@@ -138,6 +138,8 @@
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
+      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div><ol class="steps">' +
@@ -275,6 +277,8 @@
       '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>' +
+      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div><ol class="steps">' +
