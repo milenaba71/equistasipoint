@@ -1,5 +1,5 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v10';
+const VERSION = 'tp-v11';
 const FILES = [
   './', 'index.html', 'css/style.css', 'js/config.js', 'js/body.js', 'js/data.js', 'js/app.js',
   'img/logo.png', 'img/dispositivo.jpg', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',
@@ -23,7 +23,8 @@ self.addEventListener('fetch', (e) => {
   // la verifica del seriale (webhook Make) non va mai in cache
   if (new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
-    fetch(e.request)
+    // no-cache: chiede sempre al server se il file è cambiato (risposta 304 leggera se non è cambiato)
+    fetch(e.request, { cache: 'no-cache' })
       .then((r) => {
         if (r.ok) {
           const copy = r.clone();
