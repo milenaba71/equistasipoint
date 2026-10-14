@@ -8,6 +8,7 @@ Web app (PWA) per chi acquista il dispositivo **Equistasi**: indica dove senti d
 Mappe basate su Travell, Simons & Simons, *Myofascial Pain and Dysfunction: The Trigger Point Manual*.
 
 ## Funzioni
+- **Accesso con il numero di serie** del dispositivo: il seriale deve essere presente in Airtable (EQUITUTTO → Abbinamento Kit → abbinamento dispositivi). Verifica tramite webhook Make, vedi [`make/README.md`](make/README.md). Configurazione in `js/config.js`.
 - Mappa del corpo toccabile (davanti / dietro): il lato toccato imposta automaticamente destro / sinistro.
 - 13 zone di dolore, 26 muscoli con trigger point e dolore riferito.
 - Scheda muscolo: figura zoomata, lato destro/sinistro, istruzioni di applicazione, come trovare il punto esatto, sintomi, cause, consigli, segnali d'allarme.
@@ -21,6 +22,8 @@ Mappe basate su Travell, Simons & Simons, *Myofascial Pain and Dysfunction: The 
 | `js/body.js` | disegno SVG del corpo e dei muscoli (vista frontale e posteriore) |
 | `js/data.js` | trigger point, zone di dolore, testi di applicazione Equistasi, segnali d'allarme |
 | `js/app.js` | navigazione e interfaccia |
+| `js/config.js` | indirizzo del webhook di verifica seriale |
+| `make/` | scenario Make da importare per la verifica su Airtable |
 | `sw.js`, `manifest.webmanifest` | installazione e uso offline |
 
 ### Aggiungere o modificare un muscolo

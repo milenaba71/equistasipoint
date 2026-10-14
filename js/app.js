@@ -258,6 +258,8 @@
       '<li>Donnelly JM et al. <i>Travell, Simons & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, 3ª ed. Wolters Kluwer, 2019.</li>' +
       '<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>' +
       '</ul></div>' +
+      '<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>' + esc(store.get('tp-serial', '—')) + '</b></p>' +
+      '<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>' +
       '<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>' +
       '</div>';
   }
@@ -276,12 +278,67 @@
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
-  route();
 
   /* Avviso iniziale */
   const disc = document.getElementById('disclaimer');
-  if (store.get('tp-disclaimer', '') !== '1') disc.hidden = false;
   document.getElementById('disc-ok').addEventListener('click', () => { disc.hidden = true; store.set('tp-disclaimer', '1'); });
+
+  function start() {
+    route();
+    if (store.get('tp-disclaimer', '') !== '1') disc.hidden = false;
+  }
+
+  /* ───────── Accesso con il numero di serie ───────── */
+  const gate = document.getElementById('gate');
+  const gateForm = document.getElementById('gate-form');
+  const gateInput = document.getElementById('serial');
+  const gateMsg = document.getElementById('gate-msg');
+  const gateBtn = document.getElementById('gate-btn');
+
+  const normSerial = (s) => s.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+
+  async function verifySerial(serial) {
+    const url = (window.APP_CONFIG || {}).verifyUrl;
+    if (!url) throw new Error('config');
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'serial=' + encodeURIComponent(serial), { signal: ctrl.signal, cache: 'no-store' });
+      const data = await r.json();
+      return data && (data.valid === true || data.valid === 'true');
+    } finally { clearTimeout(t); }
+  }
+
+  gateForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const serial = normSerial(gateInput.value);
+    gateMsg.className = 'gate-msg';
+    if (serial.length < 5) { gateMsg.textContent = 'Inserisci il numero di serie completo.'; gateInput.focus(); return; }
+    gateBtn.disabled = true; gateBtn.textContent = 'Verifica in corso…'; gateMsg.textContent = '';
+    try {
+      if (await verifySerial(serial)) {
+        store.set('tp-serial', serial);
+        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = 'Dispositivo riconosciuto. Benvenuto!';
+        setTimeout(() => { gate.hidden = true; start(); }, 500);
+      } else {
+        gateMsg.textContent = 'Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.';
+      }
+    } catch (e) {
+      gateMsg.textContent = e.message === 'config'
+        ? 'Servizio di verifica non configurato.'
+        : 'Impossibile verificare ora. Controlla la connessione e riprova.';
+    } finally {
+      gateBtn.disabled = false; gateBtn.textContent = 'Accedi';
+    }
+  });
+
+  window.tpLogout = function () {
+    try { localStorage.removeItem('tp-serial'); } catch (e) { /* storage non disponibile */ }
+    location.hash = '#/'; location.reload();
+  };
+
+  if (store.get('tp-serial', '')) start();
+  else { gate.hidden = false; setTimeout(() => gateInput.focus(), 50); }
 
   /* Offline */
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {

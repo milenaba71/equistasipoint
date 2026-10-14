@@ -1,7 +1,7 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v1';
+const VERSION = 'tp-v2';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'js/body.js', 'js/data.js', 'js/app.js',
+  './', 'index.html', 'css/style.css', 'js/config.js', 'js/body.js', 'js/data.js', 'js/app.js',
   'img/logo.png', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',
 ];
 
@@ -20,10 +20,12 @@ self.addEventListener('activate', (e) => {
 // Rete prima, cache come riserva: gli aggiornamenti arrivano subito quando si è online.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+  // la verifica del seriale (webhook Make) non va mai in cache
+  if (new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then((r) => {
-        if (r.ok && new URL(e.request.url).origin === location.origin) {
+        if (r.ok) {
           const copy = r.clone();
           caches.open(VERSION).then((c) => c.put(e.request, copy));
         }
