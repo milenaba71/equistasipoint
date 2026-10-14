@@ -338,7 +338,7 @@
   }
 
   /* ───────── CONTENUTI: video tutorial e protocolli (Airtable via Make) ───────── */
-  const CONTENT_KEY = 'tp-content';
+  const CONTENT_KEY = 'tp-content-v2';
   const CONTENT_TTL = 3600 * 1000; // i link ai PDF di Airtable scadono dopo poche ore
   let contentPromise = null;
 
@@ -390,7 +390,10 @@
           videos: vids.map(normVideo).filter((x) => (x.url || x.file) && x.lang !== 'en').sort(byOrder),
           protocols: pros.map(normProtocol).filter((x) => x.url && x.lang !== 'en').sort(byOrder),
         };
-        try { localStorage.setItem(CONTENT_KEY, JSON.stringify({ t: Date.now(), c })); } catch (e) { /* storage non disponibile */ }
+        // un elenco vuoto non si salva: alla prossima apertura si riprova
+        if (c.videos.length || c.protocols.length) {
+          try { localStorage.setItem(CONTENT_KEY, JSON.stringify({ t: Date.now(), c })); } catch (e) { /* storage non disponibile */ }
+        }
         return c;
       })
       .catch(() => (cached ? cached.c : null));
