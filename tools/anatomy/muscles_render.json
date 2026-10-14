@@ -1,7 +1,7 @@
 {
   "trapezio_sup":      {"hl": ["Ascending part of trapezius muscle.r"]},
   "elevatore_scapola": {"hl": ["Levator scapulae.r"], "hide": ["Ascending part of trapezius muscle.r", "Transverse part of trapezius muscle.r", "Sternocleidomastoid muscle.r"]},
-  "scm":               {"hl": ["Sternocleidomastoid muscle.r"]},
+  "scm":               {"hl": ["Sternocleidomastoid muscle.r"], "hide": ["Platysma.r"]},
   "splenio_testa":     {"hl": ["Splenius capitis muscle.r"], "hide": ["Ascending part of trapezius muscle.r"]},
   "suboccipitali":     {"hl": ["Rectus posterior major capitis muscle.r", "Rectus posterior minor capitis muscle.r", "Obliquus inferior capitis muscle.r", "Obliquus superior capitis muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Splenius capitis muscle.r", "Longissimus capitis muscle.r", "Semispinalis colli muscle.r"]},
   "temporale":         {"hl": ["Temporalis muscle.r"]},
