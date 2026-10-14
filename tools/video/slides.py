@@ -48,15 +48,15 @@ def step_slide(n,title,body,photo,name):
     c.save(f'{OUT}/{name}.png')
 dev=Image.open(U+'f7f8178d-image.jpg').convert('RGB')
 shot=Image.open(U+'bfa5c4c7-image.jpg').convert('RGB')
-kit=shot.crop((0,0,535,930)); app_=Image.open(A+'applicazione.jpg').convert('RGB')
+kit=Image.open(U+'713c3877-image.jpg').convert('RGB').crop((0,0,1255,2190)); app_=Image.open(A+'applicazione.jpg').convert('RGB')
 cust=Image.open(U+'17f2a5f7-image.jpg').convert('RGB'); busta=Image.open(U+'ad30ce66-image.jpg').convert('RGB')
 # 1 titolo
 c,d=base(); p=rounded(cover(dev,820,820),410); c.paste(p,(130,330),p)
 y=text(d,1260,'Come applicare\nEquistasi gel',font('Bold',96),NAVY,gap=1.15)
-text(d,y+40,'Guida passo passo in 1 minuto',font('Medium',48),BLUE); c.save(f'{OUT}/01.png')
+text(d,y+40,'Guida passo passo',font('Medium',48),BLUE); c.save(f'{OUT}/01.png')
 # 2 cosa serve
 c,d=base(); a=rounded(cover(kit,440,700)); b=rounded(cover(busta,440,700)); c.paste(a,(80,260),a); c.paste(b,(560,260),b)
-d.text((80,985),'Dispositivo',font=font('SemiBold',38),fill=(60,64,90)); d.text((560,985),'Custodie usa e getta',font=font('SemiBold',38),fill=(60,64,90))
+d.text((80,985),'Equistasi gel',font=font('SemiBold',38),fill=(60,64,90)); d.text((560,985),'Custodie usa e getta',font=font('SemiBold',38),fill=(60,64,90))
 y=text(d,1120,'Cosa ti serve',font('Bold',72),NAVY)+30
 for t in ['• Il dispositivo Equistasi gel','• Una custodia usa e getta (nuova ogni volta)','• Il cerotto applicatore adesivo, in omaggio nella confezione']:
     for l in wrap(d,t,font('Medium',46),900): d.text((90,y),l,font=font('Medium',46),fill=(60,64,90)); y+=60
