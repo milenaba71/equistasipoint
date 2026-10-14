@@ -7,8 +7,8 @@
  * La chiave di Airtable resta su Make e non è mai presente nell'app.
  */
 window.APP_CONFIG = {
-  verifyUrl: '',
+  verifyUrl: 'https://hook.eu2.make.com/34myr3nwas3mntlb268fj5q7kz7lnmp1',
   // Webhook Make "Equistasi App – Elenco video tutorial": restituisce i record
   // della tabella Airtable "Videos" (base Equistasi App). Vedi make/README.md.
-  videosUrl: '',
+  videosUrl: 'https://hook.eu2.make.com/mtc48yt0x8t1m1e8tiu5obik0uz519vl',
 };

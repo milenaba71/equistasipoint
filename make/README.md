@@ -1,5 +1,11 @@
 # Verifica del seriale (Make + Airtable)
 
+> **Già installato** (14/10/2026) nel team Make "My Team":
+> - scenario `Equistasi App – Verifica seriale` (id 9976532) → webhook `https://hook.eu2.make.com/34myr3nwas3mntlb268fj5q7kz7lnmp1`
+> - scenario `Equistasi App – Elenco video tutorial` (id 9976535) → webhook `https://hook.eu2.make.com/mtc48yt0x8t1m1e8tiu5obik0uz519vl`
+>
+> Entrambi usano la connessione Airtable **EQUITUTTO2026**. Le istruzioni qui sotto servono solo per reinstallarli.
+
 Per entrare nell'app l'utente inserisce il seriale del proprio dispositivo Equistasi.
 Il seriale è valido se compare tra i dispositivi collegati al campo **abbinamento dispositivi**
 della tabella **Abbinamento Kit** nella base Airtable **EQUITUTTO**
