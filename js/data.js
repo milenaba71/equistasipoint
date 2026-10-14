@@ -800,6 +800,6 @@ window.APP_PROTOCOLS = [
       ['C7', 'Alla base del collo, sulla vertebra più sporgente che senti al centro quando pieghi la testa in avanti.'],
       ['Soleo destro e sinistro', 'Sulla parte bassa del polpaccio di entrambe le gambe, sopra il tendine d’Achille, al centro della zona evidenziata.'],
     ],
-    profiles: ['sport'],
+    profiles: ['sport', 'neuro'],
   },
 ];
