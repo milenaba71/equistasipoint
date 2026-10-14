@@ -123,12 +123,43 @@
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
   }
 
+  const profileChip = () => '<a class="profile-chip" href="#/profilo">' + (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + ' · cambia</a>';
+  const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
+      '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
+
+  function renderNeuroHome() {
+    const p = getProfile();
+    const EQ = window.EQUISTASI;
+    app.innerHTML =
+      '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
+      '<h1>' + esc(profileName(p)) + '</h1>' +
+      '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p></section>' +
+      '<div class="home-grid"><div>' + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
+      '<div class="card"><h3>Come applicare il dispositivo</h3>' +
+      '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
+      '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
+      '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
+      Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
+      '</div></div><ol class="steps">' +
+      [EQ.steps.start[0]].concat(EQ.steps[state.devType] || EQ.steps.silicone).map((x) => '<li>' + esc(x.replace('centrato esattamente sulla X', 'nel punto indicato dal protocollo')) + '</li>').join('') +
+      '</ol></div>' +
+      '<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">' + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
+      '</div></div>';
+    app.querySelectorAll('[data-devtype]').forEach((b) => b.addEventListener('click', () => {
+      state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType); renderNeuroHome();
+    }));
+  }
+
   function renderHome() {
     setBack(false);
+    const prof = getProfile() || { type: 'dolore' };
+    if (prof.type === 'neuro') return renderNeuroHome();
+    const sport = prof.type === 'sport';
     app.innerHTML =
-      '<section class="hero"><div class="eyebrow">Mappa dei trigger point</div>' +
-      '<h1>Dove senti dolore?</h1>' +
+      '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
+      '<h1>' + (sport ? 'Contratture o dolori muscolari?' : 'Dove senti dolore?') + '</h1>' +
       '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p></section>' +
+      (sport ? protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
       '<div class="toolbar"><div class="seg" role="group" aria-label="Vista">' +
@@ -143,8 +174,7 @@
       '<div class="card"><h3>Cerca per muscolo o disturbo</h3>' +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
-      '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
-      '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>' +
+      videoPromo + (sport ? '' : protocolsCard('Protocolli per il dolore')) +
       '<div class="card"><h3>Come funziona</h3><ol class="steps">' +
       '<li>Indica dove senti dolore.</li>' +
       '<li>Scegli il muscolo che descrive meglio il tuo disturbo.</li>' +
@@ -273,12 +303,43 @@
   }
 
 
-  /* ───────── VIDEO TUTORIAL (Airtable "Videos" via Make) ───────── */
-  const VID_KEY = 'tp-videos';
-  const VID_TTL = 6 * 3600 * 1000;
-  let videosPromise = null;
+  /* ───────── PROFILO UTENTE ───────── */
+  function getProfile() {
+    try { return JSON.parse(localStorage.getItem('tp-profile') || 'null'); } catch (e) { return null; }
+  }
+  function profileTags(p) {
+    p = p || getProfile();
+    if (!p || !window.PROFILES[p.type]) return null;
+    const t = window.PROFILES[p.type].tags.slice();
+    const pat = p.type === 'neuro' && window.PATOLOGIE[p.patologia];
+    if (pat && pat.tag) t.push(pat.tag);
+    return t;
+  }
+  function profileName(p) {
+    p = p || getProfile();
+    if (!p) return '';
+    if (p.type === 'neuro' && window.PATOLOGIE[p.patologia]) return window.PATOLOGIE[p.patologia].label;
+    return window.PROFILES[p.type] ? window.PROFILES[p.type].title : '';
+  }
+  /* Un contenuto è visibile se il suo campo "Profili app" contiene uno dei tag del profilo.
+     Campo vuoto: video "general" e protocolli → tutti; video dei muscoli → dolore e sport. */
+  function visibleFor(item, kind) {
+    const tags = profileTags();
+    if (!tags) return true;
+    if (!item.profiles.length) {
+      if (kind === 'video' && item.cat !== 'general') return tags.includes('Dolore') || tags.includes('Sport');
+      return true;
+    }
+    return item.profiles.some((x) => tags.includes(x));
+  }
+
+  /* ───────── CONTENUTI: video tutorial e protocolli (Airtable via Make) ───────── */
+  const CONTENT_KEY = 'tp-content';
+  const CONTENT_TTL = 3600 * 1000; // i link ai PDF di Airtable scadono dopo poche ore
+  let contentPromise = null;
 
   const sel = (v) => (v && typeof v === 'object' ? v.name : v) || '';
+  const list = (v) => (Array.isArray(v) ? v.map(sel) : v ? [sel(v)] : []);
   function normVideo(r) {
     const f = r.fields || {};
     const file = (f['Video File'] || [])[0];
@@ -292,29 +353,63 @@
       order: typeof f.Order === 'number' ? f.Order : 999,
       lang: sel(f.Language),
       muscles: String(f.Muscles || ''),
+      profiles: list(f['Profili app']),
     };
   }
-  function cacheGet() {
-    try { return JSON.parse(localStorage.getItem(VID_KEY) || 'null'); } catch (e) { return null; }
+  function normProtocol(r) {
+    const f = r.fields || {};
+    const file = (f['PDF File'] || [])[0];
+    return {
+      id: r.id,
+      title: (f.Title || f.ID || '').trim(),
+      subtitle: (f.Subtitle || '').trim(),
+      url: file ? file.url : '',
+      lang: sel(f.Language),
+      order: typeof f.Order === 'number' ? f.Order : 999,
+      profiles: list(f['Profili app']),
+    };
   }
-  function loadVideos() {
-    if (videosPromise) return videosPromise;
-    const cached = cacheGet();
+  const byOrder = (a, b) => a.order - b.order || a.title.localeCompare(b.title);
+  function loadContent() {
+    if (contentPromise) return contentPromise;
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(CONTENT_KEY) || 'null'); } catch (e) { /* storage non disponibile */ }
     const url = (window.APP_CONFIG || {}).videosUrl;
-    if (cached && Date.now() - cached.t < VID_TTL) return (videosPromise = Promise.resolve(cached.v));
-    if (!url) return (videosPromise = Promise.resolve(cached ? cached.v : null));
-    videosPromise = fetch(url, { cache: 'no-store' })
+    if (cached && Date.now() - cached.t < CONTENT_TTL) return (contentPromise = Promise.resolve(cached.c));
+    if (!url) return (contentPromise = Promise.resolve(cached ? cached.c : null));
+    contentPromise = fetch(url, { cache: 'no-store' })
       .then((r) => r.json())
       .then((d) => {
-        const v = (d.records || []).map(normVideo)
-          .filter((x) => (x.url || x.file) && x.lang !== 'en')
-          .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
-        try { localStorage.setItem(VID_KEY, JSON.stringify({ t: Date.now(), v })); } catch (e) { /* storage non disponibile */ }
-        return v;
+        const vids = (d.videos || d).records || [];
+        const pros = (d.protocols || {}).records || [];
+        const c = {
+          videos: vids.map(normVideo).filter((x) => (x.url || x.file) && x.lang !== 'en').sort(byOrder),
+          protocols: pros.map(normProtocol).filter((x) => x.url && x.lang !== 'en').sort(byOrder),
+        };
+        try { localStorage.setItem(CONTENT_KEY, JSON.stringify({ t: Date.now(), c })); } catch (e) { /* storage non disponibile */ }
+        return c;
       })
-      .catch(() => (cached ? cached.v : null));
-    return videosPromise;
+      .catch(() => (cached ? cached.c : null));
+    return contentPromise;
   }
+  const loadVideos = () => loadContent().then((c) => (c ? c.videos.filter((v) => visibleFor(v, 'video')) : null));
+  const loadProtocols = () => loadContent().then((c) => (c ? c.protocols.filter((x) => visibleFor(x, 'protocol')) : null));
+
+  function protocolsCard(title) {
+    setTimeout(() => {
+      const box = document.getElementById('protos');
+      if (!box) return;
+      loadProtocols().then((ps) => {
+        if (!document.getElementById('protos')) return;
+        if (!ps) { box.innerHTML = '<p class="muted small" style="margin:0">I protocolli non sono disponibili in questo momento. Controlla la connessione.</p>'; return; }
+        if (!ps.length) { box.closest('.card').remove(); return; }
+        box.innerHTML = ps.map((x) => '<a class="proto" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="pdf" aria-hidden="true">PDF</span>' +
+          '<span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></a>').join('');
+      });
+    }, 0);
+    return '<div class="card"><h3>' + esc(title || 'I tuoi protocolli') + '</h3><div id="protos"><p class="muted small" style="margin:0">Caricamento…</p></div></div>';
+  }
+
   const baseName = (t) => t.toLowerCase().replace(/^musculus\s+/, '').replace(/\s*\(?\d+\)?\s*$/, '').trim();
   function videosFor(m, list) {
     const keys = (m.videos || []).map((k) => k.toLowerCase());
@@ -405,6 +500,34 @@
     });
   }
 
+  /* ───────── PRIVACY ───────── */
+  function privacyHtml() {
+    const P = window.PRIVACY;
+    const url = (window.APP_CONFIG || {}).privacyUrl;
+    return '<p class="small"><b>Titolare del trattamento:</b> ' + esc(P.titolare) + '<br><b>Contatto:</b> ' + esc(P.contatto) + '</p>' +
+      P.sections.map(([h, t]) => '<h4>' + esc(h) + '</h4><p class="small" style="margin:0">' + esc(t) + '</p>').join('') +
+      (url ? '<p class="small" style="margin-top:14px"><a href="' + esc(url) + '" target="_blank" rel="noopener">Leggi l’informativa privacy completa ›</a></p>' : '') +
+      '<p class="small muted" style="margin-top:14px">Versione ' + esc(P.version) + '</p>';
+  }
+  function renderPrivacy() {
+    setBack(true);
+    const p = getProfile();
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">I tuoi dati</div><h1>Privacy</h1><div style="height:12px"></div></div>' +
+      '<div class="cols">' +
+      '<div class="card"><h3>Le tue scelte</h3>' +
+      '<p class="small">Profilo: <b>' + esc(profileName(p) || '—') + '</b><br>Condivisione dei dati con Equistasi: <b>' + (p && p.consent ? 'consenso dato' : 'non attiva') + '</b></p>' +
+      '<div class="row-btns"><a class="btn" href="#/profilo">Cambia profilo o consenso</a> ' +
+      '<button class="btn" id="wipe" type="button">Cancella i miei dati da questo telefono</button></div>' +
+      '<p class="small muted" style="margin:10px 0 0">Per cancellare i dati già condivisi con Equistasi scrivi a ' + esc(window.PRIVACY.contatto) + ' indicando il numero di serie.</p></div>' +
+      '<div class="card privacy-box" style="max-height:none"><h3>Informativa sintetica</h3>' + privacyHtml() + '</div>' +
+      '</div>';
+    document.getElementById('wipe').addEventListener('click', () => {
+      if (!confirm('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?')) return;
+      try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
+      location.hash = '#/'; location.reload();
+    });
+  }
+
   /* ───────── INFO ───────── */
   function renderInfo() {
     setBack(true);
@@ -420,6 +543,7 @@
       '<li>Donnelly JM et al. <i>Travell, Simons & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, 3ª ed. Wolters Kluwer, 2019.</li>' +
       '<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>' +
       '</ul></div>' +
+      '<div class="card"><h3>Il tuo profilo</h3><p class="small">' + esc(profileName() || '—') + '</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>' +
       '<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>' + esc(store.get('tp-serial', '—')) + '</b></p>' +
       '<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>' +
       '<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>' +
@@ -437,6 +561,8 @@
     else if (page === 'm') renderMuscle(arg);
     else if (page === 'info') renderInfo();
     else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
+    else if (page === 'privacy') renderPrivacy();
+    else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     window.scrollTo(0, 0);
   }
@@ -447,9 +573,105 @@
   document.getElementById('disc-ok').addEventListener('click', () => { disc.hidden = true; store.set('tp-disclaimer', '1'); });
 
   function start() {
+    if (!getProfile()) { showOnboarding(false); return; }
     route();
     if (store.get('tp-disclaimer', '') !== '1') disc.hidden = false;
   }
+
+  /* ───────── Informativa privacy (finestra) ───────── */
+  const pModal = document.getElementById('privacy-modal');
+  document.getElementById('pm-close').addEventListener('click', () => { pModal.hidden = true; });
+  document.addEventListener('click', (ev) => {
+    if (!ev.target.closest('[data-privacy]')) return;
+    ev.preventDefault();
+    document.getElementById('pm-body').innerHTML = privacyHtml();
+    pModal.hidden = false;
+  });
+
+  /* ───────── Profilazione ───────── */
+  const ob = document.getElementById('onboard');
+  const obForm = document.getElementById('ob-form');
+  const obMsg = document.getElementById('ob-msg');
+  const obNeuro = document.getElementById('ob-neuro');
+  const ob$ = { type: null, patologia: null };
+
+  document.getElementById('ob-eta').insertAdjacentHTML('beforeend', window.ETA.map((e) => '<option>' + esc(e) + '</option>').join(''));
+  document.getElementById('ob-opts').innerHTML = Object.entries(window.PROFILES).map(([k, p]) =>
+    '<button type="button" class="ob-opt" role="radio" aria-checked="false" data-type="' + k + '"><span class="ico" aria-hidden="true">' + p.icon + '</span>' +
+    '<span><b>' + esc(p.title) + '</b><span>' + esc(p.desc) + '</span></span></button>').join('');
+  document.getElementById('ob-pato').innerHTML = Object.entries(window.PATOLOGIE).map(([k, p]) =>
+    '<button type="button" class="ob-pill" role="radio" aria-checked="false" data-pato="' + k + '">' + esc(p.label) + '</button>').join('');
+
+  function obSync() {
+    obForm.querySelectorAll('[data-type]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.type === ob$.type)));
+    obForm.querySelectorAll('[data-pato]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.pato === ob$.patologia)));
+    obNeuro.hidden = ob$.type !== 'neuro';
+  }
+  obForm.addEventListener('click', (ev) => {
+    const t = ev.target.closest('[data-type]');
+    const pt = ev.target.closest('[data-pato]');
+    if (t) ob$.type = t.dataset.type;
+    if (pt) ob$.patologia = pt.dataset.pato;
+    if (t || pt) { obMsg.textContent = ''; obSync(); }
+  });
+
+  function showOnboarding(editing) {
+    const p = getProfile();
+    ob$.type = p ? p.type : null;
+    ob$.patologia = p ? p.patologia || null : null;
+    document.getElementById('ob-eta').value = (p && p.eta) || '';
+    document.getElementById('ob-read').checked = !!p;
+    document.getElementById('ob-consent').checked = !!(p && p.consent);
+    document.getElementById('ob-cancel').hidden = !(editing && p);
+    obMsg.textContent = '';
+    obSync();
+    ob.hidden = false;
+    ob.scrollTop = 0;
+  }
+
+  obForm.addEventListener('change', () => { obMsg.textContent = ''; });
+  document.getElementById('ob-cancel').addEventListener('click', () => {
+    ob.hidden = true;
+    if (location.hash === '#/profilo') history.length > 1 ? history.back() : (location.hash = '#/');
+  });
+
+  function sendProfile(p) {
+    const url = (window.APP_CONFIG || {}).profileUrl;
+    if (!url || !p.consent) return;
+    const pat = p.type === 'neuro' && window.PATOLOGIE[p.patologia];
+    const body = new URLSearchParams({
+      serial: store.get('tp-serial', ''),
+      profilo: { dolore: 'Dolore', neuro: 'Neurologico', sport: 'Sport' }[p.type],
+      patologia: pat ? pat.label : '',
+      eta: p.eta || '',
+      consenso: '1',
+      versione: window.PRIVACY.version,
+    });
+    // richiesta "semplice" senza lettura della risposta: nessun dato torna indietro all'app
+    fetch(url, { method: 'POST', mode: 'no-cors', body }).catch(() => {});
+  }
+
+  obForm.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    if (!ob$.type) { obMsg.textContent = 'Scegli per cosa usi Equistasi.'; return; }
+    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = 'Indica la patologia.'; return; }
+    if (!document.getElementById('ob-read').checked) { obMsg.textContent = 'Conferma di aver letto l’informativa privacy.'; return; }
+    const prev = getProfile();
+    const p = {
+      type: ob$.type,
+      patologia: ob$.type === 'neuro' ? ob$.patologia : null,
+      eta: document.getElementById('ob-eta').value,
+      consent: document.getElementById('ob-consent').checked,
+      version: window.PRIVACY.version,
+      ts: new Date().toISOString(),
+    };
+    store.set('tp-profile', JSON.stringify(p));
+    const changed = !prev || prev.type !== p.type || prev.patologia !== p.patologia || prev.eta !== p.eta || (!prev.consent && p.consent);
+    if (changed) sendProfile(p);
+    ob.hidden = true;
+    if (location.hash === '#/profilo') location.hash = '#/'; else route();
+    if (store.get('tp-disclaimer', '') !== '1') disc.hidden = false;
+  });
 
   /* ───────── Accesso con il numero di serie ───────── */
   const gate = document.getElementById('gate');

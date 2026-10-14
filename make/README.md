@@ -60,3 +60,33 @@ scegli una connessione Airtable che abbia accesso alla base **Equistasi App**, a
 e incolla l'indirizzo del webhook in `js/config.js` → `videosUrl`.
 L'app tiene in memoria l'elenco per 6 ore: ogni utente consuma al massimo ~4 esecuzioni al giorno.
 Limite attuale: 100 video (oltre serve la paginazione).
+
+---
+
+# Profili utente e protocolli
+
+All'avvio l'utente sceglie il profilo: **Dolore**, **Patologia neurologica** (Parkinson,
+Sclerosi multipla, Atassia, Altra) oppure **Sport**. Ogni profilo vede solo i suoi contenuti.
+
+## Decidere chi vede cosa
+Nelle tabelle Airtable **Videos** e **PDF_files** (base Equistasi App) c'è il campo **Profili app**:
+| Valore | Chi lo vede |
+|---|---|
+| Tutti | tutti i profili |
+| Dolore / Sport | il profilo corrispondente |
+| Neurologico (tutti) | tutti i pazienti neurologici |
+| Parkinson / Sclerosi multipla / Atassia | solo quella patologia |
+
+Campo vuoto: i protocolli e i video "general" li vedono tutti, i video dei muscoli solo Dolore e Sport.
+I contenuti con Language = `en` non vengono mostrati.
+
+## Scenari Make
+- `Equistasi App – Contenuti (video e protocolli)` (id 9976535): restituisce `{"videos": …, "protocols": …}`.
+- `Equistasi App – Registra profilo utente` (id 9976575) → webhook `https://hook.eu2.make.com/2n8ia3fjrqn2f7ych3f5gsb66pmkl6wo`.
+  Crea una riga nella tabella **Utenti App** (seriale, profilo, patologia, fascia d'età, versione informativa)
+  **solo se l'utente ha dato il consenso** alla condivisione.
+
+# Privacy
+Il testo dell'informativa sintetica è in `js/data.js` → `window.PRIVACY` (le parti tra [parentesi] vanno completate
+e il testo va verificato dal consulente privacy / DPO). Il link all'informativa completa si inserisce in
+`js/config.js` → `privacyUrl`: finché è vuoto il link non compare.

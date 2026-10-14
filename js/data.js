@@ -15,7 +15,7 @@
  * videos: nomi (campo "Description" della tabella Airtable "Videos") dei video
  *        tutorial da mostrare nella scheda; la numerazione finale ("Trapezius 2",
  *        "Erector Spinae (1)") e il prefisso "Musculus" vengono ignorati. In alternativa
- *        si può scrivere l'id del muscolo (es. gluteo_medio) nel campo "Muscles".
+ *        si può scrivere l’id del muscolo (es. gluteo_medio) nel campo "Muscles".
  * zones: dolore riferito. e = ellisse [cx, cy, rx, ry, rotazione°]
  *        p = 1 → zona principale (blu pieno), p = 0 → zona secondaria (blu puntinato)
  */
@@ -701,3 +701,71 @@ window.RED_FLAGS = [
   'Gamba gonfia, calda e arrossata',
   'Cefalea improvvisa e violentissima, o con disturbi della vista o della parola',
 ];
+
+/* ───────────── PROFILI UTENTE ─────────────
+ * tags: valori del campo "Profili app" (Airtable, tabelle Videos e PDF_files)
+ * che il profilo può vedere. */
+window.PROFILES = {
+  dolore: {
+    label: 'Ho dolore',
+    title: 'Dolore muscolare o articolare',
+    desc: 'Mal di schiena, cervicale, spalla, ginocchio, cefalea…',
+    icon: '🎯',
+    tags: ['Tutti', 'Dolore'],
+  },
+  neuro: {
+    label: 'Patologia neurologica',
+    title: 'Patologia neurologica',
+    desc: 'Parkinson, sclerosi multipla, atassia e altre patologie',
+    icon: '🧠',
+    tags: ['Tutti', 'Neurologico (tutti)'],
+  },
+  sport: {
+    label: 'Sport e performance',
+    title: 'Sport e performance',
+    desc: 'Equilibrio, recupero e prestazione sportiva',
+    icon: '🏃',
+    tags: ['Tutti', 'Sport'],
+  },
+};
+window.PATOLOGIE = {
+  parkinson: { label: 'Parkinson', tag: 'Parkinson' },
+  sm: { label: 'Sclerosi multipla', tag: 'Sclerosi multipla' },
+  atassia: { label: 'Atassia', tag: 'Atassia' },
+  altro: { label: 'Altra patologia neurologica', tag: null },
+};
+window.ETA = ['Meno di 30', '30-49', '50-64', '65-74', '75 e oltre'];
+
+/* ───────────── PRIVACY ─────────────
+ * Testo sintetico da far verificare al consulente privacy / DPO.
+ * Le parti tra [parentesi quadre] vanno completate.
+ * Il link all’informativa completa si imposta in js/config.js → privacyUrl. */
+window.PRIVACY = {
+  version: '2026-10',
+  titolare: '[Ragione sociale, sede legale e P. IVA del Titolare del trattamento]',
+  contatto: '[email per la privacy / DPO]',
+  sections: [
+    ['Quali dati trattiamo',
+      'Il numero di serie del dispositivo, per verificare che sia un prodotto Equistasi originale. ' +
+      'Il profilo d’uso che scegli (dolore, patologia neurologica, sport) e l’eventuale patologia indicata: sono dati relativi alla salute. ' +
+      'La fascia d’età, se decidi di indicarla. Non ti chiediamo nome, email o numero di telefono. ' +
+      'Le zone di dolore e i muscoli che consulti nella mappa restano sul tuo telefono e non vengono inviati.'],
+    ['Perché li trattiamo',
+      'a) Verificare il numero di serie e darti accesso all’app. ' +
+      'b) Mostrarti i protocolli e i video adatti al tuo profilo: questa scelta resta salvata sul tuo telefono. ' +
+      'c) Solo se ci dai il consenso: registrare il tuo profilo, la patologia e la fascia d’età insieme al numero di serie, per statistiche che ci aiutano a migliorare prodotti, protocolli e servizi.'],
+    ['Su quale base',
+      'Per a) e b): l’esecuzione del servizio che ci chiedi (art. 6.1.b GDPR). ' +
+      'Per c): il tuo consenso esplicito (art. 6.1.a e art. 9.2.a GDPR). Il consenso è facoltativo e puoi revocarlo in qualsiasi momento: se non lo dai, puoi usare l’app senza alcuna limitazione.'],
+    ['Dove sono conservati',
+      'I dati condivisi sono registrati sui sistemi del Titolare tramite fornitori tecnici nominati responsabili del trattamento: Make.com (elaborazione), Airtable (archiviazione) e Bunny.net (video). ' +
+      'Alcuni fornitori possono trattare dati fuori dall’Unione Europea con le garanzie previste dal GDPR (es. clausole contrattuali standard).'],
+    ['Per quanto tempo',
+      '[Indicare il periodo di conservazione, es. 24 mesi dall’ultimo utilizzo dell’app] oppure fino alla revoca del consenso.'],
+    ['I tuoi diritti',
+      'Puoi chiedere in ogni momento accesso, rettifica, cancellazione, limitazione, portabilità dei dati e opporti al trattamento, oltre a revocare il consenso. ' +
+      'Hai anche il diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it).'],
+    ['Dati sul tuo telefono',
+      'L’app salva sul telefono il numero di serie, il profilo scelto e le tue preferenze, per non chiederteli ogni volta. Puoi cancellarli quando vuoi dalla pagina Privacy dell’app.'],
+  ],
+};

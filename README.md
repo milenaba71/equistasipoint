@@ -8,6 +8,8 @@ Web app (PWA) per chi acquista il dispositivo **Equistasi**: indica dove senti d
 Mappe basate su Travell, Simons & Simons, *Myofascial Pain and Dysfunction: The Trigger Point Manual*.
 
 ## Funzioni
+- **Profilazione**: Dolore, Patologia neurologica (Parkinson, Sclerosi multipla, Atassia…) o Sport. Ogni profilo vede solo i propri protocolli (PDF) e video, gestiti da Airtable. Con il consenso dell'utente il profilo viene registrato in Airtable (tabella Utenti App).
+- **Privacy**: informativa sintetica, consenso facoltativo ai dati sulla salute, cancellazione dei dati dal telefono, spazio per il link all'informativa completa (`js/config.js` → `privacyUrl`).
 - **Accesso con il numero di serie** del dispositivo: il seriale deve essere presente in Airtable (EQUITUTTO → Abbinamento Kit → abbinamento dispositivi). Verifica tramite webhook Make, vedi [`make/README.md`](make/README.md). Configurazione in `js/config.js`.
 - Mappa del corpo toccabile (davanti / dietro): il lato toccato imposta automaticamente destro / sinistro.
 - 13 zone di dolore, 26 muscoli con trigger point e dolore riferito.
