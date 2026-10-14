@@ -785,3 +785,21 @@ window.PRIVACY = {
       'L’app salva sul telefono il numero di serie, il profilo scelto e le tue preferenze, per non chiederteli ogni volta. Puoi cancellarli quando vuoi dalla pagina Privacy dell’app.'],
   ],
 };
+
+/* ───────────── PROTOCOLI CON TAVOLA ILLUSTRATA (nell’app) ─────────────
+ * profiles: profili che lo vedono ('dolore', 'neuro', 'sport'). */
+window.APP_PROTOCOLS = [
+  {
+    id: 'propriocezione',
+    title: 'Propriocezione e controllo motorio',
+    subtitle: 'C7 e soleo bilaterale',
+    img: 'img/protocollo-propriocezione.jpg',
+    thumb: 'img/protocollo-propriocezione-thumb.jpg',
+    intro: 'Punti di applicazione per aumentare la propriocezione e migliorare il controllo motorio. Si usano 3 dispositivi Equistasi.',
+    points: [
+      ['C7', 'Alla base del collo, sulla vertebra più sporgente che senti al centro quando pieghi la testa in avanti.'],
+      ['Soleo destro e sinistro', 'Sulla parte bassa del polpaccio di entrambe le gambe, sopra il tendine d’Achille, al centro della zona evidenziata.'],
+    ],
+    profiles: ['dolore', 'neuro', 'sport'],
+  },
+];

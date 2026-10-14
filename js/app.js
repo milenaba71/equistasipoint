@@ -134,7 +134,7 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
       '<h1>' + esc(profileName(p)) + '</h1>' +
       '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p></section>' +
-      '<div class="home-grid"><div>' + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
+      '<div class="home-grid"><div>' + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
@@ -176,7 +176,7 @@
       '<div class="card"><h3>Cerca per muscolo o disturbo</h3>' +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
-      videoPromo + (sport ? '' : protocolsCard('Protocolli per il dolore')) +
+      appProtocolCards() + videoPromo + (sport ? '' : protocolsCard('Protocolli per il dolore')) +
       '<div class="card"><h3>Come funziona</h3><ol class="steps">' +
       '<li>Indica dove senti dolore.</li>' +
       '<li>Scegli il muscolo che descrive meglio il tuo disturbo.</li>' +
@@ -507,6 +507,34 @@
     });
   }
 
+
+  /* ───────── PROTOCOLLI ILLUSTRATI (definiti in data.js) ───────── */
+  function appProtocols() {
+    const t = (getProfile() || { type: 'dolore' }).type;
+    return (window.APP_PROTOCOLS || []).filter((x) => x.profiles.includes(t));
+  }
+  function appProtocolCards() {
+    return appProtocols().map((x) => '<a class="card pcard" href="#/protocollo/' + x.id + '">' +
+      '<img src="' + esc(x.thumb || x.img) + '" alt="" loading="lazy" />' +
+      '<span><span class="eyebrow">Protocollo</span><b>' + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + '</span></span>' +
+      '<span class="chev" aria-hidden="true">›</span></a>').join('');
+  }
+  function renderAppProtocol(id) {
+    const x = (window.APP_PROTOCOLS || []).find((p) => p.id === id);
+    if (!x) return renderHome();
+    setBack(true);
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>' + esc(x.title) + '</h1><p class="latin">' + esc(x.subtitle) + '</p></div>' +
+      '<div class="detail-grid"><div class="sticky"><div class="card" style="padding:8px"><a href="' + esc(x.img) + '" target="_blank" rel="noopener"><img class="pimg" src="' + esc(x.img) + '" alt="' + esc(x.title + ': ' + x.subtitle) + '" /></a>' +
+      '<p class="small muted" style="margin:6px 4px 0">Tocca l’immagine per ingrandirla.</p></div></div><div>' +
+      '<div class="card"><h3>Dove applicare</h3><p class="small">' + esc(x.intro) + '</p><ol class="steps">' +
+      x.points.map(([h, t]) => '<li><b>' + esc(h) + '.</b> ' + esc(t) + '</li>').join('') + '</ol></div>' +
+      '<div class="card"><h3>Come applicare il dispositivo</h3><div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi" loading="lazy" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<figure><img src="img/applicazione.jpg" alt="Dispositivo fissato con il cerotto trasparente" loading="lazy" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
+      '<p class="small" style="margin:0">Pulisci e asciuga la pelle, fissa ogni dispositivo con il cerotto in dotazione, a contatto con la pelle, sul punto indicato. Per tempi e frequenza segui il tuo protocollo o le indicazioni del professionista che ti segue.</p></div>' +
+      '<div class="card warn"><b>Toglilo prima se senti fastidio.</b> ' + esc(window.EQUISTASI.schedule.removeEarly) + ' ' + esc(window.EQUISTASI.schedule.reassure) + '</div>' +
+      '</div></div>';
+  }
+
   /* ───────── PRIVACY ───────── */
   function privacyHtml() {
     const P = window.PRIVACY;
@@ -570,6 +598,7 @@
     else if (page === 'info') renderInfo();
     else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
     else if (page === 'privacy') renderPrivacy();
+    else if (page === 'protocollo') renderAppProtocol(arg);
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     window.scrollTo(0, 0);
