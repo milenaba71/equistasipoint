@@ -175,7 +175,7 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
       '<h1>' + (sport ? 'Contratture o dolori muscolari?' : 'Dove senti dolore?') + '</h1>' +
       '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p></section>' +
-      (sport ? protocolsCard('I tuoi protocolli per lo sport') : '') +
+      (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
       '<div class="toolbar"><div class="seg" role="group" aria-label="Vista">' +
@@ -635,6 +635,7 @@
     else if (page === 'privacy') renderPrivacy();
     else if (page === 'protocollo') renderAppProtocol(arg);
     else if (page === 'promemoria') renderTimer();
+    else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     window.scrollTo(0, 0);
