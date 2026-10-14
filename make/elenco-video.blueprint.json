@@ -1,0 +1,73 @@
+{
+  "name": "Equistasi App – Elenco video tutorial",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "hook": null, "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "airtable:makeApiCall",
+      "version": 3,
+      "parameters": { "__IMTCONN__": 14440995 },
+      "mapper": {
+        "url": "v0/app9W8hMxcdME3AqZ/tblsOKKPApn4T8PBo",
+        "method": "GET",
+        "qs": [
+          { "key": "pageSize", "value": "100" },
+          { "key": "filterByFormula", "value": "OR({Video URL}!=\"\",{Video File}!=\"\")" },
+          { "key": "fields[]", "value": "Description" },
+          { "key": "fields[]", "value": "Category" },
+          { "key": "fields[]", "value": "Video Source" },
+          { "key": "fields[]", "value": "Video URL" },
+          { "key": "fields[]", "value": "Video File" },
+          { "key": "fields[]", "value": "Preview Image" },
+          { "key": "fields[]", "value": "Order" },
+          { "key": "fields[]", "value": "Language" },
+          { "key": "fields[]", "value": "Muscles" }
+        ]
+      },
+      "metadata": {
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": { "data": { "scoped": "true", "connection": "airtable2" }, "label": "EQUITUTTO2026" }
+          }
+        },
+        "designer": { "x": 300, "y": 0 }
+      }
+    },
+    {
+      "id": 3,
+      "module": "json:TransformToJSON",
+      "version": 1,
+      "parameters": {},
+      "mapper": { "object": "{{2.body}}" },
+      "metadata": { "designer": { "x": 600, "y": 0 } }
+    },
+    {
+      "id": 4,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "body": "{{3.json}}",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Access-Control-Allow-Origin", "value": "*" },
+          { "key": "Cache-Control", "value": "public, max-age=600" }
+        ]
+      },
+      "metadata": { "designer": { "x": 900, "y": 0 } }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "instant": true,
+    "scenario": { "roundtrips": 1, "maxErrors": 3, "autoCommit": true, "autoCommitTriggerLast": true, "sequential": false, "confidential": true, "dataloss": false, "dlq": false }
+  }
+}

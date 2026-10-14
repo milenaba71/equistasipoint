@@ -1,0 +1,57 @@
+{
+  "name": "Equistasi App – Verifica seriale",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": { "hook": null, "maxResults": 1 },
+      "mapper": {},
+      "metadata": { "designer": { "x": 0, "y": 0 } }
+    },
+    {
+      "id": 2,
+      "module": "airtable:makeApiCall",
+      "version": 3,
+      "parameters": { "__IMTCONN__": 14440995 },
+      "mapper": {
+        "url": "v0/appI8mMIC0khEkLqK/tbldfuiVOiGFIq9vv",
+        "method": "GET",
+        "qs": [
+          { "key": "filterByFormula", "value": "AND(LEN(\"{{upper(replace(trim(1.serial); \"/[^A-Za-z0-9-]/g\"; emptystring))}}\")>=5,FIND(\",{{upper(replace(trim(1.serial); \"/[^A-Za-z0-9-]/g\"; emptystring))}},\",\",\"&UPPER(ARRAYJOIN({Abbinamento seriali (testo)},\",\"))&\",\"))" },
+          { "key": "maxRecords", "value": "1" },
+          { "key": "fields[]", "value": "Codice scatola e Lotto" }
+        ]
+      },
+      "metadata": {
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": { "data": { "scoped": "true", "connection": "airtable2" }, "label": "EQUITUTTO2026" }
+          }
+        },
+        "designer": { "x": 300, "y": 0 }
+      }
+    },
+    {
+      "id": 3,
+      "module": "gateway:WebhookRespond",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "status": 200,
+        "body": "{\"valid\": {{if(length(2.body.records) > 0; \"true\"; \"false\")}}}",
+        "headers": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Access-Control-Allow-Origin", "value": "*" },
+          { "key": "Cache-Control", "value": "no-store" }
+        ]
+      },
+      "metadata": { "designer": { "x": 600, "y": 0 } }
+    }
+  ],
+  "metadata": {
+    "version": 1,
+    "instant": true,
+    "scenario": { "roundtrips": 1, "maxErrors": 3, "autoCommit": true, "autoCommitTriggerLast": true, "sequential": false, "confidential": true, "dataloss": false, "dlq": false }
+  }
+}

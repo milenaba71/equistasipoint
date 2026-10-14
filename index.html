@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Equistasi Trigger Point</title>
+  <meta name="description" content="Mappa scientifica dei trigger point: scopri dove applicare il dispositivo Equistasi in base al tuo dolore." />
+  <meta name="theme-color" content="#23266f" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Equistasi TP" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="dots" width="2.4" height="2.4" patternUnits="userSpaceOnUse">
+        <rect width="2.4" height="2.4" fill="#1e6bff" fill-opacity=".14" />
+        <circle cx="1.2" cy="1.2" r=".65" fill="#1e6bff" />
+      </pattern>
+      <radialGradient id="solid">
+        <stop offset="0" stop-color="#1e6bff" stop-opacity=".85" />
+        <stop offset=".75" stop-color="#1e6bff" stop-opacity=".65" />
+        <stop offset="1" stop-color="#1e6bff" stop-opacity=".25" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <header class="top">
+    <button class="icon-btn" id="btn-back" aria-label="Indietro" hidden>
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a href="#/" class="brand" aria-label="Home">
+      <img src="img/logo.png" alt="Equistasi" />
+      <span>Trigger Point</span>
+    </a>
+    <a href="#/video" class="icon-btn" aria-label="Video tutorial">
+      <svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg>
+    </a>
+    <a href="#/info" class="icon-btn" aria-label="Informazioni">
+      <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>
+    </a>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+  <footer class="foot"><a href="#/privacy">Privacy</a> · <a href="#/info">Informazioni</a> · <a href="#/video">Video tutorial</a></footer>
+
+  <section class="gate" id="gate" hidden>
+    <form class="gate-box" id="gate-form" novalidate>
+      <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
+      <img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" class="gate-device" width="480" height="386" />
+      <h1>Attiva l’app</h1>
+      <p>Inserisci il <b>numero di serie</b> del tuo dispositivo Equistasi. Lo trovi stampato sul <b>retro del dispositivo</b>.</p>
+      <label for="serial" class="gate-label">Numero di serie</label>
+      <input id="serial" class="search gate-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="es. EQX25002587" required />
+      <p class="gate-msg" id="gate-msg" role="alert"></p>
+      <button class="btn primary" id="gate-btn" type="submit">Accedi</button>
+      <p class="gate-help">Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.</p>
+    </form>
+  </section>
+
+  <section class="gate" id="onboard" hidden>
+    <form class="gate-box onboard" id="ob-form" novalidate>
+      <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
+      <h1>Per cosa usi Equistasi?</h1>
+      <p>Così ti mostriamo solo i protocolli e i video adatti a te. Puoi cambiare scelta quando vuoi.</p>
+      <div class="ob-opts" id="ob-opts" role="radiogroup" aria-label="Profilo"></div>
+      <div id="ob-neuro" hidden>
+        <div class="gate-label">Quale patologia?</div>
+        <div class="ob-pills" id="ob-pato" role="radiogroup" aria-label="Patologia"></div>
+      </div>
+      <label class="gate-label" for="ob-eta">Fascia d’età <span class="muted">(facoltativo)</span></label>
+      <select id="ob-eta" class="search"><option value="">Preferisco non indicarla</option></select>
+      <div class="ob-privacy">
+        <label class="ck"><input type="checkbox" id="ob-read" /> <span>Ho letto l’<a href="#" data-privacy>informativa privacy</a>.</span></label>
+        <label class="ck"><input type="checkbox" id="ob-consent" /> <span><b>Facoltativo.</b> Acconsento a condividere con Equistasi il profilo d’uso, la patologia indicata (dati relativi alla salute) e la fascia d’età insieme al numero di serie, per migliorare prodotti e servizi. Posso revocare il consenso in ogni momento.</span></label>
+      </div>
+      <p class="gate-msg" id="ob-msg" role="alert"></p>
+      <button class="btn primary" type="submit">Continua</button>
+      <button class="btn ob-cancel" id="ob-cancel" type="button" hidden>Annulla</button>
+    </form>
+  </section>
+
+  <div class="modal" id="privacy-modal" hidden>
+    <div class="modal-box privacy-box" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+      <h2 id="pm-title">Informativa privacy</h2>
+      <div id="pm-body"></div>
+      <button class="btn primary" id="pm-close" type="button">Chiudi</button>
+    </div>
+  </div>
+
+  <div class="modal" id="disclaimer" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="disc-title">
+      <h2 id="disc-title">Prima di iniziare</h2>
+      <p>Questa app ti aiuta a capire <b>dove applicare il dispositivo Equistasi</b> in base alla zona in cui senti dolore, usando le mappe scientifiche dei trigger point miofasciali.</p>
+      <p>Le informazioni sono di carattere generale e <b>non sostituiscono il parere del medico, del fisioterapista o del farmacista</b>. Leggi sempre il foglietto illustrativo del dispositivo.</p>
+      <p>Se il dolore è forte, persistente o accompagnato da altri sintomi, rivolgiti a un professionista sanitario.</p>
+      <button class="btn primary" id="disc-ok">Ho capito</button>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/body.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Equistasi Trigger Point",
+  "short_name": "Equistasi TP",
+  "description": "Mappa scientifica dei trigger point: dove applicare il dispositivo Equistasi in base al dolore.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f5fa",
+  "theme_color": "#23266f",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
