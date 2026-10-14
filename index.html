@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Equistasi Trigger Point</title>
+  <meta name="description" content="Mappa scientifica dei trigger point: scopri dove applicare il dispositivo Equistasi in base al tuo dolore." />
+  <meta name="theme-color" content="#23266f" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="img/icon-192.png" />
+  <link rel="apple-touch-icon" href="img/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Equistasi TP" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="dots" width="2.4" height="2.4" patternUnits="userSpaceOnUse">
+        <rect width="2.4" height="2.4" fill="#1e6bff" fill-opacity=".14" />
+        <circle cx="1.2" cy="1.2" r=".65" fill="#1e6bff" />
+      </pattern>
+      <radialGradient id="solid">
+        <stop offset="0" stop-color="#1e6bff" stop-opacity=".85" />
+        <stop offset=".75" stop-color="#1e6bff" stop-opacity=".65" />
+        <stop offset="1" stop-color="#1e6bff" stop-opacity=".25" />
+      </radialGradient>
+    </defs>
+  </svg>
+
+  <header class="top">
+    <button class="icon-btn" id="btn-back" aria-label="Indietro" hidden>
+      <svg viewBox="0 0 24 24" width="22" height="22"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <a href="#/" class="brand" aria-label="Home">
+      <img src="img/logo.png" alt="Equistasi" />
+      <span>Trigger Point</span>
+    </a>
+    <a href="#/info" class="icon-btn" aria-label="Informazioni">
+      <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>
+    </a>
+  </header>
+
+  <main id="app" tabindex="-1"></main>
+
+  <div class="modal" id="disclaimer" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="disc-title">
+      <h2 id="disc-title">Prima di iniziare</h2>
+      <p>Questa app ti aiuta a capire <b>dove applicare il dispositivo Equistasi</b> in base alla zona in cui senti dolore, usando le mappe scientifiche dei trigger point miofasciali.</p>
+      <p>Le informazioni sono di carattere generale e <b>non sostituiscono il parere del medico, del fisioterapista o del farmacista</b>. Leggi sempre il foglietto illustrativo del dispositivo.</p>
+      <p>Se il dolore è forte, persistente o accompagnato da altri sintomi, rivolgiti a un professionista sanitario.</p>
+      <button class="btn primary" id="disc-ok">Ho capito</button>
+    </div>
+  </div>
+
+  <script src="js/body.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
