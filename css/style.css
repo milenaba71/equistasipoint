@@ -201,18 +201,33 @@ ul.flags li { margin-bottom: 4px; }
 .ref { font-size: 13px; color: var(--muted); }
 
 /* ───── Figura anatomica ───── */
-.body .skin { fill: #f2d6c4; stroke: #b98a73; stroke-width: .5; }
-.body .hair { fill: #8a6a58; }
-.body .face { fill: none; stroke: #b98a73; stroke-width: .5; stroke-linecap: round; }
-.body .mu { fill: #e3a397; stroke: #a85a4e; stroke-width: .45; stroke-linejoin: round; }
-.body .mu.deep { fill: none; stroke: #a85a4e; stroke-opacity: .55; stroke-dasharray: 1.2 1; }
-.body .mu.hl { fill: #d2433a; stroke: #7d1e17; stroke-width: .7; stroke-dasharray: none; stroke-opacity: 1; }
-.body .mu.deep.hl { fill: #d2433a; fill-opacity: .9; }
-.body .line { fill: none; stroke: #a85a4e; stroke-width: .4; stroke-opacity: .7; }
+.body .skin { fill: url(#skin); stroke: #a8775f; stroke-width: .55; }
+.body .head { fill: url(#head); stroke: #a8775f; stroke-width: .55; }
+.body .hair { fill: #6f5244; }
+.body .face { fill: none; stroke: #a8775f; stroke-width: .5; stroke-linecap: round; stroke-linejoin: round; }
+.body .brow { fill: none; stroke: #7d5a4a; stroke-width: .7; stroke-linecap: round; }
+.body .eye { fill: #fff; stroke: #7d5a4a; stroke-width: .35; }
+.body .mu { fill: url(#mg); stroke: none; }
+.body .mu.deep { fill: none; stroke: #8f3a31; stroke-opacity: .55; stroke-width: .45; stroke-dasharray: 1.2 1; }
+.body .mu.hl { fill: url(#mgh); }
+.body .mu.deep.hl { fill: url(#mgh); stroke: #6d0f09; stroke-opacity: 1; stroke-dasharray: none; stroke-width: .6; }
+.body .fib { fill: none; stroke: #6e1f18; stroke-opacity: .26; stroke-width: .22; }
+.body .fib.on { stroke: #5a0802; stroke-opacity: .32; }
+.body .edge { fill: none; stroke: #7a2b23; stroke-width: .5; stroke-linejoin: round; }
+.body .edge.on { stroke: #5a0a05; stroke-width: .75; }
+.body .line { fill: none; stroke: #7a2b23; stroke-width: .4; stroke-opacity: .6; }
 .body .bone { fill: #f6ead8; stroke: #b9a17c; stroke-width: .45; }
-.body .bone-line { fill: none; stroke: #b9a17c; stroke-width: 1.1; stroke-linecap: round; }
-.body .tendon { fill: #f3e3cf; stroke: #b9a17c; stroke-width: .4; }
-.body .spine { fill: none; stroke: #b98a73; stroke-width: .6; stroke-dasharray: 1.4 1.2; }
+.body .bone-line { fill: none; stroke: #efe2cc; stroke-width: 1.2; stroke-linecap: round; }
+.body .tendon { fill: url(#tendon); stroke: #c9b190; stroke-width: .3; }
+.body .tendon.fascia { opacity: .9; }
+.body .hl-erettori .tendon.fascia, .body .hl-quadrato_lombi .tendon.fascia { opacity: .3; }
+/* con un muscolo evidenziato gli altri si schiariscono */
+.body.has-hl .mu:not(.hl):not(.deep) { fill: url(#mgm); }
+.body.has-hl .fib:not(.on) { stroke-opacity: .16; }
+.body.has-hl .edge:not(.on) { stroke: #b0645a; stroke-width: .4; }
+.body .tendon-line { fill: none; stroke: #f7efe3; stroke-width: 1; stroke-linecap: round; }
+.body .tendon-line.thin { stroke-width: .6; stroke: #f3e7d6; }
+.body .spine { fill: none; stroke: #8f5a48; stroke-width: .6; stroke-dasharray: 1.4 1.2; }
 
 .zone.p1 { fill: url(#solid); stroke: #1e6bff; stroke-width: .35; }
 .zone.p0 { fill: url(#dots); stroke: #1e6bff; stroke-width: .3; stroke-dasharray: 1 .8; }
