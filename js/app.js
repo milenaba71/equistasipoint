@@ -148,7 +148,7 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
       '<h1>' + esc(profileName(p)) + '</h1>' +
       '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p></section>' +
-      '<div class="home-grid"><div>' + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
+      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
@@ -183,7 +183,7 @@
       '</div><span class="small muted">' + (state.homeView === 'front' ? 'Vista frontale' : 'Vista posteriore') + '</span></div>' +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
       '<p class="map-hint">Tocca il lato del corpo in cui senti dolore</p></div>' +
-      '<div>' +
+      '<div>' + window.EqTimer.cardHtml() +
       '<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">' +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
       '</div></div>' +
@@ -299,7 +299,7 @@
       [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
       (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
-      scheduleCard() +
+      window.EqTimer.cardHtml() + scheduleCard() +
       '<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">' + esc(window.EQUISTASI.find) + '</p>' +
       (m.tips ? '<p class="small" style="margin:8px 0 0"><b>Consiglio:</b> ' + esc(m.tips) + '</p>' : '') + '</div>' +
       '<div class="card"><h3>Il dolore tipico</h3><p class="small" style="margin:0 0 8px">' + esc(m.symptom) + '</p>' +
@@ -615,6 +615,12 @@
       '</div>';
   }
 
+  function renderTimer() {
+    setBack(true);
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo tenerlo</h1></div>' +
+      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
+  }
+
   /* ───────── Router ───────── */
   function setBack(on) { btnBack.hidden = !on; }
   btnBack.addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
@@ -628,6 +634,7 @@
     else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
     else if (page === 'privacy') renderPrivacy();
     else if (page === 'protocollo') renderAppProtocol(arg);
+    else if (page === 'promemoria') renderTimer();
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     window.scrollTo(0, 0);
@@ -792,7 +799,9 @@
   else { gate.hidden = false; setTimeout(() => gateInput.focus(), 50); }
 
   /* Offline */
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  // nell'app per iPhone/Android i file sono già nel pacchetto: niente service worker
+  const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !isNativeApp) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {}));
     // quando una nuova versione dell'app prende il controllo, ricarica una volta per mostrarla
     const hadController = !!navigator.serviceWorker.controller;

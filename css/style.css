@@ -282,3 +282,15 @@ ul.flags li { margin-bottom: 4px; }
 @media (max-width: 380px) {
   .figures.two .fig svg { height: 300px; }
 }
+
+/* Promemoria delle 2 ore */
+.timerbar { display: block; width: 100%; border: 0; cursor: pointer; text-align: center;
+  background: var(--navy); color: #fff; font: inherit; font-size: 14px; padding: 9px 16px; }
+.timerbar.done { background: #b45309; }
+.tm-card .tm-ring { display: flex; align-items: baseline; gap: 8px; margin: 2px 0 8px; }
+.tm-ring b { font-size: 30px; color: var(--navy); letter-spacing: -.02em; }
+.tm-ring span { color: var(--muted); font-size: 14px; }
+.tm-card .btn { width: 100%; }
+.tm-stats { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 12px; color: var(--muted); }
+.tm-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #d5d9e8; margin: 0 1px; vertical-align: -1px; }
+.tm-dot.on { background: var(--blue); }
