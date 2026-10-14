@@ -13,6 +13,7 @@
     side: store.get('tp-side', 'dx'),          // 'dx' = destro, 'sx' = sinistro (della persona)
     homeView: store.get('tp-view', 'front'),
     zoom: true,
+    devType: store.get('tp-devtype', 'silicone'),
   };
 
   const SIDE_LABEL = { dx: 'destro', sx: 'sinistro' };
@@ -203,6 +204,7 @@
 
   function renderMuscle(id) {
     const m = byId(id);
+    const EQ = window.EQUISTASI;
     if (!m) return renderHome();
     setBack(true);
     const views = viewsOf(m);
@@ -226,8 +228,11 @@
       (m.warning ? '<div class="card warn"><b>Attenzione.</b> ' + esc(m.warning) + '</div>' : '') +
       '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
-      '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div><ol class="steps">' +
-      window.EQUISTASI.steps.map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
+      '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>' +
+      '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
+      Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
+      '</div></div><ol class="steps">' +
+      [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
       (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
       '<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">' + esc(window.EQUISTASI.find) + '</p>' +
@@ -242,6 +247,10 @@
     bindSide(() => renderMuscle(id));
     app.querySelectorAll('[data-zoom]').forEach((b) => b.addEventListener('click', () => {
       state.zoom = b.dataset.zoom === '1'; renderMuscle(id);
+    }));
+    app.querySelectorAll('[data-devtype]').forEach((b) => b.addEventListener('click', () => {
+      state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType);
+      const y = window.scrollY; renderMuscle(id); window.scrollTo(0, y);
     }));
   }
 

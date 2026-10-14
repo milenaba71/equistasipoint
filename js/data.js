@@ -18,13 +18,27 @@
 
 window.EQUISTASI = {
   // Testi di applicazione: da allineare sempre al foglietto illustrativo ufficiale.
-  steps: [
-    'Pulisci e asciuga bene la pelle nel punto indicato (niente creme, oli o sudore).',
-    'Trova sul tuo corpo il punto corrispondente alla X: premendo con il polpastrello senti spesso un punto più dolente, a volte un piccolo "nodulo", che riproduce il tuo dolore.',
-    'Applica il dispositivo Equistasi esattamente su quel punto, con il lato indicato nel foglietto illustrativo rivolto verso la pelle.',
-    'Fissalo con il cerotto in dotazione, facendolo aderire bene senza tirare la pelle.',
-    'Rispetta tempi e frequenza di applicazione indicati nel foglietto illustrativo o dal tuo medico / fisioterapista.',
-  ],
+  // Passi comuni + passi specifici per tipo di dispositivo (silicone / gel).
+  types: { silicone: 'Silicone', gel: 'Gel' },
+  steps: {
+    start: [
+      'Pulisci e asciuga bene la pelle nel punto indicato (niente creme, oli o sudore).',
+      'Trova sul tuo corpo il punto corrispondente alla X: premendo con il polpastrello senti spesso un punto più dolente, a volte un piccolo "nodulo", che riproduce il tuo dolore.',
+    ],
+    silicone: [
+      'Prendi l’applicatore adesivo (il cerotto) che trovi in omaggio nella confezione.',
+      'Appoggia il dispositivo al centro della parte adesiva del cerotto e premi bene, in modo che resti attaccato.',
+      'Applica il cerotto sulla pelle con il dispositivo a contatto con la pelle, centrato esattamente sulla X.',
+    ],
+    gel: [
+      'Inserisci il dispositivo nell’apposita custodia usa e getta (usane una nuova a ogni applicazione).',
+      'Prendi l’applicatore adesivo (il cerotto) che trovi in omaggio nella confezione e appoggia la custodia con il dispositivo al centro della parte adesiva.',
+      'Applica il cerotto sulla pelle con il dispositivo a contatto con la pelle, centrato esattamente sulla X.',
+    ],
+    end: [
+      'Rispetta tempi e frequenza di applicazione indicati nel foglietto illustrativo o dal tuo medico / fisioterapista.',
+    ],
+  },
   find: 'La X indica la posizione tipica del trigger point. Ogni corpo è diverso: esplora con le dita un’area di circa 2–3 cm attorno alla X e scegli il punto più sensibile.',
   blue: 'La zona blu è dove senti il dolore, ma spesso il problema nasce altrove: per questo il dispositivo va sulla X, non sulla zona blu.',
 };
