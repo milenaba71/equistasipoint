@@ -127,6 +127,13 @@
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
 
+  // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
+  function gelPhotos() {
+    if (state.devType !== 'gel') return '';
+    return '<div class="howto gel"><figure><img src="img/gel-custodie.jpg" alt="Dispositivi Equistasi gel inseriti nelle custodie usa e getta" loading="lazy" width="640" height="506" /><figcaption>Inserisci il dispositivo nella custodia usa e getta</figcaption></figure>' +
+      '<figure><img src="img/gel-busta.jpg" alt="Busta da 120 custodie di protezione per dispositivo Equistasi" loading="lazy" width="610" height="640" /><figcaption>Custodie di protezione (busta da 120 pezzi)</figcaption></figure></div>';
+  }
+
   function renderNeuroHome() {
     const p = getProfile();
     const EQ = window.EQUISTASI;
@@ -142,7 +149,7 @@
       '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
-      '</div></div><ol class="steps">' +
+      '</div></div>' + gelPhotos() + '<ol class="steps">' +
       [EQ.steps.start[0]].concat(EQ.steps[state.devType] || EQ.steps.silicone).map((x) => '<li>' + esc(x.replace('centrato esattamente sulla X', 'nel punto indicato dal protocollo')) + '</li>').join('') +
       '</ol></div>' +
       '<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">' + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
@@ -281,7 +288,7 @@
       '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
-      '</div></div><ol class="steps">' +
+      '</div></div>' + gelPhotos() + '<ol class="steps">' +
       [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
       (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
