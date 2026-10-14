@@ -116,8 +116,16 @@
     const view = state.homeView;
     const hits = window.AREA_HITS[view];
     const shape = (h, cls) => h.p ? '<path d="' + h.p + '" class="' + cls + '" data-area="' + h.a + '"/>' : ellipse(h.e, cls).replace('/>', ' data-area="' + h.a + '"/>');
-    let a = '', b = '';
-    hits.forEach((h) => { a += shape(h, 'hit'); b += shape(h, 'hit'); });
+    // punto pulsante al centro di ogni zona, per far capire che il corpo si può toccare
+    const center = (h) => {
+      if (h.e) return [h.e[0], h.e[1]];
+      const pts = h.p.match(/-?[\d.]+,-?[\d.]+/g).map((q) => q.split(',').map(Number));
+      return [pts.reduce((x, q) => x + q[0], 0) / pts.length, pts.reduce((y, q) => y + q[1], 0) / pts.length];
+    };
+    const dot = (h) => { const [x, y] = center(h); return '<g class="hot" data-area="' + h.a + '" transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"><circle class="hot-ring" r="5.5"/><circle class="hot-dot" r="2.6"/></g>'; };
+    let a = '', b = '', d = '';
+    hits.forEach((h) => { a += shape(h, 'hit'); b += shape(h, 'hit'); d += dot(h); });
+    a += d; b += d;
     return '<svg viewBox="0 6 200 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mappa del corpo, tocca dove senti dolore">' +
       window.Body.render(view, null) +
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
@@ -181,8 +189,9 @@
       '<div class="toolbar"><div class="seg" role="group" aria-label="Vista">' +
       ['front', 'back'].map((v) => '<button data-view="' + v + '" aria-pressed="' + (state.homeView === v) + '">' + VIEW_LABEL[v] + '</button>').join('') +
       '</div><span class="small muted">' + (state.homeView === 'front' ? 'Vista frontale' : 'Vista posteriore') + '</span></div>' +
+      '<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>' +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
-      '<p class="map-hint">Tocca il lato del corpo in cui senti dolore</p></div>' +
+      '<p class="map-hint">Tocca un <b>punto blu</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>' +
       '<div>' + window.EqTimer.cardHtml() +
       '<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">' +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
