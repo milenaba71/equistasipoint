@@ -224,7 +224,9 @@
       '<div class="figures' + (views.length > 1 ? ' two' : '') + '">' + figs + '</div>' + legend() + '</div>' +
       '</div><div>' +
       (m.warning ? '<div class="card warn"><b>Attenzione.</b> ' + esc(m.warning) + '</div>' : '') +
-      '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3><ol class="steps">' +
+      '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
+      '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
+      '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div><ol class="steps">' +
       window.EQUISTASI.steps.map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
       (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
