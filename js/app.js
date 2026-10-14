@@ -127,6 +127,13 @@
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
 
+  // Foto del kit: per il gel quella del dispositivo con il bordo in gel
+  function kitFigure() {
+    return state.devType === 'gel'
+      ? '<figure><img src="img/gel-kit.jpg" alt="Dispositivo Equistasi gel nel palmo della mano, accanto all’astuccio" loading="lazy" width="573" height="1000" /><figcaption>Equistasi gel</figcaption></figure>'
+      : '<figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>';
+  }
+
   // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
   function gelPhotos() {
     if (state.devType !== 'gel') return '';
@@ -145,7 +152,7 @@
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
-      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<div class="howto">' + kitFigure() +
       '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
@@ -284,7 +291,7 @@
       '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>' +
-      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<div class="howto">' + kitFigure() +
       '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
