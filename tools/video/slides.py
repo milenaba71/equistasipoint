@@ -97,3 +97,19 @@ c,d=base(); l=logo.copy(); l.thumbnail((760,200)); c.paste(l,((W-l.width)//2,620
 y=text(d,900,'Trovi tutti i punti di applicazione nell’app',font('SemiBold',56),NAVY,maxw=860)+40
 text(d,y,'Equistasi Point',font('Bold',80),BLUE); text(d,1500,'milenaba71.github.io/equistasipoint',font('Medium',40),(110,114,140))
 c.save(f'{OUT}/08.png')
+
+# --- Variante silicone: python3 slides.py <out> silicone (sovrascrive 01, 02, 04, 05) ---
+if len(sys.argv) > 2 and sys.argv[2] == 'silicone':
+    sil = Image.open(U+'76521503-image.jpg').convert('RGB').crop((40,330,911,1230))
+    c,d=base(); p=rounded(cover(sil,820,820),410); c.paste(p,(130,330),p)
+    y=text(d,1260,'Come applicare\nEquistasi silicone',font('Bold',96),NAVY,gap=1.15)
+    text(d,y+40,'Guida passo passo',font('Medium',48),BLUE); c.save(f'{OUT}/01.png')
+    c,d=base(); a=rounded(cover(sil,440,700)); b=rounded(cover(app_,440,700)); c.paste(a,(80,260),a); c.paste(b,(560,260),b)
+    d.text((80,985),'Equistasi silicone',font=font('SemiBold',38),fill=(60,64,90)); d.text((560,985),'Cerotto applicatore',font=font('SemiBold',38),fill=(60,64,90))
+    y=text(d,1120,'Cosa ti serve',font('Bold',72),NAVY)+30
+    for t in ['• Il dispositivo Equistasi silicone','• Il cerotto applicatore adesivo, in omaggio nella confezione']:
+        for l in wrap(d,t,font('Medium',46),900): d.text((90,y),l,font=font('Medium',46),fill=(60,64,90)); y+=60
+        y+=14
+    c.save(f'{OUT}/02.png')
+    step_slide(2,'Attacca il dispositivo sul cerotto','Appoggia il dispositivo al centro della parte adesiva del cerotto e premi bene, così resta attaccato.',app_,'04')
+    step_slide(3,'Applica il cerotto sulla pelle','Il dispositivo deve essere a contatto con la pelle, centrato esattamente sulla X.',sil,'05')
