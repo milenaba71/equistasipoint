@@ -171,6 +171,17 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
   .detail-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 16px; align-items: start; }
   .detail-grid .sticky { position: sticky; top: 72px; }
 }
+.sessions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.session { background: var(--chip); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; }
+.session span { font-size: 13px; color: var(--muted); }
+.session b { font-size: 20px; color: var(--navy); }
+:root[data-theme="dark"] .session b { color: #c9ceff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .session b { color: #c9ceff; } }
+.week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.day { border-radius: 10px; padding: 6px 2px; text-align: center; background: var(--chip); color: var(--muted); }
+.day b { display: block; font-size: 14px; }
+.day span { font-size: 10.5px; }
+.day.on { background: var(--navy); color: #fff; }
 ul.flags { margin: 0; padding-left: 20px; }
 ul.flags li { margin-bottom: 4px; }
 .ref { font-size: 13px; color: var(--muted); }

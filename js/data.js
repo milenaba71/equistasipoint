@@ -36,8 +36,20 @@ window.EQUISTASI = {
       'Applica il cerotto sulla pelle con il dispositivo a contatto con la pelle, centrato esattamente sulla X.',
     ],
     end: [
-      'Rispetta tempi e frequenza di applicazione indicati nel foglietto illustrativo o dal tuo medico / fisioterapista.',
+      'Tieni il dispositivo per un massimo di 2 ore, poi toglilo. Ripeti al pomeriggio (vedi "Quanto tempo tenerlo").',
     ],
+  },
+  schedule: {
+    sessions: [
+      { label: 'Mattina', time: '2 ore' },
+      { label: 'Pomeriggio', time: '2 ore' },
+    ],
+    days: ['L', 'M', 'M', 'G', 'V', 'S', 'D'],
+    onDays: 5, // 5 giorni di utilizzo, poi 2 di riposo
+    summary: '2 ore al mattino e 2 ore al pomeriggio, per 5 giorni di seguito, poi 2 giorni di riposo.',
+    removeEarly: 'Togli il dispositivo anche prima delle 2 ore se avverti qualsiasi fastidio: per esempio un aumento del dolore, nausea o un leggero mal di testa.',
+    reassure: 'Non è niente di preoccupante: significa solo che per il tuo corpo l’utilizzo è stato più lungo del necessario. Dopo aver tolto il dispositivo il fastidio passa in pochi minuti.',
+    persist: 'Se il fastidio non passa dopo aver tolto il dispositivo, rivolgiti al tuo medico o farmacista.',
   },
   find: 'La X indica la posizione tipica del trigger point. Ogni corpo è diverso: esplora con le dita un’area di circa 2–3 cm attorno alla X e scegli il punto più sensibile.',
   blue: 'La zona blu è dove senti il dolore, ma spesso il problema nasce altrove: per questo il dispositivo va sulla X, non sulla zona blu.',

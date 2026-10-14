@@ -202,6 +202,19 @@
       '</div>';
   }
 
+  function scheduleCard() {
+    const sc = window.EQUISTASI.schedule;
+    const week = sc.days.map((d, i) => {
+      const on = i < sc.onDays;
+      return '<div class="day' + (on ? ' on' : '') + '"><b>' + d + '</b><span>' + (on ? '2 + 2 h' : 'riposo') + '</span></div>';
+    }).join('');
+    return '<div class="card"><h3>Quanto tempo tenerlo</h3>' +
+      '<div class="sessions">' + sc.sessions.map((x) => '<div class="session"><span>' + esc(x.label) + '</span><b>' + esc(x.time) + '</b></div>').join('') + '</div>' +
+      '<div class="week" aria-label="Settimana tipo">' + week + '</div>' +
+      '<p class="small" style="margin:10px 0 12px">' + esc(sc.summary) + '</p>' +
+      '<div class="warn"><b>Toglilo prima se senti fastidio.</b> ' + esc(sc.removeEarly) + '<br><br>' + esc(sc.reassure) + ' ' + esc(sc.persist) + '</div></div>';
+  }
+
   function renderMuscle(id) {
     const m = byId(id);
     const EQ = window.EQUISTASI;
@@ -235,6 +248,7 @@
       [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
       (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
+      scheduleCard() +
       '<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">' + esc(window.EQUISTASI.find) + '</p>' +
       (m.tips ? '<p class="small" style="margin:8px 0 0"><b>Consiglio:</b> ' + esc(m.tips) + '</p>' : '') + '</div>' +
       '<div class="card"><h3>Il dolore tipico</h3><p class="small" style="margin:0 0 8px">' + esc(m.symptom) + '</p>' +
