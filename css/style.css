@@ -187,6 +187,7 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
 .vgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
 .vcard { text-decoration: none; display: block; }
 .vthumb { position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, #23266f, #1e6bff); }
+.vthumb.tall { aspect-ratio: 9 / 16; }
 .vthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .play { position: absolute; inset: 0; margin: auto; width: 44px; height: 44px; border-radius: 50%; background: rgba(10, 12, 30, .55); display: grid; place-items: center; }
 .vtitle { font-size: 13.5px; font-weight: 600; margin-top: 6px; line-height: 1.3; }
@@ -194,6 +195,7 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
 .vgroup:first-of-type { margin-top: 4px; }
 .vgroup a { color: var(--blue); text-decoration: none; font-weight: 600; }
 .player { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 14px; overflow: hidden; }
+.player.portrait { aspect-ratio: 9 / 16; width: min(100%, calc(78vh * 9 / 16)); margin: 0 auto; }
 .player iframe, .player video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .vpromo { display: grid; grid-template-columns: 48px 1fr auto; gap: 12px; align-items: center; text-decoration: none; }
 .vpromo-ico { width: 48px; height: 48px; border-radius: 14px; background: var(--navy); display: grid; place-items: center; }

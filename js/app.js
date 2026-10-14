@@ -458,7 +458,7 @@
   }
   function vcard(v, label) {
     return '<a class="vcard" href="#/video/' + v.id + '"><div class="vthumb">' +
-      (v.thumb ? '<img src="' + esc(v.thumb) + '" alt="" loading="lazy" onerror="this.remove()" />' : '') +
+      (v.thumb ? '<img src="' + esc(v.thumb) + '" alt="" loading="lazy" onerror="this.remove()" onload="if(this.naturalHeight>this.naturalWidth)this.parentNode.classList.add(\'tall\')" />' : '') +
       '<span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span></div>' +
       '<div class="vtitle">' + esc(label || v.title) + '</div></a>';
   }
@@ -504,10 +504,25 @@
       const m = muscleOf(v);
       app.innerHTML = '<div class="detail-head"><div class="eyebrow">Video tutorial</div><h1>' + esc(m ? m.name : v.title) + '</h1>' +
         (m ? '<p class="latin">' + esc(v.title) + '</p>' : '<div style="height:12px"></div>') + '</div>' +
-        '<div class="player">' + embed(v) + '</div>' +
+        '<div class="player portrait" id="player">' + embed(v) + '</div>' +
         (m ? '<a class="btn" style="margin-top:14px" href="#/m/' + m.id + '">Vedi la mappa del trigger point ›</a>' : '') +
         ' <a class="btn" style="margin-top:14px" href="#/video">Tutti i video</a>';
+      fitPlayer(document.getElementById('player'), v);
     });
+  }
+
+  // I tutorial sono verticali: il riquadro parte in 9:16 e passa a 16:9
+  // solo se l'anteprima (o il file video) risulta orizzontale.
+  function fitPlayer(box, v) {
+    if (!box) return;
+    const set = (w, h) => { if (w && h) box.classList.toggle('portrait', h >= w); };
+    const vid = box.querySelector('video');
+    if (vid) vid.addEventListener('loadedmetadata', () => set(vid.videoWidth, vid.videoHeight));
+    if (v.thumb) {
+      const img = new Image();
+      img.onload = () => set(img.naturalWidth, img.naturalHeight);
+      img.src = v.thumb;
+    }
   }
 
   function fillMuscleVideos(m) {
