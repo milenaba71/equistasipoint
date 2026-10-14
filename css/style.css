@@ -102,12 +102,22 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
 @media (min-width: 820px) { .home-grid { grid-template-columns: 380px 1fr; align-items: start; } }
 
 .map-card { padding: 12px; }
-.map-figure { background: var(--figure-bg); border-radius: 12px; }
+.map-figure { background: var(--figure-bg); border-radius: 12px; position: relative; }
 .map-figure image, .fig image, .thumb image { image-rendering: auto; }
 .map-figure svg { display: block; width: 100%; height: min(64vh, 560px); }
-.hit { fill: #4a8dff; fill-opacity: 0; stroke: none; cursor: pointer; transition: fill-opacity .15s; }
+.hit { fill: #4a8dff; fill-opacity: .1; stroke: none; cursor: pointer; transition: fill-opacity .15s; }
 .hit:hover, .hit.on { fill-opacity: .35; }
-.map-hint { text-align: center; font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.map-hint { text-align: center; font-size: 14px; color: var(--muted); margin: 10px 4px 0; line-height: 1.4; }
+.hot { cursor: pointer; }
+.hot-dot { fill: #fff; stroke: #1e6bff; stroke-width: 1.4; }
+.hot-ring { fill: #2f7bff; opacity: .4; pointer-events: none; transform-box: fill-box; transform-origin: center; animation: hotpulse 2.2s ease-out infinite; }
+.hot:hover .hot-dot, .hot.on .hot-dot { fill: #1e6bff; }
+@keyframes hotpulse { 0% { transform: scale(.45); opacity: .6; } 100% { transform: scale(1.7); opacity: 0; } }
+.map-tip { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 0 10px; padding: 10px 14px; border-radius: 12px;
+  background: var(--navy); color: #fff; font-weight: 700; font-size: 15px; text-align: center; }
+.map-tip-hand { display: inline-block; animation: tiphand 1.6s ease-in-out infinite; }
+@keyframes tiphand { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .hot-ring, .map-tip-hand { animation: none; } }
 
 .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .chip {
