@@ -5,7 +5,7 @@
  * The Trigger Point Manual", 2ª ed. (1999) e Donnelly et al., "Travell, Simons &
  * Simons' Myofascial Pain and Dysfunction", 3ª ed. (2019).
  *
- * Coordinate nello stesso sistema di js/body.js (viewBox 0 0 200 440),
+ * Coordinate nello stesso sistema di js/body.js (viewBox 0 0 200 432.6, tavole 3D),
  * sempre sulla metà SINISTRA del disegno:
  *   - vista frontale: metà sinistra del disegno = lato DESTRO della persona
  *   - vista posteriore: metà sinistra del disegno = lato SINISTRO della persona
@@ -78,31 +78,31 @@ window.AREAS = [
 /* Zone toccabili sulla mappa iniziale (metà sinistra del disegno). */
 window.AREA_HITS = {
   front: [
-    { a: 'torace', p: 'M72,76 L99,70 L99,122 L76,120 Z' },
-    { a: 'collo', p: 'M88,48 L100,48 L100,68 L86,68 Z' },
-    { a: 'testa', e: [100, 29, 16, 20, 0] },
-    { a: 'spalla', e: [63, 84, 11, 12, 0] },
-    { a: 'braccio_gomito', e: [55, 140, 9, 30, 12] },
-    { a: 'polso_mano', e: [41, 245, 9, 25, 8] },
-    { a: 'anca_gluteo', e: [80, 212, 11, 12, 0] },
-    { a: 'coscia', e: [86, 262, 13, 32, 0] },
-    { a: 'ginocchio', e: [86, 314, 11, 11, 0] },
-    { a: 'gamba', e: [86, 356, 11, 28, 0] },
-    { a: 'piede', e: [87, 410, 11, 15, 0] },
+    { a: 'torace', p: 'M64.9,83.2 L98.7,78.2 L97.9,121.2 L54.7,119.4 Z' },
+    { a: 'collo', p: 'M88.0,59.0 L100.0,59.0 L100.0,76.5 L84.8,76.5 Z' },
+    { a: 'testa', e: [99.9, 35.5, 18.8, 24.4, 0] },
+    { a: 'spalla', e: [56, 89.6, 13, 9.6, 0] },
+    { a: 'braccio_gomito', e: [48.9, 134.1, 11.9, 23.7, 12] },
+    { a: 'polso_mano', e: [44.1, 219.4, 2.7, 24.6, 8] },
+    { a: 'anca_gluteo', e: [75.4, 198.9, 13.5, 9.4, 0] },
+    { a: 'coscia', e: [81.9, 246.5, 17, 33.6, 0] },
+    { a: 'ginocchio', e: [82.3, 301, 13.6, 11.3, 0] },
+    { a: 'gamba', e: [79.8, 343.5, 10.7, 28.3, 0] },
+    { a: 'piede', e: [81.1, 394.2, 8.9, 10.2, 0] },
   ],
   back: [
-    { a: 'schiena_alta', p: 'M72,78 L99,66 L99,162 L76,158 Z' },
-    { a: 'lombare', p: 'M76,160 L99,162 L99,212 L74,202 Z' },
-    { a: 'collo', p: 'M88,44 L100,44 L100,66 L86,66 Z' },
-    { a: 'testa', e: [100, 27, 16, 18, 0] },
-    { a: 'spalla', e: [63, 84, 11, 12, 0] },
-    { a: 'braccio_gomito', e: [55, 140, 9, 30, 12] },
-    { a: 'polso_mano', e: [41, 245, 9, 25, 8] },
-    { a: 'anca_gluteo', e: [85, 230, 14, 22, 0] },
-    { a: 'coscia', e: [86, 280, 13, 24, 0] },
-    { a: 'ginocchio', e: [87, 316, 10, 9, 0] },
-    { a: 'gamba', e: [87, 356, 11, 28, 0] },
-    { a: 'piede', e: [87, 410, 10, 15, 0] },
+    { a: 'schiena_alta', p: 'M65.8,84.8 L98.9,74.8 L98.7,158.0 L70.8,154.3 Z' },
+    { a: 'lombare', p: 'M70.8,156.2 L98.7,158.0 L98.7,198.9 L67.6,191.1 Z' },
+    { a: 'collo', p: 'M84.2,54.1 L99.9,54.1 L100.0,74.8 L85.2,74.8 Z' },
+    { a: 'testa', e: [99.9, 33, 19.5, 22.1, 0] },
+    { a: 'spalla', e: [56, 89.6, 13, 9.6, 0] },
+    { a: 'braccio_gomito', e: [48.9, 134.1, 11.9, 23.7, 12] },
+    { a: 'polso_mano', e: [44.1, 219.4, 2.7, 24.6, 8] },
+    { a: 'anca_gluteo', e: [82.1, 213, 16.6, 20.1, 0] },
+    { a: 'coscia', e: [81.8, 265.4, 18.2, 25.2, 0] },
+    { a: 'ginocchio', e: [83.4, 303, 12, 9.2, 0] },
+    { a: 'gamba', e: [80.7, 343.5, 10.7, 28.3, 0] },
+    { a: 'piede', e: [81.1, 394.2, 8.1, 10.2, 0] },
   ],
 };
 
@@ -120,17 +120,17 @@ window.MUSCLES = [
     tips: 'Abbassa le spalle durante la giornata, alterna il lato della borsa, regola l’altezza dello schermo.',
     views: {
       back: {
-        x: [[82, 64]],
+        x: [[78.9, 73]],
         zones: [
-          { e: [93.5, 52, 3, 12, -8], p: 1 },
-          { e: [89, 36, 4, 5, 0], p: 1 },
+          { e: [92.1, 62.5, 3.6, 11.9, -8], p: 1 },
+          { e: [88.5, 44.2, 4.2, 6.1, 0], p: 1 },
         ],
       },
       front: {
-        x: [[81, 64]],
+        x: [[77.7, 73]],
         zones: [
-          { e: [86.5, 23, 3.5, 8, -12], p: 1 },
-          { e: [88, 43, 3, 3.5, 0], p: 0 },
+          { e: [82.4, 28.1, 4.6, 9.9, -12], p: 1 },
+          { e: [85.2, 52.8, 3.7, 4.3, 0], p: 0 },
         ],
       },
     },
@@ -146,11 +146,11 @@ window.MUSCLES = [
     tips: 'Usa un cuscino che sostenga il collo, evita di tenere il telefono con la spalla.',
     views: {
       back: {
-        x: [[88, 62], [86, 79]],
+        x: [[84.9, 71.2], [83, 85.6]],
         zones: [
-          { e: [88, 66, 5, 8, -15], p: 1 },
-          { e: [89, 100, 2.5, 15, 0], p: 0 },
-          { e: [70, 82, 4.5, 5, 0], p: 0 },
+          { e: [87.3, 74.8, 5.3, 6.9, -15], p: 1 },
+          { e: [87.1, 102.4, 2.9, 12.2, 0], p: 0 },
+          { e: [64.2, 88, 5.4, 4, 0], p: 0 },
         ],
       },
     },
@@ -167,19 +167,19 @@ window.MUSCLES = [
     tips: 'Trattare spesso entrambi i lati. Il muscolo si "pizzica" tra pollice e indice: non comprimere la parte anteriore del collo.',
     views: {
       front: {
-        x: [[92.5, 53], [89, 44]],
+        x: [[90.9, 63.4], [85.5, 54.1]],
         zones: [
-          { e: [93, 26, 5, 4, 0], p: 1 },
-          { e: [90.5, 35, 3.5, 4.5, 0], p: 1 },
-          { e: [100, 17, 9, 3, 0], p: 0 },
-          { e: [84.5, 31, 2.5, 5, 0], p: 0 },
-          { e: [98.5, 64, 2.5, 3.5, 0], p: 0 },
+          { e: [91.1, 31.8, 6.3, 5, 0], p: 1 },
+          { e: [90.2, 42.9, 3.6, 5.6, 0], p: 1 },
+          { e: [99.9, 20.7, 12.4, 3.8, 0], p: 0 },
+          { e: [82.5, 38, 2.9, 6.2, 0], p: 0 },
+          { e: [98.2, 73, 2.9, 3.1, 0], p: 0 },
         ],
       },
       back: {
         zones: [
-          { e: [94, 34, 5, 4, 0], p: 0 },
-          { e: [96, 13, 5, 3, 0], p: 0 },
+          { e: [93.5, 41.7, 5.4, 4.9, 0], p: 0 },
+          { e: [94.3, 15.7, 7, 3.7, 0], p: 0 },
         ],
       },
     },
@@ -196,14 +196,16 @@ window.MUSCLES = [
     tips: 'Fai pause frequenti se lavori a testa china.',
     views: {
       back: {
-        x: [[94, 52]],
+        x: [[92.7, 62.5]],
         zones: [
-          { e: [95, 15, 6, 4.5, 0], p: 1 },
-          { e: [94.5, 47, 2.5, 6, 0], p: 0 },
+          { e: [93, 18.2, 8.2, 5.6, 0], p: 1 },
+          { e: [86.4, 57.8, 6, 6.6, 0], p: 0 },
         ],
       },
       front: {
-        zones: [{ e: [95, 12.5, 5, 3, 0], p: 1 }],
+        zones: [
+          { e: [93, 15.1, 6.9, 3.7, 0], p: 1 },
+        ],
       },
     },
   },
@@ -218,11 +220,15 @@ window.MUSCLES = [
     tips: 'Rientra leggermente il mento (doppio mento) più volte al giorno.',
     views: {
       back: {
-        x: [[95, 40]],
-        zones: [{ e: [90, 30, 5.5, 9, 10], p: 1 }],
+        x: [[94.6, 49.1]],
+        zones: [
+          { e: [88.4, 36.7, 6.4, 11.1, 10], p: 1 },
+        ],
       },
       front: {
-        zones: [{ e: [89.5, 25, 6.5, 3, -15], p: 1 }],
+        zones: [
+          { e: [86.6, 30.6, 8.2, 3.7, -15], p: 1 },
+        ],
       },
     },
   },
@@ -238,11 +244,11 @@ window.MUSCLES = [
     tips: 'Durante il giorno controlla che i denti non siano serrati: labbra chiuse, denti separati.',
     views: {
       front: {
-        x: [[87, 21]],
+        x: [[82.8, 25.6]],
         zones: [
-          { e: [87, 22, 3.5, 7, -8], p: 1 },
-          { e: [93, 23, 4, 1.8, 0], p: 0 },
-          { e: [95, 39.5, 3.5, 1.6, 0], p: 0 },
+          { e: [82.9, 26.8, 4.5, 8.7, -8], p: 1 },
+          { e: [90.8, 28.1, 5.2, 2.2, 0], p: 0 },
+          { e: [94.7, 48.5, 3.7, 2, 0], p: 0 },
         ],
       },
     },
@@ -260,15 +266,17 @@ window.MUSCLES = [
     tips: 'Dormi con un cuscino tra braccio e torace. Il punto si trova sulla scapola, spesso serve aiuto per l’applicazione.',
     views: {
       back: {
-        x: [[80, 97], [85, 106]],
-        zones: [{ e: [90, 100, 2, 6, 0], p: 0 }],
+        x: [[76.3, 100], [82.8, 107.2]],
+        zones: [
+          { e: [88.3, 102.4, 2.3, 4.8, 0], p: 0 },
+        ],
       },
       front: {
         zones: [
-          { e: [64, 84, 6, 7, 0], p: 1 },
-          { e: [57, 125, 3.5, 19, 12], p: 0 },
-          { e: [45, 196, 3, 14, 10], p: 0 },
-          { e: [38, 252, 3, 6, 0], p: 0 },
+          { e: [57.2, 89.6, 7.1, 5.6, 0], p: 1 },
+          { e: [49.7, 122.2, 4.7, 15.1, 12], p: 0 },
+          { e: [40.5, 177.5, 4.6, 10.7, 10], p: 0 },
+          { e: [34.5, 227.2, 3.7, 6.7, 0], p: 0 },
         ],
       },
     },
@@ -284,14 +292,16 @@ window.MUSCLES = [
     tips: 'Evita di sollevare pesi con il braccio lontano dal corpo.',
     views: {
       back: {
-        x: [[79, 79]],
-        zones: [{ e: [58, 94, 4.5, 9, 0], p: 1 }],
+        x: [[74.5, 85.6]],
+        zones: [
+          { e: [50.4, 97.6, 5.3, 7.2, 0], p: 1 },
+        ],
       },
       front: {
         zones: [
-          { e: [57, 93, 4, 8, 0], p: 1 },
-          { e: [48, 161, 3, 4, 0], p: 0 },
-          { e: [44, 188, 3, 11, 10], p: 0 },
+          { e: [48.9, 96.8, 4.8, 6.4, 0], p: 1 },
+          { e: [40.6, 150.8, 4.4, 3.1, 0], p: 0 },
+          { e: [37.8, 171.4, 4.9, 8.4, 10], p: 0 },
         ],
       },
     },
@@ -307,10 +317,10 @@ window.MUSCLES = [
     tips: 'Apri il torace: porta le scapole indietro e in basso più volte al giorno.',
     views: {
       back: {
-        x: [[94, 92], [93.5, 108]],
+        x: [[92.8, 96], [92.5, 108.8]],
         zones: [
-          { e: [90.5, 101, 3.5, 15, 0], p: 1 },
-          { e: [82, 82, 6, 2.5, -10], p: 0 },
+          { e: [88.9, 103.2, 4.1, 12.2, 0], p: 1 },
+          { e: [78.5, 88, 7.1, 2, -10], p: 0 },
         ],
       },
     },
@@ -328,14 +338,14 @@ window.MUSCLES = [
     warning: 'Un dolore al petto, soprattutto se irradiato al braccio sinistro, alla mandibola o accompagnato da affanno, sudorazione o nausea, può essere di origine cardiaca: chiama subito il 112.',
     views: {
       front: {
-        x: [[79, 95], [85, 109]],
+        x: [[75.2, 98.4], [73.3, 109.6]],
         zones: [
-          { e: [83, 98, 9.5, 12, 0], p: 1 },
-          { e: [66, 88, 5, 7, 0], p: 1 },
-          { e: [63, 135, 3, 18, 10], p: 0 },
-          { e: [59, 163, 3, 4, 0], p: 0 },
-          { e: [48, 215, 3, 14, 8], p: 0 },
-          { e: [47, 256, 2.5, 7, 0], p: 0 },
+          { e: [80.1, 100.8, 11.1, 9.6, 0], p: 1 },
+          { e: [59.7, 92.8, 5.9, 5.6, 0], p: 1 },
+          { e: [59.2, 130.1, 4.1, 14.3, 10], p: 0 },
+          { e: [57.1, 152.3, 4.5, 3.1, 0], p: 0 },
+          { e: [45.8, 192, 3.3, 10.7, 8], p: 0 },
+          { e: [46.2, 231.7, 0.4, 7.8, 0], p: 0 },
         ],
       },
     },
@@ -354,11 +364,11 @@ window.MUSCLES = [
     tips: 'Afferra gli oggetti con il palmo verso l’alto quando possibile; fai pause nel lavoro manuale.',
     views: {
       back: {
-        x: [[47.5, 173]],
+        x: [[40.5, 159.9]],
         zones: [
-          { e: [46.5, 162, 4, 5, 0], p: 1 },
-          { e: [39.5, 247, 3.5, 7, 0], p: 1 },
-          { e: [44, 196, 2.5, 10, 10], p: 0 },
+          { e: [38.2, 151.5, 6, 3.9, 0], p: 1 },
+          { e: [33.2, 221.7, 5.4, 7.8, 0], p: 1 },
+          { e: [38.9, 177.5, 3.8, 7.6, 10], p: 0 },
         ],
       },
     },
@@ -375,10 +385,10 @@ window.MUSCLES = [
     tips: 'Apri e chiudi la mano lentamente durante le pause.',
     views: {
       back: {
-        x: [[51, 181]],
+        x: [[48, 166]],
         zones: [
-          { e: [47, 207, 2.5, 13, 10], p: 0 },
-          { e: [42.5, 254, 4.5, 10, 0], p: 1 },
+          { e: [44.5, 185.9, 3.3, 9.9, 10], p: 0 },
+          { e: [45.2, 229.4, 0.9, 11.1, 0], p: 1 },
         ],
       },
     },
@@ -397,16 +407,18 @@ window.MUSCLES = [
     tips: 'Piega le ginocchia quando sollevi pesi, evita di sederti sul portafoglio.',
     views: {
       back: {
-        x: [[88, 182], [85, 195]],
+        x: [[84.4, 175.5], [81.1, 185.6]],
         zones: [
-          { e: [95.5, 215, 3.5, 5, 0], p: 1 },
-          { e: [88, 246, 7, 5.5, 0], p: 1 },
-          { e: [73.5, 230, 3.5, 6, 0], p: 1 },
-          { e: [83, 203, 8, 2.5, -5], p: 0 },
+          { e: [94.5, 201.3, 4.2, 3.9, 0], p: 1 },
+          { e: [84.7, 229.8, 8, 5.8, 0], p: 1 },
+          { e: [68.4, 213, 4.1, 5.5, 0], p: 1 },
+          { e: [78.8, 191.9, 9.9, 2, -5], p: 0 },
         ],
       },
       front: {
-        zones: [{ e: [80, 209, 5, 3.5, -20], p: 0 }],
+        zones: [
+          { e: [75.1, 196.6, 6.2, 2.8, -20], p: 0 },
+        ],
       },
     },
   },
@@ -422,10 +434,10 @@ window.MUSCLES = [
     tips: 'Alzati ogni 30–45 minuti, cammina regolarmente.',
     views: {
       back: {
-        x: [[93.5, 178], [94, 192]],
+        x: [[91.8, 172.3], [92.4, 183.3]],
         zones: [
-          { e: [94.5, 197, 4.5, 10, 0], p: 1 },
-          { e: [90, 230, 7, 10, 0], p: 0 },
+          { e: [93, 187.2, 5.7, 7.8, 0], p: 1 },
+          { e: [88, 213, 8.4, 9.2, 0], p: 0 },
         ],
       },
     },
@@ -441,12 +453,12 @@ window.MUSCLES = [
     tips: 'Dormendo sul fianco tieni un cuscino tra le ginocchia.',
     views: {
       back: {
-        x: [[82, 208], [89, 206], [77, 213]],
+        x: [[77.7, 195.8], [86.3, 194.2], [71.7, 199.7]],
         zones: [
-          { e: [86, 202, 10, 2.8, -3], p: 1 },
-          { e: [96, 214, 3.5, 6, 0], p: 1 },
-          { e: [84, 226, 9, 7, 0], p: 0 },
-          { e: [78, 246, 3.5, 9, 0], p: 0 },
+          { e: [82.5, 191.1, 12.4, 2.2, -3], p: 1 },
+          { e: [95, 200.5, 4.3, 4.7, 0], p: 1 },
+          { e: [80.6, 209.9, 10.9, 5.8, 0], p: 0 },
+          { e: [73.3, 229.8, 4, 9.4, 0], p: 0 },
         ],
       },
     },
@@ -462,17 +474,17 @@ window.MUSCLES = [
     tips: 'Se ci sono formicolii, perdita di forza o di sensibilità consulta il medico per escludere una vera sciatica.',
     views: {
       back: {
-        x: [[80, 212]],
+        x: [[75.4, 198.9]],
         zones: [
-          { e: [78, 232, 5.5, 8, 0], p: 1 },
-          { e: [82, 271, 3.5, 22, 2], p: 0 },
-          { e: [83, 345, 3.5, 20, 2], p: 0 },
+          { e: [74.3, 215.1, 6.8, 7.6, 0], p: 1 },
+          { e: [76.2, 256, 4.8, 23, 2], p: 0 },
+          { e: [77.3, 332.4, 3.4, 20.2, 2], p: 0 },
         ],
       },
       front: {
         zones: [
-          { e: [73, 258, 3, 26, 2], p: 1 },
-          { e: [77, 350, 2.5, 22, -4], p: 0 },
+          { e: [65.3, 242.3, 3.8, 27.3, 2], p: 1 },
+          { e: [71.3, 337.4, 2.5, 22.3, -4], p: 0 },
         ],
       },
     },
@@ -488,11 +500,11 @@ window.MUSCLES = [
     tips: 'Siediti con il peso distribuito su entrambi i glutei; stretching incrociando la gamba.',
     views: {
       back: {
-        x: [[89, 223], [79, 228]],
+        x: [[86.7, 207.5], [74.7, 211.4]],
         zones: [
-          { e: [96, 215, 3.5, 5, 0], p: 1 },
-          { e: [84, 233, 9, 6.5, -8], p: 1 },
-          { e: [84, 265, 3.5, 17, 0], p: 0 },
+          { e: [95.1, 201.3, 4.2, 3.9, 0], p: 1 },
+          { e: [81.8, 216.1, 11.1, 6.3, -8], p: 1 },
+          { e: [79.2, 249.7, 4.8, 17.8, 0], p: 0 },
         ],
       },
     },
@@ -509,13 +521,15 @@ window.MUSCLES = [
     tips: 'Punto delicato vicino a vasi e nervi dell’inguine: applica con delicatezza solo sul muscolo, lateralmente al battito dell’arteria.',
     views: {
       front: {
-        x: [[85, 222]],
-        zones: [{ e: [85, 242, 5, 12, 0], p: 1 }],
+        x: [[81.8, 206.7]],
+        zones: [
+          { e: [81.6, 225.6, 5.5, 12.6, 0], p: 1 },
+        ],
       },
       back: {
         zones: [
-          { e: [96.5, 188, 2.8, 18, 0], p: 1 },
-          { e: [92, 211, 5, 3.5, 0], p: 0 },
+          { e: [95.5, 180.2, 3.5, 14.4, 0], p: 1 },
+          { e: [90.1, 198.1, 6.1, 2.8, 0], p: 0 },
         ],
       },
     },
@@ -533,10 +547,10 @@ window.MUSCLES = [
     tips: 'Evita di stare seduti con le ginocchia più alte delle anche.',
     views: {
       front: {
-        x: [[75.5, 214]],
+        x: [[69.9, 200.5]],
         zones: [
-          { e: [74, 213, 3.5, 5, 0], p: 1 },
-          { e: [73, 258, 3, 32, 2], p: 1 },
+          { e: [68, 199.7, 4.3, 3.9, 0], p: 1 },
+          { e: [65.3, 242.3, 3.8, 33, 2], p: 1 },
         ],
       },
     },
@@ -553,10 +567,10 @@ window.MUSCLES = [
     tips: 'Allunga la parte anteriore della coscia portando il tallone verso il gluteo.',
     views: {
       front: {
-        x: [[85.5, 224]],
+        x: [[82.4, 208.3]],
         zones: [
-          { e: [86, 312, 6, 7.5, 0], p: 1 },
-          { e: [86, 294, 3, 8, 0], p: 0 },
+          { e: [82.7, 299, 7.4, 7.8, 0], p: 1 },
+          { e: [81.5, 280.1, 4, 8.4, 0], p: 0 },
         ],
       },
     },
@@ -572,10 +586,10 @@ window.MUSCLES = [
     tips: 'Evita di stare a lungo in ginocchio o accovacciato.',
     views: {
       front: {
-        x: [[91.5, 280], [93.5, 297]],
+        x: [[89.5, 265.4], [91.9, 283.2]],
         zones: [
-          { e: [92, 310, 5, 7, 0], p: 1 },
-          { e: [91.5, 286, 3, 10, 0], p: 0 },
+          { e: [90.1, 296.9, 6, 7.3, 0], p: 1 },
+          { e: [89.4, 271.7, 4.2, 10.5, 0], p: 0 },
         ],
       },
     },
@@ -592,12 +606,12 @@ window.MUSCLES = [
     tips: 'Usa sedie della giusta altezza: i piedi devono appoggiare bene a terra.',
     views: {
       back: {
-        x: [[83, 280], [92, 283]],
+        x: [[77.6, 265.4], [90, 268.6]],
         zones: [
-          { e: [88, 316, 6, 6, 0], p: 1 },
-          { e: [87, 292, 6, 12, 0], p: 0 },
-          { e: [91, 254, 6, 3, 0], p: 0 },
-          { e: [86, 332, 4, 5, 0], p: 0 },
+          { e: [84.6, 303, 7.1, 6.1, 0], p: 1 },
+          { e: [83, 278, 8.1, 12.6, 0], p: 0 },
+          { e: [88, 238.2, 7.4, 3.2, 0], p: 0 },
+          { e: [80.7, 319.2, 3.4, 5.1, 0], p: 0 },
         ],
       },
     },
@@ -617,15 +631,17 @@ window.MUSCLES = [
     warning: 'Polpaccio gonfio, caldo, arrossato e dolente (soprattutto dopo viaggi lunghi o immobilità) può indicare una trombosi: rivolgiti subito al medico e non applicare nulla.',
     views: {
       back: {
-        x: [[92, 336], [82, 338]],
+        x: [[85.7, 323.3], [76.7, 325.3]],
         zones: [
-          { e: [88, 319, 5, 4, 0], p: 0 },
-          { e: [88, 352, 6, 13, 0], p: 1 },
-          { e: [88, 416, 4.5, 6, 0], p: 0 },
+          { e: [84.4, 306.1, 5.8, 4.1, 0], p: 0 },
+          { e: [81.9, 339.4, 5.8, 13.2, 0], p: 1 },
+          { e: [81.1, 397.8, 3.5, 3.7, 0], p: 0 },
         ],
       },
       front: {
-        zones: [{ e: [94, 414, 3, 5, 0], p: 1 }],
+        zones: [
+          { e: [86.2, 396.6, 2.4, 3.1, 0], p: 1 },
+        ],
       },
     },
   },
@@ -640,10 +656,10 @@ window.MUSCLES = [
     tips: 'Allunga il polpaccio a ginocchio piegato; scegli scarpe con un buon supporto del tallone.',
     views: {
       back: {
-        x: [[90, 378], [84, 372]],
+        x: [[81.4, 365.7], [77, 359.7]],
         zones: [
-          { e: [88, 418, 5.5, 6, 0], p: 1 },
-          { e: [87.5, 398, 2.5, 6, 0], p: 0 },
+          { e: [80.5, 399.1, 4, 3.7, 0], p: 1 },
+          { e: [80.7, 386, 2.5, 5.3, 0], p: 0 },
         ],
       },
     },
@@ -660,11 +676,11 @@ window.MUSCLES = [
     tips: 'Allaccia le scarpe senza stringere troppo sul collo del piede.',
     views: {
       front: {
-        x: [[83, 343]],
+        x: [[77.5, 330.3]],
         zones: [
-          { e: [88, 402, 4, 4, 0], p: 1 },
-          { e: [95, 422, 3, 3, 0], p: 1 },
-          { e: [84.5, 366, 2.2, 14, -3], p: 0 },
+          { e: [82.1, 389.2, 4.1, 2.8, 0], p: 1 },
+          { e: [85.2, 401.5, 2.4, 1.8, 0], p: 1 },
+          { e: [77.7, 353.6, 1.9, 14.2, -3], p: 0 },
         ],
       },
     },
@@ -681,11 +697,11 @@ window.MUSCLES = [
     tips: 'Esercizi di equilibrio su una gamba aiutano a rinforzare la caviglia.',
     views: {
       front: {
-        x: [[77.5, 342]],
+        x: [[72.4, 329.3]],
         zones: [
-          { e: [79.5, 405, 3.5, 5, 0], p: 1 },
-          { e: [80, 418, 3.5, 3.5, 0], p: 0 },
-          { e: [79, 372, 2, 14, -6], p: 0 },
+          { e: [73.7, 391.1, 3.2, 3.1, 0], p: 1 },
+          { e: [74.6, 399.1, 2.6, 2.2, 0], p: 0 },
+          { e: [72.8, 359.7, 1.6, 14.2, -6], p: 0 },
         ],
       },
     },
