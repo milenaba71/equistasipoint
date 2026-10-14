@@ -10,8 +10,9 @@ W = int(a[2]) if len(a) > 2 else 860
 H = int(W * 930 / 430)
 SAMPLES = int(a[3]) if len(a) > 3 else 32
 os.makedirs(outdir, exist_ok=True)
-bpy.ops.wm.open_mainfile(filepath=S + "/clean.blend")
-info = json.load(open(S + '/clean_info.json'))
+CLEAN = os.environ.get('ZA_CLEAN', 'clean2')
+bpy.ops.wm.open_mainfile(filepath=S + "/" + CLEAN + ".blend")
+info = json.load(open(S + '/' + CLEAN.replace('clean', 'clean_info') + '.json'))
 scene = bpy.context.scene
 
 
@@ -38,7 +39,10 @@ M = {
     'ten': mat('ten', '#eee4d6', 0.32, 0.04, 0.25),
     'tend': mat('tend', '#e6ded4', 0.4),
     'bone': mat('bone', '#e6d8bf', 0.5),
+    'eye': mat('eye', '#f2eee8', 0.15, 0.05, 0.6),
+    'iris': mat('iris', '#5a4434', 0.3, 0.0, 0.8),
 }
+DEFAULT_EXTRAS = os.environ.get('ZA_EXTRAS', 'eye,iris,nose,skin').split(',')
 HIDE_MATS = {'Bursa', 'Fascia', 'Articular capsule', 'Cartilage', 'Teeth', 'Teeth-roots', 'Ligament'}
 HIDE_NAMES = ('bursa', 'sheath', 'synovial')
 ALWAYS = {'Linea alba'}
@@ -48,7 +52,11 @@ kind = {}
 for o in objs:
     name = o.name[:-1]; meta = info.get(name, {}); m0 = meta.get('mat', ''); low = name.lower()
     base_hidden = (m0 in HIDE_MATS or any(k in low for k in HIDE_NAMES)) and name not in ALWAYS
-    if meta.get('skel'):
+    ex = meta.get('extra')
+    if ex:
+        base_hidden = ex not in DEFAULT_EXTRAS or ex == 'cornea'
+        k = {'eye': 'eye', 'iris': 'iris', 'nose': 'mus', 'skin': 'mus'}.get(ex, 'mus')
+    elif meta.get('skel'):
         k = 'bone'
     elif m0.startswith('Tendon') or name in ALWAYS or any(k in low for k in ('tendon', 'aponeuros', 'retinacul', 'tract')):
         k = 'ten'
@@ -105,11 +113,18 @@ for j in jobs:
         if name in hl:
             mk = 'hl'
         elif style == 'dim':
-            mk = {'mus': 'dim', 'ten': 'tend', 'bone': 'bone'}[k]
+            mk = {'mus': 'dim', 'ten': 'tend', 'bone': 'bone', 'eye': 'eye', 'iris': 'dim'}[k]
         else:
             mk = k
         o.material_slots[0].material = M[mk]
     place(j['view'])
+    if j.get('cam'):
+        camd.ortho_scale, cz = j['cam'][0], j['cam'][1]
+        cam.location.z = cz
+        scene.render.resolution_x, scene.render.resolution_y = j['cam'][2], j['cam'][3]
+    else:
+        camd.ortho_scale = 1.86; cam.location.z = 0.83
+        scene.render.resolution_x = W; scene.render.resolution_y = H
     scene.render.filepath = out
     t = time.time(); bpy.ops.render.render(write_still=True)
     print('DONE', j['name'], round(time.time() - t), 's', flush=True)
