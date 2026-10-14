@@ -127,11 +127,11 @@
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
 
-  // Foto del kit: per il gel quella del dispositivo con il bordo in gel
+  // Foto del dispositivo in base al tipo scelto (gel o silicone)
   function kitFigure() {
     return state.devType === 'gel'
       ? '<figure><img src="img/gel-kit.jpg" alt="Dispositivo Equistasi gel nel palmo della mano, accanto all’astuccio" loading="lazy" width="573" height="1000" /><figcaption>Equistasi gel</figcaption></figure>'
-      : '<figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>';
+      : '<figure><img src="img/silicone-applicato.jpg" alt="Dispositivo Equistasi silicone applicato sulla spalla" loading="lazy" width="600" height="620" /><figcaption>Equistasi silicone</figcaption></figure>';
   }
 
   // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
