@@ -18,13 +18,15 @@
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
       <pattern id="dots" width="2.4" height="2.4" patternUnits="userSpaceOnUse">
-        <rect width="2.4" height="2.4" fill="#1e6bff" fill-opacity=".14" />
-        <circle cx="1.2" cy="1.2" r=".65" fill="#1e6bff" />
+        <rect width="2.4" height="2.4" fill="#2f7bff" fill-opacity=".28" />
+        <circle cx="1.2" cy="1.2" r=".7" fill="#4a8dff" />
       </pattern>
+      <filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.3"/></filter>
+      <filter id="softer" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation=".6"/></filter>
       <radialGradient id="solid">
-        <stop offset="0" stop-color="#1e6bff" stop-opacity=".85" />
-        <stop offset=".75" stop-color="#1e6bff" stop-opacity=".65" />
-        <stop offset="1" stop-color="#1e6bff" stop-opacity=".25" />
+        <stop offset="0" stop-color="#2f7bff" stop-opacity=".95" />
+        <stop offset=".7" stop-color="#2468ff" stop-opacity=".8" />
+        <stop offset="1" stop-color="#1e5bff" stop-opacity=".45" />
       </radialGradient>
     </defs>
   </svg>

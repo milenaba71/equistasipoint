@@ -63,17 +63,17 @@
     if (h < minH) { y0 -= (minH - h) / 2; h = minH; }
     // mantieni il riquadro dentro la figura
     if (w > 200) { x0 = 0; w = 200; }
-    if (h > 440) { y0 = 0; h = 440; }
+    const HH = window.Body.H;
+    if (h > HH) { y0 = 0; h = HH; }
     x0 = Math.max(0, Math.min(x0, 200 - w));
-    y0 = Math.max(0, Math.min(y0, 440 - h));
+    y0 = Math.max(0, Math.min(y0, HH - h));
     return [x0, y0, w, h].map((n) => Math.round(n * 10) / 10).join(' ');
   }
 
   function figure(m, view, opts) {
     const v = m.views[view];
     const mirrored = isMirrored(view, state.side);
-    const hasX = v.x && v.x.length;
-    let vb = '0 0 200 440';
+    let vb = '0 0 200 ' + window.Body.H;
     if (opts.zoom) vb = bbox(v, mirrored, opts.minW || 90, opts.minH || 120, opts.pad || 16);
     const scale = opts.zoom ? 1 : 1.25;
     let overlay = '';
@@ -81,8 +81,8 @@
     (v.x || []).forEach(([x, y]) => { overlay += xMark(x, y, 2.6 * scale, !opts.thumb); });
     return '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
       esc(m.name + ', vista ' + (view === 'front' ? 'frontale' : 'posteriore')) + '">' +
-      window.Body.render(view, hasX ? m.hl : [], mirrored) +
-      '<g' + (mirrored ? ' transform="' + window.Body.MIRROR + '"' : '') + '>' + overlay + '</g></svg>';
+      '<g' + (mirrored ? ' transform="' + window.Body.MIRROR + '"' : '') + '>' + window.Body.render(view, m.id) +
+      '<g class="ov">' + overlay + '</g></g></svg>';
   }
 
   /* Vista con la X per prima. */
@@ -118,8 +118,8 @@
     const shape = (h, cls) => h.p ? '<path d="' + h.p + '" class="' + cls + '" data-area="' + h.a + '"/>' : ellipse(h.e, cls).replace('/>', ' data-area="' + h.a + '"/>');
     let a = '', b = '';
     hits.forEach((h) => { a += shape(h, 'hit'); b += shape(h, 'hit'); });
-    return '<svg viewBox="0 4 200 428" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mappa del corpo, tocca dove senti dolore">' +
-      window.Body.render(view, [], false) +
+    return '<svg viewBox="0 6 200 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mappa del corpo, tocca dove senti dolore">' +
+      window.Body.render(view, null) +
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
   }
 
@@ -138,6 +138,8 @@
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
+      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div><ol class="steps">' +
@@ -275,6 +277,8 @@
       '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>' +
+      '<div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi con i dispositivi" loading="lazy" width="360" height="600" /><figcaption>Il kit Equistasi</figcaption></figure>' +
+      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
       '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div><ol class="steps">' +
@@ -543,6 +547,7 @@
       '<li>Donnelly JM et al. <i>Travell, Simons & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, 3ª ed. Wolters Kluwer, 2019.</li>' +
       '<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>' +
       '</ul></div>' +
+      '<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello <a href="https://github.com/Z-Anatomy" target="_blank" rel="noopener">Z-Anatomy – The libre 3D atlas of anatomy</a> (CC BY-SA 4.0), basato su <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D – The Database Center for Life Science</a> (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p></div>' +
       '<div class="card"><h3>Il tuo profilo</h3><p class="small">' + esc(profileName() || '—') + '</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>' +
       '<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>' + esc(store.get('tp-serial', '—')) + '</b></p>' +
       '<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>' +

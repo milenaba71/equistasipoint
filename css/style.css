@@ -11,7 +11,7 @@
   --chip: #eef1fb;
   --warn-bg: #fff3e6;
   --warn-txt: #8a4300;
-  --figure-bg: #fbfcff;
+  --figure-bg: radial-gradient(120% 80% at 50% 30%, #3a3f5c 0%, #1d2032 60%, #14161f 100%);
   --radius: 16px;
   --shadow: 0 1px 2px rgba(22, 26, 51, .06), 0 6px 20px rgba(22, 26, 51, .06);
 }
@@ -103,9 +103,10 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
 
 .map-card { padding: 12px; }
 .map-figure { background: var(--figure-bg); border-radius: 12px; }
+.map-figure image, .fig image, .thumb image { image-rendering: auto; }
 .map-figure svg { display: block; width: 100%; height: min(64vh, 560px); }
-.hit { fill: #1e6bff; fill-opacity: 0; stroke: none; cursor: pointer; transition: fill-opacity .15s; }
-.hit:hover, .hit.on { fill-opacity: .28; }
+.hit { fill: #4a8dff; fill-opacity: 0; stroke: none; cursor: pointer; transition: fill-opacity .15s; }
+.hit:hover, .hit.on { fill-opacity: .35; }
 .map-hint { text-align: center; font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
 .chips { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
@@ -144,16 +145,16 @@ main { max-width: 980px; margin: 0 auto; padding: 16px 16px 48px; outline: none;
 .detail-head .latin { font-style: italic; color: var(--muted); font-size: 14px; margin: 0 0 12px; }
 .figures { display: grid; gap: 10px; grid-template-columns: 1fr; }
 .figures.two { grid-template-columns: 1fr 1fr; }
-.fig { background: var(--figure-bg); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; position: relative; }
+.fig { background: var(--figure-bg); border: 1px solid #2a2e45; border-radius: 14px; overflow: hidden; position: relative; }
 .fig svg { display: block; width: 100%; height: 380px; touch-action: manipulation; }
 .figures.two .fig svg { height: 340px; }
 .fig .fig-label {
   position: absolute; top: 8px; left: 8px; font-size: 11px; font-weight: 700; letter-spacing: .05em;
-  text-transform: uppercase; color: #5d6480; background: rgba(255,255,255,.85); padding: 3px 8px; border-radius: 99px;
+  text-transform: uppercase; color: #e8ebf7; background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 99px;
 }
 .fig .fig-side {
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #5d6480;
-  background: rgba(255,255,255,.85); padding: 3px 8px; border-radius: 99px; white-space: nowrap;
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 11px; color: #e8ebf7;
+  background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 99px; white-space: nowrap;
 }
 .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 0; font-size: 13.5px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -200,37 +201,9 @@ ul.flags { margin: 0; padding-left: 20px; }
 ul.flags li { margin-bottom: 4px; }
 .ref { font-size: 13px; color: var(--muted); }
 
-/* ───── Figura anatomica ───── */
-.body .skin { fill: url(#skin); stroke: #a8775f; stroke-width: .55; }
-.body .head { fill: url(#head); stroke: #a8775f; stroke-width: .55; }
-.body .hair { fill: #6f5244; }
-.body .face { fill: none; stroke: #a8775f; stroke-width: .5; stroke-linecap: round; stroke-linejoin: round; }
-.body .brow { fill: none; stroke: #7d5a4a; stroke-width: .7; stroke-linecap: round; }
-.body .eye { fill: #fff; stroke: #7d5a4a; stroke-width: .35; }
-.body .mu { fill: url(#mg); stroke: none; }
-.body .mu.deep { fill: none; stroke: #8f3a31; stroke-opacity: .55; stroke-width: .45; stroke-dasharray: 1.2 1; }
-.body .mu.hl { fill: url(#mgh); }
-.body .mu.deep.hl { fill: url(#mgh); stroke: #6d0f09; stroke-opacity: 1; stroke-dasharray: none; stroke-width: .6; }
-.body .fib { fill: none; stroke: #6e1f18; stroke-opacity: .26; stroke-width: .22; }
-.body .fib.on { stroke: #5a0802; stroke-opacity: .32; }
-.body .edge { fill: none; stroke: #7a2b23; stroke-width: .5; stroke-linejoin: round; }
-.body .edge.on { stroke: #5a0a05; stroke-width: .75; }
-.body .line { fill: none; stroke: #7a2b23; stroke-width: .4; stroke-opacity: .6; }
-.body .bone { fill: #f6ead8; stroke: #b9a17c; stroke-width: .45; }
-.body .bone-line { fill: none; stroke: #efe2cc; stroke-width: 1.2; stroke-linecap: round; }
-.body .tendon { fill: url(#tendon); stroke: #c9b190; stroke-width: .3; }
-.body .tendon.fascia { opacity: .9; }
-.body .hl-erettori .tendon.fascia, .body .hl-quadrato_lombi .tendon.fascia { opacity: .3; }
-/* con un muscolo evidenziato gli altri si schiariscono */
-.body.has-hl .mu:not(.hl):not(.deep) { fill: url(#mgm); }
-.body.has-hl .fib:not(.on) { stroke-opacity: .16; }
-.body.has-hl .edge:not(.on) { stroke: #b0645a; stroke-width: .4; }
-.body .tendon-line { fill: none; stroke: #f7efe3; stroke-width: 1; stroke-linecap: round; }
-.body .tendon-line.thin { stroke-width: .6; stroke: #f3e7d6; }
-.body .spine { fill: none; stroke: #8f5a48; stroke-width: .6; stroke-dasharray: 1.4 1.2; }
-
-.zone.p1 { fill: url(#solid); stroke: #1e6bff; stroke-width: .35; }
-.zone.p0 { fill: url(#dots); stroke: #1e6bff; stroke-width: .3; stroke-dasharray: 1 .8; }
+/* ───── Figura anatomica (tavole 3D) ───── */
+.zone.p1 { fill: url(#solid); filter: url(#soft); }
+.zone.p0 { fill: url(#dots); stroke: #6fa3ff; stroke-width: .3; stroke-dasharray: 1 .8; filter: url(#softer); }
 .tp .halo { stroke: #fff; stroke-linecap: round; }
 .tp .mark { stroke: #0c0e1d; stroke-linecap: round; }
 .tp .pulse { fill: none; stroke: #0c0e1d; stroke-opacity: .5; transform-box: fill-box; transform-origin: center; animation: pulse 1.8s ease-out infinite; }
@@ -249,6 +222,10 @@ ul.flags li { margin-bottom: 4px; }
 .gate-box p { font-size: 15px; color: var(--muted); margin: 0 0 14px; text-align: center; }
 .gate-label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
 .gate-input { font-size: 20px; letter-spacing: .06em; text-transform: uppercase; text-align: center; font-variant-numeric: tabular-nums; }
+.howto { display: grid; grid-template-columns: 0.7fr 1fr; gap: 8px; margin: 0 0 14px; }
+.howto figure { margin: 0; }
+.howto img { width: 100%; height: 150px; object-fit: cover; border-radius: 10px; display: block; }
+.howto figcaption { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
 .gate-input::placeholder { text-transform: none; letter-spacing: .02em; }
 .gate-msg { min-height: 22px; margin: 8px 0 4px !important; font-size: 14px !important; color: var(--red) !important; }
 .gate-msg.ok { color: #157a3c !important; }
