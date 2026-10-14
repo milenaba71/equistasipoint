@@ -120,17 +120,17 @@ window.MUSCLES = [
     tips: 'Abbassa le spalle durante la giornata, alterna il lato della borsa, regola l’altezza dello schermo.',
     views: {
       back: {
-        x: [[78.9, 73]],
+        x: [[87.5, 65.5]],
         zones: [
           { e: [92.1, 62.5, 3.6, 11.9, -8], p: 1 },
           { e: [88.5, 44.2, 4.2, 6.1, 0], p: 1 },
         ],
       },
       front: {
-        x: [[77.7, 73]],
+        x: [[79, 74]],
         zones: [
-          { e: [82.4, 28.1, 4.6, 9.9, -12], p: 1 },
-          { e: [85.2, 52.8, 3.7, 4.3, 0], p: 0 },
+          { e: [87, 26, 3.5, 8, -10], p: 1 },
+          { e: [88.5, 51.5, 3, 3.5, 0], p: 0 },
         ],
       },
     },
@@ -167,13 +167,13 @@ window.MUSCLES = [
     tips: 'Trattare spesso entrambi i lati. Il muscolo si "pizzica" tra pollice e indice: non comprimere la parte anteriore del collo.',
     views: {
       front: {
-        x: [[90.9, 63.4], [85.5, 54.1]],
+        x: [[89.3, 61], [91.5, 68]],
         zones: [
-          { e: [91.1, 31.8, 6.3, 5, 0], p: 1 },
-          { e: [90.2, 42.9, 3.6, 5.6, 0], p: 1 },
+          { e: [92.5, 36.5, 5, 4, 0], p: 1 },
+          { e: [90.5, 44.5, 3.5, 4.5, 0], p: 1 },
           { e: [99.9, 20.7, 12.4, 3.8, 0], p: 0 },
-          { e: [82.5, 38, 2.9, 6.2, 0], p: 0 },
-          { e: [98.2, 73, 2.9, 3.1, 0], p: 0 },
+          { e: [84, 37, 2.2, 5, 0], p: 0 },
+          { e: [97.8, 76, 2.5, 3, 0], p: 0 },
         ],
       },
       back: {
@@ -196,10 +196,10 @@ window.MUSCLES = [
     tips: 'Fai pause frequenti se lavori a testa china.',
     views: {
       back: {
-        x: [[92.7, 62.5]],
+        x: [[90.2, 54]],
         zones: [
           { e: [93, 18.2, 8.2, 5.6, 0], p: 1 },
-          { e: [86.4, 57.8, 6, 6.6, 0], p: 0 },
+          { e: [90.5, 51, 2.3, 6, 0], p: 0 },
         ],
       },
       front: {
@@ -227,7 +227,7 @@ window.MUSCLES = [
       },
       front: {
         zones: [
-          { e: [86.6, 30.6, 8.2, 3.7, -15], p: 1 },
+          { e: [89.5, 34.5, 6.5, 3, -12], p: 1 },
         ],
       },
     },
@@ -244,11 +244,11 @@ window.MUSCLES = [
     tips: 'Durante il giorno controlla che i denti non siano serrati: labbra chiuse, denti separati.',
     views: {
       front: {
-        x: [[82.8, 25.6]],
+        x: [[87, 30]],
         zones: [
-          { e: [82.9, 26.8, 4.5, 8.7, -8], p: 1 },
-          { e: [90.8, 28.1, 5.2, 2.2, 0], p: 0 },
-          { e: [94.7, 48.5, 3.7, 2, 0], p: 0 },
+          { e: [87, 24, 3.5, 7, -8], p: 1 },
+          { e: [92.5, 32.5, 4, 1.8, 0], p: 0 },
+          { e: [95, 49.5, 3.5, 1.6, 0], p: 0 },
         ],
       },
     },
@@ -292,7 +292,7 @@ window.MUSCLES = [
     tips: 'Evita di sollevare pesi con il braccio lontano dal corpo.',
     views: {
       back: {
-        x: [[74.5, 85.6]],
+        x: [[68, 80.5]],
         zones: [
           { e: [50.4, 97.6, 5.3, 7.2, 0], p: 1 },
         ],
@@ -407,7 +407,7 @@ window.MUSCLES = [
     tips: 'Piega le ginocchia quando sollevi pesi, evita di sederti sul portafoglio.',
     views: {
       back: {
-        x: [[84.4, 175.5], [81.1, 185.6]],
+        x: [[85, 169], [83.5, 176]],
         zones: [
           { e: [94.5, 201.3, 4.2, 3.9, 0], p: 1 },
           { e: [84.7, 229.8, 8, 5.8, 0], p: 1 },
@@ -453,7 +453,7 @@ window.MUSCLES = [
     tips: 'Dormendo sul fianco tieni un cuscino tra le ginocchia.',
     views: {
       back: {
-        x: [[77.7, 195.8], [86.3, 194.2], [71.7, 199.7]],
+        x: [[73, 186], [79, 183], [68, 191]],
         zones: [
           { e: [82.5, 191.1, 12.4, 2.2, -3], p: 1 },
           { e: [95, 200.5, 4.3, 4.7, 0], p: 1 },
@@ -500,7 +500,7 @@ window.MUSCLES = [
     tips: 'Siediti con il peso distribuito su entrambi i glutei; stretching incrociando la gamba.',
     views: {
       back: {
-        x: [[86.7, 207.5], [74.7, 211.4]],
+        x: [[84.5, 198.5], [77, 204.5]],
         zones: [
           { e: [95.1, 201.3, 4.2, 3.9, 0], p: 1 },
           { e: [81.8, 216.1, 11.1, 6.3, -8], p: 1 },
@@ -567,9 +567,9 @@ window.MUSCLES = [
     tips: 'Allunga la parte anteriore della coscia portando il tallone verso il gluteo.',
     views: {
       front: {
-        x: [[82.4, 208.3]],
+        x: [[80.5, 214]],
         zones: [
-          { e: [82.7, 299, 7.4, 7.8, 0], p: 1 },
+          { e: [83, 300, 6, 7, 0], p: 1 },
           { e: [81.5, 280.1, 4, 8.4, 0], p: 0 },
         ],
       },
@@ -656,7 +656,7 @@ window.MUSCLES = [
     tips: 'Allunga il polpaccio a ginocchio piegato; scegli scarpe con un buon supporto del tallone.',
     views: {
       back: {
-        x: [[81.4, 365.7], [77, 359.7]],
+        x: [[77, 358], [73, 348]],
         zones: [
           { e: [80.5, 399.1, 4, 3.7, 0], p: 1 },
           { e: [80.7, 386, 2.5, 5.3, 0], p: 0 },

@@ -1,5 +1,5 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v8';
+const VERSION = 'tp-v9';
 const FILES = [
   './', 'index.html', 'css/style.css', 'js/config.js', 'js/body.js', 'js/data.js', 'js/app.js',
   'img/logo.png', 'img/dispositivo.jpg', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',

@@ -5,7 +5,7 @@
   "splenio_testa":     {"hl": ["Splenius capitis muscle.r"], "hide": ["Ascending part of trapezius muscle.r"]},
   "suboccipitali":     {"hl": ["Rectus posterior major capitis muscle.r", "Rectus posterior minor capitis muscle.r", "Obliquus inferior capitis muscle.r", "Obliquus superior capitis muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Splenius capitis muscle.r", "Longissimus capitis muscle.r", "Semispinalis colli muscle.r"]},
   "temporale":         {"hl": ["Temporalis muscle.r"]},
-  "infraspinato":      {"hl": ["Infraspinatus muscle.r"]},
+  "infraspinato":      {"hl": ["Infraspinatus muscle.r"], "hide": ["Transverse part of trapezius muscle.r", "Descending part of trapezius muscle.r"]},
   "sovraspinato":      {"hl": ["Supraspinatus muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Transverse part of trapezius muscle.r"]},
   "romboidi":          {"hl": ["Rhomboid major muscle.r", "Rhomboid minor muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Transverse part of trapezius muscle.r", "Descending part of trapezius muscle.r"]},
   "pettorale":         {"hl": ["Clavicular head of pectoralis major muscle.r", "Sternocostal head of pectoralis major muscle.r", "(Abdominal part of pectoralis major muscle).r"]},
