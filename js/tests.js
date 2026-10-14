@@ -154,7 +154,7 @@
   }
 
   function renderList(app) {
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Sport</div><h1>Misura i tuoi progressi</h1>' +
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Sport</div><h1>Misura i tuoi <span class="hl">progressi</span></h1>' +
       '<p class="small muted" style="margin:6px 0 0">Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.</p></div>' +
       '<div class="list">' + Object.keys(TESTS).map((k) => {
         const T = TESTS[k]; const n = results().filter((r) => r.type === k).length;

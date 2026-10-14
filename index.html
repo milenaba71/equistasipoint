@@ -20,7 +20,10 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Equistasi Point" />
-  <link rel="stylesheet" href="css/style.css?v=24" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="css/style.css?v=25" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -48,16 +51,22 @@
       <img src="img/logo.png" alt="Equistasi" />
       <span>Point</span>
     </a>
-    <a href="#/video" class="icon-btn" aria-label="Video tutorial">
+    <a href="#/video" class="icon-btn nav-link" aria-label="Video tutorial">
       <svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg>
     </a>
-    <a href="#/info" class="icon-btn" aria-label="Informazioni">
+    <a href="#/info" class="icon-btn nav-link" aria-label="Informazioni">
       <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>
     </a>
   </header>
   <button class="timerbar" id="timerbar" type="button" hidden></button>
 
   <main id="app" tabindex="-1"></main>
+  <nav class="tabbar" id="tabbar" aria-label="Navigazione">
+    <a href="#/" data-tab="home"><span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Mappa</a>
+    <a href="#/promemoria" data-tab="promemoria"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Promemoria</a>
+    <a href="#/video" data-tab="video"><span class="tb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg></span>Video</a>
+    <a href="#/info" data-tab="extra" id="tab-extra"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg></span>Info</a>
+  </nav>
   <footer class="foot"><a href="#/privacy">Privacy</a> · <a href="#/info">Informazioni</a> · <a href="#/video">Video tutorial</a></footer>
 
   <section class="gate" id="gate" hidden>
@@ -114,11 +123,11 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=24"></script>
-  <script src="js/body.js?v=24"></script>
-  <script src="js/data.js?v=24"></script>
-  <script src="js/timer.js?v=24"></script>
-  <script src="js/tests.js?v=24"></script>
-  <script src="js/app.js?v=24"></script>
+  <script src="js/config.js?v=25"></script>
+  <script src="js/body.js?v=25"></script>
+  <script src="js/data.js?v=25"></script>
+  <script src="js/timer.js?v=25"></script>
+  <script src="js/tests.js?v=25"></script>
+  <script src="js/app.js?v=25"></script>
 </body>
 </html>

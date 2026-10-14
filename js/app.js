@@ -154,7 +154,7 @@
     const EQ = window.EQUISTASI;
     app.innerHTML =
       '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
-      '<h1>' + esc(profileName(p)) + '</h1>' +
+      '<h1><span class="hl">' + esc(profileName(p)) + '</span></h1>' +
       '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p></section>' +
       '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
@@ -181,7 +181,7 @@
     const sport = prof.type === 'sport';
     app.innerHTML =
       '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
-      '<h1>' + (sport ? 'Contratture o dolori muscolari?' : 'Dove senti dolore?') + '</h1>' +
+      '<h1>' + (sport ? 'Contratture o <span class="hl">dolori muscolari</span>?' : 'Dove senti <span class="hl">dolore</span>?') + '</h1>' +
       '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p></section>' +
       (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
@@ -475,7 +475,7 @@
 
   function renderVideos() {
     setBack(true);
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video tutorial</h1>' +
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video <span class="hl">tutorial</span></h1>' +
       '<p class="muted small" style="margin:4px 0 14px">Guarda come applicare il dispositivo e dove posizionarlo sui singoli muscoli.</p></div>' +
       '<div id="vlist"><p class="muted small">Caricamento dei video…</p></div>';
     loadVideos().then((list) => {
@@ -626,13 +626,26 @@
 
   function renderTimer() {
     setBack(true);
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo tenerlo</h1></div>' +
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>' +
       '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
   /* ───────── Router ───────── */
   function setBack(on) { btnBack.hidden = !on; }
   btnBack.addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
+
+  // Barra in basso: la quarta voce è "Progressi" per lo sport, "Info" per gli altri profili
+  const PROGRESS_ICON = '<svg viewBox="0 0 24 24"><path d="M4 19h16M6 15l4-4 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const INFO_ICON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>';
+  function updateTabs(page) {
+    const extra = document.getElementById('tab-extra');
+    if (!extra) return;
+    const sport = (getProfile() || {}).type === 'sport';
+    extra.href = sport ? '#/test' : '#/info';
+    extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? 'Progressi' : 'Info');
+    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
+    document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
+  }
 
   function route() {
     const h = location.hash.replace(/^#\/?/, '');
@@ -647,6 +660,7 @@
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
+    updateTabs(page);
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
