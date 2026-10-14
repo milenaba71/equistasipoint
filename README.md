@@ -12,6 +12,7 @@ Mappe basate su Travell, Simons & Simons, *Myofascial Pain and Dysfunction: The 
 - Mappa del corpo toccabile (davanti / dietro): il lato toccato imposta automaticamente destro / sinistro.
 - 13 zone di dolore, 26 muscoli con trigger point e dolore riferito.
 - Scheda muscolo: figura zoomata, lato destro/sinistro, istruzioni di applicazione, come trovare il punto esatto, sintomi, cause, consigli, segnali d'allarme.
+- **Video tutorial** gestiti da Airtable (tabella Videos) e Bunny Stream: sezione dedicata e video nella scheda di ogni muscolo. Vedi [`make/README.md`](make/README.md).
 - Ricerca per disturbo (es. "cefalea", "sciatica", "tallone").
 - Installabile sullo smartphone e utilizzabile offline.
 

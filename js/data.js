@@ -12,6 +12,10 @@
  * L’app specchia automaticamente in base al lato scelto dall’utente.
  *
  * x:     trigger point = punto in cui applicare il dispositivo Equistasi [x, y]
+ * videos: nomi (campo "Description" della tabella Airtable "Videos") dei video
+ *        tutorial da mostrare nella scheda; la numerazione finale ("Trapezius 2",
+ *        "Erector Spinae (1)") e il prefisso "Musculus" vengono ignorati. In alternativa
+ *        si può scrivere l'id del muscolo (es. gluteo_medio) nel campo "Muscles".
  * zones: dolore riferito. e = ellisse [cx, cy, rx, ry, rotazione°]
  *        p = 1 → zona principale (blu pieno), p = 0 → zona secondaria (blu puntinato)
  */
@@ -106,6 +110,7 @@ window.MUSCLES = [
   /* ───────────── TESTA E COLLO ───────────── */
   {
     id: 'trapezio_sup',
+    videos: ['Trapezius'],
     name: 'Trapezio superiore',
     latin: 'M. trapezius, pars descendens',
     hl: ['trapezio'],
@@ -152,6 +157,7 @@ window.MUSCLES = [
   },
   {
     id: 'scm',
+    videos: ['Sternocleidomastoideus'],
     name: 'Sternocleidomastoideo',
     latin: 'M. sternocleidomastoideus',
     hl: ['scm'],
@@ -180,6 +186,7 @@ window.MUSCLES = [
   },
   {
     id: 'splenio_testa',
+    videos: ['Splenius Capitis'],
     name: 'Splenio della testa',
     latin: 'M. splenius capitis',
     hl: ['splenio'],
@@ -221,6 +228,7 @@ window.MUSCLES = [
   },
   {
     id: 'temporale',
+    videos: ['Temporalis'],
     name: 'Temporale',
     latin: 'M. temporalis',
     hl: ['temporale'],
@@ -309,6 +317,7 @@ window.MUSCLES = [
   },
   {
     id: 'pettorale',
+    videos: ['Pectoralis Major'],
     name: 'Grande pettorale',
     latin: 'M. pectoralis major',
     hl: ['pettorale'],
@@ -335,6 +344,7 @@ window.MUSCLES = [
   /* ───────────── BRACCIO, GOMITO, MANO ───────────── */
   {
     id: 'estensori_radiali',
+    videos: ['Extensor Carpi Radialis Longus'],
     name: 'Estensori radiali del carpo',
     latin: 'M. extensor carpi radialis longus et brevis',
     hl: ['estensori_radiali'],
@@ -355,6 +365,7 @@ window.MUSCLES = [
   },
   {
     id: 'estensore_dita',
+    videos: ['Extensores Digitorum'],
     name: 'Estensore comune delle dita',
     latin: 'M. extensor digitorum',
     hl: ['estensore_dita'],
@@ -376,6 +387,7 @@ window.MUSCLES = [
   /* ───────────── ZONA LOMBARE E ANCA ───────────── */
   {
     id: 'quadrato_lombi',
+    videos: ['Quadratus Lumborum'],
     name: 'Quadrato dei lombi',
     latin: 'M. quadratus lumborum',
     hl: ['quadrato_lombi'],
@@ -400,6 +412,7 @@ window.MUSCLES = [
   },
   {
     id: 'paravertebrali',
+    videos: ['Erector Spinae', 'Iliocostalis'],
     name: 'Muscoli paravertebrali lombari',
     latin: 'M. iliocostalis lumborum, M. longissimus',
     hl: ['erettori'],
@@ -486,6 +499,7 @@ window.MUSCLES = [
   },
   {
     id: 'ileopsoas',
+    videos: ['Iliopsoas'],
     name: 'Ileopsoas',
     latin: 'M. iliopsoas',
     hl: ['ileopsoas'],
@@ -529,6 +543,7 @@ window.MUSCLES = [
   },
   {
     id: 'retto_femorale',
+    videos: ['Rectus Femoris'],
     name: 'Retto femorale (quadricipite)',
     latin: 'M. rectus femoris',
     hl: ['retto_femorale'],
@@ -567,6 +582,7 @@ window.MUSCLES = [
   },
   {
     id: 'ischiocrurali',
+    videos: ['Biceps Femoris'],
     name: 'Ischiocrurali (muscoli posteriori della coscia)',
     latin: 'M. biceps femoris, semitendinosus, semimembranosus',
     hl: ['ischiocrurali'],
@@ -590,6 +606,7 @@ window.MUSCLES = [
   /* ───────────── GAMBA E PIEDE ───────────── */
   {
     id: 'gastrocnemio',
+    videos: ['Gastrocnemius'],
     name: 'Gastrocnemio (polpaccio)',
     latin: 'M. gastrocnemius',
     hl: ['gastrocnemio'],
@@ -633,6 +650,7 @@ window.MUSCLES = [
   },
   {
     id: 'tibiale_anteriore',
+    videos: ['Tibialis Anterior'],
     name: 'Tibiale anteriore',
     latin: 'M. tibialis anterior',
     hl: ['tibiale_anteriore'],
@@ -653,6 +671,7 @@ window.MUSCLES = [
   },
   {
     id: 'peronei',
+    videos: ['Peroneus Longus'],
     name: 'Peronei',
     latin: 'M. fibularis longus et brevis',
     hl: ['peronei'],

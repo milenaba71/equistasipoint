@@ -8,4 +8,7 @@
  */
 window.APP_CONFIG = {
   verifyUrl: '',
+  // Webhook Make "Equistasi App – Elenco video tutorial": restituisce i record
+  // della tabella Airtable "Videos" (base Equistasi App). Vedi make/README.md.
+  videosUrl: '',
 };

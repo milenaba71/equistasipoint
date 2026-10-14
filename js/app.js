@@ -143,6 +143,8 @@
       '<div class="card"><h3>Cerca per muscolo o disturbo</h3>' +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
+      '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
+      '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>' +
       '<div class="card"><h3>Come funziona</h3><ol class="steps">' +
       '<li>Indica dove senti dolore.</li>' +
       '<li>Scegli il muscolo che descrive meglio il tuo disturbo.</li>' +
@@ -237,6 +239,7 @@
       '<div class="toolbar">' + sideToggle() +
       '<div class="seg" role="group" aria-label="Zoom"><button data-zoom="1" aria-pressed="' + state.zoom + '">Dettaglio</button><button data-zoom="0" aria-pressed="' + !state.zoom + '">Corpo intero</button></div></div>' +
       '<div class="figures' + (views.length > 1 ? ' two' : '') + '">' + figs + '</div>' + legend() + '</div>' +
+      '<div class="card" id="mvideos" hidden></div>' +
       '</div><div>' +
       (m.warning ? '<div class="card warn"><b>Attenzione.</b> ' + esc(m.warning) + '</div>' : '') +
       '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
@@ -259,6 +262,7 @@
       '</div></div>';
 
     bindSide(() => renderMuscle(id));
+    fillMuscleVideos(m);
     app.querySelectorAll('[data-zoom]').forEach((b) => b.addEventListener('click', () => {
       state.zoom = b.dataset.zoom === '1'; renderMuscle(id);
     }));
@@ -266,6 +270,139 @@
       state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType);
       const y = window.scrollY; renderMuscle(id); window.scrollTo(0, y);
     }));
+  }
+
+
+  /* ───────── VIDEO TUTORIAL (Airtable "Videos" via Make) ───────── */
+  const VID_KEY = 'tp-videos';
+  const VID_TTL = 6 * 3600 * 1000;
+  let videosPromise = null;
+
+  const sel = (v) => (v && typeof v === 'object' ? v.name : v) || '';
+  function normVideo(r) {
+    const f = r.fields || {};
+    const file = (f['Video File'] || [])[0];
+    return {
+      id: r.id,
+      title: (f.Description || '').trim(),
+      cat: sel(f.Category) || 'general',
+      url: (f['Video URL'] || '').trim(),
+      file: file ? file.url : '',
+      thumb: f['Preview Image'] || (file && file.thumbnails && file.thumbnails.large ? file.thumbnails.large.url : ''),
+      order: typeof f.Order === 'number' ? f.Order : 999,
+      lang: sel(f.Language),
+      muscles: String(f.Muscles || ''),
+    };
+  }
+  function cacheGet() {
+    try { return JSON.parse(localStorage.getItem(VID_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function loadVideos() {
+    if (videosPromise) return videosPromise;
+    const cached = cacheGet();
+    const url = (window.APP_CONFIG || {}).videosUrl;
+    if (cached && Date.now() - cached.t < VID_TTL) return (videosPromise = Promise.resolve(cached.v));
+    if (!url) return (videosPromise = Promise.resolve(cached ? cached.v : null));
+    videosPromise = fetch(url, { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        const v = (d.records || []).map(normVideo)
+          .filter((x) => (x.url || x.file) && x.lang !== 'en')
+          .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
+        try { localStorage.setItem(VID_KEY, JSON.stringify({ t: Date.now(), v })); } catch (e) { /* storage non disponibile */ }
+        return v;
+      })
+      .catch(() => (cached ? cached.v : null));
+    return videosPromise;
+  }
+  const baseName = (t) => t.toLowerCase().replace(/^musculus\s+/, '').replace(/\s*\(?\d+\)?\s*$/, '').trim();
+  function videosFor(m, list) {
+    const keys = (m.videos || []).map((k) => k.toLowerCase());
+    return list.filter((v) => keys.includes(baseName(v.title)) || v.muscles.split(/[\s,;]+/).includes(m.id));
+  }
+  function muscleOf(v) {
+    return MUSCLES.find((m) => videosFor(m, [v]).length);
+  }
+  function embed(v) {
+    const u = v.url;
+    let m;
+    if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) {
+      return '<iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    }
+    if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/))) {
+      return '<iframe src="https://player.vimeo.com/video/' + m[1] + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    }
+    if (/^https:\/\/(iframe|player)\.mediadelivery\.net\//.test(u)) {
+      return '<iframe src="' + esc(u) + (u.includes('?') ? '&' : '?') + 'autoplay=false&preload=true&responsive=true" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    }
+    const src = /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(u) ? u : v.file;
+    if (src) return '<video src="' + esc(src) + '" controls playsinline preload="metadata"' + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>';
+    if (/^https:\/\//.test(u)) return '<iframe src="' + esc(u) + '" allow="fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    return '<p class="muted small" style="padding:16px">Video non disponibile.</p>';
+  }
+  function vcard(v, label) {
+    return '<a class="vcard" href="#/video/' + v.id + '"><div class="vthumb">' +
+      (v.thumb ? '<img src="' + esc(v.thumb) + '" alt="" loading="lazy" onerror="this.remove()" />' : '') +
+      '<span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span></div>' +
+      '<div class="vtitle">' + esc(label || v.title) + '</div></a>';
+  }
+  const VIDEO_OFF = '<p class="muted small" style="margin:0">I video non sono disponibili in questo momento. Controlla la connessione e riprova.</p>';
+
+  function renderVideos() {
+    setBack(true);
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video tutorial</h1>' +
+      '<p class="muted small" style="margin:4px 0 14px">Guarda come applicare il dispositivo e dove posizionarlo sui singoli muscoli.</p></div>' +
+      '<div id="vlist"><p class="muted small">Caricamento dei video…</p></div>';
+    loadVideos().then((list) => {
+      const box = document.getElementById('vlist');
+      if (!box) return;
+      if (!list) { box.innerHTML = '<div class="card">' + VIDEO_OFF + '</div>'; return; }
+      const general = list.filter((v) => v.cat === 'general');
+      const groups = new Map();
+      list.filter((v) => v.cat !== 'general').forEach((v) => {
+        const m = muscleOf(v);
+        const k = m ? m.name : v.title.replace(/\s*\(?\d+\)?\s*$/, '');
+        if (!groups.has(k)) groups.set(k, { m, items: [] });
+        groups.get(k).items.push(v);
+      });
+      let h = '';
+      if (general.length) h += '<div class="card"><h3>Guide all’applicazione</h3><div class="vgrid">' + general.map((v) => vcard(v)).join('') + '</div></div>';
+      if (groups.size) {
+        const keys = [...groups.keys()].sort((a, b) => (groups.get(b).m ? 1 : 0) - (groups.get(a).m ? 1 : 0) || a.localeCompare(b));
+        h += '<div class="card"><h3>Video per muscolo</h3>' + keys.map((k) => {
+          const g = groups.get(k);
+          return '<h4 class="vgroup">' + esc(k) + (g.m ? ' <a href="#/m/' + g.m.id + '" class="small">mappa ›</a>' : '') + '</h4>' +
+            '<div class="vgrid">' + g.items.map((v, i) => vcard(v, g.items.length > 1 ? 'Video ' + (i + 1) : 'Guarda il video')).join('') + '</div>';
+        }).join('') + '</div>';
+      }
+      box.innerHTML = h || '<div class="card"><p class="muted small" style="margin:0">Non ci sono ancora video.</p></div>';
+    });
+  }
+
+  function renderVideo(id) {
+    setBack(true);
+    app.innerHTML = '<p class="muted small">Caricamento…</p>';
+    loadVideos().then((list) => {
+      const v = (list || []).find((x) => x.id === id);
+      if (!v) { app.innerHTML = '<div class="card">' + VIDEO_OFF + '</div>'; return; }
+      const m = muscleOf(v);
+      app.innerHTML = '<div class="detail-head"><div class="eyebrow">Video tutorial</div><h1>' + esc(m ? m.name : v.title) + '</h1>' +
+        (m ? '<p class="latin">' + esc(v.title) + '</p>' : '<div style="height:12px"></div>') + '</div>' +
+        '<div class="player">' + embed(v) + '</div>' +
+        (m ? '<a class="btn" style="margin-top:14px" href="#/m/' + m.id + '">Vedi la mappa del trigger point ›</a>' : '') +
+        ' <a class="btn" style="margin-top:14px" href="#/video">Tutti i video</a>';
+    });
+  }
+
+  function fillMuscleVideos(m) {
+    const box = document.getElementById('mvideos');
+    if (!box) return;
+    loadVideos().then((list) => {
+      const vs = list ? videosFor(m, list) : [];
+      if (!vs.length || !document.getElementById('mvideos')) { box.remove(); return; }
+      box.hidden = false;
+      box.innerHTML = '<h3>Video tutorial</h3><div class="vgrid">' + vs.map((v, i) => vcard(v, vs.length > 1 ? 'Video ' + (i + 1) : 'Guarda il video')).join('') + '</div>';
+    });
   }
 
   /* ───────── INFO ───────── */
@@ -299,6 +436,7 @@
     if (page === 'area') renderArea(arg);
     else if (page === 'm') renderMuscle(arg);
     else if (page === 'info') renderInfo();
+    else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
     else renderHome();
     window.scrollTo(0, 0);
   }
