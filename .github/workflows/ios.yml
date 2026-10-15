@@ -53,8 +53,13 @@ jobs:
               jwt.encode({}, key, algorithm="ES256")
           except Exception:
               print("::error::Il testo di APPSTORE_KEY_P8 non è una chiave valida: incolla tutto il file .p8, righe BEGIN/END comprese"); sys.exit(1)
-          tok = jwt.encode({"iss": os.environ["ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
-                           key, algorithm="ES256", headers={"kid": os.environ["KEY_ID"], "typ": "JWT"})
+          iss = os.environ["ISSUER_ID"]; kid = os.environ["KEY_ID"]
+          # Solo indizi per il controllo, mai i valori completi
+          print("Issuer ID: %d caratteri, inizia con %s, finisce con %s" % (len(iss), " ".join(iss[:4]), " ".join(iss[-4:])))
+          print("Key ID: %d caratteri, inizia con %s" % (len(kid), " ".join(kid[:3])))
+          print("Chiave .p8: %d righe, intestazione %s" % (len(key.strip().splitlines()), "ok" if key.strip().startswith("-----BEGIN PRIVATE KEY-----") else "MANCANTE"))
+          tok = jwt.encode({"iss": iss, "iat": int(time.time()), "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
+                           key, algorithm="ES256", headers={"kid": kid, "typ": "JWT"})
           req = urllib.request.Request("https://api.appstoreconnect.apple.com/v1/apps?limit=5", headers={"Authorization": "Bearer " + tok})
           try:
               with urllib.request.urlopen(req) as r:
