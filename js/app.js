@@ -428,6 +428,8 @@
     return contentPromise;
   }
   const loadVideos = () => loadContent().then((c) => (c ? c.videos.filter((v) => visibleFor(v, 'video')) : null));
+  // nella scheda di un muscolo (e aprendo un video) servono tutti i video, qualunque sia il profilo
+  const loadAllVideos = () => loadContent().then((c) => (c ? c.videos : null));
   const loadProtocols = () => loadContent().then((c) => (c ? c.protocols.filter((x) => visibleFor(x, 'protocol')) : null));
 
   function protocolsCard(title) {
@@ -512,7 +514,7 @@
   function renderVideo(id) {
     setBack(true);
     app.innerHTML = '<p class="muted small">Caricamento…</p>';
-    loadVideos().then((list) => {
+    loadAllVideos().then((list) => {
       const v = (list || []).find((x) => x.id === id);
       if (!v) { app.innerHTML = '<div class="card">' + VIDEO_OFF + '</div>'; return; }
       const m = muscleOf(v);
@@ -542,7 +544,7 @@
   function fillMuscleVideos(m) {
     const box = document.getElementById('mvideos');
     if (!box) return;
-    loadVideos().then((list) => {
+    loadAllVideos().then((list) => {
       const vs = list ? videosFor(m, list) : [];
       if (!vs.length || !document.getElementById('mvideos')) { box.remove(); return; }
       box.hidden = false;
