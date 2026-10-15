@@ -17,4 +17,6 @@ window.APP_CONFIG = {
   // Link all'informativa privacy completa (pagina del vostro sito).
   // Lasciare vuoto finché non è disponibile: il link non viene mostrato.
   privacyUrl: '',
+  // Negozio online: icona 🛒 in alto e riquadro «Shop»
+  shopUrl: 'https://shop.equistasi.com',
 };

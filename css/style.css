@@ -568,3 +568,12 @@ main { padding-top: 0; padding-bottom: 12px; }
 .tm-daily .ck { color: #fff; font-size: 14px; }
 .tm-times { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 13.5px; color: rgba(255, 255, 255, .85); }
 .tm-times input { margin-left: 6px; font: inherit; border: 0; border-radius: 10px; padding: 6px 8px; background: rgba(255, 255, 255, .15); color: #fff; }
+
+/* Shop: riquadro «Shop» */
+.shop-card { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; background: var(--indigo, #29235C); color: #fff; }
+.shop-card .shop-ico { width: 46px; height: 46px; border-radius: 14px; background: var(--yellow, #FADC00); display: grid; place-items: center; font-size: 24px; flex: none; }
+.shop-card .shop-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.shop-card .shop-txt b { font-size: 1.05rem; }
+.shop-card .shop-txt .small { color: rgba(255,255,255,.85); }
+.shop-card .chev { font-size: 1.8rem; color: var(--yellow, #FADC00); }
+.shop-card:hover { filter: brightness(1.08); }
