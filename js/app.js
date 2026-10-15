@@ -160,8 +160,10 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
       '<h1><span class="hl">' + esc(profileName(p)) + '</span></h1>' +
       '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p>' +
-      '<img class="hero-img" src="' + NEURO_IMG.hero + '" alt="" /></section>' +
-      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
+      '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
+      '<img src="' + NEURO_IMG.hero + '" alt="" />' +
+      '<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>' +
+      '<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>' + appProtocolCards() + protocolsCard('Protocolli in PDF') + '</div>' + window.EqTimer.cardHtml() + videoPromo + '</div><div>' +
       '<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">' +
       '<figure><img src="' + NEURO_IMG.s1 + '" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>' +
       '<figure><img src="' + NEURO_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>' +
@@ -182,6 +184,11 @@
     app.querySelectorAll('[data-devtype]').forEach((b) => b.addEventListener('click', () => {
       state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType); renderNeuroHome();
     }));
+    app.querySelector('#to-protos').addEventListener('click', () => {
+      const box = document.getElementById('protos-anchor');
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash');
+    });
   }
 
   // Illustrazioni a fumetti per il profilo Dolore (colori Equistasi)
@@ -680,6 +687,8 @@
     const sport = (getProfile() || {}).type === 'sport';
     extra.href = sport ? '#/test' : '#/info';
     extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? 'Progressi' : 'Info');
+    const homeTab = document.querySelector('#tabbar [data-tab="home"]');
+    if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? 'Home' : 'Mappa';
     const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
