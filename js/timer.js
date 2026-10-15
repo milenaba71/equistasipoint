@@ -19,10 +19,10 @@
   const hhmm = (t) => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
   const dayKey = (t) => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
   const left = (s) => Math.max(0, s.end - Date.now());
-  const fmtLeft = (ms) => { const m = Math.ceil(ms / 60000); return Math.floor(m / 60) + ' h ' + pad(m % 60) + ' min'; };
+  const fmtLeft = (ms) => { const m = Math.ceil(ms / 60000); return T('{h} h {m} min', { h: Math.floor(m / 60), m: pad(m % 60) }); };
 
-  const TITLE = 'È ora di togliere il dispositivo Equistasi';
-  const BODY = 'Sono passate 2 ore dall’applicazione. Togli il dispositivo e lascia riposare la pelle.';
+  const TITLE = T('È ora di togliere il dispositivo Equistasi');
+  const BODY = T('Sono passate 2 ore dall’applicazione. Togli il dispositivo e lascia riposare la pelle.');
 
   /* ───────── Notifiche ───────── */
   async function askPermission() {
@@ -74,7 +74,7 @@
     store.set(LOG, log.filter((t) => now - t < 30 * 864e5));
     const ok = await askPermission().catch(() => false);
     await schedule(s.end).catch(() => {});
-    render(ok ? '' : 'Le notifiche non sono attive: tieni aperta l’app o controlla l’orario indicato qui sopra.');
+    render(ok ? '' : T('Le notifiche non sono attive: tieni aperta l’app o controlla l’orario indicato qui sopra.'));
   }
   async function stop() {
     store.del(KEY);
@@ -101,24 +101,24 @@
     const usedToday = today > 0;
     let body;
     if (s && left(s) > 0) {
-      body = '<div class="tm-ring"><b>' + fmtLeft(left(s)) + '</b><span>rimanenti</span></div>' +
-        '<p class="small" style="margin:0 0 12px">Applicato alle <b>' + hhmm(s.start) + '</b>: toglilo alle <b>' + hhmm(s.end) + '</b>. Ti avvisiamo noi.</p>' +
-        '<button class="btn" data-tm="stop" type="button">L’ho già tolto</button>';
+      body = '<div class="tm-ring"><b>' + fmtLeft(left(s)) + '</b><span>' + T('rimanenti') + '</span></div>' +
+        '<p class="small" style="margin:0 0 12px">' + T('Applicato alle <b>{start}</b>: toglilo alle <b>{end}</b>. Ti avvisiamo noi.', { start: hhmm(s.start), end: hhmm(s.end) }) + '</p>' +
+        '<button class="btn" data-tm="stop" type="button">' + T('L’ho già tolto') + '</button>';
     } else if (s) {
-      body = '<div class="warn" style="margin-bottom:12px"><b>Sono passate 2 ore.</b> Togli il dispositivo Equistasi e lascia riposare la pelle.</div>' +
-        '<button class="btn primary" data-tm="stop" type="button">Fatto, l’ho tolto</button>';
+      body = '<div class="warn" style="margin-bottom:12px">' + T('<b>Sono passate 2 ore.</b> Togli il dispositivo Equistasi e lascia riposare la pelle.') + '</div>' +
+        '<button class="btn primary" data-tm="stop" type="button">' + T('Fatto, l’ho tolto') + '</button>';
     } else if (st >= 5 && !usedToday) {
-      body = '<div class="callout" style="margin-bottom:12px">Hai usato il dispositivo per <b>5 giorni di seguito</b>: oggi e domani sono di <b>riposo</b>.</div>' +
-        '<button class="btn" data-tm="start" type="button">Applicalo comunque e avvia le 2 ore</button>';
+      body = '<div class="callout" style="margin-bottom:12px">' + T('Hai usato il dispositivo per <b>5 giorni di seguito</b>: oggi e domani sono di <b>riposo</b>.') + '</div>' +
+        '<button class="btn" data-tm="start" type="button">' + T('Applicalo comunque e avvia le 2 ore') + '</button>';
     } else {
-      body = '<p class="small" style="margin:0 0 12px">Quando applichi il dispositivo, tocca il pulsante: dopo <b>2 ore</b> ti ricordiamo di toglierlo.</p>' +
-        '<button class="btn primary" data-tm="start" type="button">Ho applicato il dispositivo</button>';
+      body = '<p class="small" style="margin:0 0 12px">' + T('Quando applichi il dispositivo, tocca il pulsante: dopo <b>2 ore</b> ti ricordiamo di toglierlo.') + '</p>' +
+        '<button class="btn primary" data-tm="start" type="button">' + T('Ho applicato il dispositivo') + '</button>';
     }
     const dots = [0, 1].map((i) => '<span class="tm-dot' + (i < today ? ' on' : '') + '"></span>').join('');
-    return '<div class="card tm-card" id="tm-card"><h3>Promemoria delle 2 ore</h3>' + body +
+    return '<div class="card tm-card" id="tm-card"><h3>' + T('Promemoria delle 2 ore') + '</h3>' + body +
       '<p class="tm-msg small" id="tm-msg" hidden></p>' +
-      '<div class="tm-stats small"><span>Oggi ' + dots + ' ' + Math.min(today, 2) + ' di 2</span>' +
-      '<span>Giorni di fila: <b>' + st + '</b> di 5</span></div>' + dailyHtml() + '</div>';
+      '<div class="tm-stats small"><span>' + T('Oggi {dots} {n} di 2', { dots, n: Math.min(today, 2) }) + '</span>' +
+      '<span>' + T('Giorni di fila: <b>{n}</b> di 5', { n: st }) + '</span></div>' + dailyHtml() + '</div>';
   }
 
   /* ───────── Promemoria giornalieri (solo app per iPhone/Android) ───────── */
@@ -128,9 +128,9 @@
     if (!native()) return '';
     const d = daily();
     return '<div class="tm-daily"><label class="ck"><input type="checkbox" id="tm-daily"' + (d.on ? ' checked' : '') + ' />' +
-      '<span><b>Ricordami di applicarlo</b> dal lunedì al venerdì</span></label>' +
-      '<div class="tm-times"><label>Mattina <input type="time" class="tm-time" data-k="am" value="' + d.am + '" /></label>' +
-      '<label>Pomeriggio <input type="time" class="tm-time" data-k="pm" value="' + d.pm + '" /></label></div></div>';
+      '<span>' + T('<b>Ricordami di applicarlo</b> dal lunedì al venerdì') + '</span></label>' +
+      '<div class="tm-times"><label>' + T('Mattina') + ' <input type="time" class="tm-time" data-k="am" value="' + d.am + '" /></label>' +
+      '<label>' + T('Pomeriggio') + ' <input type="time" class="tm-time" data-k="pm" value="' + d.pm + '" /></label></div></div>';
   }
   // id 3002-3006 mattina, 3012-3016 pomeriggio (giorni 2-6 = lunedì-venerdì)
   async function scheduleDaily() {
@@ -146,7 +146,7 @@
     [['am', 3000], ['pm', 3010]].forEach(([k, base]) => {
       const [h, m] = (d[k] || '09:00').split(':').map(Number);
       for (let w = 2; w <= 6; w++) {
-        list.push({ id: base + w, title: 'È ora di applicare Equistasi', body: 'Applica il dispositivo e avvia il promemoria delle 2 ore.', schedule: { on: { weekday: w, hour: h, minute: m }, allowWhileIdle: true } });
+        list.push({ id: base + w, title: T('È ora di applicare Equistasi'), body: T('Applica il dispositivo e avvia il promemoria delle 2 ore.'), schedule: { on: { weekday: w, hour: h, minute: m }, allowWhileIdle: true } });
       }
     });
     await LN.schedule({ notifications: list });
@@ -175,8 +175,8 @@
     el.hidden = false;
     el.classList.toggle('done', ms === 0);
     el.innerHTML = ms > 0
-      ? '⏱ Dispositivo applicato · toglilo alle <b>' + hhmm(s.end) + '</b> (' + fmtLeft(ms) + ')'
-      : '⏰ <b>Sono passate 2 ore:</b> togli il dispositivo';
+      ? '⏱ ' + T('Dispositivo applicato · toglilo alle <b>{end}</b> ({left})', { end: hhmm(s.end), left: fmtLeft(ms) })
+      : '⏰ ' + T('<b>Sono passate 2 ore:</b> togli il dispositivo');
   }
 
   document.addEventListener('click', (ev) => {

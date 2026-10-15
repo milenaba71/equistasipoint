@@ -577,3 +577,9 @@ main { padding-top: 0; padding-bottom: 12px; }
 .shop-card .shop-txt .small { color: rgba(255,255,255,.85); }
 .shop-card .chev { font-size: 1.8rem; color: var(--yellow, #FADC00); }
 .shop-card:hover { filter: brightness(1.08); }
+
+/* Scelta della lingua (Italiano / English) */
+.lang-switch { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--grey, #F4F6F8); margin: 0 auto 12px; }
+.lang-switch button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; color: var(--indigo, #29235C); cursor: pointer; }
+.lang-switch button[aria-pressed="true"] { background: var(--indigo, #29235C); color: #fff; }
+.gate-box .lang-switch { align-self: center; }

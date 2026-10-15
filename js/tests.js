@@ -19,34 +19,35 @@
   };
   const TESTS = {
     equilibrio: {
-      icon: '🧍', name: 'Equilibrio su una gamba', short: 'Equilibrio',
-      desc: 'Il telefono misura quanto oscilla il corpo in 30 secondi su una gamba.',
-      unit: 'm/s²', better: 'low', label: 'Oscillazione',
+      icon: '🧍', name: T('Equilibrio su una gamba'), short: T('Equilibrio'),
+      desc: T('Il telefono misura quanto oscilla il corpo in 30 secondi su una gamba.'),
+      unit: 'm/s²', better: 'low', label: T('Oscillazione'),
     },
     ortostasi: {
-      icon: '🧍', name: 'Equilibrio in piedi (ortostasi)', short: 'Ortostasi',
-      desc: 'In piedi e fermi per 30 secondi: il telefono misura quanto oscilla il corpo.',
-      unit: 'm/s²', better: 'low', label: 'Oscillazione',
+      icon: '🧍', name: T('Equilibrio in piedi (ortostasi)'), short: T('Ortostasi'),
+      desc: T('In piedi e fermi per 30 secondi: il telefono misura quanto oscilla il corpo.'),
+      unit: 'm/s²', better: 'low', label: T('Oscillazione'),
     },
     salto: {
-      icon: '⤒', name: 'Salto verticale', short: 'Salto',
-      desc: 'L’altezza del salto calcolata dal tempo in volo.',
-      unit: 'cm', better: 'high', label: 'Altezza',
+      icon: '⤒', name: T('Salto verticale'), short: T('Salto'),
+      desc: T('L’altezza del salto calcolata dal tempo in volo.'),
+      unit: 'cm', better: 'high', label: T('Altezza'),
     },
     sprint: {
-      icon: '⏱', name: 'Sprint', short: 'Sprint',
-      desc: 'Cronometro su 10, 20 o 30 metri, con velocità media.',
-      unit: 's', better: 'low', label: 'Tempo',
+      icon: '⏱', name: T('Sprint'), short: T('Sprint'),
+      desc: T('Cronometro su 10, 20 o 30 metri, con velocità media.'),
+      unit: 's', better: 'low', label: T('Tempo'),
     },
   };
-  const SAFETY = '<div class="warn ts-safety"><b>⚠️ Fai i test sempre accompagnato da un’altra persona</b>, che possa sostenerti se perdi l’equilibrio. ' +
-    'I risultati sono <b>indicativi</b> e <b>non sostituiscono visite mediche o valutazioni specialistiche</b>.</div>';
-  const COND = { senza: 'Senza Equistasi', con: 'Con Equistasi' };
+  const SAFETY = '<div class="warn ts-safety">' + T('<b>⚠️ Fai i test sempre accompagnato da un’altra persona</b>, che possa sostenerti se perdi l’equilibrio.') + ' ' +
+    T('I risultati sono <b>indicativi</b> e <b>non sostituiscono visite mediche o valutazioni specialistiche</b>.') + '</div>';
+  const COND = { senza: T('Senza Equistasi'), con: T('Con Equistasi') };
   const prefs = store.get('tp-test-prefs', { cond: 'senza', leg: 'dx', eyes: 'aperti', dist: 20, stance: 'uniti' });
   const savePrefs = () => store.set('tp-test-prefs', prefs);
 
-  const fmt = (v, d = 1) => Number(v).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
-  const dateStr = (t) => new Date(t).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+  const LOCALE = window.LANG === 'en' ? 'en-GB' : 'it-IT';
+  const fmt = (v, d = 1) => Number(v).toLocaleString(LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const dateStr = (t) => new Date(t).toLocaleDateString(LOCALE, { day: 'numeric', month: 'short' });
   const results = () => store.get(KEY, []);
   function addResult(r) {
     const all = results();
@@ -69,7 +70,7 @@
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   async function countdown(el, from = 3) {
     for (let i = from; i > 0; i--) { el.textContent = i; beep(660, 120); await wait(1000); }
-    el.textContent = 'Via!'; beep(1100, 350);
+    el.textContent = T('Via!'); beep(1100, 350);
   }
 
   /* ───────── Sensori di movimento ───────── */
@@ -134,81 +135,81 @@
   function cardHtml() {
     const all = results();
     return '<a class="card vpromo tests-promo" href="#/test"><span class="vpromo-ico" aria-hidden="true"><img src="' + IMG.sprint + '" alt="" loading="lazy" /></span>' +
-      '<span><b>Misura i tuoi progressi</b><br><span class="small muted">Equilibrio, ortostasi, salto e sprint' +
-      (all.length ? ' · ' + all.length + ' prove salvate' : ' con il tuo telefono') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+      '<span><b>' + T('Misura i tuoi progressi') + '</b><br><span class="small muted">' +
+      (all.length ? T('Equilibrio, ortostasi, salto e sprint · {n} prove salvate', { n: all.length }) : T('Equilibrio, ortostasi, salto e sprint con il tuo telefono')) + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
-  function seg(name, opts, cur) {
-    return '<div class="seg" role="group" aria-label="' + name + '">' +
+  function seg(name, opts, cur, label) {
+    return '<div class="seg" role="group" aria-label="' + (label || name) + '">' +
       Object.keys(opts).map((k) => '<button type="button" data-pref="' + name + '" data-val="' + k + '" aria-pressed="' + (String(cur) === k) + '">' + opts[k] + '</button>').join('') + '</div>';
   }
 
   // Migliore e media per "senza" e "con", per lo stesso tipo di prova
   function summary(type, filter) {
-    const T = TESTS[type];
+    const tt = TESTS[type];
     const list = results().filter((r) => r.type === type && (!filter || filter(r)));
     const pick = (c) => {
       const v = list.filter((r) => r.cond === c).map((r) => r.value);
       if (!v.length) return null;
-      const best = T.better === 'low' ? Math.min(...v) : Math.max(...v);
+      const best = tt.better === 'low' ? Math.min(...v) : Math.max(...v);
       return { best, avg: v.reduce((a, b) => a + b, 0) / v.length, n: v.length };
     };
     const s = pick('senza'); const c = pick('con');
-    const d = T.unit === 'cm' ? 0 : 2;
+    const d = tt.unit === 'cm' ? 0 : 2;
     const col = (lab, x) => '<div class="ts-col"><span class="small muted">' + lab + '</span>' +
-      (x ? '<b>' + fmt(x.best, d) + ' ' + T.unit + '</b><span class="small muted">migliore · media ' + fmt(x.avg, d) + ' (' + x.n + ')</span>' : '<b>—</b><span class="small muted">nessuna prova</span>') + '</div>';
-    return '<div class="ts-sum">' + col('Senza Equistasi', s) + col('Con Equistasi', c) + '</div>';
+      (x ? '<b>' + fmt(x.best, d) + ' ' + tt.unit + '</b><span class="small muted">' + T('migliore · media {avg} ({n})', { avg: fmt(x.avg, d), n: x.n }) + '</span>' : '<b>—</b><span class="small muted">' + T('nessuna prova') + '</span>') + '</div>';
+    return '<div class="ts-sum">' + col(COND.senza, s) + col(COND.con, c) + '</div>';
   }
 
   function history(type) {
-    const T = TESTS[type];
+    const tt = TESTS[type];
     const list = results().filter((r) => r.type === type).slice(-8).reverse();
     if (!list.length) return '';
-    const d = T.unit === 'cm' ? 0 : 2;
-    return '<h3 style="font-size:15px;margin:16px 0 6px">Ultime prove</h3><ul class="ts-hist">' + list.map((r) =>
-      '<li><span>' + dateStr(r.t) + ' · ' + (r.cond === 'con' ? 'con' : 'senza') + (r.note ? ' · ' + r.note : '') + '</span><b>' + fmt(r.value, d) + ' ' + T.unit + '</b></li>').join('') + '</ul>';
+    const d = tt.unit === 'cm' ? 0 : 2;
+    return '<h3 style="font-size:15px;margin:16px 0 6px">' + T('Ultime prove') + '</h3><ul class="ts-hist">' + list.map((r) =>
+      '<li><span>' + dateStr(r.t) + ' · ' + (r.cond === 'con' ? T('con') : T('senza')) + (r.note ? ' · ' + r.note : '') + '</span><b>' + fmt(r.value, d) + ' ' + tt.unit + '</b></li>').join('') + '</ul>';
   }
 
   function renderList(app) {
-    app.innerHTML = '<img class="ts-hero" style="margin-top:16px" src="' + IMG.hero + '" alt="" loading="lazy" />' + '<div class="detail-head" style="padding-top:0"><div class="eyebrow">Sport</div><h1>Misura i tuoi <span class="hl">progressi</span></h1>' +
-      '<p class="small muted" style="margin:6px 0 0">Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.</p></div>' +
+    app.innerHTML = '<img class="ts-hero" style="margin-top:16px" src="' + IMG.hero + '" alt="" loading="lazy" />' + '<div class="detail-head" style="padding-top:0"><div class="eyebrow">' + T('Sport') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
+      '<p class="small muted" style="margin:6px 0 0">' + T('Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.') + '</p></div>' +
       SAFETY + '<div class="list">' + Object.keys(TESTS).map((k) => {
-        const T = TESTS[k]; const n = results().filter((r) => r.type === k).length;
-        return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + T.name + '</b><br><span class="small muted">' + T.desc +
-          (n ? ' · ' + n + ' prove' : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+        const tt = TESTS[k]; const n = results().filter((r) => r.type === k).length;
+        return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
+          (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
-      '<p class="small muted" style="margin-top:14px">I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo.</p>';
+      '<p class="small muted" style="margin-top:14px">' + T('I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo.') + '</p>';
   }
 
   function renderTest(app, type) {
-    const T = TESTS[type];
-    if (!T) return renderList(app);
+    const tt = TESTS[type];
+    if (!tt) return renderList(app);
     let setup = '';
     let how = '';
     if (type === 'ortostasi') {
-      setup = '<div class="toolbar">' + seg('stance', { uniti: 'Piedi uniti', tandem: 'Un piede davanti all’altro' }, prefs.stance || 'uniti') + '</div>' +
-        '<div class="toolbar">' + seg('eyes', { aperti: 'Occhi aperti', chiusi: 'Occhi chiusi' }, prefs.eyes) + '</div>';
-      how = '<li>Mettiti <b>in piedi, fermo</b>, con le braccia che tengono il telefono <b>appoggiato al petto</b>.</li><li>Tocca <b>Inizia</b>: dopo il conto alla rovescia resta immobile per <b>30 secondi</b>, guardando avanti (o a occhi chiusi).</li><li>Se perdi l’equilibrio e devi spostare un piede, tocca lo schermo. Fai il test vicino a un muro o con qualcuno accanto.</li>';
+      setup = '<div class="toolbar">' + seg('stance', { uniti: T('Piedi uniti'), tandem: T('Un piede davanti all’altro') }, prefs.stance || 'uniti', T('Posizione dei piedi')) + '</div>' +
+        '<div class="toolbar">' + seg('eyes', { aperti: T('Occhi aperti'), chiusi: T('Occhi chiusi') }, prefs.eyes, T('Occhi')) + '</div>';
+      how = '<li>' + T('Mettiti <b>in piedi, fermo</b>, con le braccia che tengono il telefono <b>appoggiato al petto</b>.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il conto alla rovescia resta immobile per <b>30 secondi</b>, guardando avanti (o a occhi chiusi).') + '</li><li>' + T('Se perdi l’equilibrio e devi spostare un piede, tocca lo schermo. Fai il test vicino a un muro o con qualcuno accanto.') + '</li>';
     } else if (type === 'equilibrio') {
-      setup = '<div class="toolbar">' + seg('leg', { dx: 'Gamba destra', sx: 'Gamba sinistra' }, prefs.leg) + '</div>' +
-        '<div class="toolbar">' + seg('eyes', { aperti: 'Occhi aperti', chiusi: 'Occhi chiusi' }, prefs.eyes) + '</div>';
-      how = '<li>Tieni il telefono <b>appoggiato al petto</b> con entrambe le mani.</li><li>Tocca <b>Inizia</b>: dopo il conto alla rovescia sollevi un piede e resti in equilibrio per <b>30 secondi</b>.</li><li>Se appoggi il piede, tocca lo schermo: salviamo il tempo che hai resistito.</li>';
+      setup = '<div class="toolbar">' + seg('leg', { dx: T('Gamba destra'), sx: T('Gamba sinistra') }, prefs.leg, T('Gamba')) + '</div>' +
+        '<div class="toolbar">' + seg('eyes', { aperti: T('Occhi aperti'), chiusi: T('Occhi chiusi') }, prefs.eyes, T('Occhi')) + '</div>';
+      how = '<li>' + T('Tieni il telefono <b>appoggiato al petto</b> con entrambe le mani.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il conto alla rovescia sollevi un piede e resti in equilibrio per <b>30 secondi</b>.') + '</li><li>' + T('Se appoggi il piede, tocca lo schermo: salviamo il tempo che hai resistito.') + '</li>';
     } else if (type === 'salto') {
-      how = '<li>Tieni il telefono <b>stretto al petto</b> con entrambe le mani, gomiti fermi.</li><li>Tocca <b>Inizia</b>: dopo il "Via" hai <b>8 secondi</b> per fare un salto verso l’alto, il più alto possibile.</li><li>Atterra sugli avampiedi, senza piegare troppo le ginocchia in volo.</li>';
+      how = '<li>' + T('Tieni il telefono <b>stretto al petto</b> con entrambe le mani, gomiti fermi.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il "Via" hai <b>8 secondi</b> per fare un salto verso l’alto, il più alto possibile.') + '</li><li>' + T('Atterra sugli avampiedi, senza piegare troppo le ginocchia in volo.') + '</li>';
     } else {
-      setup = '<div class="toolbar">' + seg('dist', { 10: '10 m', 20: '20 m', 30: '30 m' }, prefs.dist) + '</div>';
-      how = '<li>Misura la distanza e prepara un compagno con il telefono all’arrivo (oppure tienilo tu).</li><li>Tocca <b>Inizia</b>: al bip del "Via" parti.</li><li>Tocca <b>Stop</b> sul traguardo.</li>';
+      setup = '<div class="toolbar">' + seg('dist', { 10: '10 m', 20: '20 m', 30: '30 m' }, prefs.dist, T('Distanza')) + '</div>';
+      how = '<li>' + T('Misura la distanza e prepara un compagno con il telefono all’arrivo (oppure tienilo tu).') + '</li><li>' + T('Tocca <b>Inizia</b>: al bip del "Via" parti.') + '</li><li>' + T('Tocca <b>Stop</b> sul traguardo.') + '</li>';
     }
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Misura i tuoi progressi</div><h1>' + T.name + '</h1></div>' +
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Misura i tuoi progressi') + '</div><h1>' + tt.name + '</h1></div>' +
       '<div class="home-grid"><div>' +
       '<div class="card"><img class="ts-hero" src="' + IMG[type] + '" alt="" loading="lazy" />' +
-      '<div class="toolbar">' + seg('cond', COND, prefs.cond) + '</div>' + setup +
+      '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' + setup +
       SAFETY + '<ol class="steps">' + how + '</ol>' +
       '<div class="ts-live" id="ts-live" hidden><div class="ts-big" id="ts-big"></div><div class="small muted" id="ts-sub"></div></div>' +
       '<p class="gate-msg" id="ts-msg" role="alert"></p>' +
-      '<button class="btn primary" id="ts-go" type="button">Inizia</button></div>' +
+      '<button class="btn primary" id="ts-go" type="button">' + T('Inizia') + '</button></div>' +
       '</div><div>' +
-      '<div class="card"><h3>I tuoi risultati</h3>' + summary(type) + history(type) + '</div>' +
+      '<div class="card"><h3>' + T('I tuoi risultati') + '</h3>' + summary(type) + history(type) + '</div>' +
       '</div></div>';
 
     app.querySelectorAll('[data-pref]').forEach((b) => b.addEventListener('click', () => {
@@ -234,30 +235,30 @@
       const t0 = performance.now();
       // nuovo pulsante senza il gestore "Inizia"
       const stopBtn = go.cloneNode(true); go.replaceWith(stopBtn);
-      stopBtn.disabled = false; stopBtn.textContent = 'Stop';
+      stopBtn.disabled = false; stopBtn.textContent = T('Stop');
       const iv = setInterval(() => { big.textContent = fmt((performance.now() - t0) / 1000, 2) + ' s'; }, 50);
       stopBtn.onclick = () => {
         clearInterval(iv);
         const t = (performance.now() - t0) / 1000;
         const v = prefs.dist / t;
-        addResult({ type, value: t, note: prefs.dist + ' m · ' + fmt(v * 3.6, 1) + ' km/h' });
+        addResult({ type, value: t, note: T('{dist} m · {speed} km/h', { dist: prefs.dist, speed: fmt(v * 3.6, 1) }) });
         renderTest(app, type);
-        showDone(prefs.dist + ' m in ' + fmt(t, 2) + ' s · velocità media ' + fmt(v * 3.6, 1) + ' km/h');
+        showDone(T('{dist} m in {time} s · velocità media {speed} km/h', { dist: prefs.dist, time: fmt(t, 2), speed: fmt(v * 3.6, 1) }));
       };
       return;
     }
 
     if (!(await motionPermission())) {
-      msg.textContent = 'Serve il permesso ai sensori di movimento. Usa il telefono (non il computer) e consenti l’accesso quando richiesto.';
+      msg.textContent = T('Serve il permesso ai sensori di movimento. Usa il telefono (non il computer) e consenti l’accesso quando richiesto.');
       go.disabled = false; return;
     }
     live.hidden = false;
-    sub.textContent = type === 'salto' ? 'Telefono stretto al petto' : 'Preparati: telefono al petto';
+    sub.textContent = type === 'salto' ? T('Telefono stretto al petto') : T('Preparati: telefono al petto');
     await countdown(big);
 
     if (type === 'equilibrio' || type === 'ortostasi') {
       const DUR = 30000; const t0 = performance.now();
-      sub.textContent = type === 'ortostasi' ? 'Resta immobile · tocca lo schermo se sposti un piede' : 'Resta in equilibrio · tocca lo schermo se appoggi il piede';
+      sub.textContent = type === 'ortostasi' ? T('Resta immobile · tocca lo schermo se sposti un piede') : T('Resta in equilibrio · tocca lo schermo se appoggi il piede');
       const iv = setInterval(() => { big.textContent = Math.max(0, Math.ceil((DUR - (performance.now() - t0)) / 1000)) + ' s'; }, 200);
       const tap = () => record.stop && record.stop();
       setTimeout(() => document.addEventListener('pointerdown', tap, { once: true }), 300);
@@ -266,31 +267,31 @@
       clearInterval(iv); beep(1100, 300);
       const held = Math.min(DUR, performance.now() - t0) / 1000;
       const score = swayScore(samples);
-      if (score == null) { msg.textContent = 'Il sensore di movimento non ha inviato dati: prova dal telefono.'; go.disabled = false; live.hidden = true; return; }
-      const pos = type === 'ortostasi' ? ((prefs.stance || 'uniti') === 'uniti' ? 'piedi uniti' : 'tandem') : (prefs.leg === 'dx' ? 'gamba dx' : 'gamba sx');
-      const note = pos + ' · occhi ' + prefs.eyes + (held < 29.5 ? ' · ' + fmt(held, 0) + ' s' : '');
+      if (score == null) { msg.textContent = T('Il sensore di movimento non ha inviato dati: prova dal telefono.'); go.disabled = false; live.hidden = true; return; }
+      const pos = type === 'ortostasi' ? ((prefs.stance || 'uniti') === 'uniti' ? T('piedi uniti') : T('tandem')) : (prefs.leg === 'dx' ? T('gamba dx') : T('gamba sx'));
+      const note = pos + ' · ' + (prefs.eyes === 'chiusi' ? T('occhi chiusi') : T('occhi aperti')) + (held < 29.5 ? ' · ' + fmt(held, 0) + ' s' : '');
       addResult({ type, value: score, note, held, leg: prefs.leg, eyes: prefs.eyes, stance: prefs.stance });
       renderTest(app, type);
-      showDone('Oscillazione ' + fmt(score, 2) + ' m/s² (più è bassa, più sei stabile)' + (held < 29.5 ? ' · hai resistito ' + fmt(held, 0) + ' s' : ''));
+      showDone(T('Oscillazione {value} m/s² (più è bassa, più sei stabile)', { value: fmt(score, 2) }) + (held < 29.5 ? ' · ' + T('hai resistito {s} s', { s: fmt(held, 0) }) : ''));
       return;
     }
 
     // salto
-    sub.textContent = 'Salta ora!';
+    sub.textContent = T('Salta ora!');
     const samples = await record(8000);
     beep(1100, 300);
     const t = flightTime(samples);
-    if (!samples.length) { msg.textContent = 'Il sensore di movimento non ha inviato dati: prova dal telefono.'; go.disabled = false; live.hidden = true; return; }
-    if (t == null) { msg.textContent = 'Non abbiamo riconosciuto il salto: tieni il telefono ben stretto al petto e riprova.'; go.disabled = false; big.textContent = ''; return; }
+    if (!samples.length) { msg.textContent = T('Il sensore di movimento non ha inviato dati: prova dal telefono.'); go.disabled = false; live.hidden = true; return; }
+    if (t == null) { msg.textContent = T('Non abbiamo riconosciuto il salto: tieni il telefono ben stretto al petto e riprova.'); go.disabled = false; big.textContent = ''; return; }
     const h = heightCm(t);
-    addResult({ type, value: h, note: 'volo ' + fmt(t * 1000, 0) + ' ms' });
+    addResult({ type, value: h, note: T('volo {ms} ms', { ms: fmt(t * 1000, 0) }) });
     renderTest(app, type);
-    showDone('Salto di ' + fmt(h, 0) + ' cm (volo ' + fmt(t * 1000, 0) + ' ms)');
+    showDone(T('Salto di {cm} cm (volo {ms} ms)', { cm: fmt(h, 0), ms: fmt(t * 1000, 0) }));
   }
 
   function showDone(text) {
     const m = document.getElementById('ts-msg');
-    if (m) { m.className = 'ts-done'; m.textContent = 'Risultato salvato: ' + text; }
+    if (m) { m.className = 'ts-done'; m.textContent = T('Risultato salvato: {text}', { text }); }
   }
 
   function render(app, arg) {

@@ -16,8 +16,8 @@
     devType: store.get('tp-devtype', 'silicone'),
   };
 
-  const SIDE_LABEL = { dx: 'destro', sx: 'sinistro' };
-  const VIEW_LABEL = { front: 'Davanti', back: 'Dietro' };
+  const SIDE_LABEL = { dx: T('Lato destro'), sx: T('Lato sinistro') };
+  const VIEW_LABEL = { front: T('Davanti'), back: T('Dietro') };
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const byId = (id) => MUSCLES.find((m) => m.id === id);
@@ -80,7 +80,7 @@
     (v.zones || []).slice().sort((a, b) => a.p - b.p).forEach((z) => { overlay += ellipse(z.e, 'zone p' + z.p); });
     (v.x || []).forEach(([x, y]) => { overlay += xMark(x, y, 2.6 * scale, !opts.thumb); });
     return '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
-      esc(m.name + ', vista ' + (view === 'front' ? 'frontale' : 'posteriore')) + '">' +
+      esc(m.name + T(', vista ') + (view === 'front' ? 'frontale' : 'posteriore')) + '">' +
       '<g' + (mirrored ? ' transform="' + window.Body.MIRROR + '"' : '') + '>' + window.Body.render(view, m.id) +
       '<g class="ov">' + overlay + '</g></g></svg>';
   }
@@ -91,8 +91,8 @@
   }
 
   function sideToggle() {
-    return '<div class="seg" role="group" aria-label="Lato del dolore">' +
-      ['dx', 'sx'].map((s) => '<button data-side="' + s + '" aria-pressed="' + (state.side === s) + '">Lato ' + SIDE_LABEL[s] + '</button>').join('') +
+    return '<div class="seg" role="group" aria-label="' + T('Lato del dolore') + '">' +
+      ['dx', 'sx'].map((s) => '<button data-side="' + s + '" aria-pressed="' + (state.side === s) + '">' + SIDE_LABEL[s] + '</button>').join('') +
       '</div>';
   }
   function bindSide(rerender) {
@@ -104,7 +104,7 @@
   function item(m, areaId) {
     const v = viewsOf(m)[0];
     const p = areaId ? m.areas[areaId] : null;
-    const badge = p === 1 ? '<span class="badge p1">Dolore tipico</span>' : p === 0 ? '<span class="badge p0">Possibile</span>' : '';
+    const badge = p === 1 ? T('<span class="badge p1">Dolore tipico</span>') : p === 0 ? T('<span class="badge p0">Possibile</span>') : '';
     return '<a class="m-item" href="#/m/' + m.id + '">' +
       '<div class="thumb">' + figure(m, v, { zoom: true, thumb: true, minW: 70, minH: 86, pad: 8 }) + '</div>' +
       '<div>' + badge + '<h3>' + esc(m.name) + '</h3><p>' + esc(m.symptom) + '</p></div>' +
@@ -133,56 +133,56 @@
 
   // Profilo attuale + pulsante grande "Cambia profilo"
   const SWAP_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const profileChip = () => '<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>' +
+  const profileChip = () => T('<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>') +
     (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + '</b></span>' +
-    '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + 'Cambia profilo</a></div>';
+    '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + T('Cambia profilo</a></div>');
   const SHOP = (window.APP_CONFIG && window.APP_CONFIG.shopUrl) || 'https://shop.equistasi.com';
   const shopCard = '<a class="card shop-card" href="' + SHOP + '" target="_blank" rel="noopener"><span class="shop-ico" aria-hidden="true">🛒</span>' +
-    '<span class="shop-txt"><b>Shop</b><span class="small">shop.equistasi.com</span></span><span class="chev" aria-hidden="true">›</span></a>';
+    T('<span class="shop-txt"><b>Shop</b><span class="small">shop.equistasi.com</span></span><span class="chev" aria-hidden="true">›</span></a>');
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
-      '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
+      T('<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>');
 
   // Foto del dispositivo in base al tipo scelto (gel o silicone)
   function kitFigure() {
     return state.devType === 'gel'
-      ? '<figure><img src="img/gel-kit.jpg" alt="Dispositivo Equistasi gel nel palmo della mano, accanto all’astuccio" loading="lazy" width="573" height="1000" /><figcaption>Equistasi gel</figcaption></figure>'
-      : '<figure><img src="img/silicone-applicato.jpg" alt="Dispositivo Equistasi silicone applicato sulla spalla" loading="lazy" width="600" height="620" /><figcaption>Equistasi silicone</figcaption></figure>';
+      ? T('<figure><img src="img/gel-kit.jpg" alt="Dispositivo Equistasi gel nel palmo della mano, accanto all’astuccio" loading="lazy" width="573" height="1000" /><figcaption>Equistasi gel</figcaption></figure>')
+      : T('<figure><img src="img/silicone-applicato.jpg" alt="Dispositivo Equistasi silicone applicato sulla spalla" loading="lazy" width="600" height="620" /><figcaption>Equistasi silicone</figcaption></figure>');
   }
 
   // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
   function gelPhotos() {
     if (state.devType !== 'gel') return '';
-    return '<div class="howto gel"><figure><img src="img/gel-custodie.jpg" alt="Dispositivi Equistasi gel inseriti nelle custodie usa e getta" loading="lazy" width="640" height="506" /><figcaption>Inserisci il dispositivo nella custodia usa e getta</figcaption></figure>' +
-      '<figure><img src="img/gel-busta.jpg" alt="Busta da 120 custodie di protezione per dispositivo Equistasi" loading="lazy" width="610" height="640" /><figcaption>Custodie di protezione (busta da 120 pezzi)</figcaption></figure></div>';
+    return T('<div class="howto gel"><figure><img src="img/gel-custodie.jpg" alt="Dispositivi Equistasi gel inseriti nelle custodie usa e getta" loading="lazy" width="640" height="506" /><figcaption>Inserisci il dispositivo nella custodia usa e getta</figcaption></figure>') +
+      T('<figure><img src="img/gel-busta.jpg" alt="Busta da 120 custodie di protezione per dispositivo Equistasi" loading="lazy" width="610" height="640" /><figcaption>Custodie di protezione (busta da 120 pezzi)</figcaption></figure></div>');
   }
 
   function renderNeuroHome() {
     const p = getProfile();
     const EQ = window.EQUISTASI;
     app.innerHTML =
-      '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
+      '<section class="hero">' + profileChip() + T('<div class="eyebrow">Il tuo percorso con Equistasi</div>') +
       '<h1><span class="hl">' + esc(profileName(p)) + '</span></h1>' +
-      '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p>' +
+      T('<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p>') +
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
-      '<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>' +
-      '<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>' + appProtocolCards() + protocolsCard('Protocolli in PDF') + '</div>' + window.EqTimer.cardHtml() + videoPromo + '</div><div>' +
-      '<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">' +
-      '<figure><img src="' + NEURO_IMG.s1 + '" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>' +
-      '<figure><img src="' + NEURO_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>' +
-      '<figure><img src="' + NEURO_IMG.s3 + '" alt="" loading="lazy" /><figcaption><b>3</b> Muoviti come nelle tue attività di ogni giorno</figcaption></figure>' +
+      T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
+      T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + videoPromo + '</div><div>' +
+      T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
+      '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
+      '<figure><img src="' + NEURO_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>') +
+      '<figure><img src="' + NEURO_IMG.s3 + T('" alt="" loading="lazy" /><figcaption><b>3</b> Muoviti come nelle tue attività di ogni giorno</figcaption></figure>') +
       '</div></div>' +
-      '<div class="card"><h3>Come applicare il dispositivo</h3>' +
+      T('<div class="card"><h3>Come applicare il dispositivo</h3>') +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
-      '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
+      T('<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>') +
       '<div class="howto">' + kitFigure() +
-      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
-      '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
+      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      T('<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">') +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div>' + gelPhotos() + '<ol class="steps">' +
-      [EQ.steps.start[0]].concat(EQ.steps[state.devType] || EQ.steps.silicone).map((x) => '<li>' + esc(x.replace('centrato esattamente sulla X', 'nel punto indicato dal protocollo')) + '</li>').join('') +
+      [EQ.steps.start[0]].concat(EQ.steps[state.devType] || EQ.steps.silicone).map((x) => '<li>' + esc(x.replace(T('centrato esattamente sulla X'), T('nel punto indicato dal protocollo'))) + '</li>').join('') +
       '</ol></div>' +
-      '<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">' + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
+      T('<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">') + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
       shopCard + '</div></div>';
     app.querySelectorAll('[data-devtype]').forEach((b) => b.addEventListener('click', () => {
       state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType); renderNeuroHome();
@@ -216,34 +216,34 @@
     if (prof.type === 'neuro') return renderNeuroHome();
     const sport = prof.type === 'sport';
     app.innerHTML =
-      '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
-      '<h1>' + (sport ? 'Contratture o <span class="hl">dolori muscolari</span>?' : 'Dove senti <span class="hl">dolore</span>?') + '</h1>' +
-      '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>' +
+      '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? T('Sport e performance') : T('Mappa dei trigger point')) + '</div>' +
+      '<h1>' + (sport ? T('Contratture o <span class="hl">dolori muscolari</span>?') : T('Dove senti <span class="hl">dolore</span>?')) + '</h1>' +
+      T('<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>') +
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
-      '<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>' + '</section>' +
-      (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
+      T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
+      (sport ? window.EqTests.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
       '<div class="toolbar"><div class="seg" role="group" aria-label="Vista">' +
       ['front', 'back'].map((v) => '<button data-view="' + v + '" aria-pressed="' + (state.homeView === v) + '">' + VIEW_LABEL[v] + '</button>').join('') +
-      '</div><span class="small muted">' + (state.homeView === 'front' ? 'Vista frontale' : 'Vista posteriore') + '</span></div>' +
-      '<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>' +
+      '</div><span class="small muted">' + (state.homeView === 'front' ? T('Vista frontale') : T('Vista posteriore')) + '</span></div>' +
+      T('<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>') +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
-      '<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>' +
+      T('<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>') +
       '<div>' + window.EqTimer.cardHtml() +
-      '<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">' +
+      T('<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">') +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
       '</div></div>' +
-      '<div class="card"><h3>Cerca per muscolo o disturbo</h3>' +
+      T('<div class="card"><h3>Cerca per muscolo o disturbo</h3>') +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
-      appProtocolCards() + videoPromo + (sport ? '' : protocolsCard('Protocolli per il dolore')) +
-      '<div class="card"><h3>Come funziona</h3><div class="howsteps">' +
-      '<figure><img src="' + PAIN_IMG.s1 + '" alt="" loading="lazy" /><figcaption><b>1</b> Indica dove senti dolore</figcaption></figure>' +
-      '<figure><img src="' + PAIN_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>' +
-      '<figure><img src="' + PAIN_IMG.s3 + '" alt="" loading="lazy" /><figcaption><b>3</b> Applica Equistasi sulla <b>X</b></figcaption></figure>' +
-      '</div><p class="small muted" style="margin:10px 0 0">La zona <b style="color:var(--blue)">blu</b> è dove si irradia il dolore: il dispositivo va sulla X.</p></div>' +
+      appProtocolCards() + videoPromo + (sport ? '' : protocolsCard(T('Protocolli per il dolore'))) +
+      T('<div class="card"><h3>Come funziona</h3><div class="howsteps">') +
+      '<figure><img src="' + PAIN_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Indica dove senti dolore</figcaption></figure>') +
+      '<figure><img src="' + PAIN_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>') +
+      '<figure><img src="' + PAIN_IMG.s3 + T('" alt="" loading="lazy" /><figcaption><b>3</b> Applica Equistasi sulla <b>X</b></figcaption></figure>') +
+      T('</div><p class="small muted" style="margin:10px 0 0">La zona <b style="color:var(--blue)">blu</b> è dove si irradia il dolore: il dispositivo va sulla X.</p></div>') +
       shopCard + '</div></div>';
 
     app.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
@@ -276,7 +276,7 @@
       const s = norm(q.value.trim());
       if (s.length < 2) { res.innerHTML = ''; return; }
       const found = MUSCLES.filter((m) => norm([m.name, m.latin, m.symptom, m.causes].join(' ')).includes(s));
-      res.innerHTML = found.length ? found.map((m) => item(m)).join('') : '<p class="muted small">Nessun risultato. Prova con un’altra parola o scegli la zona.</p>';
+      res.innerHTML = found.length ? found.map((m) => item(m)).join('') : T('<p class="muted small">Nessun risultato. Prova con un’altra parola o scegli la zona.</p>');
     });
   }
 
@@ -287,8 +287,8 @@
     setBack(true);
     const list = MUSCLES.filter((m) => id in m.areas).sort((x, y) => y.areas[id] - x.areas[id]);
     app.innerHTML =
-      '<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>' + esc(a.name) + '</h1>' +
-      '<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p></div>' +
+      T('<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>') + esc(a.name) + '</h1>' +
+      T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p></div>') +
       '<div class="toolbar">' + sideToggle() + '</div>' +
       '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>';
     bindSide(() => renderArea(id));
@@ -297,10 +297,10 @@
   /* ───────── DETTAGLIO MUSCOLO ───────── */
   function legend() {
     return '<div class="legend">' +
-      '<span><svg viewBox="-5 -5 10 10">' + xMark(0, 0, 3, false) + '</svg>Applica qui Equistasi</span>' +
-      '<span><svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.2" class="zone p1"/></svg>Dolore principale</span>' +
-      '<span><svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.2" class="zone p0"/></svg>Dolore possibile</span>' +
-      '<span><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" rx="2" fill="#d2433a"/></svg>Muscolo</span>' +
+      '<span><svg viewBox="-5 -5 10 10">' + xMark(0, 0, 3, false) + T('</svg>Applica qui Equistasi</span>') +
+      T('<span><svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.2" class="zone p1"/></svg>Dolore principale</span>') +
+      T('<span><svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.2" class="zone p0"/></svg>Dolore possibile</span>') +
+      T('<span><svg viewBox="0 0 10 10"><rect x="1" y="1" width="8" height="8" rx="2" fill="#d2433a"/></svg>Muscolo</span>') +
       '</div>';
   }
 
@@ -310,11 +310,11 @@
       const on = i < sc.onDays;
       return '<div class="day' + (on ? ' on' : '') + '"><b>' + d + '</b><span>' + (on ? '2 + 2 h' : 'riposo') + '</span></div>';
     }).join('');
-    return '<div class="card"><h3>Quanto tempo tenerlo</h3>' +
+    return T('<div class="card"><h3>Quanto tempo tenerlo</h3>') +
       '<div class="sessions">' + sc.sessions.map((x) => '<div class="session"><span>' + esc(x.label) + '</span><b>' + esc(x.time) + '</b></div>').join('') + '</div>' +
       '<div class="week" aria-label="Settimana tipo">' + week + '</div>' +
       '<p class="small" style="margin:10px 0 12px">' + esc(sc.summary) + '</p>' +
-      '<div class="warn"><b>Toglilo prima se senti fastidio.</b> ' + esc(sc.removeEarly) + '<br><br>' + esc(sc.reassure) + ' ' + esc(sc.persist) + '</div></div>';
+      T('<div class="warn"><b>Toglilo prima se senti fastidio.</b> ') + esc(sc.removeEarly) + '<br><br>' + esc(sc.reassure) + ' ' + esc(sc.persist) + '</div></div>';
   }
 
   function renderMuscle(id) {
@@ -327,7 +327,7 @@
     const figs = views.map((v) =>
       '<div class="fig"><span class="fig-label">' + VIEW_LABEL[v] + '</span>' +
       figure(m, v, { zoom: state.zoom }) +
-      '<span class="fig-side">Lato ' + SIDE_LABEL[state.side] + '</span></div>').join('');
+      '<span class="fig-side">' + SIDE_LABEL[state.side] + '</span></div>').join('');
 
     const areasTxt = Object.keys(m.areas).map((k) => area(k).name).join(' · ');
 
@@ -337,30 +337,30 @@
       '<div class="detail-grid"><div class="sticky">' +
       '<div class="card" style="padding:12px">' +
       '<div class="toolbar">' + sideToggle() +
-      '<div class="seg" role="group" aria-label="Zoom"><button data-zoom="1" aria-pressed="' + state.zoom + '">Dettaglio</button><button data-zoom="0" aria-pressed="' + !state.zoom + '">Corpo intero</button></div></div>' +
+      '<div class="seg" role="group" aria-label="Zoom"><button data-zoom="1" aria-pressed="' + state.zoom + T('">Dettaglio</button><button data-zoom="0" aria-pressed="') + !state.zoom + T('">Corpo intero</button></div></div>') +
       '<div class="figures' + (views.length > 1 ? ' two' : '') + '">' + figs + '</div>' + legend() + '</div>' +
       '<div class="card" id="mvideos" hidden></div>' +
       '</div><div>' +
-      (m.warning ? '<div class="card warn"><b>Attenzione.</b> ' + esc(m.warning) + '</div>' : '') +
-      '<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>' +
+      (m.warning ? T('<div class="card warn"><b>Attenzione.</b> ') + esc(m.warning) + '</div>' : '') +
+      T('<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>') +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
-      '<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>' +
+      T('<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>') +
       '<div class="howto">' + kitFigure() +
-      '<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
-      '<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">' +
+      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      T('<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">') +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div>' + gelPhotos() + '<ol class="steps">' +
       [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
-      (nX > 1 ? '<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>' + nX + ' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>' : '') +
+      (nX > 1 ? T('<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>') + nX + T(' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>') : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
       window.EqTimer.cardHtml() + scheduleCard() +
-      '<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">' + esc(window.EQUISTASI.find) + '</p>' +
-      (m.tips ? '<p class="small" style="margin:8px 0 0"><b>Consiglio:</b> ' + esc(m.tips) + '</p>' : '') + '</div>' +
-      '<div class="card"><h3>Il dolore tipico</h3><p class="small" style="margin:0 0 8px">' + esc(m.symptom) + '</p>' +
-      '<h3 style="font-size:15px;margin-top:12px">Cause frequenti</h3><p class="small" style="margin:0">' + esc(m.causes) + '</p></div>' +
-      '<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">' +
+      T('<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">') + esc(window.EQUISTASI.find) + '</p>' +
+      (m.tips ? T('<p class="small" style="margin:8px 0 0"><b>Consiglio:</b> ') + esc(m.tips) + '</p>' : '') + '</div>' +
+      T('<div class="card"><h3>Il dolore tipico</h3><p class="small" style="margin:0 0 8px">') + esc(m.symptom) + '</p>' +
+      T('<h3 style="font-size:15px;margin-top:12px">Cause frequenti</h3><p class="small" style="margin:0">') + esc(m.causes) + '</p></div>' +
+      T('<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">') +
       window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
-      '<p class="ref">Mappa basata su Travell, Simons & Simons, <i>Myofascial Pain and Dysfunction: The Trigger Point Manual</i>. La posizione della X è indicativa.</p>' +
+      T('<p class="ref">Mappa basata su Travell, Simons & Simons, <i>Myofascial Pain and Dysfunction: The Trigger Point Manual</i>. La posizione della X è indicativa.</p>') +
       '</div></div>';
 
     bindSide(() => renderMuscle(id));
@@ -478,13 +478,13 @@
       if (!box) return;
       loadProtocols().then((ps) => {
         if (!document.getElementById('protos')) return;
-        if (!ps) { box.innerHTML = '<p class="muted small" style="margin:0">I protocolli non sono disponibili in questo momento. Controlla la connessione.</p>'; return; }
+        if (!ps) { box.innerHTML = T('<p class="muted small" style="margin:0">I protocolli non sono disponibili in questo momento. Controlla la connessione.</p>'); return; }
         if (!ps.length) { box.closest('.card').remove(); return; }
-        box.innerHTML = ps.map((x) => '<a class="proto" href="#/pdf" data-pdf="' + esc(x.url) + '" data-title="' + esc(x.title) + '"><span class="pdf" aria-hidden="true">PDF</span>' +
+        box.innerHTML = ps.map((x) => '<a class="proto" href="#/pdf" data-pdf="' + esc(x.url) + '" data-title="' + esc(x.title) + T('"><span class="pdf" aria-hidden="true">PDF</span>') +
           '<span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></a>').join('');
       });
     }, 0);
-    return '<div class="card"><h3>' + esc(title || 'I tuoi protocolli') + '</h3><div id="protos"><p class="muted small" style="margin:0">Caricamento…</p></div></div>';
+    return '<div class="card"><h3>' + esc(title || T('I tuoi protocolli')) + T('</h3><div id="protos"><p class="muted small" style="margin:0">Caricamento…</p></div></div>');
   }
 
   const baseName = (t) => t.toLowerCase().replace(/^musculus\s+/, '').replace(/\s*\(?\d+\)?\s*$/, '').trim();
@@ -499,18 +499,18 @@
     const u = v.url;
     let m;
     if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) {
-      return '<iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+      return '<iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + T('?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="') + esc(v.title) + '"></iframe>';
     }
     if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/))) {
-      return '<iframe src="https://player.vimeo.com/video/' + m[1] + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+      return '<iframe src="https://player.vimeo.com/video/' + m[1] + T('" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="') + esc(v.title) + '"></iframe>';
     }
     if (/^https:\/\/(iframe|player)\.mediadelivery\.net\//.test(u)) {
-      return '<iframe src="' + esc(u) + (u.includes('?') ? '&' : '?') + 'autoplay=false&preload=true&responsive=true" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+      return '<iframe src="' + esc(u) + (u.includes('?') ? '&' : '?') + T('autoplay=false&preload=true&responsive=true" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="') + esc(v.title) + '"></iframe>';
     }
     const src = /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(u) ? u : v.file;
-    if (src) return '<video src="' + esc(src) + '" controls playsinline preload="metadata"' + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>';
-    if (/^https:\/\//.test(u)) return '<iframe src="' + esc(u) + '" allow="fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
-    return '<p class="muted small" style="padding:16px">Video non disponibile.</p>';
+    if (src) return '<video src="' + esc(src) + T('" controls playsinline preload="metadata"') + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>';
+    if (/^https:\/\//.test(u)) return '<iframe src="' + esc(u) + T('" allow="fullscreen" allowfullscreen loading="lazy" title="') + esc(v.title) + '"></iframe>';
+    return T('<p class="muted small" style="padding:16px">Video non disponibile.</p>');
   }
   function vcard(v, label) {
     return '<a class="vcard" href="#/video/' + v.id + '"><div class="vthumb">' +
@@ -518,13 +518,13 @@
       '<span class="play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span></div>' +
       '<div class="vtitle">' + esc(label || v.title) + '</div></a>';
   }
-  const VIDEO_OFF = '<p class="muted small" style="margin:0">I video non sono disponibili in questo momento. Controlla la connessione e riprova.</p>';
+  const VIDEO_OFF = T('<p class="muted small" style="margin:0">I video non sono disponibili in questo momento. Controlla la connessione e riprova.</p>');
 
   function renderVideos() {
     setBack(true);
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video <span class="hl">tutorial</span></h1>' +
-      '<p class="muted small" style="margin:4px 0 14px">Guarda come applicare il dispositivo e dove posizionarlo sui singoli muscoli.</p></div>' +
-      '<div id="vlist"><p class="muted small">Caricamento dei video…</p></div>';
+    app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video <span class="hl">tutorial</span></h1>') +
+      T('<p class="muted small" style="margin:4px 0 14px">Guarda come applicare il dispositivo e dove posizionarlo sui singoli muscoli.</p></div>') +
+      T('<div id="vlist"><p class="muted small">Caricamento dei video…</p></div>');
     loadVideos().then((list) => {
       const box = document.getElementById('vlist');
       if (!box) return;
@@ -538,31 +538,31 @@
         groups.get(k).items.push(v);
       });
       let h = '';
-      if (general.length) h += '<div class="card"><h3>Guide all’applicazione</h3><div class="vgrid">' + general.map((v) => vcard(v)).join('') + '</div></div>';
+      if (general.length) h += T('<div class="card"><h3>Guide all’applicazione</h3><div class="vgrid">') + general.map((v) => vcard(v)).join('') + '</div></div>';
       if (groups.size) {
         const keys = [...groups.keys()].sort((a, b) => (groups.get(b).m ? 1 : 0) - (groups.get(a).m ? 1 : 0) || a.localeCompare(b));
-        h += '<div class="card"><h3>Video per muscolo</h3>' + keys.map((k) => {
+        h += T('<div class="card"><h3>Video per muscolo</h3>') + keys.map((k) => {
           const g = groups.get(k);
-          return '<h4 class="vgroup">' + esc(k) + (g.m ? ' <a href="#/m/' + g.m.id + '" class="small">mappa ›</a>' : '') + '</h4>' +
-            '<div class="vgrid">' + g.items.map((v, i) => vcard(v, g.items.length > 1 ? 'Video ' + (i + 1) : 'Guarda il video')).join('') + '</div>';
+          return '<h4 class="vgroup">' + esc(k) + (g.m ? ' <a href="#/m/' + g.m.id + T('" class="small">mappa ›</a>') : '') + '</h4>' +
+            '<div class="vgrid">' + g.items.map((v, i) => vcard(v, g.items.length > 1 ? 'Video ' + (i + 1) : T('Guarda il video'))).join('') + '</div>';
         }).join('') + '</div>';
       }
-      box.innerHTML = h || '<div class="card"><p class="muted small" style="margin:0">Non ci sono ancora video.</p></div>';
+      box.innerHTML = h || T('<div class="card"><p class="muted small" style="margin:0">Non ci sono ancora video.</p></div>');
     });
   }
 
   function renderVideo(id) {
     setBack(true);
-    app.innerHTML = '<p class="muted small">Caricamento…</p>';
+    app.innerHTML = T('<p class="muted small">Caricamento…</p>');
     loadAllVideos().then((list) => {
       const v = (list || []).find((x) => x.id === id);
       if (!v) { app.innerHTML = '<div class="card">' + VIDEO_OFF + '</div>'; return; }
       const m = muscleOf(v);
-      app.innerHTML = '<div class="detail-head"><div class="eyebrow">Video tutorial</div><h1>' + esc(m ? m.name : v.title) + '</h1>' +
+      app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Video tutorial</div><h1>') + esc(m ? m.name : v.title) + '</h1>' +
         (m ? '<p class="latin">' + esc(v.title) + '</p>' : '<div style="height:12px"></div>') + '</div>' +
         '<div class="player portrait" id="player">' + embed(v) + '</div>' +
-        (m ? '<a class="btn" style="margin-top:14px" href="#/m/' + m.id + '">Vedi la mappa del trigger point ›</a>' : '') +
-        ' <a class="btn" style="margin-top:14px" href="#/video">Tutti i video</a>';
+        (m ? '<a class="btn" style="margin-top:14px" href="#/m/' + m.id + T('">Vedi la mappa del trigger point ›</a>') : '') +
+        T(' <a class="btn" style="margin-top:14px" href="#/video">Tutti i video</a>');
       fitPlayer(document.getElementById('player'), v);
     });
   }
@@ -588,7 +588,7 @@
       const vs = list ? videosFor(m, list) : [];
       if (!vs.length || !document.getElementById('mvideos')) { box.remove(); return; }
       box.hidden = false;
-      box.innerHTML = '<h3>Video tutorial</h3><div class="vgrid">' + vs.map((v, i) => vcard(v, vs.length > 1 ? 'Video ' + (i + 1) : 'Guarda il video')).join('') + '</div>';
+      box.innerHTML = T('<h3>Video tutorial</h3><div class="vgrid">') + vs.map((v, i) => vcard(v, vs.length > 1 ? 'Video ' + (i + 1) : T('Guarda il video'))).join('') + '</div>';
     });
   }
 
@@ -601,22 +601,22 @@
   function appProtocolCards() {
     return appProtocols().map((x) => '<a class="card pcard" href="#/protocollo/' + x.id + '">' +
       '<img src="' + esc(x.thumb || x.img) + '" alt="" loading="lazy" />' +
-      '<span><span class="eyebrow">Protocollo</span><b>' + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + '</span></span>' +
+      T('<span><span class="eyebrow">Protocollo</span><b>') + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + '</span></span>' +
       '<span class="chev" aria-hidden="true">›</span></a>').join('');
   }
   function renderAppProtocol(id) {
     const x = (window.APP_PROTOCOLS || []).find((p) => p.id === id);
     if (!x) return renderHome();
     setBack(true);
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>' + esc(x.title) + '</h1><p class="latin">' + esc(x.subtitle) + '</p></div>' +
+    app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>') + esc(x.title) + '</h1><p class="latin">' + esc(x.subtitle) + '</p></div>' +
       '<div class="detail-grid"><div class="sticky"><div class="card" style="padding:8px"><img class="pimg" data-zoom-img src="' + esc(x.img) + '" alt="' + esc(x.title + ': ' + x.subtitle) + '" />' +
-      '<p class="small muted" style="margin:6px 4px 0">Tocca l’immagine per ingrandirla.</p></div></div><div>' +
-      '<div class="card"><h3>Dove applicare</h3><p class="small">' + esc(x.intro) + '</p><ol class="steps">' +
+      T('<p class="small muted" style="margin:6px 4px 0">Tocca l’immagine per ingrandirla.</p></div></div><div>') +
+      T('<div class="card"><h3>Dove applicare</h3><p class="small">') + esc(x.intro) + '</p><ol class="steps">' +
       x.points.map(([h, t]) => '<li><b>' + esc(h) + '.</b> ' + esc(t) + '</li>').join('') + '</ol></div>' +
-      '<div class="card"><h3>Come applicare il dispositivo</h3><div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi" loading="lazy" /><figcaption>Il kit Equistasi</figcaption></figure>' +
-      '<figure><img src="img/applicazione.jpg" alt="Dispositivo fissato con il cerotto trasparente" loading="lazy" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>' +
-      '<p class="small" style="margin:0">Pulisci e asciuga la pelle, fissa ogni dispositivo con il cerotto in dotazione, a contatto con la pelle, sul punto indicato. Per tempi e frequenza segui il tuo protocollo o le indicazioni del professionista che ti segue.</p></div>' +
-      '<div class="card warn"><b>Toglilo prima se senti fastidio.</b> ' + esc(window.EQUISTASI.schedule.removeEarly) + ' ' + esc(window.EQUISTASI.schedule.reassure) + '</div>' +
+      T('<div class="card"><h3>Come applicare il dispositivo</h3><div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi" loading="lazy" /><figcaption>Il kit Equistasi</figcaption></figure>') +
+      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo fissato con il cerotto trasparente" loading="lazy" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      T('<p class="small" style="margin:0">Pulisci e asciuga la pelle, fissa ogni dispositivo con il cerotto in dotazione, a contatto con la pelle, sul punto indicato. Per tempi e frequenza segui il tuo protocollo o le indicazioni del professionista che ti segue.</p></div>') +
+      T('<div class="card warn"><b>Toglilo prima se senti fastidio.</b> ') + esc(window.EQUISTASI.schedule.removeEarly) + ' ' + esc(window.EQUISTASI.schedule.reassure) + '</div>' +
       '</div></div>';
   }
 
@@ -624,25 +624,25 @@
   function privacyHtml() {
     const P = window.PRIVACY;
     const url = (window.APP_CONFIG || {}).privacyUrl;
-    return '<p class="small"><b>Titolare del trattamento:</b> ' + esc(P.titolare) + '<br><b>Contatto:</b> ' + esc(P.contatto) + '</p>' +
+    return T('<p class="small"><b>Titolare del trattamento:</b> ') + esc(P.titolare) + T('<br><b>Contatto:</b> ') + esc(P.contatto) + '</p>' +
       P.sections.map(([h, t]) => '<h4>' + esc(h) + '</h4><p class="small" style="margin:0">' + esc(t) + '</p>').join('') +
-      (url ? '<p class="small" style="margin-top:14px"><a href="' + esc(url) + '" target="_blank" rel="noopener">Leggi l’informativa privacy completa ›</a></p>' : '') +
-      '<p class="small muted" style="margin-top:14px">Versione ' + esc(P.version) + '</p>';
+      (url ? '<p class="small" style="margin-top:14px"><a href="' + esc(url) + T('" target="_blank" rel="noopener">Leggi l’informativa privacy completa ›</a></p>') : '') +
+      T('<p class="small muted" style="margin-top:14px">Versione ') + esc(P.version) + '</p>';
   }
   function renderPrivacy() {
     setBack(true);
     const p = getProfile();
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">I tuoi dati</div><h1>Privacy</h1><div style="height:12px"></div></div>' +
+    app.innerHTML = T('<div class="detail-head"><div class="eyebrow">I tuoi dati</div><h1>Privacy</h1><div style="height:12px"></div></div>') +
       '<div class="cols">' +
-      '<div class="card"><h3>Le tue scelte</h3>' +
-      '<p class="small">Profilo: <b>' + esc(profileName(p) || '—') + '</b><br>Condivisione dei dati con Equistasi: <b>' + (p && p.consent ? 'consenso dato' : 'non attiva') + '</b></p>' +
-      '<div class="row-btns"><a class="btn" href="#/profilo">Cambia profilo o consenso</a> ' +
-      '<button class="btn" id="wipe" type="button">Cancella i miei dati da questo telefono</button></div>' +
-      '<p class="small muted" style="margin:10px 0 0">Per cancellare i dati già condivisi con Equistasi scrivi a ' + esc(window.PRIVACY.contatto) + ' indicando il numero di serie.</p></div>' +
-      '<div class="card privacy-box" style="max-height:none"><h3>Informativa sintetica</h3>' + privacyHtml() + '</div>' +
+      T('<div class="card"><h3>Le tue scelte</h3>') +
+      T('<p class="small">Profilo: <b>') + esc(profileName(p) || '—') + T('</b><br>Condivisione dei dati con Equistasi: <b>') + (p && p.consent ? T('consenso dato') : T('non attiva')) + '</b></p>' +
+      T('<div class="row-btns"><a class="btn" href="#/profilo">Cambia profilo o consenso</a> ') +
+      T('<button class="btn" id="wipe" type="button">Cancella i miei dati da questo telefono</button></div>') +
+      T('<p class="small muted" style="margin:10px 0 0">Per cancellare i dati già condivisi con Equistasi scrivi a ') + esc(window.PRIVACY.contatto) + T(' indicando il numero di serie.</p></div>') +
+      T('<div class="card privacy-box" style="max-height:none"><h3>Informativa sintetica</h3>') + privacyHtml() + '</div>' +
       '</div>';
     document.getElementById('wipe').addEventListener('click', () => {
-      if (!confirm('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?')) return;
+      if (!confirm(T('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?'))) return;
       try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
       location.hash = '#/'; location.reload();
     });
@@ -652,28 +652,29 @@
   function renderInfo() {
     setBack(true);
     app.innerHTML =
-      '<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>' +
+      T('<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>') +
       shopCard + '<div class="cols">' +
-      '<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>' +
-      '<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>' + legend() + '</div>' +
-      '<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>' +
+      T('<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>') +
+      T('<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>') + legend() + '</div>' +
+      T('<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>') +
       '<ul class="flags small">' + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
-      '<div class="card"><h3>Fonti scientifiche</h3><ul class="flags small">' +
-      '<li>Simons DG, Travell JG, Simons LS. <i>Travell & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, Vol. 1–2, 2ª ed. Williams & Wilkins, 1999.</li>' +
-      '<li>Donnelly JM et al. <i>Travell, Simons & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, 3ª ed. Wolters Kluwer, 2019.</li>' +
-      '<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>' +
+      T('<div class="card"><h3>Fonti scientifiche</h3><ul class="flags small">') +
+      T('<li>Simons DG, Travell JG, Simons LS. <i>Travell & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, Vol. 1–2, 2ª ed. Williams & Wilkins, 1999.</li>') +
+      T('<li>Donnelly JM et al. <i>Travell, Simons & Simons’ Myofascial Pain and Dysfunction: The Trigger Point Manual</i>, 3ª ed. Wolters Kluwer, 2019.</li>') +
+      T('<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>') +
       '</ul></div>' +
-      '<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello <a href="https://github.com/Z-Anatomy" target="_blank" rel="noopener">Z-Anatomy – The libre 3D atlas of anatomy</a> (CC BY-SA 4.0), basato su <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D – The Database Center for Life Science</a> (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p></div>' +
-      '<div class="card"><h3>Il tuo profilo</h3><p class="small">' + esc(profileName() || '—') + '</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>' +
-      '<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>' + esc(store.get('tp-serial', '—')) + '</b></p>' +
-      '<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>' +
-      '<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>' +
+      T('<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello <a href="https://github.com/Z-Anatomy" target="_blank" rel="noopener">Z-Anatomy – The libre 3D atlas of anatomy</a> (CC BY-SA 4.0), basato su <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D – The Database Center for Life Science</a> (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p></div>') +
+      T('<div class="card"><h3>Il tuo profilo</h3><p class="small">') + esc(profileName() || '—') + T('</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>') +
+      T('<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>') + esc(store.get('tp-serial', '—')) + '</b></p>' +
+      T('<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>') +
+      '<div class="card"><h3>Lingua · Language</h3><div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it" aria-pressed="' + (window.LANG === 'it') + '">Italiano</button><button type="button" data-lang="en" aria-pressed="' + (window.LANG === 'en') + '">English</button></div></div>' +
+      T('<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>') +
       '</div>';
   }
 
   function renderTimer() {
     setBack(true);
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>' +
+    app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>') +
       '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
@@ -681,7 +682,7 @@
   document.addEventListener('click', (ev) => {
     const a = ev.target.closest('[data-pdf]');
     if (!a) return;
-    try { sessionStorage.setItem('tp-pdf', JSON.stringify({ url: a.dataset.pdf, title: a.dataset.title || 'Protocollo' })); } catch (e) { /* storage non disponibile */ }
+    try { sessionStorage.setItem('tp-pdf', JSON.stringify({ url: a.dataset.pdf, title: a.dataset.title || T('Protocollo') })); } catch (e) { /* storage non disponibile */ }
   });
   let pdfjsPromise = null;
   function loadPdfJs() {
@@ -702,10 +703,10 @@
     let doc = null;
     try { doc = JSON.parse(sessionStorage.getItem('tp-pdf') || 'null'); } catch (e) { doc = null; }
     if (!doc || !doc.url) { location.hash = '#/'; return; }
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>' + esc(doc.title) + '</h1></div>' +
-      '<div class="row-btns" style="margin:0 0 12px"><button class="btn primary pdf-back" type="button" style="width:auto">‹ Torna indietro</button></div>' +
-      '<div class="pdf-pages" id="pdf-pages"><p class="muted small">Caricamento del protocollo…</p></div>' +
-      '<p class="small muted" style="margin-top:12px">Non si vede bene? <a href="' + esc(doc.url) + '" target="_blank" rel="noopener">Apri il PDF a parte</a> (poi torna all’app).</p>';
+    app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>') + esc(doc.title) + '</h1></div>' +
+      T('<div class="row-btns" style="margin:0 0 12px"><button class="btn primary pdf-back" type="button" style="width:auto">‹ Torna indietro</button></div>') +
+      T('<div class="pdf-pages" id="pdf-pages"><p class="muted small">Caricamento del protocollo…</p></div>') +
+      T('<p class="small muted" style="margin-top:12px">Non si vede bene? <a href="') + esc(doc.url) + T('" target="_blank" rel="noopener">Apri il PDF a parte</a> (poi torna all’app).</p>');
     app.querySelector('.pdf-back').addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
     const box = document.getElementById('pdf-pages');
     loadPdfJs()
@@ -737,7 +738,7 @@
     if (!img) return;
     const ov = document.createElement('div');
     ov.className = 'zoom-ov';
-    ov.innerHTML = '<button class="btn primary zoom-close" type="button">✕ Chiudi</button><img src="' + img.getAttribute('src') + '" alt="" />';
+    ov.innerHTML = T('<button class="btn primary zoom-close" type="button">✕ Chiudi</button><img src="') + img.getAttribute('src') + '" alt="" />';
     ov.addEventListener('click', (e) => { if (e.target.closest('.zoom-close') || e.target === ov) ov.remove(); });
     document.body.appendChild(ov);
   });
@@ -754,9 +755,9 @@
     if (!extra) return;
     const sport = (getProfile() || {}).type === 'sport';
     extra.href = sport ? '#/test' : '#/info';
-    extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? 'Progressi' : 'Info');
+    extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? T('Progressi') : T('Info'));
     const homeTab = document.querySelector('#tabbar [data-tab="home"]');
-    if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? 'Home' : 'Mappa';
+    if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? T('Home') : T('Mappa');
     const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
@@ -776,6 +777,7 @@
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     updateTabs(page);
+    window.translateStatic(app); // aria-label e testi alternativi in inglese
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
@@ -807,7 +809,7 @@
   const obNeuro = document.getElementById('ob-neuro');
   const ob$ = { type: null, patologia: null };
 
-  document.getElementById('ob-eta').insertAdjacentHTML('beforeend', window.ETA.map((e) => '<option>' + esc(e) + '</option>').join(''));
+  document.getElementById('ob-eta').insertAdjacentHTML('beforeend', window.ETA.map((e) => '<option value="' + esc(e) + '">' + esc((window.ETA_EN && window.ETA_EN[e]) || e) + '</option>').join(''));
   document.getElementById('ob-opts').innerHTML = Object.entries(window.PROFILES).map(([k, p]) =>
     '<button type="button" class="ob-opt" role="radio" aria-checked="false" data-type="' + k + '"><span class="ico" aria-hidden="true">' + p.icon + '</span>' +
     '<span><b>' + esc(p.title) + '</b><span>' + esc(p.desc) + '</span></span></button>').join('');
@@ -853,8 +855,8 @@
   obForm.addEventListener('change', (ev) => {
     obMsg.textContent = '';
     if (ev.target.id !== 'ob-read' || !ev.target.checked) return;
-    if (!ob$.type) { obMsg.textContent = 'Scegli prima per cosa usi Equistasi.'; return; }
-    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = 'Scegli prima la patologia.'; return; }
+    if (!ob$.type) { obMsg.textContent = T('Scegli prima per cosa usi Equistasi.'); return; }
+    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = T('Scegli prima la patologia.'); return; }
     obAutoEnter();
   });
   // con le condizioni accettate e il profilo scelto si entra subito, senza premere "Continua"
@@ -887,9 +889,9 @@
 
   obForm.addEventListener('submit', (ev) => {
     ev.preventDefault();
-    if (!ob$.type) { obMsg.textContent = 'Scegli per cosa usi Equistasi.'; return; }
-    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = 'Indica la patologia.'; return; }
-    if (!document.getElementById('ob-read').checked) { obMsg.textContent = 'Conferma di aver letto l’informativa privacy.'; return; }
+    if (!ob$.type) { obMsg.textContent = T('Scegli per cosa usi Equistasi.'); return; }
+    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = T('Indica la patologia.'); return; }
+    if (!document.getElementById('ob-read').checked) { obMsg.textContent = T('Conferma di aver letto l’informativa privacy.'); return; }
     const prev = getProfile();
     const p = {
       type: ob$.type,
@@ -932,22 +934,22 @@
     ev.preventDefault();
     const serial = normSerial(gateInput.value);
     gateMsg.className = 'gate-msg';
-    if (serial.length < 5) { gateMsg.textContent = 'Inserisci il numero di serie completo.'; gateInput.focus(); return; }
-    gateBtn.disabled = true; gateBtn.textContent = 'Verifica in corso…'; gateMsg.textContent = '';
+    if (serial.length < 5) { gateMsg.textContent = T('Inserisci il numero di serie completo.'); gateInput.focus(); return; }
+    gateBtn.disabled = true; gateBtn.textContent = T('Verifica in corso…'); gateMsg.textContent = '';
     try {
       if (await verifySerial(serial)) {
         store.set('tp-serial', serial);
-        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = 'Dispositivo riconosciuto. Benvenuto!';
+        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Dispositivo riconosciuto. Benvenuto!');
         setTimeout(() => { gate.hidden = true; start(); }, 500);
       } else {
-        gateMsg.textContent = 'Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.';
+        gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
       }
     } catch (e) {
       gateMsg.textContent = e.message === 'config'
-        ? 'Servizio di verifica non configurato.'
-        : 'Impossibile verificare ora. Controlla la connessione e riprova.';
+        ? T('Servizio di verifica non configurato.')
+        : T('Impossibile verificare ora. Controlla la connessione e riprova.');
     } finally {
-      gateBtn.disabled = false; gateBtn.textContent = 'Accedi';
+      gateBtn.disabled = false; gateBtn.textContent = T('Accedi');
     }
   });
 
