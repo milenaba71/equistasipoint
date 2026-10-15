@@ -1,0 +1,29 @@
+# Rende disponibile ai tester interni l'ultima build caricata su App Store Connect.
+# Si avvia a mano: GitHub → Actions → "TestFlight: distribuisci" → Run workflow.
+name: "TestFlight: distribuisci"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  testflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chiave API di App Store Connect
+        env:
+          S_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          S_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_P8: ${{ secrets.APPSTORE_KEY_P8 }}
+        run: |
+          KEY_ID=$(printf '%s' "$S_KEY_ID" | tr -d '[:space:]'); ISSUER_ID=$(printf '%s' "$S_ISSUER_ID" | tr -d '[:space:]')
+          echo "::add-mask::$KEY_ID"; echo "::add-mask::$ISSUER_ID"
+          printf '%s\n' "$KEY_P8" > "$RUNNER_TEMP/key.p8"
+          { echo "KEY_ID=$KEY_ID"; echo "ISSUER_ID=$ISSUER_ID"; echo "KEY_PATH=$RUNNER_TEMP/key.p8"; } >> "$GITHUB_ENV"
+          pip install --quiet pyjwt cryptography
+
+      - name: Distribuisci l'ultima build ai tester interni
+        run: |
+          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          cd .github/scripts && python3 asc_testflight.py "$BUNDLE"
