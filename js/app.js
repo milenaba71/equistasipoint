@@ -178,6 +178,14 @@
     }));
   }
 
+  // Illustrazioni a fumetti per il profilo Dolore (colori Equistasi)
+  const PAIN_IMG = {
+    hero: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/e77275bf-76ac-4e4f-b24c-48fc3962e2fd.jpg',
+    s1: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/0ab20398-5ee2-4373-8f6b-866450d81668.jpg',
+    s2: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/477ccb81-969b-4ff2-b62d-35e87e87a0eb.jpg',
+    s3: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/55a029ed-7d82-4865-b10c-d3ba3c6b8f47.jpg',
+  };
+
   function renderHome() {
     setBack(false);
     const prof = getProfile() || { type: 'dolore' };
@@ -187,7 +195,7 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
       '<h1>' + (sport ? 'Contratture o <span class="hl">dolori muscolari</span>?' : 'Dove senti <span class="hl">dolore</span>?') + '</h1>' +
       '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>' +
-      (sport ? '<img class="hero-img" src="' + window.EqTests.IMG.hero + '" alt="" />' : '') + '</section>' +
+      '<img class="hero-img" src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' + '</section>' +
       (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
@@ -205,11 +213,11 @@
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
       appProtocolCards() + videoPromo + (sport ? '' : protocolsCard('Protocolli per il dolore')) +
-      '<div class="card"><h3>Come funziona</h3><ol class="steps">' +
-      '<li>Indica dove senti dolore.</li>' +
-      '<li>Scegli il muscolo che descrive meglio il tuo disturbo.</li>' +
-      '<li>Applica il dispositivo Equistasi sulla <b>X</b>: la zona <b style="color:var(--blue)">blu</b> è dove si irradia il dolore.</li>' +
-      '</ol></div>' +
+      '<div class="card"><h3>Come funziona</h3><div class="howsteps">' +
+      '<figure><img src="' + PAIN_IMG.s1 + '" alt="" loading="lazy" /><figcaption><b>1</b> Indica dove senti dolore</figcaption></figure>' +
+      '<figure><img src="' + PAIN_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>' +
+      '<figure><img src="' + PAIN_IMG.s3 + '" alt="" loading="lazy" /><figcaption><b>3</b> Applica Equistasi sulla <b>X</b></figcaption></figure>' +
+      '</div><p class="small muted" style="margin:10px 0 0">La zona <b style="color:var(--blue)">blu</b> è dove si irradia il dolore: il dispositivo va sulla X.</p></div>' +
       '</div></div>';
 
     app.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
