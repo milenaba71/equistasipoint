@@ -948,6 +948,10 @@
   const isNativeApp = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !isNativeApp) {
     window.addEventListener('load', () => navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {}));
+    // quando si torna sull'app (scheda riaperta o pagina ripresa dalla memoria) controlla subito se c'è una versione nuova
+    const checkUpdate = () => navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) checkUpdate(); });
+    window.addEventListener('pageshow', (e) => { if (e.persisted) checkUpdate(); });
     // quando una nuova versione dell'app prende il controllo, ricarica una volta per mostrarla
     const hadController = !!navigator.serviceWorker.controller;
     let reloaded = false;
