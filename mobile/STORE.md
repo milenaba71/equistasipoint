@@ -39,7 +39,7 @@ equistasi,trigger point,dolore,applicazione,dispositivo,cervicale,schiena,sport,
 L'app richiede il numero di serie del dispositivo. **Fornire un numero di serie di prova valido** in Airtable
 (es. creare un dispositivo "DEMO" in *Abbinamento Kit*) e indicarlo qui:
 
-> Numero di serie di prova: __________ (inserirlo nella schermata iniziale "Attiva l'app").
+> Numero di serie di prova: **DEMO2026** (inserirlo nella schermata iniziale "Attiva l'app"; kit "DEMO – Revisione App Store" in Airtable).
 > Scegliere un profilo, spuntare "Accetto ed entro". Il promemoria delle 2 ore si trova nella barra in basso.
 
 ## Privacy – cosa dichiarare
