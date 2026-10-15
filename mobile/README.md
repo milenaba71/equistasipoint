@@ -5,7 +5,8 @@ Questa cartella contiene il progetto **Capacitor** che trasforma la web app
 La web app su GitHub Pages resta com'è: le due versioni usano gli stessi file.
 
 - Nome app: **Equistasi Point**
-- Identificativo (bundle ID / application ID): `com.equistasi.point`
+- Identificativo iOS (bundle ID, app esistente): `com.equistasi.triggerpoint` · versione 1.2.0 (build 21)
+- Identificativo Android (application ID): `com.equistasi.point` (da allineare a quello dell’app già su Google Play)
 - Funzione nativa: **promemoria delle 2 ore** con notifiche locali
   (`@capacitor/local-notifications`), che arrivano anche ad app chiusa.
 

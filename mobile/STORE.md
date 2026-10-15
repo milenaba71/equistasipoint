@@ -3,7 +3,7 @@
 ## Dati dell'app
 - **Nome**: Equistasi Point
 - **Sottotitolo (App Store, max 30)**: Come applicare Equistasi
-- **Identificativo**: `com.equistasi.point`
+- **Identificativo iOS**: `com.equistasi.triggerpoint` (app già pubblicata, ultima 1.1.4 build 20 → nuova 1.2.0 build 21)
 - **Categoria**: Salute e fitness (secondaria: Medicina)
 - **Lingua principale**: Italiano
 - **Età**: 4+ (App Store) · PEGI 3 / Tutti (Google Play)
