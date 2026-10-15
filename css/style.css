@@ -555,3 +555,8 @@ main { padding-top: 0; padding-bottom: 12px; }
 .zoom-ov { position: fixed; inset: 0; z-index: 80; background: rgba(20, 17, 47, .92); overflow: auto; padding: 60px 10px 20px; }
 .zoom-ov img { width: 100%; max-width: 1000px; height: auto; display: block; margin: 0 auto; border-radius: 12px; background: #fff; }
 .zoom-close { position: fixed; top: calc(12px + env(safe-area-inset-top)); right: 12px; width: auto !important; z-index: 81; }
+
+/* Accetto le condizioni ed entro */
+.ck-accept { padding: 12px; border-radius: 14px; background: rgba(250, 220, 0, .22); border: 2px solid var(--yellow); font-size: 14.5px; }
+.ck-accept input { width: 24px; height: 24px; }
+.ob-submit { width: 100%; margin-top: 4px; }
