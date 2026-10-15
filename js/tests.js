@@ -39,6 +39,8 @@
       unit: 's', better: 'low', label: 'Tempo',
     },
   };
+  const SAFETY = '<div class="warn ts-safety"><b>⚠️ Fai i test sempre accompagnato da un’altra persona</b>, che possa sostenerti se perdi l’equilibrio. ' +
+    'I risultati sono <b>indicativi</b> e <b>non sostituiscono visite mediche o valutazioni specialistiche</b>.</div>';
   const COND = { senza: 'Senza Equistasi', con: 'Con Equistasi' };
   const prefs = store.get('tp-test-prefs', { cond: 'senza', leg: 'dx', eyes: 'aperti', dist: 20, stance: 'uniti' });
   const savePrefs = () => store.set('tp-test-prefs', prefs);
@@ -170,12 +172,12 @@
   function renderList(app) {
     app.innerHTML = '<img class="ts-hero" style="margin-top:16px" src="' + IMG.hero + '" alt="" loading="lazy" />' + '<div class="detail-head" style="padding-top:0"><div class="eyebrow">Sport</div><h1>Misura i tuoi <span class="hl">progressi</span></h1>' +
       '<p class="small muted" style="margin:6px 0 0">Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.</p></div>' +
-      '<div class="list">' + Object.keys(TESTS).map((k) => {
+      SAFETY + '<div class="list">' + Object.keys(TESTS).map((k) => {
         const T = TESTS[k]; const n = results().filter((r) => r.type === k).length;
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + T.name + '</b><br><span class="small muted">' + T.desc +
           (n ? ' · ' + n + ' prove' : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
-      '<p class="small muted" style="margin-top:14px">I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo. Servono a seguire i tuoi progressi, non sono una valutazione medica.</p>';
+      '<p class="small muted" style="margin-top:14px">I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo.</p>';
   }
 
   function renderTest(app, type) {
@@ -201,7 +203,7 @@
       '<div class="home-grid"><div>' +
       '<div class="card"><img class="ts-hero" src="' + IMG[type] + '" alt="" loading="lazy" />' +
       '<div class="toolbar">' + seg('cond', COND, prefs.cond) + '</div>' + setup +
-      '<ol class="steps">' + how + '</ol>' +
+      SAFETY + '<ol class="steps">' + how + '</ol>' +
       '<div class="ts-live" id="ts-live" hidden><div class="ts-big" id="ts-big"></div><div class="small muted" id="ts-sub"></div></div>' +
       '<p class="gate-msg" id="ts-msg" role="alert"></p>' +
       '<button class="btn primary" id="ts-go" type="button">Inizia</button></div>' +

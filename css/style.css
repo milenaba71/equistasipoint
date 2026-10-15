@@ -560,3 +560,5 @@ main { padding-top: 0; padding-bottom: 12px; }
 .ck-accept { padding: 12px; border-radius: 14px; background: rgba(250, 220, 0, .22); border: 2px solid var(--yellow); font-size: 14.5px; }
 .ck-accept input { width: 24px; height: 24px; }
 .ob-submit { width: 100%; margin-top: 4px; }
+
+.ts-safety { margin: 0 0 14px; }
