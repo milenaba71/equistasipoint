@@ -136,6 +136,9 @@
   const profileChip = () => '<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>' +
     (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + '</b></span>' +
     '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + 'Cambia profilo</a></div>';
+  const SHOP = (window.APP_CONFIG && window.APP_CONFIG.shopUrl) || 'https://shop.equistasi.com';
+  const shopCard = '<a class="card shop-card" href="' + SHOP + '" target="_blank" rel="noopener"><span class="shop-ico" aria-hidden="true">🛒</span>' +
+    '<span class="shop-txt"><b>Shop</b><span class="small">shop.equistasi.com</span></span><span class="chev" aria-hidden="true">›</span></a>';
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
 
@@ -180,7 +183,7 @@
       [EQ.steps.start[0]].concat(EQ.steps[state.devType] || EQ.steps.silicone).map((x) => '<li>' + esc(x.replace('centrato esattamente sulla X', 'nel punto indicato dal protocollo')) + '</li>').join('') +
       '</ol></div>' +
       '<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">' + window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
-      '</div></div>';
+      shopCard + '</div></div>';
     app.querySelectorAll('[data-devtype]').forEach((b) => b.addEventListener('click', () => {
       state.devType = b.dataset.devtype; store.set('tp-devtype', state.devType); renderNeuroHome();
     }));
@@ -241,7 +244,7 @@
       '<figure><img src="' + PAIN_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>' +
       '<figure><img src="' + PAIN_IMG.s3 + '" alt="" loading="lazy" /><figcaption><b>3</b> Applica Equistasi sulla <b>X</b></figcaption></figure>' +
       '</div><p class="small muted" style="margin:10px 0 0">La zona <b style="color:var(--blue)">blu</b> è dove si irradia il dolore: il dispositivo va sulla X.</p></div>' +
-      '</div></div>';
+      shopCard + '</div></div>';
 
     app.querySelectorAll('[data-view]').forEach((b) => b.addEventListener('click', () => {
       state.homeView = b.dataset.view; store.set('tp-view', state.homeView); renderHome();
@@ -650,7 +653,7 @@
     setBack(true);
     app.innerHTML =
       '<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>' +
-      '<div class="cols">' +
+      shopCard + '<div class="cols">' +
       '<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>' +
       '<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>' + legend() + '</div>' +
       '<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>' +
