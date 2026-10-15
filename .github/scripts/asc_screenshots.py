@@ -7,7 +7,7 @@ import glob, hashlib, os, sys, time, urllib.request
 
 from asc_upload import call
 
-SETS = {"iphone": ["APP_IPHONE_69", "APP_IPHONE_67"], "ipad": ["APP_IPAD_PRO_3GEN_129"]}
+SETS = {"iphone": ["APP_IPHONE_67"], "ipad": ["APP_IPAD_PRO_3GEN_129"]}
 
 
 def upload_shot(set_id, path):
