@@ -41,6 +41,29 @@ jobs:
           printf '%s\n' "$KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8
           echo "KEY_PATH=$HOME/.appstoreconnect/private_keys/AuthKey_${KEY_ID}.p8" >> "$GITHUB_ENV"
 
+      - name: Verifica la chiave API (accesso ad App Store Connect)
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography || python3 -m pip install --quiet pyjwt cryptography
+          python3 - <<'PY'
+          import os, time, jwt, urllib.request, urllib.error, sys
+          key = open(os.environ["KEY_PATH"]).read()
+          if not os.environ.get("ISSUER_ID") or not os.environ.get("KEY_ID"):
+              print("::error::Manca APPSTORE_ISSUER_ID o APPSTORE_KEY_ID"); sys.exit(1)
+          try:
+              jwt.encode({}, key, algorithm="ES256")
+          except Exception:
+              print("::error::Il testo di APPSTORE_KEY_P8 non è una chiave valida: incolla tutto il file .p8, righe BEGIN/END comprese"); sys.exit(1)
+          tok = jwt.encode({"iss": os.environ["ISSUER_ID"], "iat": int(time.time()), "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
+                           key, algorithm="ES256", headers={"kid": os.environ["KEY_ID"], "typ": "JWT"})
+          req = urllib.request.Request("https://api.appstoreconnect.apple.com/v1/apps?limit=5", headers={"Authorization": "Bearer " + tok})
+          try:
+              with urllib.request.urlopen(req) as r:
+                  print("Chiave API valida, HTTP", r.status)
+          except urllib.error.HTTPError as e:
+              print("::error::App Store Connect ha rifiutato la chiave API (HTTP %d): controlla APPSTORE_KEY_ID, APPSTORE_ISSUER_ID e APPSTORE_KEY_P8" % e.code)
+              sys.exit(1)
+          PY
+
       - name: Archivio firmato
         working-directory: mobile/ios/App
         run: |
