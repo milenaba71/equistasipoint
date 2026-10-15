@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="css/style.css?v=40" />
+  <link rel="stylesheet" href="css/style.css?v=41" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -65,73 +65,79 @@
 
   <main id="app" tabindex="-1"></main>
   <nav class="tabbar" id="tabbar" aria-label="Navigazione">
-    <a href="#/" data-tab="home"><span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Mappa</a>
-    <a href="#/promemoria" data-tab="promemoria"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Promemoria</a>
-    <a href="#/video" data-tab="video"><span class="tb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg></span>Video</a>
-    <a href="#/info" data-tab="extra" id="tab-extra"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg></span>Info</a>
+    <a href="#/" data-tab="home"><span class="tb-ic"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span data-t>Mappa</span></a>
+    <a href="#/promemoria" data-tab="promemoria"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span data-t>Promemoria</span></a>
+    <a href="#/video" data-tab="video"><span class="tb-ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/></svg></span><span data-t>Video</span></a>
+    <a href="#/info" data-tab="extra" id="tab-extra"><span class="tb-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg></span><span data-t>Info</span></a>
   </nav>
-  <footer class="foot"><a href="#/privacy">Privacy</a> · <a href="#/info">Informazioni</a> · <a href="#/video">Video tutorial</a></footer>
+  <footer class="foot"><a href="#/privacy">Privacy</a> · <a href="#/info" data-t>Informazioni</a> · <a href="#/video" data-t>Video tutorial</a></footer>
 
   <section class="gate" id="gate" hidden>
     <form class="gate-box" id="gate-form" novalidate>
+      <div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it">Italiano</button><button type="button" data-lang="en">English</button></div>
       <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
       <img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" class="gate-device" width="480" height="386" />
-      <h1>Attiva l’app</h1>
-      <p>Inserisci il <b>numero di serie</b> del tuo dispositivo Equistasi. Lo trovi stampato sul <b>retro del dispositivo</b>.</p>
-      <label for="serial" class="gate-label">Numero di serie</label>
+      <h1 data-t>Attiva l’app</h1>
+      <p data-t>Inserisci il <b>numero di serie</b> del tuo dispositivo Equistasi. Lo trovi stampato sul <b>retro del dispositivo</b>.</p>
+      <label for="serial" class="gate-label" data-t>Numero di serie</label>
       <input id="serial" class="search gate-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="es. EQX25002587" required />
       <p class="gate-msg" id="gate-msg" role="alert"></p>
-      <button class="btn primary" id="gate-btn" type="submit">Accedi</button>
-      <p class="gate-help">Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.</p>
+      <button class="btn primary" id="gate-btn" type="submit" data-t>Accedi</button>
+      <p class="gate-help" data-t>Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.</p>
     </form>
   </section>
 
   <section class="gate" id="onboard" hidden>
     <form class="gate-box onboard" id="ob-form" novalidate>
+      <div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it">Italiano</button><button type="button" data-lang="en">English</button></div>
       <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
-      <h1>Per cosa usi Equistasi?</h1>
-      <p>Così ti mostriamo solo i protocolli e i video adatti a te. Puoi cambiare scelta quando vuoi.</p>
+      <h1 data-t>Per cosa usi Equistasi?</h1>
+      <p data-t>Così ti mostriamo solo i protocolli e i video adatti a te. Puoi cambiare scelta quando vuoi.</p>
       <div class="ob-opts" id="ob-opts" role="radiogroup" aria-label="Profilo"></div>
       <div id="ob-neuro" hidden>
-        <div class="gate-label">Quale patologia?</div>
+        <div class="gate-label" data-t>Quale patologia?</div>
         <div class="ob-pills" id="ob-pato" role="radiogroup" aria-label="Patologia"></div>
       </div>
-      <label class="gate-label" for="ob-eta">Fascia d’età <span class="muted">(facoltativo)</span></label>
-      <select id="ob-eta" class="search"><option value="">Preferisco non indicarla</option></select>
+      <label class="gate-label" for="ob-eta" data-t>Fascia d’età <span class="muted">(facoltativo)</span></label>
+      <select id="ob-eta" class="search"><option value="" data-t>Preferisco non indicarla</option></select>
       <div class="ob-privacy">
-        <label class="ck"><input type="checkbox" id="ob-consent" /> <span><b>Facoltativo.</b> Acconsento a condividere con Equistasi il profilo d’uso, la patologia indicata (dati relativi alla salute) e la fascia d’età insieme al numero di serie, per migliorare prodotti e servizi. Posso revocare il consenso in ogni momento.</span></label>
-        <label class="ck ck-accept"><input type="checkbox" id="ob-read" /> <span><b>Accetto ed entro:</b> ho letto l’<a href="#" data-privacy>informativa privacy</a> e accetto le condizioni d’uso.</span></label>
+        <label class="ck"><input type="checkbox" id="ob-consent" /> <span data-t><b>Facoltativo.</b> Acconsento a condividere con Equistasi il profilo d’uso, la patologia indicata (dati relativi alla salute) e la fascia d’età insieme al numero di serie, per migliorare prodotti e servizi. Posso revocare il consenso in ogni momento.</span></label>
+        <label class="ck ck-accept"><input type="checkbox" id="ob-read" /> <span data-t><b>Accetto ed entro:</b> ho letto l’<a href="#" data-privacy>informativa privacy</a> e accetto le condizioni d’uso.</span></label>
       </div>
       <p class="gate-msg" id="ob-msg" role="alert"></p>
-      <button class="btn ob-submit" type="submit">Continua</button>
-      <button class="btn ob-cancel" id="ob-cancel" type="button" hidden>Annulla</button>
+      <button class="btn ob-submit" type="submit" data-t>Continua</button>
+      <button class="btn ob-cancel" id="ob-cancel" type="button" hidden data-t>Annulla</button>
     </form>
   </section>
 
   <div class="modal" id="privacy-modal" hidden>
     <div class="modal-box privacy-box" role="dialog" aria-modal="true" aria-labelledby="pm-title">
-      <h2 id="pm-title">Informativa privacy</h2>
+      <h2 id="pm-title" data-t>Informativa privacy</h2>
       <div id="pm-body"></div>
-      <button class="btn primary" id="pm-close" type="button">Chiudi</button>
+      <button class="btn primary" id="pm-close" type="button" data-t>Chiudi</button>
     </div>
   </div>
 
   <div class="modal" id="disclaimer" hidden>
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="disc-title">
-      <h2 id="disc-title">Prima di iniziare</h2>
-      <p>Questa app ti aiuta a capire <b>dove applicare il dispositivo Equistasi</b> in base alla zona in cui senti dolore, usando le mappe scientifiche dei trigger point miofasciali.</p>
-      <p>Le informazioni sono di carattere generale e <b>non sostituiscono il parere del medico, del fisioterapista o del farmacista</b>. Leggi sempre il foglietto illustrativo del dispositivo.</p>
-      <p>Se il dolore è forte, persistente o accompagnato da altri sintomi, rivolgiti a un professionista sanitario.</p>
-      <button class="btn primary" id="disc-ok">Ho capito</button>
+      <h2 id="disc-title" data-t>Prima di iniziare</h2>
+      <p data-t>Questa app ti aiuta a capire <b>dove applicare il dispositivo Equistasi</b> in base alla zona in cui senti dolore, usando le mappe scientifiche dei trigger point miofasciali.</p>
+      <p data-t>Le informazioni sono di carattere generale e <b>non sostituiscono il parere del medico, del fisioterapista o del farmacista</b>. Leggi sempre il foglietto illustrativo del dispositivo.</p>
+      <p data-t>Se il dolore è forte, persistente o accompagnato da altri sintomi, rivolgiti a un professionista sanitario.</p>
+      <button class="btn primary" id="disc-ok" data-t>Ho capito</button>
     </div>
   </div>
 
-  <script src="js/config.js?v=40"></script>
-  <script src="js/body.js?v=40"></script>
-  <script src="js/data.js?v=40"></script>
-  <script src="js/timer.js?v=40"></script>
-  <script src="js/tests.js?v=40"></script>
-  <script src="js/app.js?v=40"></script>
-  <script src="js/native.js?v=40"></script>
+  <script src="js/config.js?v=41"></script>
+  <script src="js/i18n.js?v=41"></script>
+  <script src="js/en-app.js?v=41"></script>
+  <script src="js/en-modules.js?v=41"></script>
+  <script src="js/body.js?v=41"></script>
+  <script src="js/data.js?v=41"></script>
+  <script src="js/data-en.js?v=41"></script>
+  <script src="js/timer.js?v=41"></script>
+  <script src="js/tests.js?v=41"></script>
+  <script src="js/app.js?v=41"></script>
+  <script src="js/native.js?v=41"></script>
 </body>
 </html>
