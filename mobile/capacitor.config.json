@@ -2,5 +2,13 @@
   "appId": "com.equistasi.point",
   "appName": "Equistasi Point",
   "webDir": "www",
-  "backgroundColor": "#ffffff"
+  "backgroundColor": "#ffffff",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    }
+  }
 }

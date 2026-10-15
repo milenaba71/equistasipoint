@@ -562,3 +562,9 @@ main { padding-top: 0; padding-bottom: 12px; }
 .ob-submit { width: 100%; margin-top: 4px; }
 
 .ts-safety { margin: 0 0 14px; }
+
+/* Promemoria giornalieri (app nativa) */
+.tm-daily { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, .18); }
+.tm-daily .ck { color: #fff; font-size: 14px; }
+.tm-times { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 13.5px; color: rgba(255, 255, 255, .85); }
+.tm-times input { margin-left: 6px; font: inherit; border: 0; border-radius: 10px; padding: 6px 8px; background: rgba(255, 255, 255, .15); color: #fff; }
