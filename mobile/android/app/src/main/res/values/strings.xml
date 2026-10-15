@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Equistasi Point</string>
     <string name="title_activity_main">Equistasi Point</string>
-    <string name="package_name">com.equistasi.point</string>
-    <string name="custom_url_scheme">com.equistasi.point</string>
+    <string name="package_name">com.equistasi.triggerpoint</string>
+    <string name="custom_url_scheme">com.equistasi.triggerpoint</string>
 </resources>

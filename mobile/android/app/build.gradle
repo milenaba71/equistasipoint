@@ -4,12 +4,13 @@ android {
     namespace "com.equistasi.point"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.equistasi.point"
+        applicationId "com.equistasi.triggerpoint"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // numero di build automatico (GitHub Actions) per Google Play
-        versionCode((System.getenv("VERSION_CODE") ?: "1").toInteger())
-        versionName "1.0"
+        // numero di build automatico (GitHub Actions) per Google Play: 1200 + numero di esecuzione,
+        // così supera le versioni già pubblicate dell'app Equistasi Point
+        versionCode(1200 + (System.getenv("VERSION_CODE") ?: "0").toInteger())
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
