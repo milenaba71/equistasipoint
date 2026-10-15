@@ -705,6 +705,14 @@
     '<span><b>' + esc(p.title) + '</b><span>' + esc(p.desc) + '</span></span></button>').join('');
   document.getElementById('ob-pato').innerHTML = Object.entries(window.PATOLOGIE).map(([k, p]) =>
     '<button type="button" class="ob-pill" role="radio" aria-checked="false" data-pato="' + k + '">' + esc(p.label) + '</button>').join('');
+  // il sotto-menu delle patologie si apre subito sotto "Patologia neurologica"
+  const neuroBtn = document.querySelector('#ob-opts [data-type="neuro"]');
+  if (neuroBtn) {
+    neuroBtn.classList.add('has-sub');
+    neuroBtn.insertAdjacentHTML('beforeend', '<span class="ob-caret" aria-hidden="true">▾</span>');
+    neuroBtn.after(obNeuro);
+    obNeuro.classList.add('ob-sub');
+  }
 
   function obSync() {
     obForm.querySelectorAll('[data-type]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.type === ob$.type)));
@@ -717,6 +725,7 @@
     if (t) ob$.type = t.dataset.type;
     if (pt) ob$.patologia = pt.dataset.pato;
     if (t || pt) { obMsg.textContent = ''; obSync(); }
+    if (t && t.dataset.type === 'neuro') setTimeout(() => obNeuro.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
   });
 
   function showOnboarding(editing) {

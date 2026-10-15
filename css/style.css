@@ -509,3 +509,14 @@ main { padding-top: 0; padding-bottom: 12px; }
 .profile-switch { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 999px;
   background: var(--yellow); color: var(--indigo); font-weight: 800; font-size: 15px; text-decoration: none; box-shadow: 0 6px 16px rgba(0, 0, 0, .2); }
 .profile-switch:active { transform: scale(.97); }
+
+/* Sotto-menu patologie sotto "Patologia neurologica" */
+.ob-opt.has-sub { grid-template-columns: 40px 1fr auto; }
+.ob-caret { font-size: 18px; color: var(--muted); transition: transform .2s; }
+.ob-opt[aria-checked="true"] .ob-caret { transform: rotate(180deg); color: var(--indigo); }
+.ob-sub { margin: -4px 0 4px 18px; padding: 12px 12px 4px; border-left: 3px solid var(--yellow); background: var(--grey); border-radius: 0 14px 14px 0; animation: obsub .2s ease-out; }
+.ob-sub .gate-label { margin-bottom: 8px; }
+.ob-sub .ob-pills { margin-bottom: 8px; }
+.ob-sub .ob-pill { padding: 10px 16px; font-size: 15px; }
+@keyframes obsub { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ob-sub { background: #29235C; } }
