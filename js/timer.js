@@ -118,8 +118,44 @@
     return '<div class="card tm-card" id="tm-card"><h3>Promemoria delle 2 ore</h3>' + body +
       '<p class="tm-msg small" id="tm-msg" hidden></p>' +
       '<div class="tm-stats small"><span>Oggi ' + dots + ' ' + Math.min(today, 2) + ' di 2</span>' +
-      '<span>Giorni di fila: <b>' + st + '</b> di 5</span></div></div>';
+      '<span>Giorni di fila: <b>' + st + '</b> di 5</span></div>' + dailyHtml() + '</div>';
   }
+
+  /* ───────── Promemoria giornalieri (solo app per iPhone/Android) ───────── */
+  const DAILY = 'tp-daily';
+  const daily = () => store.get(DAILY, { on: false, am: '09:00', pm: '15:00' });
+  function dailyHtml() {
+    if (!native()) return '';
+    const d = daily();
+    return '<div class="tm-daily"><label class="ck"><input type="checkbox" id="tm-daily"' + (d.on ? ' checked' : '') + ' />' +
+      '<span><b>Ricordami di applicarlo</b> dal lunedì al venerdì</span></label>' +
+      '<div class="tm-times"><label>Mattina <input type="time" class="tm-time" data-k="am" value="' + d.am + '" /></label>' +
+      '<label>Pomeriggio <input type="time" class="tm-time" data-k="pm" value="' + d.pm + '" /></label></div></div>';
+  }
+  // id 3002-3006 mattina, 3012-3016 pomeriggio (giorni 2-6 = lunedì-venerdì)
+  async function scheduleDaily() {
+    const LN = native();
+    if (!LN) return;
+    const ids = [];
+    for (let w = 2; w <= 6; w++) ids.push({ id: 3000 + w }, { id: 3010 + w });
+    try { await LN.cancel({ notifications: ids }); } catch (e) { /* nessun promemoria */ }
+    const d = daily();
+    if (!d.on) return;
+    if (!(await askPermission().catch(() => false))) return;
+    const list = [];
+    [['am', 3000], ['pm', 3010]].forEach(([k, base]) => {
+      const [h, m] = (d[k] || '09:00').split(':').map(Number);
+      for (let w = 2; w <= 6; w++) {
+        list.push({ id: base + w, title: 'È ora di applicare Equistasi', body: 'Applica il dispositivo e avvia il promemoria delle 2 ore.', schedule: { on: { weekday: w, hour: h, minute: m }, allowWhileIdle: true } });
+      }
+    });
+    await LN.schedule({ notifications: list });
+  }
+  document.addEventListener('change', (ev) => {
+    const t = ev.target;
+    if (t.id === 'tm-daily') { const d = daily(); d.on = t.checked; store.set(DAILY, d); scheduleDaily(); }
+    if (t.classList && t.classList.contains('tm-time')) { const d = daily(); d[t.dataset.k] = t.value; store.set(DAILY, d); scheduleDaily(); }
+  });
 
   // Ridisegna la scheda (se presente) e la barra in alto
   function render(msg) {
