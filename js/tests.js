@@ -8,6 +8,14 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage non disponibile */ } },
   };
+  // Illustrazioni a fumetti (colori Equistasi)
+  const IMG_BASE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/';
+  const IMG = {
+    hero: IMG_BASE + '4aa1198d-eb50-408e-b547-54bbb3f5bfa4.jpg',
+    equilibrio: IMG_BASE + '8a7ee277-f86c-4f47-be50-23cf48c073b0.jpg',
+    salto: IMG_BASE + '30259cbc-db2f-4a4b-b6d4-d07dd242740a.jpg',
+    sprint: IMG_BASE + 'b64db264-d94d-491a-885e-6f04875376d8.jpg',
+  };
   const TESTS = {
     equilibrio: {
       icon: '🧍', name: 'Equilibrio su una gamba', short: 'Equilibrio',
@@ -117,7 +125,7 @@
   /* ───────── Interfaccia ───────── */
   function cardHtml() {
     const all = results();
-    return '<a class="card vpromo tests-promo" href="#/test"><span class="vpromo-ico" aria-hidden="true">📈</span>' +
+    return '<a class="card vpromo tests-promo" href="#/test"><span class="vpromo-ico" aria-hidden="true"><img src="' + IMG.sprint + '" alt="" loading="lazy" /></span>' +
       '<span><b>Misura i tuoi progressi</b><br><span class="small muted">Equilibrio, salto e sprint' +
       (all.length ? ' · ' + all.length + ' prove salvate' : ' con il tuo telefono') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
@@ -154,11 +162,11 @@
   }
 
   function renderList(app) {
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Sport</div><h1>Misura i tuoi <span class="hl">progressi</span></h1>' +
+    app.innerHTML = '<img class="ts-hero" style="margin-top:16px" src="' + IMG.hero + '" alt="" loading="lazy" />' + '<div class="detail-head" style="padding-top:0"><div class="eyebrow">Sport</div><h1>Misura i tuoi <span class="hl">progressi</span></h1>' +
       '<p class="small muted" style="margin:6px 0 0">Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.</p></div>' +
       '<div class="list">' + Object.keys(TESTS).map((k) => {
         const T = TESTS[k]; const n = results().filter((r) => r.type === k).length;
-        return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true">' + T.icon + '</span><span><b>' + T.name + '</b><br><span class="small muted">' + T.desc +
+        return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + T.name + '</b><br><span class="small muted">' + T.desc +
           (n ? ' · ' + n + ' prove' : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
       '<p class="small muted" style="margin-top:14px">I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo. Servono a seguire i tuoi progressi, non sono una valutazione medica.</p>';
@@ -181,7 +189,8 @@
     }
     app.innerHTML = '<div class="detail-head"><div class="eyebrow">Misura i tuoi progressi</div><h1>' + T.name + '</h1></div>' +
       '<div class="home-grid"><div>' +
-      '<div class="card"><div class="toolbar">' + seg('cond', COND, prefs.cond) + '</div>' + setup +
+      '<div class="card"><img class="ts-hero" src="' + IMG[type] + '" alt="" loading="lazy" />' +
+      '<div class="toolbar">' + seg('cond', COND, prefs.cond) + '</div>' + setup +
       '<ol class="steps">' + how + '</ol>' +
       '<div class="ts-live" id="ts-live" hidden><div class="ts-big" id="ts-big"></div><div class="small muted" id="ts-sub"></div></div>' +
       '<p class="gate-msg" id="ts-msg" role="alert"></p>' +
@@ -275,5 +284,5 @@
     if (arg) renderTest(app, arg); else renderList(app);
   }
 
-  window.EqTests = { cardHtml, render, _flightTime: flightTime, _swayScore: swayScore, _heightCm: heightCm };
+  window.EqTests = { cardHtml, render, IMG, _flightTime: flightTime, _swayScore: swayScore, _heightCm: heightCm };
 })();

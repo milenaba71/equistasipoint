@@ -182,7 +182,8 @@
     app.innerHTML =
       '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
       '<h1>' + (sport ? 'Contratture o <span class="hl">dolori muscolari</span>?' : 'Dove senti <span class="hl">dolore</span>?') + '</h1>' +
-      '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p></section>' +
+      '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>' +
+      (sport ? '<img class="hero-img" src="' + window.EqTests.IMG.hero + '" alt="" />' : '') + '</section>' +
       (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
