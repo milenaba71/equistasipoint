@@ -23,9 +23,21 @@ def main(bundle_id):
         if ga.get("isInternalGroup"):
             if ga.get("hasAccessToAllBuilds"):
                 print("Il gruppo interno %s riceve già tutte le build" % ga["name"])
-                continue
-            if call("POST", "/betaGroups/%s/relationships/builds" % g["id"], {"data": [{"type": "builds", "id": b["id"]}]}, allow_fail=True) is not None:
+            elif call("POST", "/betaGroups/%s/relationships/builds" % g["id"], {"data": [{"type": "builds", "id": b["id"]}]}, allow_fail=True) is not None:
                 print("Build aggiunta al gruppo interno:", ga["name"])
+        if ga.get("isInternalGroup"):
+            gb = call("GET", "/betaGroups/%s/builds?limit=5" % g["id"], allow_fail=True) or {"data": []}
+            print("Gruppo %s: accesso a tutte le build=%s, build nel gruppo=%s" % (
+                ga["name"], ga.get("hasAccessToAllBuilds"), [x["attributes"]["version"] for x in gb["data"]]))
+            testers = call("GET", "/betaGroups/%s/betaTesters?limit=50" % g["id"], allow_fail=True) or {"data": []}
+            for t in testers["data"]:
+                ta = t["attributes"]
+                print("Tester %s: stato %s" % (ta.get("email"), ta.get("state")))
+                r = call("POST", "/betaTesterInvitations", {"data": {"type": "betaTesterInvitations", "relationships": {
+                    "betaTester": {"data": {"type": "betaTesters", "id": t["id"]}},
+                    "app": {"data": {"type": "apps", "id": app["id"]}}}}}, allow_fail=True)
+                if r is not None:
+                    print("Invito TestFlight inviato a", ta.get("email"))
     print("Fatto: apri TestFlight sull'iPhone")
 
 
