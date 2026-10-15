@@ -38,7 +38,7 @@ jobs:
           BUILD: ${{ inputs.build }}
           CONTACT_FIRST: Milena
           CONTACT_LAST: Baroni
-          CONTACT_PHONE: "+39 3922838603"
+          CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
