@@ -19,9 +19,13 @@ def main(bundle_id):
         print("Conformità crittografia impostata: nessuna crittografia non esente")
     groups = call("GET", "/apps/%s/betaGroups" % app["id"])["data"]
     for g in groups:
-        if g["attributes"].get("isInternalGroup"):
-            call("POST", "/betaGroups/%s/relationships/builds" % g["id"], {"data": [{"type": "builds", "id": b["id"]}]})
-            print("Build aggiunta al gruppo interno:", g["attributes"]["name"])
+        ga = g["attributes"]
+        if ga.get("isInternalGroup"):
+            if ga.get("hasAccessToAllBuilds"):
+                print("Il gruppo interno %s riceve già tutte le build" % ga["name"])
+                continue
+            if call("POST", "/betaGroups/%s/relationships/builds" % g["id"], {"data": [{"type": "builds", "id": b["id"]}]}, allow_fail=True) is not None:
+                print("Build aggiunta al gruppo interno:", ga["name"])
     print("Fatto: apri TestFlight sull'iPhone")
 
 
