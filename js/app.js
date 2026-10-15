@@ -209,7 +209,9 @@
       '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? 'Sport e performance' : 'Mappa dei trigger point') + '</div>' +
       '<h1>' + (sport ? 'Contratture o <span class="hl">dolori muscolari</span>?' : 'Dove senti <span class="hl">dolore</span>?') + '</h1>' +
       '<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>' +
-      '<img class="hero-img" src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' + '</section>' +
+      '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
+      '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
+      '<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>' + '</section>' +
       (sport ? window.EqTests.cardHtml() + protocolsCard('I tuoi protocolli per lo sport') : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
@@ -218,7 +220,7 @@
       '</div><span class="small muted">' + (state.homeView === 'front' ? 'Vista frontale' : 'Vista posteriore') + '</span></div>' +
       '<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>' +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
-      '<p class="map-hint">Tocca un <b>punto blu</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>' +
+      '<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>' +
       '<div>' + window.EqTimer.cardHtml() +
       '<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">' +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
@@ -238,6 +240,12 @@
       state.homeView = b.dataset.view; store.set('tp-view', state.homeView); renderHome();
     }));
 
+    const toMap = app.querySelector('#to-map');
+    if (toMap) toMap.addEventListener('click', () => {
+      const card = app.querySelector('.map-card');
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    });
     const svg = app.querySelector('#map svg');
     svg.addEventListener('click', (ev) => {
       const t = ev.target.closest('[data-area]');
