@@ -1,4 +1,4 @@
-/* "Misura i tuoi progressi" (profilo Sport): test di equilibrio, salto verticale e sprint.
+/* "Misura i tuoi progressi" (profilo Sport): test di equilibrio (su una gamba e in piedi), salto verticale e sprint.
    Usa i sensori di movimento del telefono (DeviceMotion) e un cronometro; i risultati restano sul telefono.
    Ogni prova si può segnare "senza" o "con Equistasi" per confrontare i propri progressi. */
 (function () {
@@ -13,6 +13,7 @@
   const IMG = {
     hero: IMG_BASE + '4aa1198d-eb50-408e-b547-54bbb3f5bfa4.jpg',
     equilibrio: IMG_BASE + '8a7ee277-f86c-4f47-be50-23cf48c073b0.jpg',
+    ortostasi: IMG_BASE + '66f95bf6-6c34-4b1e-924f-3e30cd3222ae.jpg',
     salto: IMG_BASE + '30259cbc-db2f-4a4b-b6d4-d07dd242740a.jpg',
     sprint: IMG_BASE + 'b64db264-d94d-491a-885e-6f04875376d8.jpg',
   };
@@ -20,6 +21,11 @@
     equilibrio: {
       icon: '🧍', name: 'Equilibrio su una gamba', short: 'Equilibrio',
       desc: 'Il telefono misura quanto oscilla il corpo in 30 secondi su una gamba.',
+      unit: 'm/s²', better: 'low', label: 'Oscillazione',
+    },
+    ortostasi: {
+      icon: '🧍', name: 'Equilibrio in piedi (ortostasi)', short: 'Ortostasi',
+      desc: 'In piedi e fermi per 30 secondi: il telefono misura quanto oscilla il corpo.',
       unit: 'm/s²', better: 'low', label: 'Oscillazione',
     },
     salto: {
@@ -34,7 +40,7 @@
     },
   };
   const COND = { senza: 'Senza Equistasi', con: 'Con Equistasi' };
-  const prefs = store.get('tp-test-prefs', { cond: 'senza', leg: 'dx', eyes: 'aperti', dist: 20 });
+  const prefs = store.get('tp-test-prefs', { cond: 'senza', leg: 'dx', eyes: 'aperti', dist: 20, stance: 'uniti' });
   const savePrefs = () => store.set('tp-test-prefs', prefs);
 
   const fmt = (v, d = 1) => Number(v).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -126,7 +132,7 @@
   function cardHtml() {
     const all = results();
     return '<a class="card vpromo tests-promo" href="#/test"><span class="vpromo-ico" aria-hidden="true"><img src="' + IMG.sprint + '" alt="" loading="lazy" /></span>' +
-      '<span><b>Misura i tuoi progressi</b><br><span class="small muted">Equilibrio, salto e sprint' +
+      '<span><b>Misura i tuoi progressi</b><br><span class="small muted">Equilibrio, ortostasi, salto e sprint' +
       (all.length ? ' · ' + all.length + ' prove salvate' : ' con il tuo telefono') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
@@ -177,7 +183,11 @@
     if (!T) return renderList(app);
     let setup = '';
     let how = '';
-    if (type === 'equilibrio') {
+    if (type === 'ortostasi') {
+      setup = '<div class="toolbar">' + seg('stance', { uniti: 'Piedi uniti', tandem: 'Un piede davanti all’altro' }, prefs.stance || 'uniti') + '</div>' +
+        '<div class="toolbar">' + seg('eyes', { aperti: 'Occhi aperti', chiusi: 'Occhi chiusi' }, prefs.eyes) + '</div>';
+      how = '<li>Mettiti <b>in piedi, fermo</b>, con le braccia che tengono il telefono <b>appoggiato al petto</b>.</li><li>Tocca <b>Inizia</b>: dopo il conto alla rovescia resta immobile per <b>30 secondi</b>, guardando avanti (o a occhi chiusi).</li><li>Se perdi l’equilibrio e devi spostare un piede, tocca lo schermo. Fai il test vicino a un muro o con qualcuno accanto.</li>';
+    } else if (type === 'equilibrio') {
       setup = '<div class="toolbar">' + seg('leg', { dx: 'Gamba destra', sx: 'Gamba sinistra' }, prefs.leg) + '</div>' +
         '<div class="toolbar">' + seg('eyes', { aperti: 'Occhi aperti', chiusi: 'Occhi chiusi' }, prefs.eyes) + '</div>';
       how = '<li>Tieni il telefono <b>appoggiato al petto</b> con entrambe le mani.</li><li>Tocca <b>Inizia</b>: dopo il conto alla rovescia sollevi un piede e resti in equilibrio per <b>30 secondi</b>.</li><li>Se appoggi il piede, tocca lo schermo: salviamo il tempo che hai resistito.</li>';
@@ -240,12 +250,12 @@
       go.disabled = false; return;
     }
     live.hidden = false;
-    sub.textContent = type === 'equilibrio' ? 'Preparati: telefono al petto' : 'Telefono stretto al petto';
+    sub.textContent = type === 'salto' ? 'Telefono stretto al petto' : 'Preparati: telefono al petto';
     await countdown(big);
 
-    if (type === 'equilibrio') {
+    if (type === 'equilibrio' || type === 'ortostasi') {
       const DUR = 30000; const t0 = performance.now();
-      sub.textContent = 'Resta in equilibrio · tocca lo schermo se appoggi il piede';
+      sub.textContent = type === 'ortostasi' ? 'Resta immobile · tocca lo schermo se sposti un piede' : 'Resta in equilibrio · tocca lo schermo se appoggi il piede';
       const iv = setInterval(() => { big.textContent = Math.max(0, Math.ceil((DUR - (performance.now() - t0)) / 1000)) + ' s'; }, 200);
       const tap = () => record.stop && record.stop();
       setTimeout(() => document.addEventListener('pointerdown', tap, { once: true }), 300);
@@ -255,8 +265,9 @@
       const held = Math.min(DUR, performance.now() - t0) / 1000;
       const score = swayScore(samples);
       if (score == null) { msg.textContent = 'Il sensore di movimento non ha inviato dati: prova dal telefono.'; go.disabled = false; live.hidden = true; return; }
-      const note = (prefs.leg === 'dx' ? 'gamba dx' : 'gamba sx') + ' · occhi ' + prefs.eyes + (held < 29.5 ? ' · ' + fmt(held, 0) + ' s' : '');
-      addResult({ type, value: score, note, held, leg: prefs.leg, eyes: prefs.eyes });
+      const pos = type === 'ortostasi' ? ((prefs.stance || 'uniti') === 'uniti' ? 'piedi uniti' : 'tandem') : (prefs.leg === 'dx' ? 'gamba dx' : 'gamba sx');
+      const note = pos + ' · occhi ' + prefs.eyes + (held < 29.5 ? ' · ' + fmt(held, 0) + ' s' : '');
+      addResult({ type, value: score, note, held, leg: prefs.leg, eyes: prefs.eyes, stance: prefs.stance });
       renderTest(app, type);
       showDone('Oscillazione ' + fmt(score, 2) + ' m/s² (più è bassa, più sei stabile)' + (held < 29.5 ? ' · hai resistito ' + fmt(held, 0) + ' s' : ''));
       return;
