@@ -131,7 +131,11 @@
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
   }
 
-  const profileChip = () => '<a class="profile-chip" href="#/profilo">' + (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + ' · cambia</a>';
+  // Profilo attuale + pulsante grande "Cambia profilo"
+  const SWAP_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const profileChip = () => '<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>' +
+    (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + '</b></span>' +
+    '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + 'Cambia profilo</a></div>';
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       '<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>';
 
