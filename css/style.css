@@ -540,3 +540,10 @@ main { padding-top: 0; padding-bottom: 12px; }
 .map-card.flash { animation: mapflash 1.2s ease-out; }
 @keyframes mapflash { 0% { box-shadow: 0 0 0 0 rgba(250, 220, 0, .9); } 100% { box-shadow: 0 0 0 18px rgba(250, 220, 0, 0); } }
 @media (prefers-reduced-motion: reduce) { .hero-cover-cta, .map-card.flash { animation: none; } }
+
+/* Home neurologico: copertina che porta ai protocolli */
+.hero-cover.neuro img { max-height: 240px; object-position: center 20%; }
+.sec-title { font-size: 20px; color: var(--indigo); margin: 4px 2px 10px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sec-title { color: #fff; } }
+.protos-anchor { scroll-margin-top: 70px; border-radius: 22px; }
+.protos-anchor.flash { animation: mapflash 1.2s ease-out; }
