@@ -17,7 +17,7 @@ def token():
                       headers={"kid": os.environ["KEY_ID"], "typ": "JWT"})
 
 
-def call(method, path, body=None):
+def call(method, path, body=None, allow_fail=False):
     req = urllib.request.Request(API + path, method=method,
                                  data=json.dumps(body).encode() if body is not None else None,
                                  headers={"Authorization": "Bearer " + token(), "Content-Type": "application/json"})
@@ -26,7 +26,11 @@ def call(method, path, body=None):
             raw = r.read()
             return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
-        print("::error::%s %s -> HTTP %d: %s" % (method, path, e.code, e.read().decode()[:2000]))
+        msg = e.read().decode()[:2000]
+        if allow_fail:
+            print("%s %s -> HTTP %d: %s" % (method, path, e.code, msg))
+            return None
+        print("::error::%s %s -> HTTP %d: %s" % (method, path, e.code, msg))
         sys.exit(1)
 
 
