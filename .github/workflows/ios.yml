@@ -114,5 +114,9 @@ jobs:
 
       - name: Carica su App Store Connect (TestFlight)
         run: |
-          xcrun altool --upload-app --type ios --file "$(ls "$RUNNER_TEMP"/export/*.ipa)" \
-            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+          sed 's#<key>method</key>#<key>destination</key><string>upload</string><key>method</key>#' \
+            "$RUNNER_TEMP/ExportOptions.plist" > "$RUNNER_TEMP/UploadOptions.plist"
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/UploadOptions.plist" -exportPath "$RUNNER_TEMP/upload" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
