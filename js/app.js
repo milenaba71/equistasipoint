@@ -477,7 +477,7 @@
         if (!document.getElementById('protos')) return;
         if (!ps) { box.innerHTML = '<p class="muted small" style="margin:0">I protocolli non sono disponibili in questo momento. Controlla la connessione.</p>'; return; }
         if (!ps.length) { box.closest('.card').remove(); return; }
-        box.innerHTML = ps.map((x) => '<a class="proto" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="pdf" aria-hidden="true">PDF</span>' +
+        box.innerHTML = ps.map((x) => '<a class="proto" href="#/pdf" data-pdf="' + esc(x.url) + '" data-title="' + esc(x.title) + '"><span class="pdf" aria-hidden="true">PDF</span>' +
           '<span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></a>').join('');
       });
     }, 0);
@@ -606,7 +606,7 @@
     if (!x) return renderHome();
     setBack(true);
     app.innerHTML = '<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>' + esc(x.title) + '</h1><p class="latin">' + esc(x.subtitle) + '</p></div>' +
-      '<div class="detail-grid"><div class="sticky"><div class="card" style="padding:8px"><a href="' + esc(x.img) + '" target="_blank" rel="noopener"><img class="pimg" src="' + esc(x.img) + '" alt="' + esc(x.title + ': ' + x.subtitle) + '" /></a>' +
+      '<div class="detail-grid"><div class="sticky"><div class="card" style="padding:8px"><img class="pimg" data-zoom-img src="' + esc(x.img) + '" alt="' + esc(x.title + ': ' + x.subtitle) + '" />' +
       '<p class="small muted" style="margin:6px 4px 0">Tocca l’immagine per ingrandirla.</p></div></div><div>' +
       '<div class="card"><h3>Dove applicare</h3><p class="small">' + esc(x.intro) + '</p><ol class="steps">' +
       x.points.map(([h, t]) => '<li><b>' + esc(h) + '.</b> ' + esc(t) + '</li>').join('') + '</ol></div>' +
@@ -674,6 +674,71 @@
       '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
+  /* ───────── Visore PDF dentro l'app (così non si esce dall'app) ───────── */
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest('[data-pdf]');
+    if (!a) return;
+    try { sessionStorage.setItem('tp-pdf', JSON.stringify({ url: a.dataset.pdf, title: a.dataset.title || 'Protocollo' })); } catch (e) { /* storage non disponibile */ }
+  });
+  let pdfjsPromise = null;
+  function loadPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (pdfjsPromise) return pdfjsPromise;
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    pdfjsPromise = new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = base + 'pdf.min.js';
+      sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js'; resolve(window.pdfjsLib); };
+      sc.onerror = () => { pdfjsPromise = null; reject(new Error('pdf.js')); };
+      document.head.appendChild(sc);
+    });
+    return pdfjsPromise;
+  }
+  function renderPdf() {
+    setBack(true);
+    let doc = null;
+    try { doc = JSON.parse(sessionStorage.getItem('tp-pdf') || 'null'); } catch (e) { doc = null; }
+    if (!doc || !doc.url) { location.hash = '#/'; return; }
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">Protocollo</div><h1>' + esc(doc.title) + '</h1></div>' +
+      '<div class="row-btns" style="margin:0 0 12px"><button class="btn primary pdf-back" type="button" style="width:auto">‹ Torna indietro</button></div>' +
+      '<div class="pdf-pages" id="pdf-pages"><p class="muted small">Caricamento del protocollo…</p></div>' +
+      '<p class="small muted" style="margin-top:12px">Non si vede bene? <a href="' + esc(doc.url) + '" target="_blank" rel="noopener">Apri il PDF a parte</a> (poi torna all’app).</p>';
+    app.querySelector('.pdf-back').addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
+    const box = document.getElementById('pdf-pages');
+    loadPdfJs()
+      .then((lib) => lib.getDocument({ url: doc.url }).promise)
+      .then(async (pdf) => {
+        if (!document.getElementById('pdf-pages')) return;
+        box.innerHTML = '';
+        const width = Math.min(box.clientWidth || 360, 900);
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        for (let n = 1; n <= pdf.numPages; n++) {
+          const page = await pdf.getPage(n);
+          const vp1 = page.getViewport({ scale: 1 });
+          const vp = page.getViewport({ scale: (width / vp1.width) * ratio });
+          const c = document.createElement('canvas');
+          c.width = vp.width; c.height = vp.height; c.className = 'pdf-page';
+          box.appendChild(c);
+          await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+        }
+      })
+      .catch(() => {
+        // se il PDF non si può leggere qui, lo mostriamo nel riquadro del browser
+        box.innerHTML = '<iframe class="pdf-frame" src="' + esc(doc.url) + '" title="' + esc(doc.title) + '"></iframe>';
+      });
+  }
+
+  /* Ingrandimento immagini dentro l'app */
+  document.addEventListener('click', (ev) => {
+    const img = ev.target.closest('[data-zoom-img]');
+    if (!img) return;
+    const ov = document.createElement('div');
+    ov.className = 'zoom-ov';
+    ov.innerHTML = '<button class="btn primary zoom-close" type="button">✕ Chiudi</button><img src="' + img.getAttribute('src') + '" alt="" />';
+    ov.addEventListener('click', (e) => { if (e.target.closest('.zoom-close') || e.target === ov) ov.remove(); });
+    document.body.appendChild(ov);
+  });
+
   /* ───────── Router ───────── */
   function setBack(on) { btnBack.hidden = !on; }
   btnBack.addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
@@ -703,6 +768,7 @@
     else if (page === 'privacy') renderPrivacy();
     else if (page === 'protocollo') renderAppProtocol(arg);
     else if (page === 'promemoria') renderTimer();
+    else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
