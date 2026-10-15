@@ -13,11 +13,19 @@ on:
 jobs:
   ios:
     runs-on: macos-15
-    env:
-      KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
-      ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
+      - name: Leggi i secrets (togliendo spazi e a capo finiti per sbaglio)
+        env:
+          S_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          S_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          S_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          for v in KEY_ID ISSUER_ID TEAM_ID; do
+            n="S_$v"; val=$(printf '%s' "${!n}" | tr -d '[:space:]')
+            echo "::add-mask::$val"
+            echo "$v=$val" >> "$GITHUB_ENV"
+          done
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
