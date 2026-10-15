@@ -829,7 +829,7 @@
     const pt = ev.target.closest('[data-pato]');
     if (t) ob$.type = t.dataset.type;
     if (pt) ob$.patologia = pt.dataset.pato;
-    if (t || pt) { obMsg.textContent = ''; obSync(); }
+    if (t || pt) { obMsg.textContent = ''; obSync(); obAutoEnter(); }
     if (t && t.dataset.type === 'neuro') setTimeout(() => obNeuro.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
   });
 
@@ -847,7 +847,20 @@
     ob.scrollTop = 0;
   }
 
-  obForm.addEventListener('change', () => { obMsg.textContent = ''; });
+  obForm.addEventListener('change', (ev) => {
+    obMsg.textContent = '';
+    if (ev.target.id !== 'ob-read' || !ev.target.checked) return;
+    if (!ob$.type) { obMsg.textContent = 'Scegli prima per cosa usi Equistasi.'; return; }
+    if (ob$.type === 'neuro' && !ob$.patologia) { obMsg.textContent = 'Scegli prima la patologia.'; return; }
+    obAutoEnter();
+  });
+  // con le condizioni accettate e il profilo scelto si entra subito, senza premere "Continua"
+  let obTimer = null;
+  function obAutoEnter() {
+    if (!document.getElementById('ob-read').checked || !ob$.type || (ob$.type === 'neuro' && !ob$.patologia)) return;
+    clearTimeout(obTimer);
+    obTimer = setTimeout(() => obForm.requestSubmit(), 350);
+  }
   document.getElementById('ob-cancel').addEventListener('click', () => {
     ob.hidden = true;
     if (location.hash === '#/profilo') history.length > 1 ? history.back() : (location.hash = '#/');
