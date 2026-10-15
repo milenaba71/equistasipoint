@@ -82,6 +82,7 @@ jobs:
         run: |
           # Numero di build: l'ultima pubblicata su App Store Connect era la 20
           BUILD=$((20 + GITHUB_RUN_NUMBER))
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
           xcodebuild -project App.xcodeproj -scheme App -configuration Release \
             -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/App.xcarchive" \
             DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
@@ -116,7 +117,13 @@ jobs:
         run: |
           sed 's#<key>method</key>#<key>destination</key><string>upload</string><key>method</key>#' \
             "$RUNNER_TEMP/ExportOptions.plist" > "$RUNNER_TEMP/UploadOptions.plist"
-          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+          if xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/UploadOptions.plist" -exportPath "$RUNNER_TEMP/upload" \
             -allowProvisioningUpdates \
-            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
+            -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"; then
+            exit 0
+          fi
+          echo "Caricamento con xcodebuild non riuscito: provo con la Build Upload API di App Store Connect"
+          VERSION=$(grep -m1 'MARKETING_VERSION' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/[^0-9.]//g')
+          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          python3 .github/scripts/asc_upload.py "$(ls "$RUNNER_TEMP"/export/*.ipa)" "$BUNDLE" "$VERSION" "$BUILD"
