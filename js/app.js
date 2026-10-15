@@ -159,8 +159,14 @@
     app.innerHTML =
       '<section class="hero">' + profileChip() + '<div class="eyebrow">Il tuo percorso con Equistasi</div>' +
       '<h1><span class="hl">' + esc(profileName(p)) + '</span></h1>' +
-      '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p></section>' +
+      '<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p>' +
+      '<img class="hero-img" src="' + NEURO_IMG.hero + '" alt="" /></section>' +
       '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + appProtocolCards() + protocolsCard('I tuoi protocolli') + videoPromo + '</div><div>' +
+      '<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">' +
+      '<figure><img src="' + NEURO_IMG.s1 + '" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>' +
+      '<figure><img src="' + NEURO_IMG.s2 + '" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>' +
+      '<figure><img src="' + NEURO_IMG.s3 + '" alt="" loading="lazy" /><figcaption><b>3</b> Muoviti come nelle tue attività di ogni giorno</figcaption></figure>' +
+      '</div></div>' +
       '<div class="card"><h3>Come applicare il dispositivo</h3>' +
       '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
       '<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>' +
@@ -184,6 +190,14 @@
     s1: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/0ab20398-5ee2-4373-8f6b-866450d81668.jpg',
     s2: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/477ccb81-969b-4ff2-b62d-35e87e87a0eb.jpg',
     s3: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/55a029ed-7d82-4865-b10c-d3ba3c6b8f47.jpg',
+  };
+
+  // Illustrazioni a fumetti per il profilo Neurologico (colori Equistasi)
+  const NEURO_IMG = {
+    hero: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/792f6e17-450d-4787-a2fb-29bcc60b5063.jpg',
+    s1: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/1f8bc2eb-fc0a-444d-9874-95459881a835.jpg',
+    s2: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/d9f1b7bf-5f11-47ea-8357-1b693a4e072c.jpg',
+    s3: 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/78d40c3b-5e04-441a-b152-00ec81ad2bba.jpg',
   };
 
   function renderHome() {
