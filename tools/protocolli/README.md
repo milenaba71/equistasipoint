@@ -11,4 +11,4 @@ I PDF in `protocolli/` sono generati da `gen.py` (testi IT/EN) con il foglio di 
 I contenuti seguono i protocolli originali Equistasi (tempi di applicazione inclusi); la nota
 "rivolta ai professionisti sanitari" è sostituita dall'avviso per il paziente.
 
-La mappa dei dermatomeri (`fig_dermatomi.jpg`) è disegnata da `dermmap.py` sulle tavole 3D dell'app (nessuna immagine di terzi).
+La mappa dei dermatomeri (`fig_dermatomi.jpg`) è la tavola fornita da Equistasi, con la fonte indicata nel PDF (F.H. Netter, Atlante di anatomia umana, Elsevier).

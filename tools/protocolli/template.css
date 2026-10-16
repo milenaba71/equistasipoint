@@ -69,7 +69,7 @@
   .apply .steps li { margin-bottom: 2.6mm; }
 
   .derm-map { background: #fff; border: .4mm solid #e2e2ec; }
-  .derm-map img { width: 100%; height: 150mm; object-fit: contain; background: #fff; }
+  .derm-map img { width: 100%; height: 140mm; object-fit: contain; background: #fff; }
   .derm-map figcaption { background: var(--grey); color: var(--txt); }
   .derm-h { color: var(--ind); font-size: 11.5pt; margin: 0 0 2mm; }
   .derm-t { width: 100%; border-collapse: collapse; font-size: 9.4pt; }
