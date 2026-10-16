@@ -124,9 +124,11 @@
       return [pts.reduce((x, q) => x + q[0], 0) / pts.length, pts.reduce((y, q) => y + q[1], 0) / pts.length];
     };
     const dot = (h) => { const [x, y] = center(h); return '<g class="hot" data-area="' + h.a + '" transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"><circle class="hot-ring" r="5.5"/><circle class="hot-dot" r="2.6"/></g>'; };
+    // tutti i trigger point della vista: puntini piccoli, aprono la scheda del muscolo
+    const tps = MUSCLES.map((m) => ((m.views[view] || {}).x || []).map(([x, y]) => '<circle class="tp-dot" data-muscle="' + m.id + '" cx="' + x + '" cy="' + y + '" r="1.9"><title>' + esc(m.name) + '</title></circle>').join('')).join('');
     let a = '', b = '', d = '';
     hits.forEach((h) => { a += shape(h, 'hit'); b += shape(h, 'hit'); d += dot(h); });
-    a += d; b += d;
+    a += tps + d; b += tps + d;
     return '<svg viewBox="0 6 200 404" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Mappa del corpo, tocca dove senti dolore">' +
       window.Body.render(view, null) +
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
@@ -233,7 +235,7 @@
       '</div><span class="small muted">' + (state.homeView === 'front' ? T('Vista frontale') : T('Vista posteriore')) + '</span></div>' +
       T('<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>') +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
-      T('<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p>') + EXAMPLE_NOTE() + '</div>' +
+      T('<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona. I <b>puntini piccoli</b> sono i trigger point: toccali per aprire il muscolo.</p>') + EXAMPLE_NOTE() + '</div>' +
       '<div>' + window.EqTimer.cardHtml() +
       T('<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">') +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
@@ -268,7 +270,7 @@
     });
     const svg = app.querySelector('#map svg');
     svg.addEventListener('click', (ev) => {
-      const t = ev.target.closest('[data-area]');
+      const t = ev.target.closest('[data-muscle]') || ev.target.closest('[data-area]');
       if (!t) return;
       const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
       const p = pt.matrixTransform(svg.getScreenCTM().inverse());
@@ -276,7 +278,7 @@
       state.side = state.homeView === 'front' ? (leftOfDrawing ? 'dx' : 'sx') : (leftOfDrawing ? 'sx' : 'dx');
       store.set('tp-side', state.side);
       t.classList.add('on');
-      setTimeout(() => { location.hash = '#/area/' + t.dataset.area; }, 120);
+      setTimeout(() => { location.hash = t.dataset.muscle ? '#/m/' + t.dataset.muscle : '#/area/' + t.dataset.area; }, 120);
     });
 
     const q = app.querySelector('#q');
