@@ -240,7 +240,7 @@
       T('<div class="card"><h3>Cerca per muscolo o disturbo</h3>') +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
-      appProtocolCards() + videoPromo + (sport ? '' : protocolsCard(T('Protocolli per il dolore'))) +
+      appProtocolCards() + (sport ? '' : window.EqMeta.cardHtml()) + videoPromo + (sport ? '' : protocolsCard(T('Protocolli per il dolore'))) +
       T('<div class="card"><h3>Come funziona</h3><div class="howsteps">') +
       '<figure><img src="' + PAIN_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Indica dove senti dolore</figcaption></figure>') +
       '<figure><img src="' + PAIN_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>') +
@@ -292,7 +292,7 @@
       T('<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>') + esc(a.name) + '</h1>' +
       T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p>') + EXAMPLE_NOTE() + '</div>' +
       '<div class="toolbar">' + sideToggle() + '</div>' +
-      '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>';
+      '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>' + window.EqMeta.areaLink(id);
     bindSide(() => renderArea(id));
   }
 
@@ -774,7 +774,7 @@
     extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? T('Progressi') : T('Info'));
     const homeTab = document.querySelector('#tabbar [data-tab="home"]');
     if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? T('Home') : T('Mappa');
-    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
+    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
 
@@ -787,6 +787,7 @@
     else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
     else if (page === 'privacy') renderPrivacy();
     else if (page === 'protocollo') renderAppProtocol(arg);
+    else if (page === 'metameri') { setBack(true); window.EqMeta.render(app, arg); }
     else if (page === 'promemoria') renderTimer();
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
