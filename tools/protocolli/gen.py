@@ -49,7 +49,7 @@ def page(lang, title_short, body, p, n, first=None):
     else:
         head = '<header class="slim"><img class="logo" src="logo.png" alt="Equistasi"><span class="t">%s</span></header>' % title_short
     d, rev = FOOT[lang]
-    foot = ('<footer><div><p class="disc">%s</p><b>Equistasi S.r.l.</b> · www.equistasi.com · info@equistasi.com · +39 335 584 9343<br>%s</div>'
+    foot = ('<footer><div><p class="disc">%s</p><b>Equistasi S.r.l.</b> · www.equistasi.com · info@equistasi.com<br>%s</div>'
             '<img src="qr.png" alt="QR app.equistasi.com"></footer>') % (d, rev.format(p=p, n=n))
     return '<div class="page">%s<main>%s</main>%s</div>' % (head, body, foot)
 
