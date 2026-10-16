@@ -98,8 +98,8 @@ def dolore(L):
         'puoi regolare i punti fino a trovare quelli con cui percepisci un eventuale beneficio, anche combinando il punto di dolore con punti vicini.' if it else
         'you can adjust the points until you find those with which you notice any perceived benefit, also combining the pain point with nearby points.') + '</p></section>'
     p2 = '<section>' + h2(3, 'Quanto tempo tenerlo' if it else 'How long to keep it on') + timetable([
-        ('Prima applicazione' if it else 'First application', 'Lascia i dispositivi sul punto doloroso e sui muscoli <b>fino al giorno successivo</b>; toglili circa <b>un’ora dopo il risveglio</b>.' if it else 'Leave the devices on the painful spot and on the muscles in place <b>until the next day</b>; remove them about <b>an hour after waking up</b>.'),
-        ('Dispositivo sulla vertebra' if it else 'Device on the vertebra', 'Inizia con <b>1 ora</b>; se serve, aumenta fino a <b>2 ore</b>.' if it else 'Start with <b>1 hour</b>; if needed, increase up to <b>2 hours</b>.'),
+        ('Prima applicazione' if it else 'First application', 'Solo i dispositivi sui <b>muscoli</b> (punto doloroso e muscoli coinvolti) restano <b>fino al giorno successivo</b>; toglili circa <b>un’ora dopo il risveglio</b>.' if it else 'Only the devices on the <b>muscles</b> (painful spot and muscles involved) stay on <b>until the next day</b>; remove them about <b>an hour after waking up</b>.'),
+        ('Dispositivo sulla vertebra' if it else 'Device on the vertebra', 'Inizia con <b>1 ora</b>; se serve, aumenta fino a <b>2 ore</b>. <b>Mai</b> fino al giorno successivo.' if it else 'Start with <b>1 hour</b>; if needed, increase up to <b>2 hours</b>. <b>Never</b> until the next day.'),
         ('Se il dolore è scomparso' if it else 'If the pain has gone', 'Non serve continuare: quando il dolore ritorna, riapplica i dispositivi nello stesso modo.' if it else 'There is no need to continue: when the pain comes back, reapply the devices in the same way.'),
         ('Pausa settimanale' if it else 'Weekly break', 'Fai una pausa di <b>almeno 2 giorni ogni settimana</b>.' if it else 'Take a break of <b>at least 2 days every week</b>.'),
     ], WEEK[L]) + '</section>'
@@ -110,7 +110,7 @@ def dolore(L):
     p2 += '<section>' + h2(4, 'In sintesi' if it else 'In short') + '<div class="apply"><img src="applicazione.jpg" alt="">' + steps([
         ('1', '', 'Un dispositivo sul <b>punto più doloroso</b>, due sui <b>muscoli</b> che sostengono la zona e uno sulla <b>vertebra</b> del metamero (1–2 ore).' if it else 'One device on the <b>most painful spot</b>, two on the <b>muscles</b> supporting the area and one on the <b>vertebra</b> of the metamere (1–2 hours).'),
         ('2', '', 'Dopo <b>10 minuti</b> controlla: se non percepisci alcun beneficio, sposta i dispositivi su punti vicini.' if it else 'After <b>10 minutes</b> check: if you notice no perceived benefit, move the devices to nearby points.'),
-        ('3', '', 'La prima volta tienili <b>fino al mattino dopo</b>; poi riapplica solo quando il dolore ritorna, con <b>2 giorni di pausa</b> a settimana.' if it else 'The first time keep them on <b>until the next morning</b>; then reapply only when the pain returns, with <b>2 days off</b> a week.')]) + '</div></section>'
+        ('3', '', 'La prima volta tieni quelli sui muscoli <b>fino al mattino dopo</b> (mai quello sulla vertebra); poi riapplica solo quando il dolore ritorna, con <b>2 giorni di pausa</b> a settimana.' if it else 'The first time keep the ones on the muscles on <b>until the next morning</b> (never the one on the vertebra); then reapply only when the pain returns, with <b>2 days off</b> a week.')]) + '</div></section>'
     short = 'Dolore cronico · Equistasi®' if it else 'Chronic pain · Equistasi®'
     return doc(L, short, [page(L, short, p1, 1, 2, first), page(L, short, p2, 2, 2)])
 
