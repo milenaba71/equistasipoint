@@ -26,3 +26,8 @@ Le coordinate di X e zone in `js/data.js` sono nel sistema 200 × 432.6 di quest
 Muscoli profondi non visibili dalla vista frontale (es. pterigoideo laterale, digastrico, `"xray": true`
 in `muscles_render.json`): si renderizza la tavola "dim" e, a parte, solo il muscolo (`"solo": true`
 nel job); il muscolo viene poi sovrapposto in trasparenza (opacità ~70%) sulla tavola.
+
+Pianta del piede (`<muscolo>-sole.webp`, vista `"sole"`): tavola quadrata 860 × 860 (coordinate 200 × 200),
+telecamera ortografica sotto i piedi che guarda in alto, dita verso l'alto, piede destro a sinistra
+come nella vista frontale. Parametri usati: `SOLE_SCALE=0.38 SOLE_CY=-0.023 SOLE_CLIP=0.12`
+(il clip taglia tutto ciò che sta più in alto della caviglia), luci al 35%.

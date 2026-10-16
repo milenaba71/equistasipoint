@@ -350,6 +350,36 @@
       causes: 'Tight shoes or laces, walking for long periods, a stiff foot.',
       tips: 'Loosen your laces and choose comfortable shoes with a wide toe box.',
     },
+    abduttore_alluce: {
+      name: 'Abductor hallucis',
+      symptom: 'Pain on the inside of the heel and along the inner arch of the foot, especially when walking.',
+      causes: 'Tight or stiff shoes, flat or rolled-in feet, walking for long periods on hard surfaces.',
+      tips: 'Choose comfortable shoes with good arch support; roll a small ball under the arch of your foot.',
+    },
+    flessore_breve_dita: {
+      name: 'Flexor digitorum brevis',
+      symptom: 'Pain under the sole at the level of the metatarsal heads (forefoot), worse after walking for a long time.',
+      causes: 'Shoes with stiff or thin soles, walking barefoot on hard surfaces, high-arched feet.',
+      tips: 'Wear shoes with soft, cushioned soles; massage the sole with a small ball.',
+    },
+    quadrato_plantare: {
+      name: 'Quadratus plantae',
+      symptom: 'Pain under the heel, strong with the first steps in the morning; often mistaken for plantar fasciitis or a heel spur.',
+      causes: 'Standing for long periods, shoes without cushioning, being overweight, running.',
+      tips: 'This muscle lies deep: apply the device on the X, in front of the heel. Before getting out of bed, move your ankles and stretch your sole.',
+    },
+    abduttore_mignolo_piede: {
+      name: 'Abductor digiti minimi (foot)',
+      symptom: 'Pain under the outer edge of the sole, near the base of the little toe.',
+      causes: 'Shoes that are tight at the toes, walking on the outer edge of the foot, ankle sprains.',
+      tips: 'Choose shoes with a wide toe box and check how your soles wear.',
+    },
+    muscoli_alluce: {
+      name: 'Flexor hallucis brevis and adductor hallucis',
+      symptom: 'Pain under the base of the big toe and under the forefoot, sometimes with a feeling of swelling or numbness.',
+      causes: 'High heels, shoes that are tight at the toes, bunions, walking for long periods.',
+      tips: 'Avoid high heels and tight shoes; move your toes often.',
+    },
     pettorale: {
       name: 'Pectoralis major',
       symptom: 'Pain in the chest and the front of the shoulder, which may spread down the inside of the arm to the last fingers.',
