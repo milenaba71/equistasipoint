@@ -583,3 +583,6 @@ main { padding-top: 0; padding-bottom: 12px; }
 .lang-switch button { border: 0; background: transparent; padding: 6px 14px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; color: var(--indigo, #29235C); cursor: pointer; }
 .lang-switch button[aria-pressed="true"] { background: var(--indigo, #29235C); color: #fff; }
 .gate-box .lang-switch { align-self: center; }
+
+/* Avviso: le mappe sono solo esempi */
+.example-note { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: #fff8cc; color: var(--indigo, #29235C); font-size: 13px; line-height: 1.45; }

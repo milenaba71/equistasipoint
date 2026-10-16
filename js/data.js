@@ -270,15 +270,15 @@ window.MUSCLES = [
       back: {
         x: [[76.3, 100], [82.8, 107.2]],
         zones: [
-          { e: [88.3, 102.4, 2.3, 4.8, 0], p: 0 },
+          { e: [88.3, 102.4, 3, 6.2, 0], p: 0 },
         ],
       },
       front: {
         zones: [
-          { e: [57.2, 89.6, 7.1, 5.6, 0], p: 1 },
-          { e: [49.7, 122.2, 4.7, 15.1, 12], p: 0 },
-          { e: [40.5, 177.5, 4.6, 10.7, 10], p: 0 },
-          { e: [34.5, 227.2, 3.7, 6.7, 0], p: 0 },
+          { e: [57.2, 89.6, 9.2, 7.3, 0], p: 1 },
+          { e: [49.7, 122.2, 5.6, 18.1, 12], p: 0 },
+          { e: [40.5, 177.5, 5.5, 12.8, 10], p: 0 },
+          { e: [34.5, 227.2, 4.4, 8, 0], p: 0 },
         ],
       },
     },
@@ -296,14 +296,14 @@ window.MUSCLES = [
       back: {
         x: [[68, 80.5]],
         zones: [
-          { e: [50.4, 97.6, 5.3, 7.2, 0], p: 1 },
+          { e: [50.4, 97.6, 6.4, 8.6, 0], p: 1 },
         ],
       },
       front: {
         zones: [
-          { e: [48.9, 96.8, 4.8, 6.4, 0], p: 1 },
-          { e: [40.6, 150.8, 4.4, 3.1, 0], p: 0 },
-          { e: [37.8, 171.4, 4.9, 8.4, 10], p: 0 },
+          { e: [48.9, 96.8, 5.8, 7.7, 0], p: 1 },
+          { e: [40.6, 150.8, 5.3, 3.7, 0], p: 0 },
+          { e: [37.8, 171.4, 5.9, 10.1, 10], p: 0 },
         ],
       },
     },
@@ -328,6 +328,71 @@ window.MUSCLES = [
     },
   },
   {
+    id: 'trapezio_medio_inf',
+    videos: ['Trapezius'],
+    name: 'Trapezio medio e inferiore',
+    latin: 'M. trapezius, pars transversa et ascendens',
+    hl: ['trapezio'],
+    areas: { schiena_alta: 1, collo: 1, spalla: 0 },
+    symptom: 'Dolore o bruciore tra colonna e scapola; dal trapezio inferiore il dolore può salire alla base del collo, sopra la scapola e alla spalla.',
+    causes: 'Postura curva in avanti, braccia tese a lungo davanti a sé (computer, guida), zaini e borse pesanti.',
+    tips: 'Fai delle pause per aprire il torace e portare le scapole indietro e in basso; regola sedia e schermo.',
+    views: {
+      back: {
+        x: [[85, 100], [88, 128]],
+        zones: [
+          { e: [91, 104, 5, 11, 0], p: 1 },
+          { e: [90.5, 62, 4.5, 10, -8], p: 1 },
+          { e: [76, 82, 10, 4, -8], p: 1 },
+          { e: [62, 86, 5, 4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'iliocostale_toracico',
+    name: 'Iliocostale del torace (paravertebrali dorsali)',
+    latin: 'M. iliocostalis thoracis',
+    hl: ['iliocostale', 'paravertebrali'],
+    areas: { schiena_alta: 1, lombare: 1, torace: 0 },
+    symptom: 'Dolore lungo la schiena accanto alla colonna, che può salire verso la scapola, scendere verso la zona lombare o andare in avanti verso il torace e l’addome.',
+    causes: 'Stare a lungo seduti o piegati in avanti, sollevare pesi con la schiena curva, movimenti bruschi di torsione.',
+    tips: 'Alterna spesso le posizioni, piega le ginocchia quando sollevi pesi e cammina un po’ ogni ora.',
+    views: {
+      back: {
+        x: [[86, 118], [88, 150]],
+        zones: [
+          { e: [88, 106, 6, 14, 0], p: 1 },
+          { e: [90, 166, 7, 12, 0], p: 1 },
+          { e: [81, 138, 5, 10, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'dentato_post_sup',
+    name: 'Dentato posteriore superiore',
+    latin: 'M. serratus posterior superior',
+    hl: ['dentato'],
+    areas: { schiena_alta: 1, spalla: 1, braccio_gomito: 0, polso_mano: 0 },
+    symptom: 'Dolore profondo sotto la parte alta della scapola, che può scendere sul retro della spalla e del braccio fino al gomito e al lato del mignolo.',
+    causes: 'Respirazione affannosa o tosse prolungata, postura curva con le spalle in avanti, lavoro con le braccia sollevate.',
+    tips: 'Respira lentamente con la pancia, porta spesso le spalle indietro e in basso. Il punto è sotto la scapola: sposta il braccio in avanti per raggiungerlo meglio.',
+    views: {
+      back: {
+        x: [[89, 86]],
+        zones: [
+          { e: [79, 98, 9, 9, 0], p: 1 },
+          { e: [47, 152, 3.5, 3.5, 0], p: 1 },
+          { e: [56, 104, 5, 10, 8], p: 0 },
+          { e: [51.5, 130, 4.5, 13, 8], p: 0 },
+          { e: [43.5, 186, 3, 12, 8], p: 0 },
+          { e: [43, 226, 2.4, 8, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
     id: 'pettorale',
     videos: ['Pectoralis Major'],
     name: 'Grande pettorale',
@@ -342,12 +407,12 @@ window.MUSCLES = [
       front: {
         x: [[75.2, 98.4], [73.3, 109.6]],
         zones: [
-          { e: [80.1, 100.8, 11.1, 9.6, 0], p: 1 },
-          { e: [59.7, 92.8, 5.9, 5.6, 0], p: 1 },
-          { e: [59.2, 130.1, 4.1, 14.3, 10], p: 0 },
-          { e: [57.1, 152.3, 4.5, 3.1, 0], p: 0 },
-          { e: [45.8, 192, 3.3, 10.7, 8], p: 0 },
-          { e: [46.2, 231.7, 0.4, 7.8, 0], p: 0 },
+          { e: [80.1, 100.8, 14.4, 12.5, 0], p: 1 },
+          { e: [59.7, 92.8, 7.7, 7.3, 0], p: 1 },
+          { e: [59.2, 130.1, 5.3, 18.6, 10], p: 0 },
+          { e: [57.1, 152.3, 5.9, 4, 0], p: 0 },
+          { e: [45.8, 192, 4, 12.8, 8], p: 0 },
+          { e: [46.2, 231.7, 2.2, 9.4, 0], p: 0 },
         ],
       },
     },
@@ -368,9 +433,9 @@ window.MUSCLES = [
       back: {
         x: [[40.5, 159.9]],
         zones: [
-          { e: [38.2, 151.5, 6, 3.9, 0], p: 1 },
-          { e: [33.2, 221.7, 5.4, 7.8, 0], p: 1 },
-          { e: [38.9, 177.5, 3.8, 7.6, 10], p: 0 },
+          { e: [38.2, 151.5, 7.2, 4.7, 0], p: 1 },
+          { e: [33.2, 221.7, 6.5, 9.4, 0], p: 1 },
+          { e: [38.9, 177.5, 4.6, 9.1, 10], p: 0 },
         ],
       },
     },
@@ -389,8 +454,8 @@ window.MUSCLES = [
       back: {
         x: [[48, 166]],
         zones: [
-          { e: [44.5, 185.9, 3.3, 9.9, 10], p: 0 },
-          { e: [45.2, 229.4, 0.9, 11.1, 0], p: 1 },
+          { e: [44.5, 185.9, 4, 11.9, 10], p: 0 },
+          { e: [45.2, 229.4, 2.2, 13.3, 0], p: 1 },
         ],
       },
     },
@@ -478,15 +543,15 @@ window.MUSCLES = [
       back: {
         x: [[75.4, 198.9]],
         zones: [
-          { e: [74.3, 215.1, 6.8, 7.6, 0], p: 1 },
-          { e: [76.2, 256, 4.8, 23, 2], p: 0 },
-          { e: [77.3, 332.4, 3.4, 20.2, 2], p: 0 },
+          { e: [74.3, 215.1, 8.8, 9.9, 0], p: 1 },
+          { e: [76.2, 256, 6.2, 29.9, 2], p: 0 },
+          { e: [77.3, 332.4, 4.1, 24.2, 2], p: 0 },
         ],
       },
       front: {
         zones: [
-          { e: [65.3, 242.3, 3.8, 27.3, 2], p: 1 },
-          { e: [71.3, 337.4, 2.5, 22.3, -4], p: 0 },
+          { e: [65.3, 242.3, 4.9, 35.5, 2], p: 1 },
+          { e: [71.3, 337.4, 3, 26.8, -4], p: 0 },
         ],
       },
     },
@@ -504,9 +569,9 @@ window.MUSCLES = [
       back: {
         x: [[84.5, 198.5], [77, 204.5]],
         zones: [
-          { e: [95.1, 201.3, 4.2, 3.9, 0], p: 1 },
-          { e: [81.8, 216.1, 11.1, 6.3, -8], p: 1 },
-          { e: [79.2, 249.7, 4.8, 17.8, 0], p: 0 },
+          { e: [95.1, 201.3, 5.5, 5.1, 0], p: 1 },
+          { e: [81.8, 216.1, 14.4, 8.2, -8], p: 1 },
+          { e: [79.2, 249.7, 6.2, 23.1, 0], p: 0 },
         ],
       },
     },
@@ -525,13 +590,13 @@ window.MUSCLES = [
       front: {
         x: [[81.8, 206.7]],
         zones: [
-          { e: [81.6, 225.6, 5.5, 12.6, 0], p: 1 },
+          { e: [81.6, 225.6, 7.2, 16.4, 0], p: 1 },
         ],
       },
       back: {
         zones: [
-          { e: [95.5, 180.2, 3.5, 14.4, 0], p: 1 },
-          { e: [90.1, 198.1, 6.1, 2.8, 0], p: 0 },
+          { e: [95.5, 180.2, 4.5, 18.7, 0], p: 1 },
+          { e: [90.1, 198.1, 7.9, 3.6, 0], p: 0 },
         ],
       },
     },
@@ -551,8 +616,8 @@ window.MUSCLES = [
       front: {
         x: [[69.9, 200.5]],
         zones: [
-          { e: [68, 199.7, 4.3, 3.9, 0], p: 1 },
-          { e: [65.3, 242.3, 3.8, 33, 2], p: 1 },
+          { e: [68, 199.7, 5.6, 5.1, 0], p: 1 },
+          { e: [65.3, 242.3, 4.9, 42.9, 2], p: 1 },
         ],
       },
     },
@@ -571,8 +636,8 @@ window.MUSCLES = [
       front: {
         x: [[80.5, 214]],
         zones: [
-          { e: [83, 300, 6, 7, 0], p: 1 },
-          { e: [81.5, 280.1, 4, 8.4, 0], p: 0 },
+          { e: [83, 300, 7.8, 9.1, 0], p: 1 },
+          { e: [81.5, 280.1, 5.2, 10.9, 0], p: 0 },
         ],
       },
     },
@@ -590,8 +655,8 @@ window.MUSCLES = [
       front: {
         x: [[89.5, 265.4], [91.9, 283.2]],
         zones: [
-          { e: [90.1, 296.9, 6, 7.3, 0], p: 1 },
-          { e: [89.4, 271.7, 4.2, 10.5, 0], p: 0 },
+          { e: [90.1, 296.9, 7.8, 9.5, 0], p: 1 },
+          { e: [89.4, 271.7, 5.5, 13.7, 0], p: 0 },
         ],
       },
     },
@@ -610,10 +675,10 @@ window.MUSCLES = [
       back: {
         x: [[77.6, 265.4], [90, 268.6]],
         zones: [
-          { e: [84.6, 303, 7.1, 6.1, 0], p: 1 },
-          { e: [83, 278, 8.1, 12.6, 0], p: 0 },
-          { e: [88, 238.2, 7.4, 3.2, 0], p: 0 },
-          { e: [80.7, 319.2, 3.4, 5.1, 0], p: 0 },
+          { e: [84.6, 303, 9.2, 7.9, 0], p: 1 },
+          { e: [83, 278, 10.5, 16.4, 0], p: 0 },
+          { e: [88, 238.2, 9.6, 4.2, 0], p: 0 },
+          { e: [80.7, 319.2, 4.4, 6.6, 0], p: 0 },
         ],
       },
     },
@@ -635,14 +700,14 @@ window.MUSCLES = [
       back: {
         x: [[85.7, 323.3], [76.7, 325.3]],
         zones: [
-          { e: [84.4, 306.1, 5.8, 4.1, 0], p: 0 },
-          { e: [81.9, 339.4, 5.8, 13.2, 0], p: 1 },
-          { e: [81.1, 397.8, 3.5, 3.7, 0], p: 0 },
+          { e: [84.4, 306.1, 7.5, 5.3, 0], p: 0 },
+          { e: [81.9, 339.4, 7, 15.8, 0], p: 1 },
+          { e: [81.1, 397.8, 4.2, 4.4, 0], p: 0 },
         ],
       },
       front: {
         zones: [
-          { e: [86.2, 396.6, 2.4, 3.1, 0], p: 1 },
+          { e: [86.2, 396.6, 2.9, 3.7, 0], p: 1 },
         ],
       },
     },
@@ -660,8 +725,8 @@ window.MUSCLES = [
       back: {
         x: [[77, 358], [73, 348]],
         zones: [
-          { e: [80.5, 399.1, 4, 3.7, 0], p: 1 },
-          { e: [80.7, 386, 2.5, 5.3, 0], p: 0 },
+          { e: [80.5, 399.1, 4.8, 4.4, 0], p: 1 },
+          { e: [80.7, 386, 3, 6.4, 0], p: 0 },
         ],
       },
     },
@@ -680,9 +745,9 @@ window.MUSCLES = [
       front: {
         x: [[77.5, 330.3]],
         zones: [
-          { e: [82.1, 389.2, 4.1, 2.8, 0], p: 1 },
-          { e: [85.2, 401.5, 2.4, 1.8, 0], p: 1 },
-          { e: [77.7, 353.6, 1.9, 14.2, -3], p: 0 },
+          { e: [82.1, 389.2, 4.9, 3.4, 0], p: 1 },
+          { e: [85.2, 401.5, 2.9, 2.2, 0], p: 1 },
+          { e: [77.7, 353.6, 2.3, 17, -3], p: 0 },
         ],
       },
     },
@@ -701,9 +766,9 @@ window.MUSCLES = [
       front: {
         x: [[72.4, 329.3]],
         zones: [
-          { e: [73.7, 391.1, 3.2, 3.1, 0], p: 1 },
-          { e: [74.6, 399.1, 2.6, 2.2, 0], p: 0 },
-          { e: [72.8, 359.7, 1.6, 14.2, -6], p: 0 },
+          { e: [73.7, 391.1, 3.8, 3.7, 0], p: 1 },
+          { e: [74.6, 399.1, 3.1, 2.6, 0], p: 0 },
+          { e: [72.8, 359.7, 2.2, 17, -6], p: 0 },
         ],
       },
     },
