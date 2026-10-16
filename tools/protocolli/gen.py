@@ -121,8 +121,8 @@ def derm(L):
         'Ogni zona della pelle è collegata a una radice nervosa che esce dalla colonna vertebrale: questa zona si chiama <b>dermatomero</b>. Conoscerlo ti aiuta a personalizzare l’applicazione di Equistasi®, andando oltre i punti standard.' if it else
         'Each area of skin is connected to a nerve root that leaves the spine: this area is called a <b>dermatome</b>. Knowing it helps you personalise how you apply Equistasi®, going beyond the standard points.'))
     p1 = '<section>' + h2(1, 'Trova la zona del dolore' if it else 'Find the painful area') + '<p style="margin:0">' + (
-        'Se senti dolore o alterazioni della sensibilità (formicolii, sensibilità ridotta) in una zona precisa, cerca il dermatomero corrispondente: nell’app Equistasi Point, nella sezione <b>Metamero e dermatomero</b>, trovi per ogni zona la radice nervosa e le vertebre collegate.' if it else
-        'If you feel pain or changes in sensation (tingling, reduced feeling) in a specific area, look up the matching dermatome: in the Equistasi Point app, in the <b>Metamere and dermatome</b> section, you will find the nerve root and the linked vertebrae for every area.') + '</p></section>'
+        'Se senti dolore o alterazioni della sensibilità (formicolii, sensibilità ridotta) in una zona precisa, cerca il dermatomero corrispondente nella <b>mappa a pagina 3</b>. Nell’app Equistasi Point, nella sezione <b>Metamero e dermatomero</b>, trovi per ogni zona la radice nervosa e le vertebre collegate.' if it else
+        'If you feel pain or changes in sensation (tingling, reduced feeling) in a specific area, look up the matching dermatome on the <b>map on page 3</b>. In the Equistasi Point app, in the <b>Metamere and dermatome</b> section, you will find the nerve root and the linked vertebrae for every area.') + '</p></section>'
     p1 += '<section>' + h2(2, 'Dove applicare i 3 dispositivi' if it else 'Where to apply the 3 devices') + where(steps([
         ('1', 'Sul punto principale' if it else 'On the main point', 'Applica un dispositivo sulla zona di massima sensibilità o dolore, nel dermatomero interessato.' if it else 'Apply one device on the area of greatest tenderness or pain, within the affected dermatome.'),
         ('2·3', 'Sui muscoli di sostegno' if it else 'On the supporting muscles', 'Applica gli altri due sui muscoli che sostengono la zona (per esempio quadricipite per L3-L4, polpacci per S1-S2).' if it else 'Apply the other two on the muscles that support the area (for example the quadriceps for L3-L4, the calves for S1-S2).'),
@@ -143,7 +143,23 @@ def derm(L):
         'Se avverti <b>nausea, mal di testa o capogiri</b>, togli subito i dispositivi e riprova il giorno successivo.' if it else 'If you feel <b>nausea, headache or dizziness</b>, remove the devices immediately and try again the next day.']) + '</section>'
     p2 += '<section>' + APPTIP[L] + '</section>'
     short = 'Dolore e dermatomeri · Equistasi®' if it else 'Pain and dermatomes · Equistasi®'
-    return doc(L, short, [page(L, short, p1, 1, 2, first), page(L, short, p2, 2, 2)])
+    rows = [('C5', 'Clavicole', 'Collarbones'), ('C5, C6, C7', 'Lato esterno delle braccia', 'Outer side of the arms'),
+            ('C8, T1', 'Lato interno delle braccia', 'Inner side of the arms'), ('C6', 'Pollice', 'Thumb'),
+            ('C6, C7, C8', 'Mano', 'Hand'), ('C8', 'Anulare e mignolo', 'Ring and little fingers'),
+            ('T4', 'Altezza dei capezzoli', 'Nipple level'), ('T10', 'Altezza dell’ombelico', 'Navel level'),
+            ('T12', 'Inguine', 'Groin'), ('L1, L2, L3, L4', 'Davanti e interno delle gambe', 'Front and inner side of the legs'),
+            ('L4, L5, S1', 'Piedi', 'Feet'), ('L4', 'Lato interno dell’alluce', 'Inner side of the big toe'),
+            ('L5, S1, S2', 'Lato esterno e retro delle gambe', 'Outer side and back of the legs'),
+            ('S1', 'Bordo esterno del piede e mignolo del piede', 'Outer edge of the foot and little toe'),
+            ('S2, S3, S4, S5', 'Perineo', 'Perineum')]
+    half = (len(rows) + 1) // 2
+    tab = lambda rr: '<table class="derm-t">' + ''.join('<tr><th>%s</th><td>%s</td></tr>' % (a, b if it else c) for a, b, c in rr) + '</table>'
+    p3 = '<section>' + h2(5, 'Mappa dei dermatomeri' if it else 'Dermatome map') + (
+        '<figure class="fig derm-map"><img src="fig_dermatomi.jpg" alt=""><figcaption>%s</figcaption></figure>' % (
+        'Davanti e dietro. La mappa mostra i dermatomeri come zone separate: in realtà ogni dermatomero si sovrappone in parte a quelli vicini.' if it else
+        'Front and back. The map shows the dermatomes as separate areas: in reality each dermatome partly overlaps its neighbours.')) + '</section>'
+    p3 += '<section><h3 class="derm-h">' + ('Livelli dei dermatomeri principali' if it else 'Main dermatome levels') + '</h3><div class="two">' + tab(rows[:half]) + tab(rows[half:]) + '</div></section>'
+    return doc(L, short, [page(L, short, p1, 1, 3, first), page(L, short, p2, 2, 3), page(L, short, p3, 3, 3)])
 
 
 # ─────────────── SPORT ───────────────
