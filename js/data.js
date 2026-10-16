@@ -61,10 +61,12 @@ window.EQUISTASI = {
 
 window.AREAS = [
   { id: 'testa', name: 'Testa / cefalea', icon: '🧠' },
+  { id: 'viso', name: 'Viso / mandibola', icon: '🦷' },
   { id: 'collo', name: 'Collo / cervicale', icon: '🦒' },
   { id: 'spalla', name: 'Spalla', icon: '💪' },
   { id: 'schiena_alta', name: 'Schiena alta / dorsale', icon: '🔙' },
   { id: 'torace', name: 'Petto / torace', icon: '🫁' },
+  { id: 'addome', name: 'Addome / pancia', icon: '⭕' },
   { id: 'braccio_gomito', name: 'Braccio / gomito', icon: '🦾' },
   { id: 'polso_mano', name: 'Polso / mano', icon: '✋' },
   { id: 'lombare', name: 'Zona lombare', icon: '⬇️' },
@@ -81,6 +83,8 @@ window.AREA_HITS = {
     { a: 'torace', p: 'M64.9,83.2 L98.7,78.2 L97.9,121.2 L54.7,119.4 Z' },
     { a: 'collo', p: 'M88.0,59.0 L100.0,59.0 L100.0,76.5 L84.8,76.5 Z' },
     { a: 'testa', e: [99.9, 35.5, 18.8, 24.4, 0] },
+    { a: 'viso', e: [89.5, 49, 6.5, 8, 0] },
+    { a: 'addome', p: 'M60.0,123.0 L98.7,123.0 L98.7,189.0 L69.0,189.0 Z' },
     { a: 'spalla', e: [56, 89.6, 13, 9.6, 0] },
     { a: 'braccio_gomito', e: [48.9, 134.1, 11.9, 23.7, 12] },
     { a: 'polso_mano', e: [44.1, 219.4, 2.7, 24.6, 8] },
@@ -240,7 +244,7 @@ window.MUSCLES = [
     name: 'Temporale',
     latin: 'M. temporalis',
     hl: ['temporale'],
-    areas: { testa: 1 },
+    areas: { testa: 1, viso: 0 },
     symptom: 'Cefalea alla tempia, dolore sopra il sopracciglio e ai denti superiori.',
     causes: 'Serrare o digrignare i denti (bruxismo), stress, masticare chewing-gum a lungo.',
     tips: 'Durante il giorno controlla che i denti non siano serrati: labbra chiuse, denti separati.',
@@ -251,6 +255,91 @@ window.MUSCLES = [
           { e: [85.5, 23.5, 5.5, 10, -8], p: 1 },
           { e: [92, 32, 5.5, 2.6, 0], p: 0 },
           { e: [94.5, 49.5, 4.5, 2.4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+
+  {
+    id: 'massetere',
+    videos: ['Masseter'],
+    name: 'Massetere',
+    latin: 'M. masseter',
+    hl: ['massetere'],
+    areas: { viso: 1, testa: 0 },
+    symptom: 'Dolore alla mandibola, alla guancia e ai denti (molari), a volte sopra il sopracciglio o all’orecchio con fischi; difficoltà ad aprire bene la bocca.',
+    causes: 'Serrare o digrignare i denti (anche di notte), masticare a lungo chewing-gum o cibi duri, stress.',
+    tips: 'Durante il giorno tieni le labbra chiuse e i denti separati. Se digrigni di notte parlane con il dentista.',
+    warning: 'Un dolore alla mandibola che compare sotto sforzo, insieme a dolore al petto, affanno o sudorazione, può essere di origine cardiaca: chiama subito il 112.',
+    views: {
+      front: {
+        x: [[88, 48], [88.5, 53.5]],
+        zones: [
+          { e: [89, 51, 4.2, 5.5, 0], p: 1 },
+          { e: [92.5, 50.5, 3, 4, 0], p: 1 },
+          { e: [90, 32.5, 5, 2.2, -8], p: 0 },
+          { e: [84.5, 40, 2.2, 4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'pterigoideo_laterale',
+    videos: ['Pterygoideus Lateralis'],
+    name: 'Pterigoideo laterale',
+    latin: 'M. pterygoideus lateralis',
+    hl: ['pterigoideo_laterale'],
+    areas: { viso: 1 },
+    symptom: 'Dolore profondo davanti all’orecchio, all’articolazione della mandibola (ATM) e allo zigomo, spesso con scrosci o click quando apri la bocca.',
+    causes: 'Bruxismo, denti che non combaciano bene, masticare sempre dallo stesso lato, tenere la mandibola in avanti.',
+    tips: 'Il muscolo è profondo: applica il dispositivo sulla X, appena davanti all’orecchio e sotto lo zigomo. Per qualche giorno preferisci cibi morbidi.',
+    views: {
+      front: {
+        x: [[87.5, 43]],
+        zones: [
+          { e: [85.5, 41.5, 2.8, 3.5, 0], p: 1 },
+          { e: [91, 44.5, 3.8, 3, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'digastrico',
+    name: 'Digastrico',
+    latin: 'M. digastricus',
+    hl: ['digastrico'],
+    areas: { viso: 1, collo: 0 },
+    symptom: 'Dolore sotto l’angolo della mandibola e dietro l’orecchio, alla gola o agli incisivi inferiori; sensazione di nodo in gola.',
+    causes: 'Testa portata in avanti, respirare con la bocca, bruxismo, deglutizione scorretta.',
+    tips: 'Tieni la testa allineata sopra le spalle e la lingua appoggiata al palato.',
+    warning: 'Se senti un nodulo duro sotto la mandibola, hai febbre o difficoltà a deglutire, rivolgiti al medico.',
+    views: {
+      front: {
+        x: [[86.5, 51.5], [95.5, 60]],
+        zones: [
+          { e: [85, 54.5, 2.6, 5.5, 0], p: 1 },
+          { e: [97, 56.5, 3.2, 2.4, 0], p: 1 },
+          { e: [95.5, 64.5, 3.5, 2.2, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'zigomatico',
+    name: 'Zigomatico maggiore',
+    latin: 'M. zygomaticus major',
+    hl: ['zigomatico'],
+    areas: { viso: 1, testa: 0 },
+    symptom: 'Dolore che sale dalla guancia lungo il lato del naso fino al centro della fronte.',
+    causes: 'Tensione dei muscoli del viso, stress, espressioni tenute a lungo (per esempio strizzare gli occhi davanti allo schermo).',
+    tips: 'Rilassa il viso durante il giorno e fai pause regolari dallo schermo.',
+    views: {
+      front: {
+        x: [[89.5, 47]],
+        zones: [
+          { e: [95, 44, 2.2, 6, -12], p: 1 },
+          { e: [97.5, 32.5, 3, 4.5, 0], p: 1 },
+          { e: [99, 23.5, 4.5, 4, 0], p: 0 },
         ],
       },
     },
@@ -413,6 +502,57 @@ window.MUSCLES = [
           { e: [57.1, 152.3, 5.9, 4, 0], p: 0 },
           { e: [45.8, 192, 4, 12.8, 8], p: 0 },
           { e: [46.2, 231.7, 2.2, 9.4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+
+  /* ───────────── ADDOME ───────────── */
+  {
+    id: 'retto_addome',
+    videos: ['Rectus Abdominis'],
+    name: 'Retto dell’addome',
+    latin: 'M. rectus abdominis',
+    hl: ['retto_addome'],
+    areas: { addome: 1, lombare: 0, schiena_alta: 0 },
+    symptom: 'Dolore alla bocca dello stomaco con senso di pienezza o bruciore, crampi intorno all’ombelico; può dare una fascia di dolore orizzontale a metà schiena o in basso, nella zona lombare e sacrale.',
+    causes: 'Addominali eseguiti in modo scorretto, postura curva, tosse prolungata, interventi chirurgici all’addome.',
+    tips: 'Respira lentamente con la pancia; allunga dolcemente l’addome stando a pancia in giù appoggiato sugli avambracci.',
+    warning: 'Un dolore addominale forte o improvviso, oppure con febbre, vomito, sangue nelle feci o pancia dura, va sempre valutato subito da un medico.',
+    views: {
+      front: {
+        x: [[92, 132], [93, 186]],
+        zones: [
+          { e: [95.5, 125, 6.5, 4.5, 0], p: 1 },
+          { e: [94, 169, 5.5, 4.5, 0], p: 0 },
+          { e: [94, 193, 7, 4, 0], p: 0 },
+        ],
+      },
+      back: {
+        zones: [
+          { e: [86, 148, 13.5, 3.8, 0], p: 1 },
+          { e: [88, 196, 12, 3.8, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'obliqui_addome',
+    name: 'Obliquo esterno dell’addome',
+    latin: 'M. obliquus externus abdominis',
+    hl: ['obliqui_addome'],
+    areas: { addome: 1, torace: 0 },
+    symptom: 'Bruciore o dolore alla bocca dello stomaco, simile al mal di stomaco; dolore sul fianco e, dai punti più bassi, all’inguine.',
+    causes: 'Torsioni del busto ripetute (golf, tennis, lavori domestici), tosse, postura curva.',
+    tips: 'Evita torsioni brusche del busto e rinforza l’addome con esercizi dolci.',
+    warning: 'Un bruciore di stomaco che non passa, o un dolore addominale forte o improvviso, va sempre valutato da un medico.',
+    views: {
+      front: {
+        x: [[73, 136], [77, 174]],
+        zones: [
+          { e: [90, 128, 9, 6, 0], p: 1 },
+          { e: [73.5, 152, 5, 12, 0], p: 1 },
+          { e: [82, 200, 5, 3.5, 20], p: 0 },
         ],
       },
     },
