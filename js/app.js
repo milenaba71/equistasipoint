@@ -17,16 +17,17 @@
   };
 
   const SIDE_LABEL = { dx: T('Lato destro'), sx: T('Lato sinistro') };
-  const VIEW_LABEL = { front: T('Davanti'), back: T('Dietro') };
+  const VIEW_LABEL = { front: T('Davanti'), back: T('Dietro'), sole: T('Pianta') };
+  const VIEW_ARIA = { front: T('frontale'), back: T('posteriore'), sole: T('plantare') };
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const byId = (id) => MUSCLES.find((m) => m.id === id);
   const area = (id) => AREAS.find((a) => a.id === id);
 
-  /* La metà sinistra del disegno corrisponde al lato destro (vista frontale)
+  /* La metà sinistra del disegno corrisponde al lato destro (vista frontale e pianta del piede)
      o al lato sinistro (vista posteriore) della persona. */
   function isMirrored(view, side) {
-    return view === 'front' ? side === 'sx' : side === 'dx';
+    return view === 'back' ? side === 'dx' : side === 'sx';
   }
 
   function ellipse(e, cls) {
@@ -44,7 +45,7 @@
   }
 
   /* Riquadro che contiene zone e trigger point (per lo zoom). */
-  function bbox(v, mirrored, minW, minH, pad) {
+  function bbox(v, mirrored, minW, minH, pad, HH) {
     let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
     const add = (x, y, r) => {
       const xx = mirrored ? 200 - x : x;
@@ -63,7 +64,6 @@
     if (h < minH) { y0 -= (minH - h) / 2; h = minH; }
     // mantieni il riquadro dentro la figura
     if (w > 200) { x0 = 0; w = 200; }
-    const HH = window.Body.H;
     if (h > HH) { y0 = 0; h = HH; }
     x0 = Math.max(0, Math.min(x0, 200 - w));
     y0 = Math.max(0, Math.min(y0, HH - h));
@@ -73,14 +73,15 @@
   function figure(m, view, opts) {
     const v = m.views[view];
     const mirrored = isMirrored(view, state.side);
-    let vb = '0 0 200 ' + window.Body.H;
-    if (opts.zoom) vb = bbox(v, mirrored, opts.minW || 90, opts.minH || 120, opts.pad || 16);
+    const HH = window.Body.h(view);
+    let vb = '0 0 200 ' + HH;
+    if (opts.zoom) vb = bbox(v, mirrored, opts.minW || 90, Math.min(opts.minH || 120, HH), opts.pad || 16, HH);
     const scale = opts.zoom ? 1 : 1.25;
     let overlay = '';
     (v.zones || []).slice().sort((a, b) => a.p - b.p).forEach((z) => { overlay += ellipse(z.e, 'zone p' + z.p); });
     (v.x || []).forEach(([x, y]) => { overlay += xMark(x, y, 2.6 * scale, !opts.thumb); });
     return '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' +
-      esc(m.name + T(', vista ') + (view === 'front' ? 'frontale' : 'posteriore')) + '">' +
+      esc(m.name + T(', vista ') + VIEW_ARIA[view]) + '">' +
       '<g' + (mirrored ? ' transform="' + window.Body.MIRROR + '"' : '') + '>' + window.Body.render(view, m.id) +
       '<g class="ov">' + overlay + '</g></g></svg>';
   }

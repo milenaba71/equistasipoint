@@ -60,5 +60,10 @@
   "tibiale_posteriore": {"hl": ["Tibialis posterior muscle.r"], "hide": ["Soleus muscle.r", "Lateral head of gastrocnemius.r", "Medial head of gastrocnemius.r", "Flexor digitorum longus.r", "Flexor hallucis longus.r"]},
   "flessore_lungo_dita": {"hl": ["Flexor digitorum longus.r"], "hide": ["Soleus muscle.r", "Lateral head of gastrocnemius.r", "Medial head of gastrocnemius.r"]},
   "popliteo": {"hl": ["Popliteus muscle.r"], "hide": ["Lateral head of gastrocnemius.r", "Medial head of gastrocnemius.r", "Plantaris muscle.r"]},
-  "estensore_breve_dita": {"hl": ["Extensor digitorum brevis.r", "Extensor hallucis brevis.r"]}
+  "estensore_breve_dita": {"hl": ["Extensor digitorum brevis.r", "Extensor hallucis brevis.r"]},
+  "abduttore_alluce": {"hl": ["Abductor hallucis.r"], "view": "sole"},
+  "flessore_breve_dita": {"hl": ["Flexor digitorum brevis.r"], "view": "sole"},
+  "quadrato_plantare": {"hl": ["Quadratus plantae muscle.r"], "hide": ["Flexor digitorum brevis.r"], "view": "sole"},
+  "abduttore_mignolo_piede": {"hl": ["Abductor digiti minimi of foot.r"], "view": "sole"},
+  "muscoli_alluce": {"hl": ["Lateral head of flexor hallucis brevis.r", "Medial head of flexor hallucis brevis.r", "Oblique head of adductor hallucis.r", "Transverse head of adductor hallucis.r"], "view": "sole"}
 }

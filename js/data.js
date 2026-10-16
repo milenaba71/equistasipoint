@@ -1331,17 +1331,17 @@ window.MUSCLES = [
     tips: 'Bevi a sufficienza e allunga il polpaccio prima di dormire.',
     warning: 'Polpaccio gonfio, caldo, arrossato e dolente (soprattutto dopo viaggi lunghi o immobilità) può indicare una trombosi: rivolgiti subito al medico e non applicare nulla.',
     views: {
+      sole: {
+        zones: [
+          { e: [64, 110, 4, 12, 0], p: 1 },
+        ],
+      },
       back: {
         x: [[85.7, 323.3], [76.7, 325.3]],
         zones: [
           { e: [84.4, 306.1, 7.5, 5.3, 0], p: 0 },
           { e: [81.9, 339.4, 7, 15.8, 0], p: 1 },
           { e: [81.1, 397.8, 4.2, 4.4, 0], p: 0 },
-        ],
-      },
-      front: {
-        zones: [
-          { e: [86.2, 396.6, 2.9, 3.7, 0], p: 1 },
         ],
       },
     },
@@ -1356,6 +1356,11 @@ window.MUSCLES = [
     causes: 'Corsa, camminate in salita o su terreni morbidi (sabbia), scarpe con tacco.',
     tips: 'Allunga il polpaccio a ginocchio piegato; scegli scarpe con un buon supporto del tallone.',
     views: {
+      sole: {
+        zones: [
+          { e: [52, 151, 8, 8, 0], p: 1 },
+        ],
+      },
       back: {
         x: [[77, 358], [73, 348], [74, 324]],
         zones: [
@@ -1439,6 +1444,12 @@ window.MUSCLES = [
     causes: 'Piede piatto o pronato, corsa su terreni irregolari, scarpe consumate.',
     tips: 'Il muscolo è profondo: applica il dispositivo sulla X, al centro del polpaccio. Usa scarpe che sostengano bene l’arco del piede.',
     views: {
+      sole: {
+        zones: [
+          { e: [50, 112, 12, 30, -10], p: 0 },
+          { e: [52, 151, 7, 7, 0], p: 0 },
+        ],
+      },
       back: {
         x: [[79, 336]],
         zones: [
@@ -1459,10 +1470,15 @@ window.MUSCLES = [
     causes: 'Camminare su sabbia o terreni irregolari, scarpe rigide o strette, piede piatto.',
     tips: 'Fai rotolare una pallina sotto la pianta del piede e scegli scarpe flessibili.',
     views: {
+      sole: {
+        zones: [
+          { e: [44, 78, 10, 5, -20], p: 1 },
+          { e: [42, 60, 9, 6, -20], p: 0 },
+        ],
+      },
       back: {
         x: [[82, 346]],
         zones: [
-          { e: [80, 405, 5, 3, 0], p: 1 },
           { e: [86, 386, 3, 5, 0], p: 0 },
           { e: [83, 352, 3, 8, 0], p: 0 },
         ],
@@ -1483,6 +1499,100 @@ window.MUSCLES = [
         x: [[79, 396]],
         zones: [
           { e: [79, 396, 4.5, 3.5, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'abduttore_alluce',
+    name: 'Abduttore dell’alluce',
+    latin: 'M. abductor hallucis',
+    hl: ['abduttore_alluce'],
+    areas: { piede: 1 },
+    symptom: 'Dolore all’interno del tallone e lungo l’arco interno del piede, soprattutto camminando.',
+    causes: 'Scarpe strette o rigide, piede piatto o pronato, camminare a lungo su superfici dure.',
+    tips: 'Scegli scarpe comode con un buon sostegno dell’arco; fai rotolare una pallina sotto l’arco del piede.',
+    views: {
+      sole: {
+        x: [[65, 125]],
+        zones: [
+          { e: [62, 145, 5, 6, 0], p: 1 },
+          { e: [66, 115, 3.5, 10, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'flessore_breve_dita',
+    name: 'Flessore breve delle dita',
+    latin: 'M. flexor digitorum brevis',
+    hl: ['flessore_breve_dita'],
+    areas: { piede: 1 },
+    symptom: 'Dolore sotto la pianta, all’altezza delle teste dei metatarsi (avampiede), che peggiora camminando a lungo.',
+    causes: 'Scarpe con suola rigida o sottile, camminare scalzi su superfici dure, piede cavo.',
+    tips: 'Usa scarpe con suola morbida e ammortizzata; massaggia la pianta con una pallina.',
+    views: {
+      sole: {
+        x: [[50, 118]],
+        zones: [
+          { e: [43, 80, 9, 4.5, -20], p: 1 },
+          { e: [50, 118, 5, 9, -10], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'quadrato_plantare',
+    name: 'Quadrato della pianta',
+    latin: 'M. quadratus plantae',
+    hl: ['quadrato_plantare'],
+    areas: { piede: 1 },
+    symptom: 'Dolore sotto il tallone, forte ai primi passi del mattino; spesso scambiato per fascite plantare o sperone calcaneare.',
+    causes: 'Stare in piedi a lungo, scarpe senza ammortizzazione, sovrappeso, corsa.',
+    tips: 'Il muscolo è profondo: applica il dispositivo sulla X, davanti al tallone. Prima di alzarti dal letto muovi le caviglie e allunga la pianta.',
+    views: {
+      sole: {
+        x: [[53, 124]],
+        zones: [
+          { e: [53, 150, 7.5, 7, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'abduttore_mignolo_piede',
+    name: 'Abduttore del mignolo del piede',
+    latin: 'M. abductor digiti minimi pedis',
+    hl: ['abduttore_mignolo_piede'],
+    areas: { piede: 1 },
+    symptom: 'Dolore sotto il lato esterno della pianta, vicino alla base del mignolo.',
+    causes: 'Scarpe strette in punta, camminare sul bordo esterno del piede, distorsioni della caviglia.',
+    tips: 'Scegli scarpe larghe in punta e controlla l’usura della suola.',
+    views: {
+      sole: {
+        x: [[40, 123]],
+        zones: [
+          { e: [30, 85, 3.5, 5, 0], p: 1 },
+          { e: [37, 112, 3, 9, -20], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'muscoli_alluce',
+    name: 'Flessore breve e adduttore dell’alluce',
+    latin: 'Mm. flexor hallucis brevis et adductor hallucis',
+    hl: ['muscoli_alluce'],
+    areas: { piede: 1 },
+    symptom: 'Dolore sotto la base dell’alluce e sotto l’avampiede, a volte con sensazione di gonfiore o intorpidimento.',
+    causes: 'Tacchi alti, scarpe strette in punta, alluce valgo, camminare a lungo.',
+    tips: 'Evita tacchi e scarpe strette; muovi spesso le dita dei piedi.',
+    views: {
+      sole: {
+        x: [[60, 92], [47, 84]],
+        zones: [
+          { e: [60, 68, 4, 7, 0], p: 1 },
+          { e: [46, 80, 9, 4, -20], p: 0 },
         ],
       },
     },

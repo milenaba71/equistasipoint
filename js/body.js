@@ -2,7 +2,7 @@
  * Tavole anatomiche (render 3D da Z-Anatomy, CC BY-SA 4.0 — vedi tools/anatomy).
  * Sistema di coordinate: viewBox 0 0 200 432.6, asse di simmetria x = 100.
  * Le tavole mostrano il muscolo evidenziato sul lato sinistro del disegno
- * (vista frontale = lato destro della persona, vista posteriore = lato sinistro);
+ * (vista frontale e pianta del piede = lato destro della persona, vista posteriore = lato sinistro);
  * per l'altro lato l'app specchia l'intera figura.
  */
 (function () {
@@ -15,10 +15,13 @@
    * @param {'front'|'back'} view
    * @param {string|null} muscleId  tavola con il muscolo evidenziato, oppure null per il corpo intero
    */
+  // La pianta del piede (vista da sotto) è una tavola quadrata 200 × 200.
+  const h = (view) => (view === 'sole' ? 200 : H);
+
   function render(view, muscleId) {
     const src = 'img/anatomy/' + (muscleId ? muscleId + '-' + view : 'base-' + view) + '.webp';
-    return '<image href="' + src + '" x="0" y="0" width="' + W + '" height="' + H + '" preserveAspectRatio="none"/>';
+    return '<image href="' + src + '" x="0" y="0" width="' + W + '" height="' + h(view) + '" preserveAspectRatio="none"/>';
   }
 
-  window.Body = { render, MIRROR, W, H };
+  window.Body = { render, MIRROR, W, H, h };
 })();
