@@ -117,9 +117,13 @@
         'Each area of the body receives its nerves from a segment of the spinal cord, the <b>metamere</b>, which leaves the spine at the level of a vertebra. The area of skin supplied by that segment is the <b>dermatome</b>. With this method the device is applied both where it hurts and on the vertebra linked to that area.') + '</p></div>' +
       '<div class="card"><h3>' + L('Come si fa', 'How it works') + '</h3><div class="howsteps comic">' +
       steps.map(([img, txt], i) => '<figure>' + (img ? '<img src="' + img + '" alt="" loading="lazy" />' : '') + '<figcaption><b>' + (i + 1) + '</b> ' + txt + '</figcaption></figure>').join('') +
-      '</div><p class="small" style="margin:10px 0 0">' + L(
-        'Dopo ogni applicazione attendi circa 60 secondi e rivaluta il dolore. Tieni i dispositivi al massimo 2 ore e segui lo schema di 5 giorni di utilizzo e 2 di riposo.',
-        'After each application wait about 60 seconds and reassess the pain. Keep the devices on for no more than 2 hours and follow the pattern of 5 days of use and 2 days off.') + '</p></div>' +
+      '</div></div>' +
+      '<div class="card meta-time"><h3>' + L('Quanto tempo tenerlo', 'How long to keep it on') + '</h3><ul class="small meta-find">' +
+      '<li>' + L('Dopo ogni applicazione attendi circa <b>60 secondi</b> e rivaluta il dolore.', 'After each application wait about <b>60 seconds</b> and reassess the pain.') + '</li>' +
+      '<li>' + L('Le prime volte tieni i dispositivi <b>1 ora</b>; se serve, aumenta poi fino a <b>2 ore</b>.', 'The first times keep the devices on for <b>1 hour</b>; if needed, then increase up to <b>2 hours</b>.') + '</li>' +
+      '<li>' + L('Segui lo schema di <b>5 giorni</b> di utilizzo e <b>2 di riposo</b>.', 'Follow the pattern of <b>5 days</b> of use and <b>2 days off</b>.') + '</li>' +
+      '</ul></div>' +
+      '<div class="card warn"><b>' + L('Togli i dispositivi anche prima', 'Remove the devices earlier') + '</b> ' + L('se senti un fastidio di qualunque genere. Il fastidio passa in pochi minuti dopo averli tolti.', 'if you feel discomfort of any kind. The discomfort passes within a few minutes after removing them.') + '</div>' +
       '<div class="card"><h3>' + L('Come trovare le vertebre', 'How to find the vertebrae') + '</h3><ul class="small meta-find">' +
       '<li><b>C7</b> ' + L('la vertebra più sporgente alla base del collo quando pieghi la testa in avanti.', 'the most prominent vertebra at the base of the neck when you bend your head forward.') + '</li>' +
       '<li><b>T3</b> ' + L('all’altezza della spina delle scapole.', 'at the level of the spine of the shoulder blades.') + '</li>' +
