@@ -124,7 +124,7 @@ window.MUSCLES = [
     tips: 'Abbassa le spalle durante la giornata, alterna il lato della borsa, regola l’altezza dello schermo.',
     views: {
       back: {
-        x: [[87.5, 65.5]],
+        x: [[83.5, 69.5]],
         zones: [
           { e: [91, 57, 6.5, 15.5, -8], p: 1 },
           { e: [86.5, 40.5, 6.5, 8.5, 0], p: 1 },
@@ -592,7 +592,7 @@ window.MUSCLES = [
     tips: 'Apri e chiudi la mano lentamente durante le pause.',
     views: {
       back: {
-        x: [[48, 166]],
+        x: [[43.5, 168]],
         zones: [
           { e: [44.5, 185.9, 4, 11.9, 10], p: 0 },
           { e: [45.2, 229.4, 2.2, 13.3, 0], p: 1 },
@@ -689,6 +689,7 @@ window.MUSCLES = [
         ],
       },
       front: {
+        x: [[67.5, 197]],
         zones: [
           { e: [65.3, 242.3, 4.9, 35.5, 2], p: 1 },
           { e: [71.3, 337.4, 3, 26.8, -4], p: 0 },
