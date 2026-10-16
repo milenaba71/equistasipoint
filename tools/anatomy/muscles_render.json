@@ -32,6 +32,6 @@
   "pterigoideo_laterale": {"hl": ["Superior head of lateral pterygoid muscle.r", "Inferior head of lateral pterygoid muscle.r"], "xray": true},
   "digastrico": {"hl": ["Anterior belly of digastric muscle.r", "Posterior belly of digastric muscle.r", "Intermediate tendon of digastric muscle.r"], "xray": true},
   "zigomatico": {"hl": ["Zygomaticus major muscle.r", "Zygomaticus minor muscle.r"]},
-  "retto_addome": {"hl": ["Rectus abdominis muscle.r", "Pyramidalis muscle.r"], "hide": ["External abdominal oblique muscle.r"]},
+  "retto_addome": {"hl": ["Rectus abdominis muscle.r", "Pyramidalis muscle.r"], "hide": ["External abdominal oblique muscle.r", "Internal abdominal oblique muscle.r", "Transversus abdominis muscle.r"]},
   "obliqui_addome": {"hl": ["External abdominal oblique muscle.r"]}
 }

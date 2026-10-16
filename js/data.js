@@ -295,7 +295,7 @@ window.MUSCLES = [
     tips: 'Il muscolo è profondo: applica il dispositivo sulla X, appena davanti all’orecchio e sotto lo zigomo. Per qualche giorno preferisci cibi morbidi.',
     views: {
       front: {
-        x: [[86.5, 42.5]],
+        x: [[87.5, 43]],
         zones: [
           { e: [85.5, 41.5, 2.8, 3.5, 0], p: 1 },
           { e: [91, 44.5, 3.8, 3, 0], p: 1 },
@@ -315,9 +315,9 @@ window.MUSCLES = [
     warning: 'Se senti un nodulo duro sotto la mandibola, hai febbre o difficoltà a deglutire, rivolgiti al medico.',
     views: {
       front: {
-        x: [[86.5, 57], [96, 61]],
+        x: [[86.5, 51.5], [95.5, 60]],
         zones: [
-          { e: [86, 51.5, 2.6, 6, 0], p: 1 },
+          { e: [85, 54.5, 2.6, 5.5, 0], p: 1 },
           { e: [97, 56.5, 3.2, 2.4, 0], p: 1 },
           { e: [95.5, 64.5, 3.5, 2.2, 0], p: 0 },
         ],
