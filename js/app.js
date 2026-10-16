@@ -136,6 +136,7 @@
   const profileChip = () => T('<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>') +
     (window.PROFILES[(getProfile() || {}).type] || {}).icon + ' ' + esc(profileName()) + '</b></span>' +
     '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + T('Cambia profilo</a></div>');
+  const EXAMPLE_NOTE = () => '<p class="example-note">' + T('ℹ️ Le mappe, le X e le zone di dolore sono <b>solo esempi indicativi</b> e <b>non sostituiscono il parere del medico</b> o del fisioterapista.') + '</p>';
   const SHOP = (window.APP_CONFIG && window.APP_CONFIG.shopUrl) || 'https://shop.equistasi.com';
   const shopCard = '<a class="card shop-card" href="' + SHOP + '" target="_blank" rel="noopener"><span class="shop-ico" aria-hidden="true">🛒</span>' +
     T('<span class="shop-txt"><b>Shop</b><span class="small">shop.equistasi.com</span></span><span class="chev" aria-hidden="true">›</span></a>');
@@ -230,7 +231,7 @@
       '</div><span class="small muted">' + (state.homeView === 'front' ? T('Vista frontale') : T('Vista posteriore')) + '</span></div>' +
       T('<div class="map-tip" aria-hidden="true"><span class="map-tip-hand">👆</span> Tocca il corpo dove senti dolore</div>') +
       '<div class="map-figure" id="map">' + homeMap() + '</div>' +
-      T('<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p></div>') +
+      T('<p class="map-hint">Tocca un <b>punto giallo</b> sul lato in cui senti dolore: si aprono i <b>punti di applicazione</b> del dispositivo per quella zona.</p>') + EXAMPLE_NOTE() + '</div>' +
       '<div>' + window.EqTimer.cardHtml() +
       T('<div class="card"><h3>Oppure scegli la zona</h3><div class="chips">') +
       AREAS.map((a) => '<a class="chip" href="#/area/' + a.id + '"><span class="ico" aria-hidden="true">' + a.icon + '</span>' + esc(a.name) + '</a>').join('') +
@@ -288,7 +289,7 @@
     const list = MUSCLES.filter((m) => id in m.areas).sort((x, y) => y.areas[id] - x.areas[id]);
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>') + esc(a.name) + '</h1>' +
-      T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p></div>') +
+      T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p>') + EXAMPLE_NOTE() + '</div>' +
       '<div class="toolbar">' + sideToggle() + '</div>' +
       '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>';
     bindSide(() => renderArea(id));
@@ -360,7 +361,7 @@
       T('<h3 style="font-size:15px;margin-top:12px">Cause frequenti</h3><p class="small" style="margin:0">') + esc(m.causes) + '</p></div>' +
       T('<div class="card"><h3>Quando rivolgersi al medico</h3><ul class="flags small">') +
       window.RED_FLAGS.map((f) => '<li>' + esc(f) + '</li>').join('') + '</ul></div>' +
-      T('<p class="ref">Mappa basata su Travell, Simons & Simons, <i>Myofascial Pain and Dysfunction: The Trigger Point Manual</i>. La posizione della X è indicativa.</p>') +
+      T('<p class="ref">Mappa basata su Travell, Simons & Simons, <i>Myofascial Pain and Dysfunction: The Trigger Point Manual</i>. La posizione della X è indicativa.</p>') + EXAMPLE_NOTE() +
       '</div></div>';
 
     bindSide(() => renderMuscle(id));

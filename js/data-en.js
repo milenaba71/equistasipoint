@@ -124,6 +124,24 @@
       causes: 'Rounded shoulders, long hours at the computer or desk.',
       tips: 'Open up your chest: draw your shoulder blades back and down several times a day.',
     },
+    trapezio_medio_inf: {
+      name: 'Middle and lower trapezius',
+      symptom: 'Aching or burning pain between the spine and the shoulder blade; from the lower trapezius the pain can travel up to the base of the neck, above the shoulder blade and to the shoulder.',
+      causes: 'Slouched posture, arms held out in front of you for long periods (computer, driving), heavy backpacks and bags.',
+      tips: 'Take breaks to open up your chest and draw your shoulder blades back and down; adjust your chair and screen.',
+    },
+    iliocostale_toracico: {
+      name: 'Iliocostalis thoracis (thoracic paraspinals)',
+      symptom: 'Pain along the back next to the spine that can travel up towards the shoulder blade, down towards the lower back or forwards to the chest and abdomen.',
+      causes: 'Sitting or bending forward for long periods, lifting with a rounded back, sudden twisting movements.',
+      tips: 'Change position often, bend your knees when lifting and walk a little every hour.',
+    },
+    dentato_post_sup: {
+      name: 'Serratus posterior superior',
+      symptom: 'Deep pain under the upper part of the shoulder blade, which can spread down the back of the shoulder and arm to the elbow and the little-finger side of the hand.',
+      causes: 'Laboured breathing or a long-lasting cough, slouched posture with rounded shoulders, working with the arms raised.',
+      tips: 'Breathe slowly into your belly and often draw your shoulders back and down. The point lies under the shoulder blade: move your arm forwards to reach it more easily.',
+    },
     pettorale: {
       name: 'Pectoralis major',
       symptom: 'Pain in the chest and the front of the shoulder, which may spread down the inside of the arm to the last fingers.',
