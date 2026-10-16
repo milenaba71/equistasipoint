@@ -68,8 +68,15 @@
         '<path d="M' + (100 - s) + ',' + (y - s) + ' L' + (100 + s) + ',' + (y + s) + ' M' + (100 + s) + ',' + (y - s) + ' L' + (100 - s) + ',' + (y + s) + '" class="mark" stroke-width="' + (s * 0.45) + '"/></g>' +
         '<text x="' + (100 + s + 2.5) + '" y="' + (y + 1.6) + '" class="vlabel">' + k + '</text>';
     }).join('');
-    return '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(L('Colonna vista da dietro: vertebre ', 'Spine seen from behind: vertebrae ') + r.v.join(', ')) + '">' +
+    // corpo intero con il riquadro della zona ingrandita, per capire dove si trova sulla schiena
+    const box = vb.split(' ').map(Number);
+    const dots = ys.map((y) => '<circle cx="100" cy="' + y + '" r="2.2" class="vdot"/>').join('');
+    const full = '<svg viewBox="26 8 148 420" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(L('Corpo intero visto da dietro', 'Whole body seen from behind')) + '">' +
+      window.Body.render('back', null) + '<g class="ov"><rect x="' + box[0] + '" y="' + box[1] + '" width="' + box[2] + '" height="' + box[3] + '" rx="3" class="zbox"/>' + dots + '</g></svg>';
+    const zoom = '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + esc(L('Colonna vista da dietro: vertebre ', 'Spine seen from behind: vertebrae ') + r.v.join(', ')) + '">' +
       window.Body.render('back', null) + '<g class="ov">' + marks + '</g></svg>';
+    return '<figure class="meta-full">' + full + '<figcaption>' + L('Vista da dietro', 'Back view') + '</figcaption></figure>' +
+      '<figure class="meta-zoom">' + zoom + '<figcaption>' + L('Ingrandimento', 'Close-up') + '</figcaption></figure>';
   }
 
   const STEPS = () => [
@@ -98,7 +105,7 @@
   function regionCard(r, open) {
     return '<details class="card meta-region" id="meta-' + r.area + '"' + (open ? ' open' : '') + '><summary>' +
       '<span class="ico" aria-hidden="true">' + areaIcon(r.area) + '</span><b>' + esc(areaName(r.area)) + '</b><span class="seg-badge">' + esc(r.seg) + '</span></summary>' +
-      '<div class="meta-body"><div class="fig meta-fig">' + spineFigure(r) + '</div><div>' +
+      '<div class="meta-body"><div class="meta-figs">' + spineFigure(r) + '</div><div>' +
       '<p class="small"><b>' + L('Dermatomero', 'Dermatome') + ':</b> ' + esc(L(r.it, r.en)) + '</p>' +
       '<p class="small"><b>' + L('Vertebre da palpare', 'Vertebrae to palpate') + ':</b> ' + r.v.join(', ') + '. ' +
       L('Applica il primo dispositivo su quella <b>più dolente</b> alla pressione.', 'Apply the first device on the one that is <b>most tender</b> to pressure.') + '</p>' +

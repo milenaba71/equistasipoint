@@ -596,10 +596,14 @@ main { padding-top: 0; padding-bottom: 12px; }
 .meta-region > summary::after { content: '›'; margin-left: 6px; font-size: 22px; color: var(--muted, #6b7280); transition: transform .2s; }
 .meta-region[open] > summary::after { transform: rotate(90deg); }
 .meta-region .seg-badge { margin-left: auto; background: #29235C; color: #FADC00; font-weight: 800; font-size: 13px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
-.meta-body { display: grid; grid-template-columns: 150px 1fr; gap: 14px; padding: 0 16px 16px; align-items: start; }
-.meta-fig { background: #1e1a46; border-radius: 14px; overflow: hidden; }
-.meta-fig svg { display: block; width: 100%; height: 200px; }
-.meta-fig .vlabel { font: 800 4.2px 'Open Sans', sans-serif; fill: #FADC00; paint-order: stroke; stroke: #1e1a46; stroke-width: 1px; }
+.meta-body { display: grid; grid-template-columns: minmax(0, 300px) 1fr; gap: 16px; padding: 0 16px 16px; align-items: start; }
+.meta-figs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.meta-figs figure { margin: 0; background: #1e1a46; border-radius: 14px; overflow: hidden; }
+.meta-figs svg { display: block; width: 100%; height: 280px; }
+.meta-figs figcaption { color: #fff; font-size: 12px; font-weight: 700; text-align: center; padding: 4px 6px 7px; }
+.meta-figs .zbox { fill: none; stroke: #FADC00; stroke-width: 1.6; }
+.meta-figs .vdot { fill: #FADC00; stroke: #1e1a46; stroke-width: .8; }
+.meta-figs .vlabel { font: 800 4.2px 'Open Sans', sans-serif; fill: #FADC00; paint-order: stroke; stroke: #1e1a46; stroke-width: 1px; }
 .meta-find { margin: 0; padding-left: 18px; }
 .meta-find li { margin: 4px 0; }
 .meta-link { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; margin-top: 12px; }
@@ -607,7 +611,7 @@ main { padding-top: 0; padding-bottom: 12px; }
 .meta-link b { display: block; }
 .howsteps.comic { grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 760px) { .howsteps.comic { grid-template-columns: repeat(4, 1fr); } }
-@media (max-width: 420px) { .meta-body { grid-template-columns: 120px 1fr; } .meta-fig svg { height: 170px; } }
+@media (max-width: 640px) { .meta-body { grid-template-columns: 1fr; } .meta-figs svg { height: 260px; } }
 
 /* Due criteri: trigger point o metamero */
 .criteria h3 { margin-top: 0; }
