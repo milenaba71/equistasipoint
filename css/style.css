@@ -606,3 +606,12 @@ main { padding-top: 0; padding-bottom: 12px; }
 .howsteps.comic { grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 760px) { .howsteps.comic { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 420px) { .meta-body { grid-template-columns: 120px 1fr; } .meta-fig svg { height: 170px; } }
+
+/* Due criteri: trigger point o metamero */
+.criteria h3 { margin-top: 0; }
+.criteria .crit { display: flex; gap: 12px; align-items: flex-start; margin: 10px 0; }
+.criteria .crit p { margin: 0; font-size: 14.5px; line-height: 1.45; }
+.criteria .crit-ico { font-size: 24px; line-height: 1; flex: none; width: 36px; height: 36px; display: grid; place-items: center; background: var(--grey, #F4F6F8); border-radius: 50%; }
+.criteria .crit-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.criteria .crit-btns .btn { text-align: center; text-decoration: none; justify-content: center; }
+@media (max-width: 380px) { .criteria .crit-btns { grid-template-columns: 1fr; } }
