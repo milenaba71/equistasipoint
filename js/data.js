@@ -345,6 +345,60 @@ window.MUSCLES = [
     },
   },
 
+  {
+    id: 'occipitofrontale',
+    name: 'Occipitofrontale (frontale e occipitale)',
+    latin: 'M. occipitofrontalis',
+    hl: ['occipitofrontale'],
+    areas: { testa: 1 },
+    symptom: 'Dal ventre frontale: dolore alla fronte, sopra l’occhio. Dal ventre occipitale: dolore alla nuca che si irradia sopra la testa fino dietro l’occhio.',
+    causes: 'Corrugare la fronte, stress, sforzare la vista, occhiali non adatti, dormire con la testa su un cuscino troppo duro.',
+    tips: 'Rilassa la fronte durante il giorno e controlla la vista se sforzi gli occhi.',
+    views: {
+      front: {
+        x: [[91, 27]],
+        zones: [
+          { e: [91, 26, 6.5, 5, 0], p: 1 },
+          { e: [88.5, 39, 3, 2, 0], p: 0 },
+        ],
+      },
+      back: {
+        x: [[90.5, 37]],
+        zones: [
+          { e: [92, 31, 7.5, 6, 0], p: 1 },
+          { e: [90, 37, 4.5, 3, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'scaleni',
+    name: 'Scaleni',
+    latin: 'Mm. scaleni',
+    hl: ['scaleni'],
+    areas: { collo: 1, torace: 0, spalla: 0, braccio_gomito: 0, polso_mano: 0, schiena_alta: 0 },
+    symptom: 'Dolore al petto, alla parte anteriore e posteriore del braccio, al lato del pollice e dell’indice e lungo il bordo interno della scapola; a volte formicolio alla mano.',
+    causes: 'Respirare con il petto invece che con la pancia, tosse, trasportare pesi, dormire con la testa bassa, colpo di frusta.',
+    tips: 'Respira lentamente con la pancia; tieni la testa alta sul cuscino. Punto vicino a nervi e vasi del collo: applica con delicatezza.',
+    warning: 'Formicolii persistenti, perdita di forza o mano fredda e pallida vanno valutati dal medico.',
+    views: {
+      front: {
+        x: [[89.5, 70]],
+        zones: [
+          { e: [79, 100, 9, 7, 0], p: 1 },
+          { e: [53, 120, 4, 11, 8], p: 1 },
+          { e: [45, 175, 3, 10, 10], p: 0 },
+          { e: [37, 214, 3.5, 6, 0], p: 0 },
+        ],
+      },
+      back: {
+        zones: [
+          { e: [84, 98, 3.5, 10, 0], p: 1 },
+          { e: [53, 125, 4, 12, 8], p: 0 },
+        ],
+      },
+    },
+  },
   /* ───────────── SPALLA E SCHIENA ALTA ───────────── */
   {
     id: 'infraspinato',
@@ -507,6 +561,182 @@ window.MUSCLES = [
     },
   },
 
+  {
+    id: 'deltoide',
+    name: 'Deltoide',
+    latin: 'M. deltoideus',
+    hl: ['deltoide'],
+    areas: { spalla: 1, braccio_gomito: 0 },
+    symptom: 'Dolore localizzato alla spalla, davanti, di lato o dietro, che aumenta alzando il braccio.',
+    causes: 'Sollevare pesi con le braccia tese, movimenti ripetuti sopra la testa, sport di lancio, urti alla spalla.',
+    tips: 'Evita di tenere a lungo le braccia sollevate; fai pause nei lavori sopra la testa.',
+    views: {
+      front: {
+        x: [[53, 96]],
+        zones: [
+          { e: [53, 98, 5.5, 11, 8], p: 1 },
+          { e: [48.5, 108, 2.5, 7, 0], p: 0 },
+        ],
+      },
+      back: {
+        x: [[60, 94]],
+        zones: [
+          { e: [58, 96, 7.5, 8, 0], p: 1 },
+          { e: [49, 104, 3, 8, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'sottoscapolare',
+    name: 'Sottoscapolare',
+    latin: 'M. subscapularis',
+    hl: ['sottoscapolare'],
+    areas: { spalla: 1, braccio_gomito: 0, polso_mano: 0 },
+    symptom: 'Dolore forte dietro la spalla, che può scendere lungo il retro del braccio fino a un “bracciale” di dolore al polso; difficoltà ad alzare il braccio e a portarlo indietro (spalla “congelata”).',
+    causes: 'Movimenti ripetuti di rotazione interna (nuoto, lanci), sollevare pesi sopra la testa, tenere il braccio immobile a lungo.',
+    tips: 'Il muscolo è sotto la scapola: applica il dispositivo nell’ascella, sul bordo esterno della scapola. Muovi la spalla con dolcezza ogni giorno.',
+    views: {
+      back: {
+        x: [[65.5, 101]],
+        zones: [
+          { e: [56, 96, 7, 8, 0], p: 1 },
+          { e: [73, 98, 7, 9, 0], p: 0 },
+          { e: [52, 125, 4, 12, 8], p: 0 },
+          { e: [44, 210, 4.5, 2.6, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'piccolo_rotondo',
+    name: 'Piccolo rotondo',
+    latin: 'M. teres minor',
+    hl: ['piccolo_rotondo'],
+    areas: { spalla: 1 },
+    symptom: 'Dolore profondo e ben localizzato dietro la spalla, nella parte posteriore del deltoide.',
+    causes: 'Sollevare oggetti sopra la testa o dietro di sé, sport di lancio, guidare tenendo a lungo il volante in alto.',
+    tips: 'Evita di dormire sul lato dolente; fai pause nei movimenti sopra la testa.',
+    views: {
+      back: {
+        x: [[64, 96]],
+        zones: [
+          { e: [55, 97, 5, 5.5, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'grande_rotondo',
+    videos: ['Teres Major'],
+    name: 'Grande rotondo',
+    latin: 'M. teres major',
+    hl: ['grande_rotondo'],
+    areas: { spalla: 1, braccio_gomito: 0 },
+    symptom: 'Dolore dietro la spalla e lungo il retro del braccio, a volte fino all’avambraccio; dolore alzando il braccio in alto.',
+    causes: 'Remare, tirare o spingere pesi, guidare con le braccia tese, movimenti ripetuti sopra la testa.',
+    tips: 'Allunga dolcemente il braccio sopra la testa; evita sforzi bruschi di trazione.',
+    views: {
+      back: {
+        x: [[68, 107]],
+        zones: [
+          { e: [55, 97, 6, 6.5, 0], p: 1 },
+          { e: [53, 125, 4, 11, 8], p: 0 },
+          { e: [45, 178, 3, 9, 10], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'gran_dorsale',
+    videos: ['Latissimus Dorsi'],
+    name: 'Gran dorsale',
+    latin: 'M. latissimus dorsi',
+    hl: ['gran_dorsale'],
+    areas: { schiena_alta: 1, spalla: 0, braccio_gomito: 0, polso_mano: 0 },
+    symptom: 'Dolore sordo e costante sotto la punta della scapola, che può scendere lungo il retro del braccio fino al lato del mignolo.',
+    causes: 'Tirare verso il basso o verso di sé (trazioni, remo, nuoto), sollevare pesi lontano dal corpo, lavorare con le braccia in avanti e in alto.',
+    tips: 'Allunga il fianco sollevando il braccio sopra la testa e inclinandoti dal lato opposto.',
+    views: {
+      back: {
+        x: [[66, 118]],
+        zones: [
+          { e: [76, 113, 8, 7, 0], p: 1 },
+          { e: [53, 128, 4, 12, 8], p: 0 },
+          { e: [47, 180, 3, 12, 10], p: 0 },
+          { e: [45, 222, 2.8, 7, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'dentato_post_inf',
+    name: 'Dentato posteriore inferiore',
+    latin: 'M. serratus posterior inferior',
+    hl: ['dentato_post_inf'],
+    areas: { schiena_alta: 1, lombare: 0 },
+    symptom: 'Dolore sordo e fastidioso sopra le ultime costole, nella parte bassa della schiena dorsale, che resta anche dopo altri trattamenti.',
+    causes: 'Sollevare e ruotare il busto insieme, tosse prolungata, respirazione affannosa.',
+    tips: 'Evita di sollevare pesi ruotando il busto; respira lentamente con la pancia.',
+    views: {
+      back: {
+        x: [[85, 152]],
+        zones: [
+          { e: [85, 152, 10, 8, -15], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'dentato_anteriore',
+    videos: ['Serratus Anterior'],
+    name: 'Dentato anteriore',
+    latin: 'M. serratus anterior',
+    hl: ['dentato_anteriore'],
+    areas: { torace: 1, schiena_alta: 0, braccio_gomito: 0 },
+    symptom: 'Dolore sul fianco del torace all’altezza delle costole centrali e sotto la punta della scapola; “fitta al fianco” correndo, fastidio a respirare profondamente.',
+    causes: 'Corsa, flessioni, sollevare pesi sopra la testa, tosse forte e prolungata.',
+    tips: 'Respira lentamente e profondamente; riduci gli sforzi di spinta finché il dolore passa.',
+    warning: 'Un dolore al torace con affanno, sudorazione o nausea può essere di origine cardiaca: chiama subito il 112.',
+    views: {
+      front: {
+        x: [[67, 118]],
+        zones: [
+          { e: [68, 119, 5.5, 9, 0], p: 1 },
+          { e: [58, 135, 3, 10, 8], p: 0 },
+          { e: [46, 222, 2.6, 6, 0], p: 0 },
+        ],
+      },
+      back: {
+        zones: [
+          { e: [74, 114, 5, 5, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'piccolo_pettorale',
+    name: 'Piccolo pettorale',
+    latin: 'M. pectoralis minor',
+    hl: ['piccolo_pettorale'],
+    areas: { torace: 1, spalla: 1, braccio_gomito: 0, polso_mano: 0 },
+    symptom: 'Dolore davanti alla spalla e sul petto, che può scendere lungo il lato interno del braccio fino alle ultime tre dita; spalle chiuse in avanti.',
+    causes: 'Postura curva con spalle in avanti, zaino con spallacci stretti, respirazione con il petto, uso delle stampelle.',
+    tips: 'Apri spesso il petto portando le spalle indietro; stretching contro lo stipite di una porta.',
+    warning: 'Un dolore al petto, soprattutto se irradiato al braccio sinistro o con affanno, sudorazione o nausea, può essere di origine cardiaca: chiama subito il 112.',
+    views: {
+      front: {
+        x: [[72, 94], [75.5, 106]],
+        zones: [
+          { e: [57, 95, 6, 8, 0], p: 1 },
+          { e: [77, 100, 8, 9, 0], p: 1 },
+          { e: [57, 130, 3, 12, 8], p: 0 },
+          { e: [47, 185, 3, 12, 10], p: 0 },
+          { e: [45, 228, 2.5, 7, 0], p: 0 },
+        ],
+      },
+    },
+  },
   /* ───────────── ADDOME ───────────── */
   {
     id: 'retto_addome',
@@ -595,12 +825,155 @@ window.MUSCLES = [
         x: [[43.5, 168]],
         zones: [
           { e: [44.5, 185.9, 4, 11.9, 10], p: 0 },
-          { e: [45.2, 229.4, 2.2, 13.3, 0], p: 1 },
+          { e: [37.5, 229.4, 2.2, 11, 0], p: 1 },
         ],
       },
     },
   },
 
+  {
+    id: 'bicipite',
+    name: 'Bicipite brachiale',
+    latin: 'M. biceps brachii',
+    hl: ['bicipite'],
+    areas: { braccio_gomito: 1, spalla: 1 },
+    symptom: 'Dolore superficiale davanti alla spalla e nella piega del gomito; debolezza nel sollevare oggetti con il palmo in su.',
+    causes: 'Sollevare pesi con il palmo in su, portare borse pesanti, avvitare, suonare strumenti a corda.',
+    tips: 'Solleva gli oggetti tenendoli vicino al corpo e alternando le braccia.',
+    views: {
+      front: {
+        x: [[52, 138]],
+        zones: [
+          { e: [55, 95, 5, 6.5, 0], p: 1 },
+          { e: [52, 125, 4, 10, 8], p: 0 },
+          { e: [49.5, 156, 4, 3, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'tricipite',
+    name: 'Tricipite brachiale',
+    latin: 'M. triceps brachii',
+    hl: ['tricipite'],
+    areas: { braccio_gomito: 1, spalla: 0, polso_mano: 0 },
+    symptom: 'Dolore dietro la spalla e lungo il retro del braccio, al gomito (“gomito del tennista” esterno o punta del gomito) e a volte fino alle ultime dita.',
+    causes: 'Flessioni e piegamenti, tennis e golf, usare stampelle o bastone, appoggiarsi sui gomiti.',
+    tips: 'Evita di appoggiarti a lungo sui gomiti; quando usi il bastone regolane bene l’altezza.',
+    views: {
+      back: {
+        x: [[57, 118], [49, 135]],
+        zones: [
+          { e: [55, 98, 5, 5.5, 0], p: 1 },
+          { e: [52, 128, 5, 14, 8], p: 0 },
+          { e: [49, 156, 4, 4, 0], p: 1 },
+          { e: [45, 180, 3, 10, 10], p: 0 },
+          { e: [43, 228, 2.5, 6, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'brachiale',
+    name: 'Brachiale',
+    latin: 'M. brachialis',
+    hl: ['brachiale'],
+    areas: { braccio_gomito: 1, polso_mano: 1, spalla: 0 },
+    symptom: 'Dolore alla base del pollice (sul dorso) e nella piega del gomito, a volte davanti alla spalla.',
+    causes: 'Portare pesi a gomito piegato (borse della spesa, bambini in braccio), lavori di forza ripetuti, suonare la chitarra.',
+    tips: 'Porta le borse a braccio disteso e alternando i lati.',
+    views: {
+      front: {
+        x: [[50, 145]],
+        zones: [
+          { e: [32, 212, 3, 4, 0], p: 1 },
+          { e: [49.5, 156, 4, 3, 0], p: 1 },
+          { e: [55, 96, 4, 5, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'brachioradiale',
+    videos: ['Brachioradialis'],
+    name: 'Brachioradiale',
+    latin: 'M. brachioradialis',
+    hl: ['brachioradiale'],
+    areas: { braccio_gomito: 1, polso_mano: 1 },
+    symptom: 'Dolore al lato esterno del gomito e dell’avambraccio e sul dorso della mano, tra pollice e indice.',
+    causes: 'Stringere con forza (attrezzi, racchetta, mouse), sollevare pesi con il pollice in su, giardinaggio.',
+    tips: 'Impugna con il palmo rivolto in alto quando puoi; fai pause nei lavori manuali.',
+    views: {
+      front: {
+        x: [[41, 158]],
+        zones: [
+          { e: [43.5, 151, 3, 4, 0], p: 1 },
+          { e: [39, 175, 3, 10, 8], p: 0 },
+          { e: [32.5, 214, 3, 4, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'flessori_avambraccio',
+    videos: ['Flexor Digitorum Superficialis', 'Flexor Carpi Ulnaris', 'Flexor Carpi Radialis'],
+    name: 'Flessori del polso e delle dita',
+    latin: 'Mm. flexores carpi et digitorum',
+    hl: ['flessori_avambraccio'],
+    areas: { polso_mano: 1, braccio_gomito: 0 },
+    symptom: 'Dolore sul lato del palmo del polso e nel palmo, che può arrivare alle dita; difficoltà a impugnare forbici o attrezzi.',
+    causes: 'Stringere a lungo attrezzi o il volante, lavori manuali di precisione, sport di presa (arrampicata, tennis, golf).',
+    tips: 'Allenta la presa quando puoi e fai pause aprendo e chiudendo lentamente la mano.',
+    warning: 'Formicolii notturni al pollice, indice e medio possono indicare un tunnel carpale: parlane con il medico.',
+    views: {
+      front: {
+        x: [[45, 172], [51, 170]],
+        zones: [
+          { e: [42, 207, 6, 3, 0], p: 1 },
+          { e: [39, 219, 6, 5, 0], p: 1 },
+          { e: [39, 232, 6, 5, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'adduttore_pollice',
+    name: 'Adduttore e opponente del pollice',
+    latin: 'Mm. adductor et opponens pollicis',
+    hl: ['adduttore_pollice'],
+    areas: { polso_mano: 1 },
+    symptom: 'Dolore alla base del pollice e sul lato del polso dalla parte del pollice; difficoltà a scrivere, abbottonare o pizzicare oggetti.',
+    causes: 'Scrivere a lungo, usare lo smartphone con il pollice, cucire, lavori di giardinaggio e pinze.',
+    tips: 'Alterna le mani al telefono e fai pause allargando il pollice.',
+    views: {
+      front: {
+        x: [[32, 219]],
+        zones: [
+          { e: [31, 214, 3, 4.5, 0], p: 1 },
+          { e: [34.5, 207, 3, 2.5, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'interossei_mano',
+    name: 'Interossei della mano',
+    latin: 'Mm. interossei manus',
+    hl: ['interossei_mano'],
+    areas: { polso_mano: 1 },
+    symptom: 'Dolore lungo il lato di un dito fino alla punta, rigidità delle dita e piccoli noduli dolenti alle articolazioni.',
+    causes: 'Stringere a lungo oggetti piccoli, cucire, scrivere al computer, suonare strumenti.',
+    tips: 'Allarga e chiudi le dita durante le pause; usa impugnature più grandi.',
+    views: {
+      back: {
+        x: [[31.5, 221]],
+        zones: [
+          { e: [33, 232, 1.8, 6, 0], p: 1 },
+          { e: [32, 221, 3, 4, 0], p: 0 },
+        ],
+      },
+    },
+  },
   /* ───────────── ZONA LOMBARE E ANCA ───────────── */
   {
     id: 'quadrato_lombi',
@@ -743,6 +1116,46 @@ window.MUSCLES = [
     },
   },
 
+  {
+    id: 'grande_gluteo',
+    videos: ['Gluteus Maximus'],
+    name: 'Grande gluteo',
+    latin: 'M. gluteus maximus',
+    hl: ['grande_gluteo'],
+    areas: { anca_gluteo: 1, lombare: 0 },
+    symptom: 'Dolore al gluteo e intorno all’osso sacro e al coccige; fastidio stando seduti a lungo, salendo le scale o in salita.',
+    causes: 'Stare seduti a lungo, salire scale o pendii, nuoto a rana, cadute sul sedere, dormire a pancia in giù con le gambe tese.',
+    tips: 'Siediti su un cuscino morbido e alzati spesso; quando dormi su un fianco tieni un cuscino tra le ginocchia.',
+    views: {
+      back: {
+        x: [[90, 200], [85, 226]],
+        zones: [
+          { e: [93, 200, 4.5, 9, 0], p: 1 },
+          { e: [92, 225, 5, 5, 0], p: 1 },
+          { e: [81, 229, 8, 5, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'pettineo',
+    name: 'Pettineo',
+    latin: 'M. pectineus',
+    hl: ['pettineo'],
+    areas: { anca_gluteo: 1, coscia: 0 },
+    symptom: 'Dolore profondo all’inguine, appena sotto la piega, che aumenta aprendo e allargando le gambe.',
+    causes: 'Inciampare o scivolare, sedersi a gambe incrociate, sport con cambi di direzione.',
+    tips: 'Punto vicino ai vasi dell’inguine: applica con delicatezza solo sul muscolo, all’interno del battito dell’arteria.',
+    views: {
+      front: {
+        x: [[88, 218]],
+        zones: [
+          { e: [87, 214, 5, 5, 0], p: 1 },
+          { e: [86, 229, 3, 5, 0], p: 0 },
+        ],
+      },
+    },
+  },
   /* ───────────── COSCIA E GINOCCHIO ───────────── */
   {
     id: 'tensore_fascia_lata',
@@ -825,6 +1238,86 @@ window.MUSCLES = [
     },
   },
 
+  {
+    id: 'adduttori',
+    name: 'Adduttori della coscia',
+    latin: 'Mm. adductor longus, brevis et magnus',
+    hl: ['adduttori'],
+    areas: { coscia: 1, anca_gluteo: 1, ginocchio: 0 },
+    symptom: 'Dolore all’inguine e lungo l’interno della coscia, che può scendere all’interno del ginocchio e della tibia; dolore aprendo le gambe.',
+    causes: 'Calcio, sci, equitazione, scivolate, sedersi a lungo a gambe accavallate.',
+    tips: 'Allunga dolcemente l’interno coscia; evita di accavallare le gambe a lungo.',
+    views: {
+      front: {
+        x: [[89, 232]],
+        zones: [
+          { e: [88, 212, 5, 4, 0], p: 1 },
+          { e: [91, 255, 3.5, 15, 0], p: 1 },
+          { e: [89.5, 300, 3.5, 5, 0], p: 0 },
+          { e: [86, 335, 2.5, 10, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'sartorio',
+    videos: ['Sartorius'],
+    name: 'Sartorio',
+    latin: 'M. sartorius',
+    hl: ['sartorio'],
+    areas: { coscia: 1, ginocchio: 1 },
+    symptom: 'Dolore superficiale, a volte pungente o con formicolio, lungo la coscia in diagonale dall’anca all’interno del ginocchio.',
+    causes: 'Stare seduti a gambe incrociate, corsa, cadute, gambe a “X”.',
+    tips: 'Evita di sederti a lungo a gambe incrociate.',
+    views: {
+      front: {
+        x: [[77, 212], [88, 262]],
+        zones: [
+          { e: [83, 240, 3, 16, -18], p: 0 },
+          { e: [88.5, 296, 3.5, 8, 0], p: 1 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'vasto_laterale',
+    videos: ['Vastus Lateralis'],
+    name: 'Vasto laterale',
+    latin: 'M. vastus lateralis',
+    hl: ['vasto_laterale'],
+    areas: { coscia: 1, ginocchio: 1, anca_gluteo: 0 },
+    symptom: 'Dolore lungo il lato esterno della coscia e del ginocchio, a volte con ginocchio “bloccato” o rotula rigida; fastidio dormendo sul fianco.',
+    causes: 'Corsa, scendere scale e pendii, sci, colpi sul lato della coscia.',
+    tips: 'Quando dormi sul fianco metti un cuscino tra le ginocchia; massaggia dolcemente il lato della coscia.',
+    views: {
+      front: {
+        x: [[69, 262], [71, 288]],
+        zones: [
+          { e: [68, 270, 4.5, 22, 0], p: 1 },
+          { e: [73, 302, 4, 5, 0], p: 1 },
+          { e: [65.5, 240, 3, 6, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'popliteo',
+    name: 'Popliteo',
+    latin: 'M. popliteus',
+    hl: ['popliteo'],
+    areas: { ginocchio: 1 },
+    symptom: 'Dolore dietro il ginocchio, soprattutto accovacciandosi, correndo o scendendo le scale e le discese.',
+    causes: 'Corsa in discesa, sport con cambi di direzione, distorsioni del ginocchio.',
+    tips: 'Riduci le discese finché il dolore non passa; evita di stare a lungo accovacciato.',
+    views: {
+      back: {
+        x: [[80, 315]],
+        zones: [
+          { e: [80, 306, 6, 5, 0], p: 1 },
+        ],
+      },
+    },
+  },
   /* ───────────── GAMBA E PIEDE ───────────── */
   {
     id: 'gastrocnemio',
@@ -864,8 +1357,9 @@ window.MUSCLES = [
     tips: 'Allunga il polpaccio a ginocchio piegato; scegli scarpe con un buon supporto del tallone.',
     views: {
       back: {
-        x: [[77, 358], [73, 348]],
+        x: [[77, 358], [73, 348], [74, 324]],
         zones: [
+          { e: [76, 327, 4.5, 7, 0], p: 0 },
           { e: [80.5, 399.1, 4.8, 4.4, 0], p: 1 },
           { e: [80.7, 386, 3, 6.4, 0], p: 0 },
         ],
@@ -910,6 +1404,85 @@ window.MUSCLES = [
           { e: [73.7, 391.1, 3.8, 3.7, 0], p: 1 },
           { e: [74.6, 399.1, 3.1, 2.6, 0], p: 0 },
           { e: [72.8, 359.7, 2.2, 17, -6], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'estensore_lungo_dita',
+    name: 'Estensore lungo delle dita',
+    latin: 'M. extensor digitorum longus',
+    hl: ['estensore_lungo_dita'],
+    areas: { piede: 1, gamba: 0 },
+    symptom: 'Dolore sul dorso del piede che arriva alle dita centrali; crampi notturni alla parte anteriore della gamba.',
+    causes: 'Camminare a lungo in salita o su terreni irregolari, scarpe strette, guidare a lungo con il piede sul pedale.',
+    tips: 'Scegli scarpe comode e non strette sulle dita; muovi spesso le caviglie.',
+    views: {
+      front: {
+        x: [[71.5, 332]],
+        zones: [
+          { e: [77, 396, 4.5, 5, 0], p: 1 },
+          { e: [77, 406, 4, 3, 0], p: 1 },
+          { e: [74, 380, 3, 4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'tibiale_posteriore',
+    videos: ['Tibialis Posterior'],
+    name: 'Tibiale posteriore',
+    latin: 'M. tibialis posterior',
+    hl: ['tibiale_posteriore'],
+    areas: { piede: 1, gamba: 1 },
+    symptom: 'Dolore al tendine d’Achille e sotto la pianta del piede, soprattutto camminando o correndo su terreni irregolari.',
+    causes: 'Piede piatto o pronato, corsa su terreni irregolari, scarpe consumate.',
+    tips: 'Il muscolo è profondo: applica il dispositivo sulla X, al centro del polpaccio. Usa scarpe che sostengano bene l’arco del piede.',
+    views: {
+      back: {
+        x: [[79, 336]],
+        zones: [
+          { e: [80, 371, 2.8, 11, 0], p: 1 },
+          { e: [79, 342, 4, 10, 0], p: 0 },
+          { e: [80, 398, 4, 4, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'flessore_lungo_dita',
+    name: 'Flessore lungo delle dita',
+    latin: 'M. flexor digitorum longus',
+    hl: ['flessore_lungo_dita'],
+    areas: { piede: 1, gamba: 0 },
+    symptom: 'Dolore sotto la pianta, nella parte anteriore del piede e sotto le dita; a volte all’interno della caviglia e del polpaccio.',
+    causes: 'Camminare su sabbia o terreni irregolari, scarpe rigide o strette, piede piatto.',
+    tips: 'Fai rotolare una pallina sotto la pianta del piede e scegli scarpe flessibili.',
+    views: {
+      back: {
+        x: [[82, 346]],
+        zones: [
+          { e: [80, 405, 5, 3, 0], p: 1 },
+          { e: [86, 386, 3, 5, 0], p: 0 },
+          { e: [83, 352, 3, 8, 0], p: 0 },
+        ],
+      },
+    },
+  },
+  {
+    id: 'estensore_breve_dita',
+    name: 'Muscoli dorsali del piede (estensori brevi)',
+    latin: 'Mm. extensor digitorum et hallucis brevis',
+    hl: ['estensore_breve_dita'],
+    areas: { piede: 1 },
+    symptom: 'Dolore sul dorso del piede, nella parte centrale, che peggiora camminando.',
+    causes: 'Scarpe strette o lacci troppo stretti, camminare a lungo, piede rigido.',
+    tips: 'Allenta i lacci e scegli scarpe comode con punta larga.',
+    views: {
+      front: {
+        x: [[79, 396]],
+        zones: [
+          { e: [79, 396, 4.5, 3.5, 0], p: 1 },
         ],
       },
     },
