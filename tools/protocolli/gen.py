@@ -79,37 +79,37 @@ def dolore(L):
     it = L == 'it'
     T = 'Dolore cronico: <span>come usare Equistasi®</span>' if it else 'Chronic pain: <span>how to use Equistasi®</span>'
     first = dict(kicker='Dolore' if it else 'Pain', title=T, intro=(
-        'Equistasi® è un dispositivo medico pensato per aiutarti a gestire il dolore cronico attraverso vibrazioni focali che stimolano la percezione del corpo, contribuendo a ridurre il dolore. Ecco come utilizzarlo in modo efficace.' if it else
-        'Equistasi® is a medical device designed to help you manage chronic pain through focal vibrations that stimulate body awareness, helping to reduce pain. Here is how to use it effectively.'))
+        'Equistasi® genera una stimolazione meccanica focale destinata a influenzare l’informazione propriocettiva. In alcune persone può associarsi a una modificazione della percezione dolorosa: la risposta è individuale. Ecco come utilizzarlo.' if it else
+        'Equistasi® generates focal mechanical stimulation intended to influence proprioceptive information. In some people it may be associated with a change in pain perception: the response is individual. Here is how to use it.'))
     p1 = '<section>' + h2(1, 'Dove applicare i dispositivi' if it else 'Where to apply the devices') + where(
         steps([('1', 'Sul punto doloroso' if it else 'On the painful spot',
                 'Applica il primo dispositivo dove senti il dolore più intenso.' if it else 'Apply the first device where you feel the most intense pain.'),
                ('2·3', 'Sui muscoli coinvolti' if it else 'On the muscles involved',
-                'Applica gli altri due sui muscoli che sostengono il movimento dell’area dolorante: aiutano la percezione del corpo e riducono la tensione. Nell’app trovi i muscoli di ogni zona.' if it else
-                'Apply the other two on the muscles that support the movement of the painful area: they help body awareness and reduce tension. In the app you will find the muscles for every area.'),
+                'Applica gli altri due sui muscoli che sostengono il movimento dell’area dolorante. Nell’app trovi i muscoli di ogni zona.' if it else
+                'Apply the other two on the muscles that support the movement of the painful area. In the app you will find the muscles for every area.'),
                ('4', 'Sulla vertebra del metamero' if it else 'On the vertebra of the metamere',
                 'Applica un dispositivo sulla vertebra del <b>metamero</b> collegato al distretto muscolare: premi le vertebre della zona e scegli la <b>più dolente</b> (ginocchio → L3-L4). Le trovi nell’app, sezione <b>Metamero e dermatomero</b>.' if it else
                 'Apply one device on the vertebra of the <b>metamere</b> linked to the muscle area: press the vertebrae of that area and choose the <b>most tender</b> one (knee → L3-L4). You will find them in the app, <b>Metamere and dermatome</b> section.')]) + FIX[L],
         fig('fig_knee_meta.jpg', '<b>Esempio: dolore al ginocchio.</b> 1 sul punto doloroso, 2 e 3 sui muscoli della coscia, 4 sulla vertebra L3-L4 (vista da dietro).' if it else '<b>Example: knee pain.</b> 1 on the painful spot, 2 and 3 on the thigh muscles, 4 on the L3-L4 vertebra (back view).'), '70mm') + '</section>'
     p1 += '<section>' + h2(2, 'Verifica se funziona' if it else 'Check that it works') + '<p style="margin:0 0 3mm">' + (
         'Dopo aver applicato i dispositivi, attendi circa <b>10 minuti</b>.' if it else 'After applying the devices, wait about <b>10 minutes</b>.') + '</p><div class="check">' + (
-        '<div class="c ok"><span class="t">✓ Senti anche un leggero sollievo?</span>Significa che i punti scelti sono corretti.</div><div class="c ko"><span class="t">↻ Nessun sollievo dopo 10–20 minuti?</span>Sposta i dispositivi su punti vicini, lungo i muscoli o sulla colonna.</div>' if it else
-        '<div class="c ok"><span class="t">✓ Do you feel even slight relief?</span>It means the chosen points are correct.</div><div class="c ko"><span class="t">↻ No relief after 10–20 minutes?</span>Move the devices to nearby points, along the muscles or on the spine.</div>') + '</div><p style="margin:3mm 0 0"><b>' + ('Per un beneficio maggiore:' if it else 'For greater benefit:') + '</b> ' + (
-        'regola i punti fino a trovare quelli che ti danno più sollievo; combinare punto di dolore e punti vicini può dare un sollievo più duraturo.' if it else
-        'adjust the points until you find those that give you the most relief; combining the pain point with nearby points can give longer-lasting relief.') + '</p></section>'
+        '<div class="c ok"><span class="t">✓ Percepisci un eventuale beneficio?</span>I punti scelti sono adatti a te: la risposta è individuale.</div><div class="c ko"><span class="t">↻ Nessun beneficio percepito dopo 10–20 minuti?</span>Sposta i dispositivi su punti vicini, lungo i muscoli o sulla colonna.</div>' if it else
+        '<div class="c ok"><span class="t">✓ Do you notice any perceived benefit?</span>The chosen points suit you: the response is individual.</div><div class="c ko"><span class="t">↻ No perceived benefit after 10–20 minutes?</span>Move the devices to nearby points, along the muscles or on the spine.</div>') + '</div><p style="margin:3mm 0 0"><b>' + ('Risposta individuale:' if it else 'Individual response:') + '</b> ' + (
+        'puoi regolare i punti fino a trovare quelli con cui percepisci un eventuale beneficio, anche combinando il punto di dolore con punti vicini.' if it else
+        'you can adjust the points until you find those with which you notice any perceived benefit, also combining the pain point with nearby points.') + '</p></section>'
     p2 = '<section>' + h2(3, 'Quanto tempo tenerlo' if it else 'How long to keep it on') + timetable([
         ('Prima applicazione' if it else 'First application', 'Lascia i dispositivi sul punto doloroso e sui muscoli <b>fino al giorno successivo</b>; toglili circa <b>un’ora dopo il risveglio</b>.' if it else 'Leave the devices on the painful spot and on the muscles in place <b>until the next day</b>; remove them about <b>an hour after waking up</b>.'),
         ('Dispositivo sulla vertebra' if it else 'Device on the vertebra', 'Inizia con <b>1 ora</b>; se serve, aumenta fino a <b>2 ore</b>.' if it else 'Start with <b>1 hour</b>; if needed, increase up to <b>2 hours</b>.'),
         ('Se il dolore è scomparso' if it else 'If the pain has gone', 'Non serve continuare: quando il dolore ritorna, riapplica i dispositivi nello stesso modo.' if it else 'There is no need to continue: when the pain comes back, reapply the devices in the same way.'),
-        ('Pausa settimanale' if it else 'Weekly break', 'Per mantenere l’efficacia nel tempo fai una pausa di <b>almeno 2 giorni ogni settimana</b>.' if it else 'To keep it effective over time, take a break of <b>at least 2 days every week</b>.'),
+        ('Pausa settimanale' if it else 'Weekly break', 'Fai una pausa di <b>almeno 2 giorni ogni settimana</b>.' if it else 'Take a break of <b>at least 2 days every week</b>.'),
     ], WEEK[L]) + '</section>'
     p2 += '<section>' + warn('Quando togliere i dispositivi' if it else 'When to remove the devices', [ANY[L],
-        'Durante l’applicazione il dolore iniziale può ridursi o scomparire e poi ripresentarsi come un <b>leggero fastidio</b>: è il momento di togliere i dispositivi. Il fastidio diminuisce rapidamente dopo la rimozione.' if it else
-        'During application the initial pain may decrease or disappear and then return as <b>mild discomfort</b>: this is the time to remove the devices. The discomfort quickly decreases after removal.',
+        'Durante l’applicazione la percezione del dolore può modificarsi; se poi compare un <b>leggero fastidio</b>, è il momento di togliere i dispositivi. Il fastidio diminuisce rapidamente dopo la rimozione.' if it else
+        'During application your perception of pain may change; if <b>mild discomfort</b> then appears, this is the time to remove the devices. The discomfort quickly decreases after removal.',
         'Se avverti <b>nausea, mal di testa o capogiri</b>, togli subito i dispositivi e riprova il giorno successivo.' if it else 'If you feel <b>nausea, headache or dizziness</b>, remove the devices immediately and try again the next day.']) + '</section>'
     p2 += '<section>' + h2(4, 'In sintesi' if it else 'In short') + '<div class="apply"><img src="applicazione.jpg" alt="">' + steps([
         ('1', '', 'Un dispositivo sul <b>punto più doloroso</b>, due sui <b>muscoli</b> che sostengono la zona e uno sulla <b>vertebra</b> del metamero (1–2 ore).' if it else 'One device on the <b>most painful spot</b>, two on the <b>muscles</b> supporting the area and one on the <b>vertebra</b> of the metamere (1–2 hours).'),
-        ('2', '', 'Dopo <b>10 minuti</b> controlla: se non senti sollievo, sposta i dispositivi su punti vicini.' if it else 'After <b>10 minutes</b> check: if you feel no relief, move the devices to nearby points.'),
+        ('2', '', 'Dopo <b>10 minuti</b> controlla: se non percepisci alcun beneficio, sposta i dispositivi su punti vicini.' if it else 'After <b>10 minutes</b> check: if you notice no perceived benefit, move the devices to nearby points.'),
         ('3', '', 'La prima volta tienili <b>fino al mattino dopo</b>; poi riapplica solo quando il dolore ritorna, con <b>2 giorni di pausa</b> a settimana.' if it else 'The first time keep them on <b>until the next morning</b>; then reapply only when the pain returns, with <b>2 days off</b> a week.')]) + '</div></section>'
     short = 'Dolore cronico · Equistasi®' if it else 'Chronic pain · Equistasi®'
     return doc(L, short, [page(L, short, p1, 1, 2, first), page(L, short, p2, 2, 2)])
@@ -142,7 +142,6 @@ def derm(L):
     ], WEEK[L]) + '</section>'
     p2 += '<section>' + warn('Quando togliere i dispositivi' if it else 'When to remove the devices', [ANY[L],
         'Se avverti <b>nausea, mal di testa o capogiri</b>, togli subito i dispositivi e riprova il giorno successivo.' if it else 'If you feel <b>nausea, headache or dizziness</b>, remove the devices immediately and try again the next day.']) + '</section>'
-    p2 += '<section>' + APPTIP[L] + '</section>'
     short = 'Dolore e dermatomeri · Equistasi®' if it else 'Pain and dermatomes · Equistasi®'
     rows = [('C5', 'Clavicole', 'Collarbones'), ('C5, C6, C7', 'Lato esterno delle braccia', 'Outer side of the arms'),
             ('C8, T1', 'Lato interno delle braccia', 'Inner side of the arms'), ('C6', 'Pollice', 'Thumb'),
@@ -167,8 +166,8 @@ def derm(L):
 def sport(L):
     it = L == 'it'
     first = dict(kicker='Sport', title=('Sport e performance: <span>come usare Equistasi®</span>' if it else 'Sport and performance: <span>how to use Equistasi®</span>'), intro=(
-        'Equistasi® aiuta il controllo del movimento e la propriocezione, cioè la percezione del corpo nello spazio. Ecco come usarlo prima e durante l’attività sportiva.' if it else
-        'Equistasi® supports movement control and proprioception, that is the sense of your body in space. Here is how to use it before and during sport.'))
+        'Equistasi® genera una stimolazione meccanica focale destinata a influenzare l’informazione propriocettiva, cioè la percezione del corpo nello spazio. La risposta è individuale. Ecco come usarlo prima e durante l’attività sportiva.' if it else
+        'Equistasi® generates focal mechanical stimulation intended to influence proprioceptive information, that is the sense of your body in space. The response is individual. Here is how to use it before and during sport.'))
     p1 = '<section>' + h2(1, 'Dove applicare i 3 dispositivi' if it else 'Where to apply the 3 devices') + where(steps([
         ('1', 'Settima vertebra cervicale (C7)' if it else 'Seventh cervical vertebra (C7)', 'Posiziona un dispositivo alla base del collo, direttamente sopra la C7: è la vertebra più sporgente quando pieghi la testa in avanti.' if it else 'Place one device at the base of the neck, directly over C7: it is the most prominent vertebra when you bend your head forward.'),
         ('2·3', 'Polpacci' if it else 'Calves', 'Applica un dispositivo su ciascun polpaccio, preferibilmente sul muscolo soleo (parte bassa del polpaccio, sopra il tendine d’Achille).' if it else 'Apply one device on each calf, preferably on the soleus muscle (lower part of the calf, above the Achilles tendon).')]) + FIX[L],
@@ -180,8 +179,8 @@ def sport(L):
         ('Ogni settimana' if it else 'Every week', 'Massimo <b>5 giorni</b>, con <b>2 giorni di pausa</b> per evitare che i recettori si abituino allo stimolo.' if it else 'No more than <b>5 days</b>, with <b>2 days off</b> so that the receptors do not get used to the stimulus.'),
     ], WEEK[L]) + '</section>'
     p2 += '<section>' + h2(3, 'A cosa serve' if it else 'What it is for') + '<div class="two"><div class="opt"><h3>' + ('Stabilità posturale' if it else 'Postural stability') + '</h3>' + (
-        'Migliora il controllo neuromuscolare, utile anche per ridurre il rischio di infortuni, come quelli al legamento crociato anteriore.' if it else 'It improves neuromuscular control, which also helps reduce the risk of injuries, such as those to the anterior cruciate ligament.') + '</div><div class="opt"><h3>' + (
-        'Prestazione' if it else 'Performance') + '</h3>' + ('Ottimizza il controllo del movimento e la propriocezione, fondamentali negli sport dinamici come il calcio e il ciclismo.' if it else 'It optimises movement control and proprioception, essential in dynamic sports such as football and cycling.') + '</div></div></section>'
+        'Per il controllo neuromuscolare.' if it else 'For neuromuscular control.') + '</div><div class="opt"><h3>' + (
+        'Prestazione' if it else 'Performance') + '</h3>' + ('Per il controllo del movimento negli sport dinamici, come calcio e ciclismo.' if it else 'For movement control in dynamic sports such as football and cycling.') + '</div></div></section>'
     p2 += '<section>' + h2(4, 'Con il tuo fisioterapista' if it else 'With your physiotherapist') + '<p style="margin:0">' + (
         'Ti consigliamo di farti seguire da un fisioterapista o da un preparatore atletico esperto: potrà adattare punti e tempi alle tue esigenze e allo sport che pratichi.' if it else
         'We recommend being followed by a physiotherapist or an experienced athletic trainer: they can adapt the points and times to your needs and to the sport you play.') + '</p></section>'
@@ -196,12 +195,12 @@ def sport(L):
 def parkinson(L):
     it = L == 'it'
     first = dict(kicker='Parkinson', title=('Parkinson: <span>equilibrio e stabilità posturale</span>' if it else 'Parkinson’s: <span>balance and postural stability</span>'), intro=(
-        'Come usare Equistasi® per migliorare l’equilibrio e la stabilità quando cammini e stai in piedi. Segui sempre le indicazioni del tuo neurologo o fisioterapista.' if it else
-        'How to use Equistasi® to improve balance and stability when walking and standing. Always follow the advice of your neurologist or physiotherapist.'))
+        'Equistasi® genera una stimolazione meccanica focale destinata a influenzare l’informazione propriocettiva; la risposta è individuale. Segui le indicazioni del tuo neurologo o fisioterapista.' if it else
+        'Equistasi® generates focal mechanical stimulation intended to influence proprioceptive information; the response is individual. Follow the advice of your neurologist or physiotherapist.'))
     p1 = '<section>' + h2(1, 'Dove applicare i 3 dispositivi' if it else 'Where to apply the 3 devices') + where(steps([
-        ('1', 'Settima vertebra cervicale (C7)' if it else 'Seventh cervical vertebra (C7)', 'Dietro al collo: è un punto chiave per la regolazione della postura. È la vertebra più sporgente quando pieghi la testa in avanti.' if it else 'At the back of the neck: a key point for controlling posture. It is the most prominent vertebra when you bend your head forward.'),
+        ('1', 'Settima vertebra cervicale (C7)' if it else 'Seventh cervical vertebra (C7)', 'Dietro al collo: è la vertebra più sporgente quando pieghi la testa in avanti.' if it else 'At the back of the neck: the most prominent vertebra when you bend your head forward.'),
         ('2', 'Soleo destro' if it else 'Right soleus', 'Nella parte posteriore della gamba, alla base del polpaccio.' if it else 'At the back of the leg, at the base of the calf.'),
-        ('3', 'Soleo sinistro' if it else 'Left soleus', 'Nella stessa posizione sull’altra gamba. I muscoli soleo sono fondamentali per l’equilibrio e per stare in piedi.' if it else 'In the same position on the other leg. The soleus muscles are essential for balance and for standing.')]) + FIX[L],
+        ('3', 'Soleo sinistro' if it else 'Left soleus', 'Nella stessa posizione sull’altra gamba.' if it else 'In the same position on the other leg.')]) + FIX[L],
         fig('fig_c7_soleo.jpg', '<b>Vista da dietro.</b> 1 su C7, 2 e 3 sui due soleo.' if it else '<b>Back view.</b> 1 on C7, 2 and 3 on both soleus muscles.', 'tall')) + '</section>'
     p1 += '<section>' + h2(2, 'Quanto tempo tenerlo' if it else 'How long to keep it on') + timetable([
         ('Primo giorno' if it else 'First day', '<b>1 ora</b> consecutiva, preferibilmente nelle ore in cui ti muovi di più.' if it else '<b>1 hour</b> in a row, preferably at the times of day when you move the most.'),
@@ -248,11 +247,11 @@ def sm(L):
     p2 += '<section>' + h2(2, 'Come valutare i progressi' if it else 'How to assess progress') + '<p style="margin:0">' + (
         'Il tuo fisioterapista può misurare equilibrio e cammino con semplici test (come il Timed Up and Go e il test di Romberg), meglio se ripresi in video: prima di iniziare, dopo la prima ora di applicazione e ai controlli successivi.' if it else
         'Your physiotherapist can measure balance and walking with simple tests (such as the Timed Up and Go and the Romberg test), ideally recorded on video: before starting, after the first hour of application and at later check-ups.') + '</p></section>'
-    p2 += '<section>' + h2(3, 'Se non noti miglioramenti' if it else 'If you notice no improvement') + '<ul class="plain">' + ''.join('<li>%s</li>' % x for x in ([
-        'Parlane con il medico: alcuni farmaci possono ridurre l’efficacia del dispositivo.',
+    p2 += '<section>' + h2(3, 'Se non percepisci alcun beneficio' if it else 'If you notice no perceived benefit') + '<ul class="plain">' + ''.join('<li>%s</li>' % x for x in ([
+        'Parlane con il medico: alcuni farmaci possono influire sulla risposta al dispositivo.',
         'Si può fare una pausa di una o più settimane e poi ripetere il trattamento.',
         'Il fisioterapista può valutare punti di applicazione diversi.'] if it else [
-        'Talk to your doctor: some medicines may reduce the effectiveness of the device.',
+        'Talk to your doctor: some medicines may affect the response to the device.',
         'You can take a break of one or more weeks and then repeat the treatment.',
         'Your physiotherapist can consider different application points.'])) + '</ul></section>'
     p2 += '<section>' + FIX[L] + '</section>'

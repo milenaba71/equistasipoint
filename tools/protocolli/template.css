@@ -60,10 +60,10 @@
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
   .plain { margin: 0; padding-left: 5mm; }
   .plain li { margin-bottom: 1.6mm; }
-  .fig.tall img { height: 96mm; object-fit: contain; background: #1e1a46; }
+  .fig.tall img { height: 86mm; object-fit: contain; background: #1e1a46; }
   .fig.wide img { height: 84mm; object-fit: contain; background: #1e1a46; }
 
-  .fig.tall.sm img { height: 70mm; }
+  .fig.tall.sm img { height: 60mm; }
   .fig.wide img { height: 64mm; }
 
   .apply .steps li { margin-bottom: 2.6mm; }
