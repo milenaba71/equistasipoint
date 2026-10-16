@@ -407,8 +407,8 @@
   }
 
   /* ───────── CONTENUTI: video tutorial e protocolli (Airtable via Make) ───────── */
-  const CONTENT_KEY = 'tp-content-v2';
-  const CONTENT_TTL = 3600 * 1000; // i link ai PDF di Airtable scadono dopo poche ore
+  const CONTENT_KEY = 'tp-content-v3';
+  const CONTENT_TTL = 15 * 60 * 1000; // nuovi video subito visibili; i link ai PDF di Airtable scadono dopo poche ore
   let contentPromise = null;
 
   const sel = (v) => (v && typeof v === 'object' ? v.name : v) || '';
@@ -443,29 +443,43 @@
     };
   }
   const byOrder = (a, b) => a.order - b.order || a.title.localeCompare(b.title);
+  /* Lingua dei contenuti (campo "Language" in Airtable: it / en).
+     Video: in inglese si mostra la versione "en" con lo stesso numero "Order" al posto di quella italiana;
+     i video senza versione inglese restano in italiano. Protocolli: in inglese quelli "en", se ce ne sono. */
+  function forLang(c) {
+    if (!c) return c;
+    const en = window.LANG === 'en';
+    const videos = c.videos.filter((v) => {
+      if (v.lang === 'en') return en;
+      return !en || !(v.order < 999 && c.videos.some((w) => w.lang === 'en' && w.order === v.order));
+    });
+    const enPros = c.protocols.filter((x) => x.lang === 'en');
+    const protocols = en && enPros.length ? enPros : c.protocols.filter((x) => x.lang !== 'en');
+    return { videos, protocols };
+  }
   function loadContent() {
     if (contentPromise) return contentPromise;
     let cached = null;
     try { cached = JSON.parse(localStorage.getItem(CONTENT_KEY) || 'null'); } catch (e) { /* storage non disponibile */ }
     const url = (window.APP_CONFIG || {}).videosUrl;
-    if (cached && Date.now() - cached.t < CONTENT_TTL) return (contentPromise = Promise.resolve(cached.c));
-    if (!url) return (contentPromise = Promise.resolve(cached ? cached.c : null));
+    if (cached && Date.now() - cached.t < CONTENT_TTL) return (contentPromise = Promise.resolve(forLang(cached.c)));
+    if (!url) return (contentPromise = Promise.resolve(forLang(cached ? cached.c : null)));
     contentPromise = fetch(url, { cache: 'no-store' })
       .then((r) => r.json())
       .then((d) => {
         const vids = (d.videos || d).records || [];
         const pros = (d.protocols || {}).records || [];
         const c = {
-          videos: vids.map(normVideo).filter((x) => (x.url || x.file) && x.lang !== 'en').sort(byOrder),
-          protocols: pros.map(normProtocol).filter((x) => x.url && x.lang !== 'en').sort(byOrder),
+          videos: vids.map(normVideo).filter((x) => x.url || x.file).sort(byOrder),
+          protocols: pros.map(normProtocol).filter((x) => x.url).sort(byOrder),
         };
         // un elenco vuoto non si salva: alla prossima apertura si riprova
         if (c.videos.length || c.protocols.length) {
           try { localStorage.setItem(CONTENT_KEY, JSON.stringify({ t: Date.now(), c })); } catch (e) { /* storage non disponibile */ }
         }
-        return c;
+        return forLang(c);
       })
-      .catch(() => (cached ? cached.c : null));
+      .catch(() => forLang(cached ? cached.c : null));
     return contentPromise;
   }
   const loadVideos = () => loadContent().then((c) => (c ? c.videos.filter((v) => visibleFor(v, 'video')) : null));
