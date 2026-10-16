@@ -36,3 +36,21 @@ for lab,(x,y),side in [('1',(82,314),-1),('2',(90.5,283),1),('3',(80,260),-1)]:
   d.text((bx,cy),lab,font=F2,fill=(41,35,92,255),anchor='mm')
 bg.convert('RGB').save('fig_knee.jpg',quality=90)
 print('ok')
+# dolore cronico: ginocchio (davanti) + vertebra del metamero L3-L4 (dietro)
+knee = Image.open('fig_knee.jpg')
+im = Image.open('/home/user/equistasipoint/img/anatomy/base-back.webp').convert('RGBA')
+x0, y0, x1, y1 = 60, 120, 140, 256
+c = im.crop((int(x0*k), int(y0*k), int(x1*k), int(y1*k))); c = c.resize(knee.size, Image.LANCZOS)
+sx = knee.width / ((x1-x0)*k); sy = knee.height / ((y1-y0)*k)
+bg = Image.new('RGBA', c.size, (30, 26, 70, 255)); bg.alpha_composite(c); d = ImageDraw.Draw(bg)
+F2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 34)
+cx, cy = (100-x0)*k*sx, (172.8-y0)*k*sy; s = 22
+for w, col in ((16, (255,255,255,255)), (8, (20,20,30,255))):
+  d.line([cx-s,cy-s,cx+s,cy+s], fill=col, width=w); d.line([cx-s,cy+s,cx+s,cy-s], fill=col, width=w)
+bx = cx+52; r = 24
+d.ellipse([bx-r-4,cy-r-4,bx+r+4,cy+r+4], fill=(41,35,92,255)); d.ellipse([bx-r,cy-r,bx+r,cy+r], fill=(250,220,0,255))
+d.text((bx,cy), '4', font=F2, fill=(41,35,92,255), anchor='mm')
+gap = 16
+out = Image.new('RGB', (knee.width*2+gap, knee.height), (255,255,255)); out.paste(knee, (0,0)); out.paste(bg.convert('RGB'), (knee.width+gap, 0))
+out.save('fig_knee_meta.jpg', quality=90)
+print('knee_meta', out.size)
