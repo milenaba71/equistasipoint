@@ -407,6 +407,8 @@ main { padding-top: 0; padding-bottom: 12px; }
 .hot-dot { fill: var(--yellow); stroke: var(--indigo); stroke-width: 1.2; }
 .hot:hover .hot-dot, .hot.on .hot-dot { fill: #fff; }
 .hot-ring { fill: var(--yellow); }
+.tp-dot { fill: #1b1840; stroke: var(--yellow); stroke-width: .9; cursor: pointer; }
+.tp-dot:hover, .tp-dot.on { fill: var(--yellow); stroke: #1b1840; }
 .hit { fill: var(--yellow); fill-opacity: .08; }
 .hit:hover, .hit.on { fill-opacity: .3; }
 
