@@ -152,13 +152,13 @@ def derm(L):
             ('L5, S1, S2', 'Lato esterno e retro delle gambe', 'Outer side and back of the legs'),
             ('S1', 'Bordo esterno del piede e mignolo del piede', 'Outer edge of the foot and little toe'),
             ('S2, S3, S4, S5', 'Perineo', 'Perineum')]
-    half = (len(rows) + 1) // 2
+    third = (len(rows) + 2) // 3
     tab = lambda rr: '<table class="derm-t">' + ''.join('<tr><th>%s</th><td>%s</td></tr>' % (a, b if it else c) for a, b, c in rr) + '</table>'
     p3 = '<section>' + h2(5, 'Mappa dei dermatomeri' if it else 'Dermatome map') + (
         '<figure class="fig derm-map"><img src="fig_dermatomi.jpg" alt=""><figcaption>%s</figcaption></figure>' % (
         'Davanti e dietro. La mappa mostra i dermatomeri come zone separate: in realtà ogni dermatomero si sovrappone in parte a quelli vicini.' if it else
         'Front and back. The map shows the dermatomes as separate areas: in reality each dermatome partly overlaps its neighbours.')) + '</section>'
-    p3 += '<section><h3 class="derm-h">' + ('Livelli dei dermatomeri principali' if it else 'Main dermatome levels') + '</h3><div class="two">' + tab(rows[:half]) + tab(rows[half:]) + '</div></section>'
+    p3 += '<section><h3 class="derm-h">' + ('Livelli dei dermatomeri principali' if it else 'Main dermatome levels') + '</h3><div class="three">' + tab(rows[:third]) + tab(rows[third:2 * third]) + tab(rows[2 * third:]) + '</div></section>'
     return doc(L, short, [page(L, short, p1, 1, 3, first), page(L, short, p2, 2, 3), page(L, short, p3, 3, 3)])
 
 
