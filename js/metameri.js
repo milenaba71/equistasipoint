@@ -16,7 +16,7 @@
   const IMG_BASE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/';
   const IMG = {
     s1: IMG_BASE + '8cf187ed-8625-4024-b946-dcdc4dd4986c.jpg',
-    s2: IMG_BASE + '40e35bb8-96e8-4fd5-8e4f-28f801d802dd.jpg',
+    s2: IMG_BASE + '79f8b55a-3027-4dc2-ae36-49ef5d23f687.jpg',
     s3: IMG_BASE + 'aec780e2-6a67-4e63-aea4-f78a5f239096.jpg',
     s4: IMG_BASE + '2b9e613a-df76-4c42-8e6a-40ae9f37f74d.jpg',
   };
