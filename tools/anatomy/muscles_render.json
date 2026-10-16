@@ -27,5 +27,11 @@
   "peronei": {"hl": ["Fibularis longus muscle.r", "Fibularis brevis muscle.r"]},
   "trapezio_medio_inf": {"hl": ["Descending part of trapezius muscle.r"]},
   "iliocostale_toracico": {"hl": ["Iliocostalis thoracis muscle.r"], "hide": ["Latissimus dorsi muscle.r", "Serratus posterior inferior muscle.r", "Descending part of trapezius muscle.r", "Transverse part of trapezius muscle.r", "Rhomboid major muscle.r"]},
-  "dentato_post_sup": {"hl": ["Serratus posterior superior muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Transverse part of trapezius muscle.r", "Descending part of trapezius muscle.r", "Rhomboid major muscle.r", "Rhomboid minor muscle.r"]}
+  "dentato_post_sup": {"hl": ["Serratus posterior superior muscle.r"], "hide": ["Ascending part of trapezius muscle.r", "Transverse part of trapezius muscle.r", "Descending part of trapezius muscle.r", "Rhomboid major muscle.r", "Rhomboid minor muscle.r"]},
+  "massetere": {"hl": ["Superficial part of masseter.r", "Deep part of masseter.r"], "hide": ["Masseteric fascia.r", "Platysma.r"]},
+  "pterigoideo_laterale": {"hl": ["Superior head of lateral pterygoid muscle.r", "Inferior head of lateral pterygoid muscle.r"], "xray": true},
+  "digastrico": {"hl": ["Anterior belly of digastric muscle.r", "Posterior belly of digastric muscle.r", "Intermediate tendon of digastric muscle.r"], "xray": true},
+  "zigomatico": {"hl": ["Zygomaticus major muscle.r", "Zygomaticus minor muscle.r"]},
+  "retto_addome": {"hl": ["Rectus abdominis muscle.r", "Pyramidalis muscle.r"], "hide": ["External abdominal oblique muscle.r"]},
+  "obliqui_addome": {"hl": ["External abdominal oblique muscle.r"]}
 }

@@ -22,3 +22,7 @@ Le immagini derivate restano sotto CC BY-SA 4.0. Il codice dell'app, i testi e i
 Stile: muscoli `#9c3a24`, muscolo evidenziato `#e8501a`, corpo "spento" `#b8a69c`, tendini `#eee4d6`;
 telecamera ortografica (scala 1.86 m, centro a 0.83 m), Cycles, AgX Medium High Contrast.
 Le coordinate di X e zone in `js/data.js` sono nel sistema 200 × 432.6 di queste immagini.
+
+Muscoli profondi non visibili dalla vista frontale (es. pterigoideo laterale, digastrico, `"xray": true`
+in `muscles_render.json`): si renderizza la tavola "dim" e, a parte, solo il muscolo (`"solo": true`
+nel job); il muscolo viene poi sovrapposto in trasparenza (opacità ~70%) sulla tavola.
