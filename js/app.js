@@ -224,6 +224,7 @@
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
+      (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Il metamero</b> è come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa i metameri</a></div></div>')) +
       (sport ? window.EqTests.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
@@ -252,6 +253,13 @@
       state.homeView = b.dataset.view; store.set('tp-view', state.homeView); renderHome();
     }));
 
+    const goMap = () => {
+      const card = app.querySelector('.map-card');
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+    };
+    const useTp = app.querySelector('#use-tp');
+    if (useTp) useTp.addEventListener('click', goMap);
     const toMap = app.querySelector('#to-map');
     if (toMap) toMap.addEventListener('click', () => {
       const card = app.querySelector('.map-card');
