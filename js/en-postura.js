@@ -46,7 +46,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   'Serve a trasformare le inclinazioni in centimetri di oscillazione.': 'Used to turn tilt angles into centimetres of sway.',
   'Altezza in centimetri': 'Height in centimetres',
   'Telefono nella cintura': 'Phone in the belt',
-  'dietro la schiena, zona lombare, al centro. Telefono dritto, schermo verso l’esterno.': 'behind your back, lower back, in the centre. Phone upright, screen facing out.',
+  'dietro la schiena, zona lombare, al centro. Telefono in orizzontale o in verticale, schermo verso l’esterno.': 'behind your back, lower back, in the centre. Phone landscape or portrait, screen facing out.',
   'Tocca <b>Inizia</b> e metti il telefono nella cintura: hai <b>10 secondi</b>.': 'Tap <b>Start</b> and put the phone in the belt: you have <b>10 seconds</b>.',
   'Piedi uniti, braccia lungo i fianchi. Una voce ti dice quando iniziare e quando finire: resta fermo per <b>30 secondi</b>.': 'Feet together, arms by your sides. A voice tells you when to start and when to stop: stay still for <b>30 seconds</b>.',
   'Telefono sul petto': 'Phone on the chest',

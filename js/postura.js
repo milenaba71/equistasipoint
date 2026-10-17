@@ -109,16 +109,29 @@
   }
 
   // Inclinazione dal vettore di gravità, filtrata (passa-basso) e ricampionata a 20 Hz.
-  // Telefono dritto: l'asse y punta in alto. Su alcuni telefoni i segni sono invertiti: li correggiamo.
+  // Il telefono può stare in verticale o in orizzontale (schermo verso l'esterno): l'asse su cui
+  // pesa di più la gravità è "l'alto". Se è x, ruotiamo di 90° gli assi; su alcuni telefoni i segni
+  // sono invertiti: li correggiamo.
+  function axes(samples) {
+    const mx = mean(samples.map((p) => p.x)); const my = mean(samples.map((p) => p.y));
+    const land = Math.abs(mx) > Math.abs(my);
+    const sign = (land ? mx : my) < 0 ? -1 : 1;
+    return land
+      ? (p) => ({ x: -p.y * sign, y: p.x * sign, z: p.z * sign })
+      : (p) => ({ x: p.x * sign, y: p.y * sign, z: p.z * sign });
+  }
+
   function tilt(samples, fc = 1.5) {
     if (samples.length < 10) return null;
-    const sign = mean(samples.map((p) => p.y)) < 0 ? -1 : 1;
-    let gx = samples[0].x * sign; let gy = samples[0].y * sign; let gz = samples[0].z * sign;
+    const map = axes(samples);
+    const s0 = map(samples[0]);
+    let gx = s0.x; let gy = s0.y; let gz = s0.z;
     const out = []; let last = samples[0].t; let nextT = samples[0].t;
     samples.forEach((p) => {
       const dt = Math.max(0.001, (p.t - last) / 1000); last = p.t;
       const k = 1 - Math.exp(-2 * Math.PI * fc * dt);
-      gx += k * (p.x * sign - gx); gy += k * (p.y * sign - gy); gz += k * (p.z * sign - gz);
+      const q = map(p);
+      gx += k * (q.x - gx); gy += k * (q.y - gy); gz += k * (q.z - gz);
       if (p.t >= nextT) { out.push({ t: p.t, ap: deg(Math.atan2(-gz, gy)), ml: deg(Math.atan2(gx, gy)) }); nextT += 50; }
     });
     return out;
@@ -235,7 +248,7 @@
   function renderStability(app) {
     const belt = prefs.mount === 'cintura';
     const how = belt
-      ? ['<b>' + T('Telefono nella cintura') + '</b>: ' + T('dietro la schiena, zona lombare, al centro. Telefono dritto, schermo verso l’esterno.'),
+      ? ['<b>' + T('Telefono nella cintura') + '</b>: ' + T('dietro la schiena, zona lombare, al centro. Telefono in orizzontale o in verticale, schermo verso l’esterno.'),
         T('Tocca <b>Inizia</b> e metti il telefono nella cintura: hai <b>10 secondi</b>.'),
         T('Piedi uniti, braccia lungo i fianchi. Una voce ti dice quando iniziare e quando finire: resta fermo per <b>30 secondi</b>.')]
       : ['<b>' + T('Telefono sul petto') + '</b>: ' + T('tenuto con due mani all’altezza dello sterno, schermo verso di te.'),
