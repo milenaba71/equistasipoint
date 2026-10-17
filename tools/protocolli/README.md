@@ -12,3 +12,9 @@ I contenuti seguono i protocolli originali Equistasi (tempi di applicazione incl
 "rivolta ai professionisti sanitari" è sostituita dall'avviso per il paziente.
 
 La mappa dei dermatomeri (`fig_dermatomi.jpg`) è la tavola fornita da Equistasi, con la fonte indicata nel PDF (F.H. Netter, Atlante di anatomia umana, Elsevier).
+
+## Protocollo per professionisti sanitari
+
+`pro.py` crea `pro-dolore-it.html` (dolore muscoloscheletrico cronico, per fisioterapisti); `pro_pdf.js` lo converte in PDF A4 a impaginazione
+continua con intestazione e numero di pagina: `PW=<percorso playwright> CHROMIUM=<chromium> node pro_pdf.js pro-dolore-it.html protocollo.pdf`.
+Usa anche `fig_knee_meta.jpg` (creata da `figs.py`). Il PDF non è pubblicato nell'app (che contiene solo materiale per i pazienti).
