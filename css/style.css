@@ -711,7 +711,8 @@ main { padding-top: 0; padding-bottom: 12px; }
 .gate-win:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 @keyframes gate-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(250, 220, 0, .0); } 50% { box-shadow: 0 0 0 5px rgba(250, 220, 0, .55); } }
 .gate-idle { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; height: 100%; font-size: 13px; font-weight: 700; }
-.gate-idle svg { width: 62%; height: auto; }
+.gate-idle svg { width: 52%; height: auto; }
+.gate-idle span { padding: 0 10px; text-align: center; line-height: 1.25; }
 .gate-dev.scanning .gate-idle { display: none; }
 .gate-dev.scanning .gate-win, .gate-dev.read .gate-win { animation: none; }
 .gate-dev.read .gate-win, .gate-dev.paired .gate-win { box-shadow: 0 0 0 3px #157a3c; }

@@ -978,7 +978,7 @@
   gateScan.addEventListener('click', async () => {
     if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
-    gateWin(T('Inquadra il seriale')); gateSn.textContent = gateSnIdle;
+    gateWin(T('Clicca qui e abbina il dispositivo')); gateSn.textContent = gateSnIdle;
     gateDev.classList.add('scanning'); gateScanBar.hidden = false;
     try {
       const text = await window.EqScan.open({
@@ -1014,13 +1014,13 @@
         setTimeout(() => { gate.hidden = true; start(); }, 900);
       } else {
         gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
-        gateWin(T('Inquadra il seriale'));
+        gateWin(T('Clicca qui e abbina il dispositivo'));
       }
     } catch (e) {
       gateMsg.textContent = e.message === 'config'
         ? T('Servizio di verifica non configurato.')
         : T('Impossibile verificare ora. Controlla la connessione e riprova.');
-      gateWin(T('Inquadra il seriale'));
+      gateWin(T('Clicca qui e abbina il dispositivo'));
     } finally {
       gateBtn.disabled = false; gateBtn.textContent = T('Accedi');
     }
