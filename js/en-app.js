@@ -257,6 +257,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Puoi rivedere questo video quando vuoi in Video tutorial.": "You can watch this video again anytime in Video tutorials.",
   "Inizia": "Start",
   "Rivedi": "Watch again",
+  "Tocca per l’audio": "Tap for sound",
   "Questa è la tua Home": "This is your Home",
   "Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo": "When you apply the device tap “I’ve applied the device”: after 2 hours we’ll remind you to remove it",
   "Tocca sul corpo la zona dove senti dolore": "Tap the area of the body where you feel pain",
