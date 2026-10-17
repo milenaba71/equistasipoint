@@ -6,7 +6,7 @@ name: App Android
 on:
   push:
     branches: [main]
-    paths: ['index.html', 'css/**', 'js/**', 'img/**', 'manifest.webmanifest', 'mobile/**', '.github/workflows/android.yml']
+    paths: ['index.html', 'css/**', 'js/**', 'img/**', 'media/**', 'manifest.webmanifest', 'mobile/**', '.github/workflows/android.yml']
   workflow_dispatch:
 
 jobs:
