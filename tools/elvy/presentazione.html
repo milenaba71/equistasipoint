@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Elvy – Presentazione</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+@page { size: 1280px 720px; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #424244; }
+body { font-family: 'Manrope', sans-serif; color: #FFFFFF; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.s { width: 1280px; height: 720px; position: relative; overflow: hidden; background: #424244; padding: 56px 64px 48px; page-break-after: always; display: flex; flex-direction: column; }
+.s:last-child { page-break-after: auto; }
+h1, h2, h3 { font-family: 'Lexend', sans-serif; margin: 0; font-weight: 700; }
+h2 { font-size: 40px; line-height: 1.1; }
+h3 { font-size: 20px; }
+.k { font-size: 14px; font-weight: 800; letter-spacing: .1em; color: #7FD6D1; text-transform: uppercase; margin-bottom: 10px; }
+.k.p { color: #C4A6F2; }
+p { margin: 0; }
+.lead { font-size: 19px; line-height: 1.5; color: #E4E4E8; max-width: 640px; margin-top: 14px; }
+.t { color: #7FD6D1; } .pu { color: #C4A6F2; }
+.foot { position: absolute; left: 64px; right: 64px; bottom: 22px; display: flex; justify-content: space-between; font-size: 12px; color: #A8A8AE; }
+.card { background: #4E4E52; border-radius: 22px; padding: 22px 24px; }
+.card p { font-size: 15px; line-height: 1.5; color: #D9D9DE; margin-top: 8px; }
+.grid { display: grid; gap: 18px; }
+.phone { height: 470px; border-radius: 30px; box-shadow: 0 18px 40px rgba(0,0,0,.35); border: 3px solid #2E2E31; display: block; }
+.phone.sm { height: 400px; border-radius: 26px; }
+.phone.md { height: 470px; border-radius: 28px; }
+.watch { width: 150px; border-radius: 36px; border: 6px solid #2E2E31; box-shadow: 0 0 0 2px #8E8E94, 0 14px 30px rgba(0,0,0,.4); display: block; }
+.cap { font-size: 13px; color: #D0D0D6; text-align: center; margin-top: 10px; font-weight: 700; }
+.photo { border-radius: 22px; object-fit: cover; display: block; box-shadow: 0 18px 40px rgba(0,0,0,.35); }
+ul.l { margin: 14px 0 0; padding: 0; list-style: none; }
+ul.l li { font-size: 16.5px; line-height: 1.45; color: #E4E4E8; padding: 7px 0 7px 26px; position: relative; }
+ul.l li::before { content: ''; position: absolute; left: 4px; top: 15px; width: 10px; height: 10px; border-radius: 5px; background: #4BA6A3; }
+ul.l li.pp::before { background: #7D4EB7; }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 14px; background: #2F5F5D; color: #A9EAE5; font-size: 13px; font-weight: 800; }
+.note { font-size: 12.5px; color: #B8B8BE; line-height: 1.45; }
+.serial { font-family: 'Lexend', sans-serif; font-size: 34px; letter-spacing: .06em; }
+.serial b { color: #7FD6D1; }
+</style>
+</head>
+<body>
+
+<!-- 1 Copertina -->
+<section class="s" style="padding:0;flex-direction:row;background:radial-gradient(circle at 75% 45%,#57575C 0,#424244 55%,#38383A 100%)">
+  <div style="width:640px;padding:72px 0 0 72px;display:flex;flex-direction:column">
+    <img src="assets/logo.png" style="width:118px;border-radius:14px">
+    <div class="k" style="margin-top:56px">Equistasi presenta</div>
+    <h1 style="font-size:76px;line-height:1.02">Allenati<br>con <span class="t">Elvy</span></h1>
+    <p class="lead" style="font-size:21px">Il dispositivo NFC, l’app per smartphone e smartwatch e la cintura per misurare equilibrio, salti, corsa, postura e recupero.</p>
+    <div style="margin-top:auto;margin-bottom:48px;font-size:13px;color:#A8A8AE">Presentazione di progetto · ottobre 2026 · documento riservato</div>
+  </div>
+  <div style="flex:1;position:relative">
+    <img src="assets/mascotte.png" style="position:absolute;right:70px;top:50px;height:620px;border-radius:30px;box-shadow:0 24px 60px rgba(0,0,0,.35)">
+  </div>
+</section>
+
+<!-- 2 Il sistema -->
+<section class="s">
+  <div class="k">Il sistema Elvy</div>
+  <h2>Quattro elementi, un solo obiettivo:<br>misurare come ti alleni</h2>
+  <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-top:38px">
+    <div class="card"><div class="pill">1</div><h3 style="margin-top:14px">Dispositivo Elvy</h3><p>Il dispositivo Equistasi per lo sport, con chip NFC e numero di serie E2026. Si applica sul corpo come gli altri dispositivi Equistasi.</p></div>
+    <div class="card"><div class="pill">2</div><h3 style="margin-top:14px">App Elvy</h3><p>Usa i sensori dello smartphone: accelerometro, giroscopio, fotocamera. Guida i test e salva le misure sul telefono.</p></div>
+    <div class="card"><div class="pill">3</div><h3 style="margin-top:14px">Smartwatch</h3><p>Su Apple Watch e Wear OS fa da telecomando dei test e da timer. Dall’app Salute legge HRV, battito e dati della corsa.</p></div>
+    <div class="card"><div class="pill">4</div><h3 style="margin-top:14px">Cintura Elvy</h3><p>Tiene il telefono fermo sulla zona lombare, vicino al baricentro, per test di equilibrio, salto e corsa più ripetibili.</p></div>
+  </div>
+  <div style="margin-top:auto;display:flex;align-items:center;gap:18px">
+    <img src="assets/pollice.png" style="height:120px;border-radius:16px">
+    <p class="lead" style="margin:0">Il cuore dell’esperienza è il confronto: <b>stesso test, stessa persona, con e senza Elvy</b>. Lo sportivo osserva la propria risposta individuale nel tempo.</p>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>2</span></div>
+</section>
+
+<!-- 3 Dispositivo + NFC -->
+<section class="s" style="flex-direction:row;gap:48px">
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="k">Dispositivo Elvy con NFC</div>
+    <h2>Avvicini il telefono:<br>Elvy si riconosce da solo</h2>
+    <ul class="l">
+      <li><b>Attivazione:</b> al primo uso l’app legge il chip e registra il kit. Niente codici da digitare.</li>
+      <li><b>Originalità:</b> ogni dispositivo ha un numero di serie unico, verificato a ogni lettura.</li>
+      <li><b>Dove l’hai applicato:</b> l’app associa ogni Elvy al punto del corpo e avvia il timer.</li>
+      <li><b>Test «con Elvy»:</b> se un dispositivo è attivo, il test viene segnato in automatico.</li>
+      <li class="pp"><b>Senza NFC:</b> se il telefono non ha l’NFC si scrive il numero di serie a mano.</li>
+    </ul>
+    <div class="card" style="margin-top:auto;display:flex;align-items:center;gap:22px">
+      <div>
+        <div class="note" style="font-weight:800;letter-spacing:.08em">NUMERO DI SERIE · 11 CARATTERI, SOLO NUMERI DOPO LA E</div>
+        <div class="serial" style="margin-top:6px"><b>E2026</b>000123</div>
+      </div>
+      <p style="margin:0;font-size:14px">Stessa lunghezza dei seriali Equistasi, registrati nella stessa tabella Airtable dei kit.</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:flex-start;padding-top:8px">
+    <div><img class="phone sm" src="screens/NfcAttiva.png"><div class="cap">Primo avvio</div></div>
+    <div><img class="phone sm" src="screens/NfcApplica.png"><div class="cap">Dove l’hai applicato?</div></div>
+    <div><img class="phone sm" src="screens/NfcInUso.png"><div class="cap">Timer e promemoria</div></div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>3</span></div>
+</section>
+
+<!-- 4 App -->
+<section class="s" style="flex-direction:row;gap:48px">
+  <div style="width:400px;display:flex;flex-direction:column">
+    <div class="k">L’app</div>
+    <h2>Un allenatore<br>in tasca</h2>
+    <p class="lead">Elvy, la mascotte, accompagna lo sportivo in ogni test: spiega cosa fare, conta il tempo e commenta il risultato con parole semplici.</p>
+    <ul class="l">
+      <li><b>Oggi:</b> recupero del mattino e il test consigliato.</li>
+      <li><b>Test:</b> equilibrio, salti, corsa, postura, recupero, mobilità.</li>
+      <li><b>Progressi:</b> l’andamento nel tempo, con e senza Elvy.</li>
+    </ul>
+    <p class="note" style="margin-top:auto">Le misure restano sul telefono. Sono stime indicative per l’allenamento, non una diagnosi.</p>
+  </div>
+  <div style="flex:1;display:flex;gap:18px;justify-content:flex-end;align-items:flex-start;padding-top:10px">
+    <div><img class="phone" src="screens/Main.png"><div class="cap">Benvenuto</div></div>
+    <div><img class="phone" src="screens/Oggi.png"><div class="cap">Oggi</div></div>
+    <div><img class="phone" src="screens/Test.png"><div class="cap">Tutti i test</div></div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>4</span></div>
+</section>
+
+<!-- 5 Test -->
+<section class="s">
+  <div class="k">I test</div>
+  <h2>Cosa misura Elvy con i sensori del telefono</h2>
+  <div style="display:flex;gap:18px;margin-top:30px;align-items:flex-start">
+    <div><img class="phone md" src="screens/Equilibrio.png"><div class="cap">Equilibrio su una gamba</div></div>
+    <div><img class="phone md" src="screens/Salto.png"><div class="cap">Drop jump · RSI</div></div>
+    <div><img class="phone md" src="screens/Corsa.png"><div class="cap">Analisi della corsa</div></div>
+    <div><img class="phone md" src="screens/Hrv.png"><div class="cap">Recupero · HRV</div></div>
+    <div class="grid" style="flex:1;grid-template-columns:1fr;gap:10px">
+      <div class="card" style="padding:14px 18px"><b>Equilibrio</b><p style="margin-top:4px;font-size:13.5px">Oscillazione in cm², simmetria destra/sinistra, occhi aperti e chiusi.</p></div>
+      <div class="card" style="padding:14px 18px"><b>Salti</b><p style="margin-top:4px;font-size:13.5px">Altezza dal tempo di volo, forza reattiva, simmetria tra le gambe, fatica.</p></div>
+      <div class="card" style="padding:14px 18px"><b>Corsa</b><p style="margin-top:4px;font-size:13.5px">Cadenza, tempo di contatto, oscillazione verticale, regolarità.</p></div>
+      <div class="card" style="padding:14px 18px"><b>Recupero e corpo</b><p style="margin-top:4px;font-size:13.5px">HRV dal dito sulla fotocamera, tempo di reazione, mobilità, postura.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>5</span></div>
+</section>
+
+<!-- 6 Con e senza -->
+<section class="s" style="flex-direction:row;gap:56px">
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="k p">Con e senza Elvy</div>
+    <h2 style="margin-top:30px">Lo stesso test, due condizioni,<br>la tua risposta individuale</h2>
+    <p class="lead">Equistasi® genera una stimolazione meccanica focale destinata a influenzare l’informazione propriocettiva. Elvy aiuta lo sportivo a osservare se, nel suo caso, cambia qualcosa.</p>
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:40px">
+      <div class="card"><div class="pill">1</div><h3 style="margin-top:12px;font-size:18px">Misura di base</h3><p>Test senza dispositivo, nelle stesse condizioni.</p></div>
+      <div class="card"><div class="pill">2</div><h3 style="margin-top:12px;font-size:18px">Applica Elvy</h3><p>NFC: l’app sa dove e da quanto è applicato.</p></div>
+      <div class="card"><div class="pill">3</div><h3 style="margin-top:12px;font-size:18px">Ripeti e confronta</h3><p>Grafico prima/dopo e andamento nelle settimane.</p></div>
+    </div>
+    <p class="note" style="margin-top:auto">L’eventuale beneficio percepito varia da persona a persona. I risultati dell’app sono stime per l’allenamento e non hanno valore clinico.</p>
+  </div>
+  <div style="width:330px;display:flex;flex-direction:column;justify-content:center">
+    <div class="card" style="padding:24px">
+      <div class="note" style="font-weight:800;letter-spacing:.08em">ESEMPIO · EQUILIBRIO SU UNA GAMBA</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:22px;height:180px;gap:24px;padding:0 20px">
+        <div style="flex:1;text-align:center"><div style="height:150px;border-radius:12px;background:#6E6E74"></div><div class="cap">Senza</div></div>
+        <div style="flex:1;text-align:center"><div style="height:118px;border-radius:12px;background:#4BA6A3"></div><div class="cap">Con Elvy</div></div>
+      </div>
+      <p style="font-size:13px;margin-top:22px">Area di oscillazione (cm²): più bassa vuol dire più stabile. Dati di esempio.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>6</span></div>
+</section>
+
+<!-- 7 Smartwatch -->
+<section class="s">
+  <div style="display:flex;gap:48px;flex:1">
+    <div style="width:420px;display:flex;flex-direction:column">
+      <div class="k">Smartwatch</div>
+      <h2>Al polso, mentre<br>ti alleni</h2>
+      <ul class="l">
+        <li><b>Telecomando dei test:</b> il telefono resta in cintura, si avvia e si ferma dall’orologio.</li>
+        <li><b>Timer Elvy:</b> vibra quando è ora di togliere i dispositivi.</li>
+        <li><b>Recupero:</b> HRV e battito a riposo appena svegli.</li>
+        <li><b>Corsa:</b> battito, cadenza, contatto e passo in tempo reale.</li>
+      </ul>
+      <p class="note" style="margin-top:auto">Apple Watch con l’app Elvy; Garmin, Samsung, Polar e altri tramite Apple Salute o Health Connect.</p>
+    </div>
+    <div style="flex:1;display:flex;gap:26px;align-items:center;justify-content:flex-end">
+      <div><img class="phone sm" src="screens/Orologio.png"><div class="cap">Collega l’orologio</div></div>
+      <div class="grid" style="grid-template-columns:repeat(2,auto);gap:26px 22px">
+        <div><img class="watch" src="screens/WatchTest.png"><div class="cap">Test</div></div>
+        <div><img class="watch" src="screens/WatchTimer.png"><div class="cap">Timer Elvy</div></div>
+        <div><img class="watch" src="screens/WatchRecupero.png"><div class="cap">Recupero</div></div>
+        <div><img class="watch" src="screens/WatchCorsa.png"><div class="cap">Corsa</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>7</span></div>
+</section>
+
+<!-- 8 Cintura -->
+<section class="s" style="flex-direction:row;gap:40px">
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="k">Cintura Elvy</div>
+    <h2>Il telefono al posto giusto</h2>
+    <p class="lead">Sulla zona lombare il telefono è vicino al baricentro: misura meglio oscillazioni, salti e passi, e lascia le mani libere.</p>
+    <img class="photo" src="img/belt2.png" style="width:100%;height:330px;margin-top:22px">
+    <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:16px;gap:12px">
+      <div class="card" style="padding:12px 16px"><b style="font-size:14px">Elastico regolabile</b><p style="font-size:12.5px;margin-top:2px">fibbia rapida, taglia unica</p></div>
+      <div class="card" style="padding:12px 16px"><b style="font-size:14px">Tasca in rete</b><p style="font-size:12.5px;margin-top:2px">telefoni fino a 6,9″, zip</p></div>
+      <div class="card" style="padding:12px 16px"><b style="font-size:14px">Inserti riflettenti</b><p style="font-size:12.5px;margin-top:2px">bordi teal, logo Elvy</p></div>
+    </div>
+  </div>
+  <img class="photo" src="img/worn.png" style="width:390px;height:616px;object-position:center 30%">
+  <div class="foot"><span>Elvy · by Equistasi</span><span>8</span></div>
+</section>
+
+<!-- 9 Packaging -->
+<section class="s">
+  <div class="k">Packaging</div>
+  <h2>Il kit Elvy</h2>
+  <div style="display:flex;gap:24px;margin-top:22px">
+    <div style="flex:1"><img class="photo" src="img/box2.png" style="width:100%;height:440px"><div class="cap">Scatola · grafite opaco, mascotte e logo Elvy</div></div>
+    <div style="flex:1"><img class="photo" src="img/open2.png" style="width:100%;height:440px"><div class="cap">All’apertura · cintura, dispositivi, guida rapida</div></div>
+  </div>
+  <div style="display:flex;gap:28px;margin-top:20px;font-size:15px;color:#E4E4E8">
+    <span><b class="t">Nella scatola:</b> cintura Elvy · dispositivi Elvy NFC · guida rapida con QR per scaricare l’app</span>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>9</span></div>
+</section>
+
+<!-- 10 Prossimi passi -->
+<section class="s" style="flex-direction:row;gap:48px">
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="k">Prossimi passi</div>
+    <h2>Dal progetto<br>all’App Store</h2>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:30px;gap:14px">
+      <div class="card"><h3 style="font-size:17px">1 · Marchio</h3><p>File originali di logo e mascotte (vettoriali); nome per gli store con suffisso, es. «Elvy – Allenati».</p></div>
+      <div class="card"><h3 style="font-size:17px">2 · App telefono</h3><p>Test con i sensori, lettura NFC, seriali E2026 nella stessa tabella dei kit, lettura da Salute / Health Connect.</p></div>
+      <div class="card"><h3 style="font-size:17px">3 · Smartwatch</h3><p>App Apple Watch: telecomando, timer, recupero. Poi Wear OS.</p></div>
+      <div class="card"><h3 style="font-size:17px">4 · Prodotto</h3><p>Prototipo della cintura e della scatola; programmazione dei chip NFC con i seriali.</p></div>
+    </div>
+    <p class="note" style="margin-top:auto">Le immagini di cintura e packaging sono visualizzazioni di concept, non foto di prodotti esistenti.</p>
+  </div>
+  <div style="width:360px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <img src="assets/salta.png" style="height:330px;border-radius:24px">
+    <div style="font-family:'Lexend';font-size:34px;font-weight:700;margin-top:24px">Allenati con <span class="t">Elvy</span></div>
+    <div class="note" style="margin-top:8px">Equistasi SRL · equistasi.com</div>
+  </div>
+  <div class="foot"><span>Elvy · by Equistasi</span><span>10</span></div>
+</section>
+
+</body>
+</html>
