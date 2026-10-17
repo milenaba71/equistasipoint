@@ -239,4 +239,5 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "mancano": "left",
   "toglilo alle {end}": "remove it at {end}",
   "Quando applichi il dispositivo tocca il pulsante: dopo <b>2 ore</b> ti ricordiamo di toglierlo.": "When you apply the device tap the button: after <b>2 hours</b> we’ll remind you to remove it.",
+  "Applicato adesso": "Applied just now",
 });

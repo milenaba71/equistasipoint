@@ -116,7 +116,7 @@
     let main; let act;
     if (s && left(s) > 0) {
       main = '<div class="td-main">' + ring((Date.now() - s.start) / DURATION, 96, 7, mini(esc(sn), true)) +
-        '<div><div class="td-k">' + T('Dispositivo attivo') + '</div><h3>' + T('Applicato da {t}', { t: since(s.start) }) + '</h3>' +
+        '<div><div class="td-k">' + T('Dispositivo attivo') + '</div><h3>' + (Date.now() - s.start < 60000 ? T('Applicato adesso') : T('Applicato da {t}', { t: since(s.start) })) + '</h3>' +
         '<p class="small">' + T('Toglilo alle <b>{end}</b> · ti avvisiamo noi', { end: hhmm(s.end) }) + '</p></div></div>';
       act = '<a class="btn" href="#/promemoria">' + T('Apri il promemoria') + '</a>';
     } else if (s) {
