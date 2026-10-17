@@ -436,7 +436,7 @@
   }
 
   /* ───────── CONTENUTI: video tutorial e protocolli (Airtable via Make) ───────── */
-  const CONTENT_KEY = 'tp-content-v3';
+  const CONTENT_KEY = 'tp-content-v4';
   const CONTENT_TTL = 15 * 60 * 1000; // nuovi video subito visibili; i link ai PDF di Airtable scadono dopo poche ore
   let contentPromise = null;
 
@@ -471,6 +471,8 @@
       profiles: list(f['Profili app']),
     };
   }
+  // «Nascosto» nel campo "Profili app" toglie il contenuto dall'app senza cancellarlo da Airtable
+  const hidden = (x) => x.profiles.includes('Nascosto');
   const byOrder = (a, b) => a.order - b.order || a.title.localeCompare(b.title);
   /* Lingua dei contenuti (campo "Language" in Airtable: it / en).
      Video: in inglese si mostra la versione "en" con lo stesso numero "Order" al posto di quella italiana;
@@ -499,8 +501,8 @@
         const vids = (d.videos || d).records || [];
         const pros = (d.protocols || {}).records || [];
         const c = {
-          videos: vids.map(normVideo).filter((x) => x.url || x.file).sort(byOrder),
-          protocols: pros.map(normProtocol).filter((x) => x.url).sort(byOrder),
+          videos: vids.map(normVideo).filter((x) => (x.url || x.file) && !hidden(x)).sort(byOrder),
+          protocols: pros.map(normProtocol).filter((x) => x.url && !hidden(x)).sort(byOrder),
         };
         // un elenco vuoto non si salva: alla prossima apertura si riprova
         if (c.videos.length || c.protocols.length) {
