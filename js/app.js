@@ -170,7 +170,7 @@
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
-      T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + videoPromo + '</div><div>' +
+      T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
       '<figure><img src="' + NEURO_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>') +
@@ -227,7 +227,7 @@
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
       (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Il metamero</b> è come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa i metameri</a></div></div>')) +
-      (sport ? window.EqTests.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
+      (sport ? window.EqTests.cardHtml() + window.EqPosture.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
       '<div class="card map-card">' +
       '<div class="toolbar"><div class="seg" role="group" aria-label="Vista">' +
@@ -243,7 +243,7 @@
       T('<div class="card"><h3>Cerca per muscolo o disturbo</h3>') +
       '<input class="search" id="q" type="search" placeholder="es. cefalea, torcicollo, sciatica, tallone…" autocomplete="off" />' +
       '<div class="list" id="results" style="margin-top:10px"></div></div>' +
-      appProtocolCards() + (sport ? '' : window.EqMeta.cardHtml()) + videoPromo + (sport ? '' : protocolsCard(T('Protocolli per il dolore'))) +
+      appProtocolCards() + (sport ? '' : window.EqMeta.cardHtml() + window.EqPosture.cardHtml()) + videoPromo + (sport ? '' : protocolsCard(T('Protocolli per il dolore'))) +
       T('<div class="card"><h3>Come funziona</h3><div class="howsteps">') +
       '<figure><img src="' + PAIN_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Indica dove senti dolore</figcaption></figure>') +
       '<figure><img src="' + PAIN_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Tocca la zona e scegli il muscolo</figcaption></figure>') +
@@ -784,13 +784,13 @@
     extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? T('Progressi') : T('Info'));
     const homeTab = document.querySelector('#tabbar [data-tab="home"]');
     if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? T('Home') : T('Mappa');
-    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
+    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', postura: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
 
   function route() {
     const h = location.hash.replace(/^#\/?/, '');
-    const [page, arg] = h.split('/');
+    const [page, arg, arg2, arg3] = h.split('/');
     if (page === 'area') renderArea(arg);
     else if (page === 'm') renderMuscle(arg);
     else if (page === 'info') renderInfo();
@@ -801,6 +801,7 @@
     else if (page === 'promemoria') renderTimer();
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
+    else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     updateTabs(page);
