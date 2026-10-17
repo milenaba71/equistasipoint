@@ -266,4 +266,12 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Nei Video impari ad applicarlo nel modo giusto": "In Videos you learn how to apply it correctly",
   "In Info trovi il tuo dispositivo abbinato e come leggere la mappa": "In Info you find your paired device and how to read the map",
   "<span><b>Come usare l’app</b><br><span class=\"small muted\">Il video veloce con le cose fondamentali</span></span><span class=\"chev\" aria-hidden=\"true\">›</span>": "<span><b>How to use the app</b><br><span class=\"small muted\">The quick video with the essentials</span></span><span class=\"chev\" aria-hidden=\"true\">›</span>",
+  "Prendi il <b>dispositivo</b> Equistasi": "Take the Equistasi <b>device</b>",
+  "Cerotto applicatore Equistasi": "Equistasi applicator patch",
+  "Prendi il <b>cerotto applicatore</b>": "Take the <b>applicator patch</b>",
+  "Dispositivo appoggiato al centro del cerotto": "Device placed in the centre of the patch",
+  "Appoggia il dispositivo <b>al centro del cerotto</b>": "Place the device <b>in the centre of the patch</b>",
+  "Dispositivo fissato sulla pelle con il cerotto": "Device fixed on the skin with the patch",
+  "Applicalo sulla pelle con il <b>centro del dispositivo sulla X</b>": "Apply it on the skin with the <b>centre of the device on the X</b>",
+  "Applicalo sulla pelle <b>nel punto indicato</b>": "Apply it on the skin <b>at the indicated point</b>",
 });
