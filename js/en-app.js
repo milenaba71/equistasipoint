@@ -208,7 +208,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Luce": "Light",
   "Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.": "To scan the serial, allow camera access, or type it below.",
   "Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.": "The camera could not be opened. Type the serial number below.",
-  "Inquadra il seriale": "Scan the serial",
+  "Clicca qui e abbina il dispositivo": "Tap here to pair your device",
   "oppure digita il seriale": "or type the serial",
   "Abbinamento in corso…": "Pairing…",
   "Prendi il dispositivo e inquadra il <b>numero di serie</b> sul retro: il dispositivo si abbina all’app.": "Pick up your device and frame the <b>serial number</b> on the back: the device pairs with the app.",
