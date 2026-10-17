@@ -703,3 +703,19 @@ main { padding-top: 0; padding-bottom: 12px; }
   body { background: #fff; }
   .pz-report .card { box-shadow: none; border: 1px solid #ddd; }
 }
+
+/* Attivazione: lettura del seriale con la fotocamera */
+.gate-scan { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; }
+.gate-scan svg { width: 24px; height: 24px; flex: none; }
+.gate-or { font-size: 13px !important; margin: 14px 0 8px !important; }
+#gate-btn { width: 100%; margin-top: 2px; }
+.scan { position: fixed; inset: 0; z-index: 90; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.scan-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scan-frame { position: relative; width: min(84vw, 380px); aspect-ratio: 2 / 1; border-radius: 18px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); border: 3px solid var(--yellow); }
+.scan-frame span { position: absolute; left: 8%; right: 8%; top: 50%; height: 2px; background: rgba(250, 220, 0, .85); animation: scan-line 1.8s ease-in-out infinite; }
+@keyframes scan-line { 0%, 100% { transform: translateY(-40px); } 50% { transform: translateY(40px); } }
+@media (prefers-reduced-motion: reduce) { .scan-frame span { animation: none; } }
+.scan-hint { position: relative; color: #fff; text-align: center; font-size: 16px; line-height: 1.4; max-width: 340px; margin: 22px 16px 0; text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+.scan-bar { position: absolute; left: 0; right: 0; bottom: calc(24px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 12px; padding: 0 16px; }
+.scan-bar .btn { min-width: 120px; }
+.scan-torch.on { background: var(--yellow); }

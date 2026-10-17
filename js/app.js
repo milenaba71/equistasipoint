@@ -958,6 +958,22 @@
     } finally { clearTimeout(t); }
   }
 
+  // Fotocamera: legge il codice a barre sul retro del dispositivo e attiva l'app senza scrivere il seriale
+  const gateScan = document.getElementById('gate-scan');
+  gateScan.addEventListener('click', async () => {
+    gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
+    try {
+      const text = await window.EqScan.open({ accept: (t) => /^[A-Z0-9-]{5,24}$/.test(normSerial(t)) && /\d/.test(t) });
+      if (!text) return;
+      gateInput.value = normSerial(text);
+      if (gateForm.requestSubmit) gateForm.requestSubmit(); else gateForm.dispatchEvent(new Event('submit', { cancelable: true }));
+    } catch (e) {
+      gateMsg.textContent = e.message === 'denied'
+        ? T('Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.')
+        : T('Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.');
+    }
+  });
+
   gateForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const serial = normSerial(gateInput.value);
