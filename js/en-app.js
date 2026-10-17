@@ -158,7 +158,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Navigazione": "Navigation",
   "Lingua": "Language",
   "Dispositivo Equistasi": "Equistasi device",
-  "es. EQX25002587": "e.g. EQX25002587",
+  "Scrivi qui il numero di serie": "Type the serial number here",
   "Profilo": "Profile",
   "Patologia": "Condition",
   "Equistasi Point – Come applicare il dispositivo Equistasi": "Equistasi Point – How to apply the Equistasi device",
