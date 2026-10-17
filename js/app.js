@@ -958,19 +958,35 @@
     } finally { clearTimeout(t); }
   }
 
-  // Fotocamera: legge il codice a barre sul retro del dispositivo e attiva l'app senza scrivere il seriale
+  // Fotocamera dentro il dispositivo disegnato: legge il codice a barre sul retro e attiva l'app senza scrivere il seriale
   const gateScan = document.getElementById('gate-scan');
+  const gateDev = gateScan.parentElement;
+  const gateSn = document.getElementById('gate-sn');
+  const gateScanBar = document.getElementById('gate-scan-bar');
+  const gateSnIdle = gateSn.textContent;
+  document.getElementById('gate-cancel').addEventListener('click', () => window.EqScan.stop());
   gateScan.addEventListener('click', async () => {
+    if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
+    gateDev.classList.remove('read'); gateSn.textContent = gateSnIdle;
+    gateDev.classList.add('scanning'); gateScanBar.hidden = false;
     try {
-      const text = await window.EqScan.open({ accept: (t) => /^[A-Z0-9-]{5,24}$/.test(normSerial(t)) && /\d/.test(t) });
+      const text = await window.EqScan.open({
+        container: gateScan,
+        torch: document.getElementById('gate-torch'),
+        accept: (t) => /^[A-Z0-9-]{5,24}$/.test(normSerial(t)) && /\d/.test(t),
+      });
       if (!text) return;
-      gateInput.value = normSerial(text);
+      const serial = normSerial(text);
+      gateSn.textContent = serial; gateDev.classList.add('read');
+      gateInput.value = serial;
       if (gateForm.requestSubmit) gateForm.requestSubmit(); else gateForm.dispatchEvent(new Event('submit', { cancelable: true }));
     } catch (e) {
       gateMsg.textContent = e.message === 'denied'
         ? T('Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.')
         : T('Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.');
+    } finally {
+      gateDev.classList.remove('scanning'); gateScanBar.hidden = true;
     }
   });
 

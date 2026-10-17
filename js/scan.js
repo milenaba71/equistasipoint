@@ -1,10 +1,15 @@
 /* Lettura del numero di serie con la fotocamera: si inquadra il retro del dispositivo e si legge il codice
    a barre (Code 128) con zxing-wasm, sul telefono. Nessuna immagine viene inviata o salvata.
-   Uso: EqScan.open({ accept: (testo) => true/false }) → Promise con il testo letto, o null se annullato. */
+   Uso: EqScan.open({ container, torch, accept }) → Promise con il testo letto, o null se annullato.
+   - container: elemento in cui mostrare la fotocamera (es. la finestra del dispositivo disegnato);
+     senza container la fotocamera si apre a tutto schermo.
+   - torch: pulsante (facoltativo) per accendere la luce, mostrato solo se il telefono la supporta.
+   EqScan.stop() chiude la fotocamera. */
 (function () {
   const BASE = 'js/vendor/zxing/';
   const FORMATS = ['Code128', 'Code39', 'Code93', 'DataMatrix', 'QRCode'];
   let lib = null;
+  let current = null;
 
   function loadLib() {
     if (lib) return lib;
@@ -30,49 +35,66 @@
   function open(opts) {
     opts = opts || {};
     const accept = opts.accept || (() => true);
+    if (current) current(null);
     return new Promise((resolve, reject) => {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { reject(new Error('unsupported')); return; }
 
+      const inline = !!opts.container;
       const el = document.createElement('div');
-      el.className = 'scan';
-      el.setAttribute('role', 'dialog');
-      el.setAttribute('aria-label', T('Inquadra il numero di serie'));
-      el.innerHTML =
-        '<video class="scan-video" playsinline muted autoplay></video>' +
-        '<div class="scan-frame" aria-hidden="true"><span></span></div>' +
-        '<p class="scan-hint">' + T('Inquadra il <b>codice a barre</b> sul retro del dispositivo, da vicino e ben illuminato.') + '</p>' +
-        '<div class="scan-bar">' +
-        '<button type="button" class="btn scan-torch" hidden>' + T('Luce') + '</button>' +
-        '<button type="button" class="btn scan-cancel">' + T('Annulla') + '</button>' +
-        '</div>';
-      document.body.appendChild(el);
+      let torchBtn = opts.torch || null;
+      if (inline) {
+        el.className = 'scan-inline';
+        el.innerHTML = '<video playsinline muted autoplay></video><span class="scan-line" aria-hidden="true"></span>';
+        opts.container.appendChild(el);
+      } else {
+        el.className = 'scan';
+        el.setAttribute('role', 'dialog');
+        el.setAttribute('aria-label', T('Inquadra il numero di serie'));
+        el.innerHTML =
+          '<video class="scan-video" playsinline muted autoplay></video>' +
+          '<div class="scan-frame" aria-hidden="true"><span></span></div>' +
+          '<p class="scan-hint">' + T('Inquadra il <b>codice a barre</b> sul retro del dispositivo, da vicino e ben illuminato.') + '</p>' +
+          '<div class="scan-bar"><button type="button" class="btn scan-torch" hidden>' + T('Luce') + '</button>' +
+          '<button type="button" class="btn scan-cancel">' + T('Annulla') + '</button></div>';
+        document.body.appendChild(el);
+        torchBtn = el.querySelector('.scan-torch');
+        el.querySelector('.scan-cancel').addEventListener('click', () => close(null));
+      }
       const video = el.querySelector('video');
-      const torchBtn = el.querySelector('.scan-torch');
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       let stream = null; let timer = null; let busy = false; let done = false; let torch = false;
+      const onTorch = () => {
+        const track = stream && stream.getVideoTracks()[0];
+        if (!track) return;
+        torch = !torch;
+        track.applyConstraints({ advanced: [{ torch }] }).catch(() => {});
+        torchBtn.classList.toggle('on', torch);
+      };
 
       function close(result, err) {
         if (done) return;
         done = true;
+        current = null;
         clearTimeout(timer);
         if (stream) stream.getTracks().forEach((t) => t.stop());
+        if (torchBtn) { torchBtn.removeEventListener('click', onTorch); torchBtn.classList.remove('on'); if (inline) torchBtn.hidden = true; }
         el.remove();
         document.removeEventListener('visibilitychange', onHide);
         if (err) reject(err); else resolve(result);
       }
+      current = close;
       const onHide = () => { if (document.hidden) close(null); };
       document.addEventListener('visibilitychange', onHide);
-      el.querySelector('.scan-cancel').addEventListener('click', () => close(null));
 
       async function tick(Z) {
         if (done) return;
         if (!busy && video.readyState >= 2 && video.videoWidth) {
           busy = true;
           try {
-            // zona centrale (dove c'è la cornice), ridotta a max 1280 px di larghezza
+            // zona centrale dell'immagine, ridotta a max 1280 px di larghezza
             const vw = video.videoWidth; const vh = video.videoHeight;
-            const cw = Math.round(vw * 0.9); const ch = Math.round(vh * 0.6);
+            const cw = Math.round(vw * 0.9); const ch = Math.round(vh * 0.7);
             const k = Math.min(1, 1280 / cw);
             canvas.width = Math.round(cw * k); canvas.height = Math.round(ch * k);
             ctx.drawImage(video, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, canvas.width, canvas.height);
@@ -99,14 +121,7 @@
         const track = s.getVideoTracks()[0];
         const caps = track && track.getCapabilities ? track.getCapabilities() : {};
         if (caps.focusMode && caps.focusMode.includes('continuous')) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
-        if (caps.torch) {
-          torchBtn.hidden = false;
-          torchBtn.addEventListener('click', () => {
-            torch = !torch;
-            track.applyConstraints({ advanced: [{ torch }] }).catch(() => {});
-            torchBtn.classList.toggle('on', torch);
-          });
-        }
+        if (caps.torch && torchBtn) { torchBtn.hidden = false; torchBtn.addEventListener('click', onTorch); }
         video.play().catch(() => {});
         return libReady;
       }).then((Z) => { if (Z) tick(Z); }).catch((e) => {
@@ -116,5 +131,5 @@
     });
   }
 
-  window.EqScan = { open, _loadLib: loadLib };
+  window.EqScan = { open, stop: () => { if (current) current(null); }, _loadLib: loadLib };
 })();
