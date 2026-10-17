@@ -1,7 +1,7 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v58';
+const VERSION = 'tp-v59';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/native.js',
+  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/scan.js', 'js/native.js',
   'img/logo.png', 'img/dispositivo.jpg', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',
 ];
 

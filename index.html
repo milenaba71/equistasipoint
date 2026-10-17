@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="css/style.css?v=58" />
+  <link rel="stylesheet" href="css/style.css?v=59" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -78,11 +78,13 @@
       <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
       <img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" class="gate-device" width="480" height="386" />
       <h1 data-t>Attiva l’app</h1>
-      <p data-t>Inserisci il <b>numero di serie</b> del tuo dispositivo Equistasi. Lo trovi stampato sul <b>retro del dispositivo</b>.</p>
+      <p data-t>Inquadra con la fotocamera il <b>retro del dispositivo</b>: l’app legge da sola il numero di serie.</p>
+      <button class="btn primary gate-scan" id="gate-scan" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 9v6M10 9v6M13 9v6M17 9v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-t>Inquadra il numero di serie</span></button>
+      <p class="gate-or" data-t>oppure scrivilo</p>
       <label for="serial" class="gate-label" data-t>Numero di serie</label>
       <input id="serial" class="search gate-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="es. EQX25002587" required />
       <p class="gate-msg" id="gate-msg" role="alert"></p>
-      <button class="btn primary" id="gate-btn" type="submit" data-t>Accedi</button>
+      <button class="btn" id="gate-btn" type="submit" data-t>Accedi</button>
       <p class="gate-help" data-t>Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.</p>
     </form>
   </section>
@@ -128,19 +130,20 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=58"></script>
-  <script src="js/i18n.js?v=58"></script>
-  <script src="js/en-app.js?v=58"></script>
-  <script src="js/en-modules.js?v=58"></script>
-  <script src="js/en-postura.js?v=58"></script>
-  <script src="js/body.js?v=58"></script>
-  <script src="js/data.js?v=58"></script>
-  <script src="js/data-en.js?v=58"></script>
-  <script src="js/timer.js?v=58"></script>
-  <script src="js/tests.js?v=58"></script>
-  <script src="js/metameri.js?v=58"></script>
-  <script src="js/postura.js?v=58"></script>
-  <script src="js/app.js?v=58"></script>
-  <script src="js/native.js?v=58"></script>
+  <script src="js/config.js?v=59"></script>
+  <script src="js/i18n.js?v=59"></script>
+  <script src="js/en-app.js?v=59"></script>
+  <script src="js/en-modules.js?v=59"></script>
+  <script src="js/en-postura.js?v=59"></script>
+  <script src="js/body.js?v=59"></script>
+  <script src="js/data.js?v=59"></script>
+  <script src="js/data-en.js?v=59"></script>
+  <script src="js/timer.js?v=59"></script>
+  <script src="js/tests.js?v=59"></script>
+  <script src="js/metameri.js?v=59"></script>
+  <script src="js/postura.js?v=59"></script>
+  <script src="js/scan.js?v=59"></script>
+  <script src="js/app.js?v=59"></script>
+  <script src="js/native.js?v=59"></script>
 </body>
 </html>

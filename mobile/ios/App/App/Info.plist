@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Equistasi Point usa la fotocamera per scattare le foto dell’analisi della postura. Le foto restano sul telefono.</string>
+	<string>Equistasi Point usa la fotocamera per leggere il numero di serie sul retro del dispositivo e per le foto dell’analisi della postura. Le immagini restano sul telefono.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Equistasi Point apre le foto che scegli per l’analisi della postura. Le foto restano sul telefono.</string>
 	<key>NSMotionUsageDescription</key>
