@@ -834,18 +834,21 @@
   window.addEventListener('hashchange', route);
   // Vibrazione leggera al tocco. Android: navigator.vibrate. iPhone (iOS 18): Safari non ha vibrate,
   // ma toccare un interruttore <input switch> produce un piccolo colpo: ne usiamo uno nascosto.
-  let hapticLbl = null;
   function haptic(ms) {
     if (navigator.vibrate) { navigator.vibrate(ms); return; }
-    if (!/iP(hone|ad|od)/.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return;
-    if (!hapticLbl) {
-      hapticLbl = document.createElement('label');
-      hapticLbl.setAttribute('aria-hidden', 'true');
-      hapticLbl.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
-      hapticLbl.innerHTML = '<input type="checkbox" switch tabindex="-1">';
-      document.body.appendChild(hapticLbl);
-    }
-    hapticLbl.click();
+    // iPhone: un interruttore creato e "toccato" al momento, poi rimosso (stesso metodo della libreria ios-haptics)
+    try {
+      const label = document.createElement('label');
+      label.ariaHidden = 'true';
+      label.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      label.appendChild(input);
+      document.head.appendChild(label);
+      label.click();
+      document.head.removeChild(label);
+    } catch (e) { /* nessuna vibrazione disponibile */ }
   }
   document.addEventListener('click', (ev) => {
     if (ev.target.closest('.hot, .tp-dot, [data-area], [data-muscle]')) haptic(15); // punti sul corpo: un po' più deciso

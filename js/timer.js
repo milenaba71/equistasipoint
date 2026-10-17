@@ -103,7 +103,7 @@
     return '<div class="tm-ringbox" style="width:' + size + 'px;height:' + size + 'px">' +
       '<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '" aria-hidden="true">' +
       '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" class="tm-track" stroke-width="' + w + '" fill="none"/>' +
-      (f > 0 ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" class="tm-prog" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' : '') + '</svg>' +
+      (f >= 0.015 ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" class="tm-prog" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' : '') + '</svg>' +
       '<div class="tm-ringin">' + inner + '</div></div>';
   }
   const since = (t) => { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 60 ? T('{m} min', { m }) : T('{h} h {m} min', { h: Math.floor(m / 60), m: pad(m % 60) }); };
