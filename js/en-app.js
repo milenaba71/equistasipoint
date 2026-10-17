@@ -262,7 +262,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo": "When you apply the device tap “I’ve applied the device”: after 2 hours we’ll remind you to remove it",
   "Tocca sul corpo la zona dove senti dolore": "Tap the area of the body where you feel pain",
   "Scegli il disturbo che riconosci": "Choose the problem you recognise",
-  "La X indica dove applicare il dispositivo": "The X shows where to apply the device",
+  "La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore": "The X shows where to apply the device, the blue area is where the pain spreads",
   "In Promemoria vedi quanto manca e i giorni di fila": "In Reminder you see the time left and your streak",
   "Nei Video impari ad applicarlo nel modo giusto": "In Videos you learn how to apply it correctly",
   "In Info trovi il tuo dispositivo abbinato e come leggere la mappa": "In Info you find your paired device and how to read the map",

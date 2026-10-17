@@ -7,13 +7,13 @@
     [3, 4.22, 'Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo'],
     [7.4, 12.08, 'Tocca sul corpo la zona dove senti dolore'],
     [11.8, 16.42, 'Scegli il disturbo che riconosci'],
-    [15.7, 20.36, 'La X indica dove applicare il dispositivo'],
-    [18.7, 24.05, 'In Promemoria vedi quanto manca e i giorni di fila'],
-    [21.7, 28.48, 'Nei Video impari ad applicarlo nel modo giusto'],
-    [24.6, 32.12, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
+    [15.7, 20.36, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
+    [18.7, 26.86, 'In Promemoria vedi quanto manca e i giorni di fila'],
+    [21.7, 31.29, 'Nei Video impari ad applicarlo nel modo giusto'],
+    [24.6, 34.94, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
   ];
   // versione con la voce maschile in italiano dei tutorial Equistasi (Higgsfield); in inglese, o senza H.264, il video muto del sito
-  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/289c44c4-8e5e-42ac-81c1-6b93f2361c65.mp4';
+  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/d657031e-9d07-467c-a0cd-412aecb071b7.mp4';
 
   function show() {
     return new Promise((resolve) => {
@@ -39,7 +39,7 @@
       let cur = -1; let raf = 0; let done = false;
 
       function tick() {
-        const t = v.currentTime; const d = v.duration || (dub ? 39.4 : 26);
+        const t = v.currentTime; const d = v.duration || (dub ? 42.2 : 26);
         let i = 0; while (i + 1 < STEPS.length && t >= STEPS[i + 1][col]) i++;
         if (i !== cur) { cur = i; cap.classList.remove('in'); void cap.offsetWidth; cap.textContent = T(STEPS[i][2]); cap.classList.add('in'); }
         bars.forEach((b, k) => {
