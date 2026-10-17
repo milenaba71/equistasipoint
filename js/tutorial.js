@@ -1,21 +1,23 @@
 /* Video veloce su come usare l'app: parte dopo «Dispositivo abbinato», con didascalie e pulsante Salta.
    Uso: EqTutorial.show() → Promise risolta quando il video finisce o si tocca Salta / Inizia. */
 (function () {
-  // Didascalie: [secondo di inizio nel video muto, secondo nel video doppiato, testo]
+  // Didascalie: [secondo di inizio nel video muto, nel video in italiano, nel video in inglese, testo]
   const STEPS = [
-    [0, 0, 'Questa è la tua Home'],
-    [3, 4.22, 'Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo'],
-    [7.4, 12.08, 'Tocca sul corpo la zona dove senti dolore'],
-    [11.8, 16.42, 'Scegli il disturbo che riconosci'],
-    [15.7, 20.36, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
-    [18.7, 26.86, 'In Promemoria vedi quanto manca e i giorni di fila'],
-    [21.7, 31.29, 'Nei Video impari ad applicarlo nel modo giusto'],
-    // la scena dei test sport c'è solo nel video doppiato: in quello muto dura 0
-    [24.6, 34.94, 'Se fai sport, in Progressi misuri equilibrio, salto e sprint: fai i test senza e con Equistasi e confronta i risultati'],
-    [24.6, 50.06, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
+    [0, 0, 0, 'Questa è la tua Home'],
+    [3, 4.22, 3.23, 'Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo'],
+    [7.4, 12.08, 10.05, 'Tocca sul corpo la zona dove senti dolore'],
+    [11.8, 16.42, 14.44, 'Scegli il disturbo che riconosci'],
+    [15.7, 20.36, 18.65, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
+    [18.7, 26.86, 23.86, 'In Promemoria vedi quanto manca e i giorni di fila'],
+    [21.7, 31.29, 27.81, 'Nei Video impari ad applicarlo nel modo giusto'],
+    // la scena dei test sport c'è solo nei video doppiati: in quello muto dura 0
+    [24.6, 34.94, 31.26, 'Se fai sport, in Progressi misuri equilibrio, salto e sprint: fai i test senza e con Equistasi e confronta i risultati'],
+    [24.6, 50.06, 45.75, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
   ];
-  // versione con la voce maschile in italiano dei tutorial Equistasi (Higgsfield); in inglese, o senza H.264, il video muto del sito
-  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/1c633788-c6f6-44be-a15e-56e3146cf077.mp4';
+  // versioni con la voce maschile dei tutorial Equistasi (Higgsfield), in italiano e in inglese; senza H.264 il video muto del sito
+  const CF = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/';
+  const DUB = { it: CF + '1c633788-c6f6-44be-a15e-56e3146cf077.mp4', en: CF + '86244952-4c21-4dc7-af41-933e2a0116c7.mp4' };
+  const DUR = { it: 57.3, en: 52.4 };
 
   function show() {
     return new Promise((resolve) => {
@@ -34,8 +36,9 @@
       requestAnimationFrame(() => el.classList.add('on'));
       const v = el.querySelector('video');
       const mp4 = !!v.canPlayType('video/mp4; codecs="avc1.4d401f"');
-      let dub = mp4 && window.LANG !== 'en'; let col = dub ? 1 : 0;
-      v.src = dub ? DUB : 'media/tutorial.' + (mp4 ? 'mp4' : 'webm');
+      const lang = window.LANG === 'en' ? 'en' : 'it';
+      let dub = mp4; let col = dub ? (lang === 'en' ? 2 : 1) : 0;
+      v.src = dub ? DUB[lang] : 'media/tutorial.' + (mp4 ? 'mp4' : 'webm');
       v.muted = !dub;
       const snd = el.querySelector('.tut-sound'); const cap = el.querySelector('.tut-cap'); const bars = el.querySelectorAll('.tut-bars i');
       let cur = -1; let raf = 0; let done = false;
@@ -43,9 +46,9 @@
       fitBars();
 
       function tick() {
-        const t = v.currentTime; const d = v.duration || (dub ? 57.3 : 26);
+        const t = v.currentTime; const d = v.duration || (dub ? DUR[lang] : 26);
         let i = 0; while (i + 1 < STEPS.length && t >= STEPS[i + 1][col]) i++;
-        if (i !== cur) { cur = i; cap.classList.remove('in'); void cap.offsetWidth; cap.textContent = T(STEPS[i][2]); cap.classList.add('in'); }
+        if (i !== cur) { cur = i; cap.classList.remove('in'); void cap.offsetWidth; cap.textContent = T(STEPS[i][3]); cap.classList.add('in'); }
         bars.forEach((b, k) => {
           const a = STEPS[k][col], z = k + 1 < STEPS.length ? STEPS[k + 1][col] : d;
           if (z > a) b.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (t - a) / (z - a))) + ')';
