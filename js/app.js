@@ -832,9 +832,24 @@
   }
   let lastDepth = 0;
   window.addEventListener('hashchange', route);
-  // vibrazione leggera al tocco (solo i telefoni che la supportano)
+  // Vibrazione leggera al tocco. Android: navigator.vibrate. iPhone (iOS 18): Safari non ha vibrate,
+  // ma toccare un interruttore <input switch> produce un piccolo colpo: ne usiamo uno nascosto.
+  let hapticLbl = null;
+  function haptic(ms) {
+    if (navigator.vibrate) { navigator.vibrate(ms); return; }
+    if (!/iP(hone|ad|od)/.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return;
+    if (!hapticLbl) {
+      hapticLbl = document.createElement('label');
+      hapticLbl.setAttribute('aria-hidden', 'true');
+      hapticLbl.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+      hapticLbl.innerHTML = '<input type="checkbox" switch tabindex="-1">';
+      document.body.appendChild(hapticLbl);
+    }
+    hapticLbl.click();
+  }
   document.addEventListener('click', (ev) => {
-    if (navigator.vibrate && ev.target.closest('.tabbar a, .hot, .tp-dot, [data-area], .m-item, .btn')) navigator.vibrate(8);
+    if (ev.target.closest('.hot, .tp-dot, [data-area], [data-muscle]')) haptic(15); // punti sul corpo: un po' più deciso
+    else if (ev.target.closest('.tabbar a, .m-item, .btn')) haptic(8);
   });
 
   /* Avviso iniziale */
