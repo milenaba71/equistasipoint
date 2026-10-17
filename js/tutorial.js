@@ -4,16 +4,16 @@
   // Didascalie: [secondo di inizio nel video muto, secondo nel video doppiato, testo]
   const STEPS = [
     [0, 0, 'Questa è la tua Home'],
-    [3, 4.91, 'Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo'],
-    [7.4, 12.62, 'Tocca sul corpo la zona dove senti dolore'],
-    [11.8, 18.62, 'Scegli il disturbo che riconosci'],
-    [15.7, 22.56, 'La X indica dove applicare il dispositivo'],
-    [18.7, 27.9, 'In Promemoria vedi quanto manca e i giorni di fila'],
-    [21.7, 32.87, 'Nei Video impari ad applicarlo nel modo giusto'],
-    [24.6, 36.44, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
+    [3, 4.22, 'Quando applichi il dispositivo tocca «Ho applicato il dispositivo»: dopo 2 ore ti ricordiamo di toglierlo'],
+    [7.4, 12.08, 'Tocca sul corpo la zona dove senti dolore'],
+    [11.8, 16.42, 'Scegli il disturbo che riconosci'],
+    [15.7, 20.36, 'La X indica dove applicare il dispositivo'],
+    [18.7, 24.05, 'In Promemoria vedi quanto manca e i giorni di fila'],
+    [21.7, 28.48, 'Nei Video impari ad applicarlo nel modo giusto'],
+    [24.6, 32.12, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
   ];
-  // versione con la voce in italiano (Higgsfield); in inglese, o senza H.264, il video muto del sito
-  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/d813324d-c1e6-42b1-a367-0a3c18228a72.mp4';
+  // versione con la voce maschile in italiano dei tutorial Equistasi (Higgsfield); in inglese, o senza H.264, il video muto del sito
+  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/289c44c4-8e5e-42ac-81c1-6b93f2361c65.mp4';
 
   function show() {
     return new Promise((resolve) => {
@@ -39,7 +39,7 @@
       let cur = -1; let raf = 0; let done = false;
 
       function tick() {
-        const t = v.currentTime; const d = v.duration || (dub ? 45.5 : 26);
+        const t = v.currentTime; const d = v.duration || (dub ? 39.4 : 26);
         let i = 0; while (i + 1 < STEPS.length && t >= STEPS[i + 1][col]) i++;
         if (i !== cur) { cur = i; cap.classList.remove('in'); void cap.offsetWidth; cap.textContent = T(STEPS[i][2]); cap.classList.add('in'); }
         bars.forEach((b, k) => {
