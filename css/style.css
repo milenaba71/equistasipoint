@@ -752,3 +752,15 @@ main { padding-top: 0; padding-bottom: 12px; }
 .dev-card-txt p { margin: 0 0 6px; }
 .dev-ok { color: #157a3c; font-weight: 700; }
 .dev-card-txt .btn { margin-top: 4px; }
+
+/* Conferma dopo l'abbinamento */
+.paired-box { position: relative; text-align: center; }
+.paired-x { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--grey, #eef0f6); color: var(--indigo); font-size: 18px; font-weight: 800; cursor: pointer; }
+.dev-mini.dev-mini-lg { width: 200px; margin: 14px auto 16px; border-radius: 22px; }
+.dev-mini-lg::before { inset: 8px; border-width: 1.5px; border-radius: 16px; }
+.dev-mini-lg .dev-mini-win { font-size: 34px; border-radius: 11px; }
+.dev-mini-lg .dev-mini-sn { font-size: 16px; }
+.dev-mini-lg .dev-mini-ce { font-size: 17px; }
+.paired-sn { color: var(--ink, #222) !important; font-size: 17px !important; margin: 0 0 6px !important; }
+.paired-ok-txt { font-size: 17px !important; color: #157a3c !important; font-weight: 700; margin: 0 0 10px !important; }
+.paired-note { font-size: 13px !important; margin: 0 0 18px !important; }

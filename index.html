@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="css/style.css?v=64" />
+  <link rel="stylesheet" href="css/style.css?v=65" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -98,6 +98,19 @@
     </form>
   </section>
 
+  <section class="gate" id="paired" hidden>
+    <div class="gate-box paired-box" role="dialog" aria-modal="true" aria-labelledby="paired-title">
+      <button type="button" class="paired-x" id="paired-x" aria-label="Chiudi">✕</button>
+      <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
+      <h1 id="paired-title" data-t>Dispositivo abbinato</h1>
+      <div class="dev-mini dev-mini-lg" aria-hidden="true"><span class="dev-mini-win">✓</span><span class="dev-mini-sn" id="paired-mini"></span><span class="dev-mini-ce">CE</span></div>
+      <p class="paired-sn"><span data-t>Numero di serie</span>: <b id="paired-sn"></b></p>
+      <p class="dev-ok paired-ok-txt" data-t>✓ Abbinato all’app</p>
+      <p class="paired-note" data-t>Lo ritrovi quando vuoi in <b>Info</b> → <b>Il tuo dispositivo</b>.</p>
+      <button class="btn primary" id="paired-ok" type="button" data-t>Chiudi</button>
+    </div>
+  </section>
+
   <section class="gate" id="onboard" hidden>
     <form class="gate-box onboard" id="ob-form" novalidate>
       <div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it">Italiano</button><button type="button" data-lang="en">English</button></div>
@@ -139,20 +152,20 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=64"></script>
-  <script src="js/i18n.js?v=64"></script>
-  <script src="js/en-app.js?v=64"></script>
-  <script src="js/en-modules.js?v=64"></script>
-  <script src="js/en-postura.js?v=64"></script>
-  <script src="js/body.js?v=64"></script>
-  <script src="js/data.js?v=64"></script>
-  <script src="js/data-en.js?v=64"></script>
-  <script src="js/timer.js?v=64"></script>
-  <script src="js/tests.js?v=64"></script>
-  <script src="js/metameri.js?v=64"></script>
-  <script src="js/postura.js?v=64"></script>
-  <script src="js/scan.js?v=64"></script>
-  <script src="js/app.js?v=64"></script>
-  <script src="js/native.js?v=64"></script>
+  <script src="js/config.js?v=65"></script>
+  <script src="js/i18n.js?v=65"></script>
+  <script src="js/en-app.js?v=65"></script>
+  <script src="js/en-modules.js?v=65"></script>
+  <script src="js/en-postura.js?v=65"></script>
+  <script src="js/body.js?v=65"></script>
+  <script src="js/data.js?v=65"></script>
+  <script src="js/data-en.js?v=65"></script>
+  <script src="js/timer.js?v=65"></script>
+  <script src="js/tests.js?v=65"></script>
+  <script src="js/metameri.js?v=65"></script>
+  <script src="js/postura.js?v=65"></script>
+  <script src="js/scan.js?v=65"></script>
+  <script src="js/app.js?v=65"></script>
+  <script src="js/native.js?v=65"></script>
 </body>
 </html>
