@@ -216,4 +216,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Abbinato all’app": "Paired with the app",
   "Il tuo dispositivo": "Your device",
   "Cambia dispositivo": "Change device",
+  "Dispositivo abbinato": "Device paired",
+  "✓ Abbinato all’app": "✓ Paired with the app",
+  "Lo ritrovi quando vuoi in <b>Info</b> → <b>Il tuo dispositivo</b>.": "You can find it any time in <b>Info</b> → <b>Your device</b>.",
 });

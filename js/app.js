@@ -1000,6 +1000,22 @@
     }
   });
 
+  // Schermata di conferma dopo l'abbinamento: resta finché si tocca Chiudi o la X, poi parte l'app
+  const paired = document.getElementById('paired');
+  function showPaired(serial) {
+    document.getElementById('paired-mini').textContent = serial;
+    document.getElementById('paired-sn').textContent = serial;
+    paired.hidden = false;
+    document.getElementById('paired-ok').focus();
+  }
+  function closePaired() {
+    if (paired.hidden) return;
+    paired.hidden = true;
+    start();
+  }
+  document.getElementById('paired-ok').addEventListener('click', closePaired);
+  document.getElementById('paired-x').addEventListener('click', closePaired);
+
   gateForm.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const serial = normSerial(gateInput.value);
@@ -1011,7 +1027,7 @@
         store.set('tp-serial', serial);
         gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Il dispositivo si è abbinato all’app. Benvenuto!');
         if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
-        setTimeout(() => { gate.hidden = true; start(); }, 900);
+        setTimeout(() => { gate.hidden = true; showPaired(serial); }, 900);
       } else {
         gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
         gateWin(T('Clicca qui e abbina il dispositivo'));
