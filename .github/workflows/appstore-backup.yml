@@ -1,0 +1,53 @@
+# Salva nel repository una copia della versione oggi in vendita su App Store (testi, parole chiave, screenshot, build),
+# nella cartella backup/appstore/<versione>/. Si avvia a mano: GitHub → Actions → "App Store: copia versione pubblicata".
+name: "App Store: copia versione pubblicata"
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chiave API di App Store Connect
+        env:
+          S_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          S_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_P8: ${{ secrets.APPSTORE_KEY_P8 }}
+        run: |
+          KEY_ID=$(printf '%s' "$S_KEY_ID" | tr -d '[:space:]'); ISSUER_ID=$(printf '%s' "$S_ISSUER_ID" | tr -d '[:space:]')
+          echo "::add-mask::$KEY_ID"; echo "::add-mask::$ISSUER_ID"
+          printf '%s\n' "$KEY_P8" > "$RUNNER_TEMP/key.p8"
+          { echo "KEY_ID=$KEY_ID"; echo "ISSUER_ID=$ISSUER_ID"; echo "KEY_PATH=$RUNNER_TEMP/key.p8"; } >> "$GITHUB_ENV"
+          pip install --quiet pyjwt cryptography
+
+      - name: Copia da App Store Connect
+        run: |
+          P=mobile/ios/App/App.xcodeproj/project.pbxproj
+          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
+          OUT="$GITHUB_WORKSPACE/backup/appstore"
+          cd .github/scripts && python3 asc_backup.py "$BUNDLE" "$OUT"
+
+      - name: Scheda pubblica e icona
+        run: |
+          P=mobile/ios/App/App.xcodeproj/project.pbxproj
+          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
+          D=$(ls -d backup/appstore/*/ | sort -V | tail -1)
+          curl -s "https://itunes.apple.com/lookup?bundleId=$BUNDLE&country=it" > "$D/scheda-pubblica-it.json"
+          ICON=$(python3 -c "import json;print(json.load(open('$D/scheda-pubblica-it.json'))['results'][0]['artworkUrl512'])")
+          curl -s "${ICON%/*}/1024x1024bb.png" -o "$D/icona-1024.png"
+          ls -la "$D" "$D/screenshot"
+
+      - name: Salva nel repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add backup/appstore
+          git diff --cached --quiet && { echo "Niente di nuovo"; exit 0; }
+          git commit -m "Copia della versione App Store in vendita"
+          git push
