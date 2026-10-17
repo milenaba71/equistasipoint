@@ -162,11 +162,16 @@
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       T('<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>');
 
-  // Foto del dispositivo in base al tipo scelto (gel o silicone)
-  function kitFigure() {
-    return state.devType === 'gel'
-      ? T('<figure><img src="img/gel-kit.jpg" alt="Dispositivo Equistasi gel nel palmo della mano, accanto all’astuccio" loading="lazy" width="573" height="1000" /><figcaption>Equistasi gel</figcaption></figure>')
-      : T('<figure><img src="img/silicone-applicato.jpg" alt="Dispositivo Equistasi silicone applicato sulla spalla" loading="lazy" width="600" height="620" /><figcaption>Equistasi silicone</figcaption></figure>');
+  // Come applicare, passo passo: dispositivo, cerotto applicatore, dispositivo sul cerotto, sulla pelle
+  function applySteps(onMap) {
+    const dev = state.devType === 'gel' ? 'img/gel-kit.jpg' : 'img/dispositivo.jpg';
+    const step = (n, src, alt, txt) => '<li><figure><span class="ap-n">' + n + '</span><img src="' + src + '" alt="' + alt + '" loading="lazy" /></figure><p>' + txt + '</p></li>';
+    return '<ol class="apply-steps">' +
+      step(1, dev, T('Dispositivo Equistasi'), T('Prendi il <b>dispositivo</b> Equistasi')) +
+      step(2, 'img/cerotto.jpg', T('Cerotto applicatore Equistasi'), T('Prendi il <b>cerotto applicatore</b>')) +
+      step(3, 'img/cerotto-dispositivo.jpg', T('Dispositivo appoggiato al centro del cerotto'), T('Appoggia il dispositivo <b>al centro del cerotto</b>')) +
+      step(4, 'img/applicazione.jpg', T('Dispositivo fissato sulla pelle con il cerotto'), (onMap ? T('Applicalo sulla pelle con il <b>centro del dispositivo sulla X</b>') : T('Applicalo sulla pelle <b>nel punto indicato</b>'))) +
+      '</ol>';
   }
 
   // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
@@ -194,10 +199,9 @@
       '<figure><img src="' + NEURO_IMG.s3 + T('" alt="" loading="lazy" /><figcaption><b>3</b> Muoviti come nelle tue attività di ogni giorno</figcaption></figure>') +
       '</div></div>' +
       T('<div class="card"><h3>Come applicare il dispositivo</h3>') +
-      '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
+      '<div class="device">' +
       T('<p>Posiziona il dispositivo nei punti indicati dal tuo protocollo.</p></div>') +
-      '<div class="howto">' + kitFigure() +
-      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      applySteps() +
       T('<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">') +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div>' + gelPhotos() + '<ol class="steps">' +
@@ -373,10 +377,9 @@
       '</div><div>' +
       (m.warning ? T('<div class="card warn"><b>Attenzione.</b> ') + esc(m.warning) + '</div>' : '') +
       T('<div class="card"><h3>Come applicare il dispositivo Equistasi</h3>') +
-      '<div class="device"><img src="img/dispositivo.jpg" alt="Dispositivo Equistasi" width="480" height="386" loading="lazy" />' +
+      '<div class="device">' +
       T('<p>Il <b>centro del dispositivo</b> va posizionato esattamente sulla <b>X</b> della mappa.</p></div>') +
-      '<div class="howto">' + kitFigure() +
-      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo Equistasi fissato sulla pelle con il cerotto trasparente" loading="lazy" width="600" height="515" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      applySteps(true) +
       T('<div class="toolbar"><span class="small"><b>Il tuo dispositivo è:</b></span><div class="seg" role="group" aria-label="Tipo di dispositivo">') +
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div>' + gelPhotos() + '<ol class="steps">' +
@@ -663,8 +666,7 @@
       T('<p class="small muted" style="margin:6px 4px 0">Tocca l’immagine per ingrandirla.</p></div></div><div>') +
       T('<div class="card"><h3>Dove applicare</h3><p class="small">') + esc(x.intro) + '</p><ol class="steps">' +
       x.points.map(([h, t]) => '<li><b>' + esc(h) + '.</b> ' + esc(t) + '</li>').join('') + '</ol></div>' +
-      T('<div class="card"><h3>Come applicare il dispositivo</h3><div class="howto"><figure><img src="img/kit.jpg" alt="Kit Equistasi" loading="lazy" /><figcaption>Il kit Equistasi</figcaption></figure>') +
-      T('<figure><img src="img/applicazione.jpg" alt="Dispositivo fissato con il cerotto trasparente" loading="lazy" /><figcaption>Fissato sulla pelle con il cerotto trasparente</figcaption></figure></div>') +
+      T('<div class="card"><h3>Come applicare il dispositivo</h3>') + applySteps() +
       T('<p class="small" style="margin:0">Pulisci e asciuga la pelle, fissa ogni dispositivo con il cerotto in dotazione, a contatto con la pelle, sul punto indicato. Per tempi e frequenza segui il tuo protocollo o le indicazioni del professionista che ti segue.</p></div>') +
       T('<div class="card warn"><b>Toglilo prima se senti fastidio.</b> ') + esc(window.EQUISTASI.schedule.removeEarly) + ' ' + esc(window.EQUISTASI.schedule.reassure) + '</div>' +
       '</div></div>';
