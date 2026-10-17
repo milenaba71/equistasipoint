@@ -236,11 +236,8 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Oggi": "Today",
   "Applicato {n} volta su 2": "Applied {n} of 2 times",
   "Nessun dispositivo applicato": "No device applied",
-  "Inquadra il dispositivo quando lo applichi: parte il promemoria delle 2 ore.": "Scan the device when you apply it: the 2-hour reminder starts.",
-  "Inquadra il dispositivo e applicalo": "Scan the device and apply it",
-  "Avvia senza inquadrare": "Start without scanning",
-  "Per inquadrare il dispositivo consenti l’uso della fotocamera, oppure tocca «Avvia senza inquadrare».": "To scan the device allow camera access, or tap “Start without scanning”.",
-  "Non riesco ad aprire la fotocamera: tocca «Avvia senza inquadrare».": "The camera could not be opened: tap “Start without scanning”.",
   "mancano": "left",
   "toglilo alle {end}": "remove it at {end}",
+  "Quando applichi il dispositivo tocca il pulsante: dopo <b>2 ore</b> ti ricordiamo di toglierlo.": "When you apply the device tap the button: after <b>2 hours</b> we’ll remind you to remove it.",
+  "Applicato adesso": "Applied just now",
 });

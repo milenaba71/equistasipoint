@@ -798,3 +798,49 @@ main { padding-top: 0; padding-bottom: 12px; }
 /* Profilo: nome */
 .ob-name { margin-bottom: 4px; }
 .ob-hint { font-size: 12.5px !important; margin: 0 0 14px !important; text-align: left !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   Aspetto da app: intestazione blu continua, titolo nella fascia blu
+   con il "foglio" che sale, passaggi animati, niente comportamenti da sito
+   ══════════════════════════════════════════════════════════════ */
+html, body { -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+.top, .tabbar, .hero, .detail-head, .btn, .seg, .tabs, .m-item, .chip, .badge, svg, .icon-btn, .timerbar, .profile-bar { -webkit-user-select: none; user-select: none; }
+img { -webkit-touch-callout: none; -webkit-user-drag: none; }
+.card a:not(.btn):not(.m-item):not(.card) { text-decoration: none; font-weight: 700; color: var(--eqblue); }
+
+/* Barra in alto blu: si unisce alla fascia della pagina */
+.top { background: var(--indigo); box-shadow: none; color: #fff; }
+.top .icon-btn { color: #fff; }
+.top .icon-btn:hover { background: rgba(255, 255, 255, .12); }
+.brand img { background: #fff; border-radius: 10px; padding: 3px 8px; height: 32px; }
+
+/* Titolo delle pagine interne nella fascia blu, il contenuto sale come un foglio */
+.detail-head { position: relative; background: var(--indigo); color: #fff; margin: 0 -16px 14px; padding: 14px 20px 40px; }
+.detail-head::before { content: ""; position: absolute; right: -60px; top: -80px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(250, 220, 0, .22), rgba(250, 220, 0, 0) 65%); pointer-events: none; }
+.detail-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 24px; background: var(--bg); border-radius: 24px 24px 0 0; }
+.detail-head .eyebrow { color: var(--yellow); position: relative; }
+.detail-head h1, .detail-head h1 .hl { color: #fff; position: relative; }
+.detail-head h1 .hl { color: var(--yellow); }
+.detail-head p, .detail-head .latin, .detail-head .muted, .detail-head .small { color: rgba(255, 255, 255, .8) !important; position: relative; }
+.detail-head a { color: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .detail-head h1 { color: #fff; } }
+@media (min-width: 820px) { .detail-head { margin: 0 0 14px; border-radius: 0 0 28px 28px; } }
+
+/* Passaggi tra le pagine */
+@keyframes pg-fwd { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes pg-back { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+main.pg-fwd { animation: pg-fwd .26s cubic-bezier(.2, .8, .2, 1); }
+main.pg-back { animation: pg-back .26s cubic-bezier(.2, .8, .2, 1); }
+@media (prefers-reduced-motion: reduce) { main.pg-fwd, main.pg-back { animation: none; } }
+
+/* Barra in basso più da app */
+.tabbar a { transition: color .2s; }
+.tabbar a .tb-ic { transition: background .2s, transform .2s; }
+.tabbar a:active .tb-ic { transform: scale(.9); }
+.btn { transition: transform .12s, background .2s; }
+
+/* Sul telefono il piè di pagina da sito non serve (Privacy e Video sono in Info e nella barra) */
+@media (max-width: 819px) { .foot { display: none; } }
+.detail-head { margin-bottom: 4px; }
+.detail-head .example-note, .detail-head .example-note b, .detail-head .warn, .detail-head .warn b, .detail-head .callout, .detail-head .callout b { color: var(--warn-txt, #29235C) !important; }
+.detail-head .example-note { position: relative; margin-bottom: 0; }

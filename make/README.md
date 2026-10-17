@@ -9,7 +9,8 @@
 Per entrare nell'app l'utente inserisce il seriale del proprio dispositivo Equistasi.
 Il seriale è valido se compare tra i dispositivi collegati al campo **abbinamento dispositivi**
 della tabella **Abbinamento Kit** nella base Airtable **EQUITUTTO**
-(controllo sul campo lookup `Abbinamento seriali (testo)`, corrispondenza esatta, maiuscole/minuscole ignorate).
+(controllo sul campo lookup `Abbinamento seriali (testo)`, corrispondenza esatta, maiuscole/minuscole e spazi ignorati).
+Il seriale ricevuto viene sempre trattato come testo (`toString`): i seriali fatti solo di cifre (es. `20240008797`) altrimenti arrivano a Make come numero e non vengono trovati (corretto il 17/10/2026).
 
 ```
 App  ──GET ?serial=EQX25002587──▶  Webhook Make  ──▶  Airtable (Abbinamento Kit)
