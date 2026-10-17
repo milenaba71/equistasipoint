@@ -964,11 +964,14 @@
   const gateSn = document.getElementById('gate-sn');
   const gateScanBar = document.getElementById('gate-scan-bar');
   const gateSnIdle = gateSn.textContent;
+  const gateWinLabel = gateScan.querySelector('.gate-idle span');
+  // testo nella finestra del dispositivo: in attesa, in abbinamento, abbinato
+  const gateWin = (label, cls) => { gateWinLabel.textContent = label; gateDev.classList.remove('read', 'paired'); if (cls) gateDev.classList.add(cls); };
   document.getElementById('gate-cancel').addEventListener('click', () => window.EqScan.stop());
   gateScan.addEventListener('click', async () => {
     if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
-    gateDev.classList.remove('read'); gateSn.textContent = gateSnIdle;
+    gateWin(T('Inquadra il seriale')); gateSn.textContent = gateSnIdle;
     gateDev.classList.add('scanning'); gateScanBar.hidden = false;
     try {
       const text = await window.EqScan.open({
@@ -978,7 +981,7 @@
       });
       if (!text) return;
       const serial = normSerial(text);
-      gateSn.textContent = serial; gateDev.classList.add('read');
+      gateSn.textContent = serial; gateWin(T('Abbinamento in corso…'), 'read');
       gateInput.value = serial;
       if (gateForm.requestSubmit) gateForm.requestSubmit(); else gateForm.dispatchEvent(new Event('submit', { cancelable: true }));
     } catch (e) {
@@ -999,15 +1002,18 @@
     try {
       if (await verifySerial(serial)) {
         store.set('tp-serial', serial);
-        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Dispositivo riconosciuto. Benvenuto!');
-        setTimeout(() => { gate.hidden = true; start(); }, 500);
+        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Dispositivo abbinato: l’app è attiva. Benvenuto!');
+        if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Dispositivo abbinato'), 'paired');
+        setTimeout(() => { gate.hidden = true; start(); }, 900);
       } else {
         gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
+        gateWin(T('Inquadra il seriale'));
       }
     } catch (e) {
       gateMsg.textContent = e.message === 'config'
         ? T('Servizio di verifica non configurato.')
         : T('Impossibile verificare ora. Controlla la connessione e riprova.');
+      gateWin(T('Inquadra il seriale'));
     } finally {
       gateBtn.disabled = false; gateBtn.textContent = T('Accedi');
     }
