@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="css/style.css?v=65" />
+  <link rel="stylesheet" href="css/style.css?v=66" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -122,6 +122,9 @@
         <div class="gate-label" data-t>Quale patologia?</div>
         <div class="ob-pills" id="ob-pato" role="radiogroup" aria-label="Patologia"></div>
       </div>
+      <label class="gate-label" for="ob-name" data-t>Come ti chiami? <span class="muted">(facoltativo)</span></label>
+      <input id="ob-name" class="search ob-name" type="text" autocomplete="given-name" autocapitalize="words" maxlength="40" placeholder="Il tuo nome" />
+      <p class="ob-hint" data-t>Serve solo per salutarti nell’app: resta sul telefono e non viene inviato.</p>
       <label class="gate-label" for="ob-eta" data-t>Fascia d’età <span class="muted">(facoltativo)</span></label>
       <select id="ob-eta" class="search"><option value="" data-t>Preferisco non indicarla</option></select>
       <div class="ob-privacy">
@@ -152,20 +155,20 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=65"></script>
-  <script src="js/i18n.js?v=65"></script>
-  <script src="js/en-app.js?v=65"></script>
-  <script src="js/en-modules.js?v=65"></script>
-  <script src="js/en-postura.js?v=65"></script>
-  <script src="js/body.js?v=65"></script>
-  <script src="js/data.js?v=65"></script>
-  <script src="js/data-en.js?v=65"></script>
-  <script src="js/timer.js?v=65"></script>
-  <script src="js/tests.js?v=65"></script>
-  <script src="js/metameri.js?v=65"></script>
-  <script src="js/postura.js?v=65"></script>
-  <script src="js/scan.js?v=65"></script>
-  <script src="js/app.js?v=65"></script>
-  <script src="js/native.js?v=65"></script>
+  <script src="js/config.js?v=66"></script>
+  <script src="js/i18n.js?v=66"></script>
+  <script src="js/en-app.js?v=66"></script>
+  <script src="js/en-modules.js?v=66"></script>
+  <script src="js/en-postura.js?v=66"></script>
+  <script src="js/body.js?v=66"></script>
+  <script src="js/data.js?v=66"></script>
+  <script src="js/data-en.js?v=66"></script>
+  <script src="js/timer.js?v=66"></script>
+  <script src="js/tests.js?v=66"></script>
+  <script src="js/metameri.js?v=66"></script>
+  <script src="js/postura.js?v=66"></script>
+  <script src="js/scan.js?v=66"></script>
+  <script src="js/app.js?v=66"></script>
+  <script src="js/native.js?v=66"></script>
 </body>
 </html>

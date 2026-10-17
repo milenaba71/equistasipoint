@@ -65,9 +65,10 @@
   }
 
   /* ───────── Sessioni ───────── */
-  async function start() {
+  async function start(serial) {
     const now = Date.now();
     const s = { start: now, end: now + DURATION };
+    if (serial) s.serial = serial;
     store.set(KEY, s);
     const log = store.get(LOG, []);
     log.push(now);
@@ -93,6 +94,45 @@
   }
   const todayCount = () => store.get(LOG, []).filter((t) => dayKey(t) === dayKey(Date.now())).length;
 
+
+  /* ───────── Anello del tempo e scheda "Oggi" ───────── */
+  // anello di avanzamento (frac 0–1) con un contenuto al centro
+  function ring(frac, size, w, inner) {
+    const r = (size - w) / 2; const c = 2 * Math.PI * r; const f = Math.max(0, Math.min(1, frac));
+    return '<div class="tm-ringbox" style="width:' + size + 'px;height:' + size + 'px">' +
+      '<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '" aria-hidden="true">' +
+      '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" class="tm-track" stroke-width="' + w + '" fill="none"/>' +
+      (f > 0 ? '<circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" class="tm-prog" stroke-width="' + w + '" fill="none" stroke-linecap="round" stroke-dasharray="' + (c * f).toFixed(1) + ' ' + c.toFixed(1) + '" transform="rotate(-90 ' + size / 2 + ' ' + size / 2 + ')"/>' : '') + '</svg>' +
+      '<div class="tm-ringin">' + inner + '</div></div>';
+  }
+  const since = (t) => { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 60 ? T('{m} min', { m }) : T('{h} h {m} min', { h: Math.floor(m / 60), m: pad(m % 60) }); };
+  const mini = (sn, ok) => '<span class="dev-mini td-dev" aria-hidden="true"><span class="dev-mini-win' + (ok ? '' : ' idle') + '">' + (ok ? '✓' : '') + '</span><span class="dev-mini-sn">' + (sn || '') + '</span><span class="dev-mini-ce">CE</span></span>';
+  function todayHtml() {
+    const s = store.get(KEY, null);
+    let sn = s && s.serial;
+    if (!sn) { try { sn = localStorage.getItem('tp-serial') || ''; } catch (e) { sn = ''; } } // salvato come testo semplice da app.js
+    const esc = (x) => String(x).replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    let main; let act;
+    if (s && left(s) > 0) {
+      main = '<div class="td-main">' + ring((Date.now() - s.start) / DURATION, 96, 7, mini(esc(sn), true)) +
+        '<div><div class="td-k">' + T('Dispositivo attivo') + '</div><h3>' + T('Applicato da {t}', { t: since(s.start) }) + '</h3>' +
+        '<p class="small">' + T('Toglilo alle <b>{end}</b> · ti avvisiamo noi', { end: hhmm(s.end) }) + '</p></div></div>';
+      act = '<a class="btn" href="#/promemoria">' + T('Apri il promemoria') + '</a>';
+    } else if (s) {
+      main = '<div class="td-main">' + ring(1, 96, 7, mini(esc(sn), true)) +
+        '<div><div class="td-k">' + T('Sono passate 2 ore') + '</div><h3>' + T('Togli il dispositivo') + '</h3><p class="small">' + T('e lascia riposare la pelle') + '</p></div></div>';
+      act = '<button class="btn primary" data-tm="stop" type="button">' + T('Fatto, l’ho tolto') + '</button>';
+    } else {
+      const n = todayCount();
+      main = '<div class="td-main">' + ring(0, 96, 7, mini(esc(sn), false)) +
+        '<div><div class="td-k">' + T('Oggi') + '</div><h3>' + (n ? T('Applicato {n} volta su 2', { n: Math.min(n, 2) }) : T('Nessun dispositivo applicato')) + '</h3>' +
+        '<p class="small">' + T('Inquadra il dispositivo quando lo applichi: parte il promemoria delle 2 ore.') + '</p></div></div>';
+      act = '<button class="btn primary td-scan" data-tm-scan type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 9v6M10 9v6M13 9v6M17 9v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' + T('Inquadra il dispositivo e applicalo') + '</button>' +
+        '<button class="td-link" data-tm="start" type="button">' + T('Avvia senza inquadrare') + '</button>';
+    }
+    return '<div class="card today-card" id="today-card">' + main + '<div class="td-act">' + act + '</div><p class="small td-msg" id="today-msg" hidden></p></div>';
+  }
+
   /* ───────── Interfaccia ───────── */
   function cardHtml() {
     const s = store.get(KEY, null);
@@ -101,7 +141,7 @@
     const usedToday = today > 0;
     let body;
     if (s && left(s) > 0) {
-      body = '<div class="tm-ring"><b>' + fmtLeft(left(s)) + '</b><span>' + T('rimanenti') + '</span></div>' +
+      body = '<div class="tm-big">' + ring(1 - left(s) / DURATION, 210, 16, '<span class="tm-big-l">' + T('mancano') + '</span><b>' + fmtLeft(left(s)) + '</b><span class="tm-big-l">' + T('toglilo alle {end}', { end: hhmm(s.end) }) + '</span>') + '</div>' +
         '<p class="small" style="margin:0 0 12px">' + T('Applicato alle <b>{start}</b>: toglilo alle <b>{end}</b>. Ti avvisiamo noi.', { start: hhmm(s.start), end: hhmm(s.end) }) + '</p>' +
         '<button class="btn" data-tm="stop" type="button">' + T('L’ho già tolto') + '</button>';
     } else if (s) {
@@ -164,6 +204,11 @@
       old.outerHTML = cardHtml();
       if (msg) { const m = document.getElementById('tm-msg'); m.textContent = msg; m.hidden = false; }
     }
+    const td = document.getElementById('today-card');
+    if (td) {
+      td.outerHTML = todayHtml();
+      if (msg) { const m = document.getElementById('today-msg'); m.textContent = msg; m.hidden = false; }
+    }
     bar();
   }
   function bar() {
@@ -184,6 +229,19 @@
     if (!b) return;
     if (b.dataset.tm === 'start') start(); else stop();
   });
+  // "Inquadra il dispositivo e applicalo": si legge il codice a barre sul retro e parte il promemoria
+  document.addEventListener('click', async (ev) => {
+    if (!ev.target.closest('[data-tm-scan]') || !window.EqScan) return;
+    const msg = (t) => { const m = document.getElementById('today-msg') || document.getElementById('tm-msg'); if (m) { m.textContent = t; m.hidden = false; } };
+    try {
+      const text = await window.EqScan.open({ accept: (t) => /^[A-Z0-9-]{5,24}$/.test(t.toUpperCase().replace(/[^A-Z0-9-]/g, '')) && /\d/.test(t) });
+      if (text) start(text.toUpperCase().replace(/[^A-Z0-9-]/g, ''));
+    } catch (e) {
+      msg(e.message === 'denied'
+        ? T('Per inquadrare il dispositivo consenti l’uso della fotocamera, oppure tocca «Avvia senza inquadrare».')
+        : T('Non riesco ad aprire la fotocamera: tocca «Avvia senza inquadrare».'));
+    }
+  });
   document.addEventListener('click', (ev) => {
     if (ev.target.closest('#timerbar')) { const c = document.getElementById('tm-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); else location.hash = '#/promemoria'; }
   });
@@ -198,5 +256,5 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   window.addEventListener('load', tick);
 
-  window.EqTimer = { cardHtml, render, tick };
+  window.EqTimer = { cardHtml, todayHtml, render, tick, start };
 })();
