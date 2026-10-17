@@ -566,6 +566,9 @@
   }
   const VIDEO_OFF = T('<p class="muted small" style="margin:0">I video non sono disponibili in questo momento. Controlla la connessione e riprova.</p>');
 
+  const tutCard = '<button type="button" class="card vpromo tut-open" data-tut><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
+    T('<span><b>Come usare l’app</b><br><span class="small muted">Il video veloce con le cose fondamentali</span></span><span class="chev" aria-hidden="true">›</span>') + '</button>';
+  document.addEventListener('click', (ev) => { if (ev.target.closest('[data-tut]') && window.EqTutorial) window.EqTutorial.show(); });
   function renderVideos() {
     setBack(true);
     app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Impara a usare Equistasi</div><h1>Video <span class="hl">tutorial</span></h1>') +
@@ -584,6 +587,7 @@
         groups.get(k).items.push(v);
       });
       let h = '';
+      h += tutCard;
       if (general.length) h += T('<div class="card"><h3>Guide all’applicazione</h3><div class="vgrid">') + general.map((v) => vcard(v)).join('') + '</div></div>';
       if (groups.size) {
         const keys = [...groups.keys()].sort((a, b) => (groups.get(b).m ? 1 : 0) - (groups.get(a).m ? 1 : 0) || a.localeCompare(b));
@@ -1078,7 +1082,8 @@
   function closePaired() {
     if (paired.hidden) return;
     paired.hidden = true;
-    start();
+    // video veloce su come usare l'app, poi profilo e tutto il resto
+    if (window.EqTutorial) window.EqTutorial.show().then(start); else start();
   }
   document.getElementById('paired-ok').addEventListener('click', closePaired);
   document.getElementById('paired-x').addEventListener('click', closePaired);

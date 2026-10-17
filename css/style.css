@@ -913,3 +913,30 @@ main.pg-back { animation: pg-back .26s cubic-bezier(.2, .8, .2, 1); }
 @keyframes pair-up { to { opacity: 1; transform: none; } }
 @keyframes pair-shake { 0%,100% { margin-left: 0; } 20% { margin-left: -10px; } 40% { margin-left: 9px; } 60% { margin-left: -6px; } 80% { margin-left: 3px; } }
 @media (max-height: 560px) { .pair { --d: min(60vw, 40vh, 260px); } .pair-t { font-size: 1.15rem; } }
+
+/* ───── Video «Come usare l'app» (js/tutorial.js) ───── */
+button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; border: 0; cursor: pointer; }
+.tut { position: fixed; inset: 0; z-index: 210; display: flex; flex-direction: column; align-items: center; color: #fff;
+  padding: calc(10px + env(safe-area-inset-top)) 16px calc(14px + env(safe-area-inset-bottom));
+  background: radial-gradient(120% 80% at 50% 40%, #1b2a6b 0%, #0b1033 55%, #04060f 100%); opacity: 0; transition: opacity .3s ease; }
+.tut.on { opacity: 1; }
+.tut-bars { display: flex; gap: 4px; width: 100%; max-width: 460px; }
+.tut-bars span { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.22); overflow: hidden; }
+.tut-bars i { display: block; height: 100%; background: #FADC00; transform: scaleX(0); transform-origin: left; }
+.tut-top { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 460px; margin: 10px 0 12px; }
+.tut-top b { font-size: 1.05rem; }
+.tut-skip { border: 0; border-radius: 999px; padding: 9px 16px; background: rgba(255,255,255,.14); color: #fff; font: 600 .95rem/1 inherit; cursor: pointer; }
+.tut-phone { flex: 1 1 auto; min-height: 0; display: flex; justify-content: center; }
+.tut-phone video { height: 100%; max-width: 100%; aspect-ratio: 390 / 844; object-fit: contain; border-radius: 26px; background: #0b1033;
+  box-shadow: 0 0 0 6px rgba(255,255,255,.08), 0 20px 60px rgba(0,0,0,.55); }
+.tut-cap { flex: 0 0 auto; min-height: 3.6em; max-width: 460px; margin: 14px 0 0; text-align: center; font-size: 1.05rem; line-height: 1.35; font-weight: 600; }
+.tut-cap.in { animation: tut-in .4s ease-out; }
+.tut-end { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; text-align: center;
+  background: rgba(6,9,26,.88); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .35s; }
+.tut.fin .tut-end { opacity: 1; pointer-events: auto; }
+.tut-ok { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-size: 44px; background: #1fae5b; box-shadow: 0 0 30px rgba(31,174,91,.6); }
+.tut-end h2 { margin: 6px 0 0; font-size: 1.6rem; }
+.tut-end p { margin: 0 0 8px; color: rgba(220,232,255,.8); max-width: 320px; }
+.tut-go { min-width: 220px; }
+.tut-again { border: 0; background: none; color: rgba(220,232,255,.85); font: inherit; padding: 8px; cursor: pointer; }
+@keyframes tut-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

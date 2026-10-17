@@ -1,7 +1,7 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v74';
+const VERSION = 'tp-v75';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/scan.js', 'js/pair.js', 'js/native.js',
+  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/scan.js', 'js/pair.js', 'js/tutorial.js', 'js/native.js',
   'img/logo.png', 'img/dispositivo.jpg', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',
 ];
 
@@ -22,6 +22,8 @@ self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   // la verifica del seriale (webhook Make) non va mai in cache
   if (new URL(e.request.url).origin !== location.origin) return;
+  // i video si scaricano a pezzi (richieste Range): li lascia gestire al browser
+  if (/\.(mp4|webm)$/.test(new URL(e.request.url).pathname)) return;
   e.respondWith(
     // no-cache: chiede sempre al server se il file è cambiato (risposta 304 leggera se non è cambiato)
     fetch(e.request, { cache: 'no-cache' })
