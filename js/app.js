@@ -141,6 +141,15 @@
     '<a class="profile-switch" href="#/profilo">' + SWAP_ICON + T('Cambia profilo</a></div>');
   const EXAMPLE_NOTE = () => '<p class="example-note">' + T('ℹ️ Le mappe, le X e le zone di dolore sono <b>solo esempi indicativi</b> e <b>non sostituiscono il parere del medico</b> o del fisioterapista.') + '</p>';
   const SHOP = (window.APP_CONFIG && window.APP_CONFIG.shopUrl) || 'https://shop.equistasi.com';
+  // Il dispositivo abbinato all'app (seriale letto o digitato all'attivazione)
+  const deviceCard = () => {
+    const sn = store.get('tp-serial', '');
+    return '<div class="card dev-card"><div class="dev-mini" aria-hidden="true"><span class="dev-mini-win">✓</span><span class="dev-mini-sn">' + esc(sn || '—') + '</span><span class="dev-mini-ce">CE</span></div>' +
+      '<div class="dev-card-txt"><h3>' + T('Il tuo dispositivo') + '</h3>' +
+      '<p class="small">' + T('Numero di serie') + ': <b>' + esc(sn || '—') + '</b></p>' +
+      (sn ? '<p class="small dev-ok">✓ ' + T('Abbinato all’app') + '</p>' : '') +
+      '<button class="btn" onclick="tpLogout()">' + T('Cambia dispositivo') + '</button></div></div>';
+  };
   const shopCard = '<a class="card shop-card" href="' + SHOP + '" target="_blank" rel="noopener"><span class="shop-ico" aria-hidden="true">🛒</span>' +
     T('<span class="shop-txt"><b>Shop</b><span class="small">shop.equistasi.com</span></span><span class="chev" aria-hidden="true">›</span></a>');
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
@@ -679,7 +688,7 @@
     setBack(true);
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>') +
-      shopCard + '<div class="cols">' +
+      deviceCard() + shopCard + '<div class="cols">' +
       T('<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>') +
       T('<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>') + legend() + '</div>' +
       T('<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>') +
@@ -691,8 +700,6 @@
       '</ul></div>' +
       T('<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello <a href="https://github.com/Z-Anatomy" target="_blank" rel="noopener">Z-Anatomy – The libre 3D atlas of anatomy</a> (CC BY-SA 4.0), basato su <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D – The Database Center for Life Science</a> (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p></div>') +
       T('<div class="card"><h3>Il tuo profilo</h3><p class="small">') + esc(profileName() || '—') + T('</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>') +
-      T('<div class="card"><h3>Il tuo dispositivo</h3><p class="small">Numero di serie: <b>') + esc(store.get('tp-serial', '—')) + '</b></p>' +
-      T('<button class="btn" onclick="tpLogout()">Cambia dispositivo</button></div>') +
       '<div class="card"><h3>Lingua · Language</h3><div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it" aria-pressed="' + (window.LANG === 'it') + '">Italiano</button><button type="button" data-lang="en" aria-pressed="' + (window.LANG === 'en') + '">English</button></div></div>' +
       T('<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>') +
       '</div>';
@@ -1002,8 +1009,8 @@
     try {
       if (await verifySerial(serial)) {
         store.set('tp-serial', serial);
-        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Dispositivo abbinato: l’app è attiva. Benvenuto!');
-        if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Dispositivo abbinato'), 'paired');
+        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Il dispositivo si è abbinato all’app. Benvenuto!');
+        if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
         setTimeout(() => { gate.hidden = true; start(); }, 900);
       } else {
         gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
