@@ -73,6 +73,7 @@
     const log = store.get(LOG, []);
     log.push(now);
     store.set(LOG, log.filter((t) => now - t < 30 * 864e5));
+    render(); // la scheda si aggiorna subito, anche mentre il telefono chiede il permesso per le notifiche
     const ok = await askPermission().catch(() => false);
     await schedule(s.end).catch(() => {});
     render(ok ? '' : T('Le notifiche non sono attive: tieni aperta l’app o controlla l’orario indicato qui sopra.'));
@@ -126,9 +127,8 @@
       const n = todayCount();
       main = '<div class="td-main">' + ring(0, 96, 7, mini(esc(sn), false)) +
         '<div><div class="td-k">' + T('Oggi') + '</div><h3>' + (n ? T('Applicato {n} volta su 2', { n: Math.min(n, 2) }) : T('Nessun dispositivo applicato')) + '</h3>' +
-        '<p class="small">' + T('Inquadra il dispositivo quando lo applichi: parte il promemoria delle 2 ore.') + '</p></div></div>';
-      act = '<button class="btn primary td-scan" data-tm-scan type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M7 9v6M10 9v6M13 9v6M17 9v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' + T('Inquadra il dispositivo e applicalo') + '</button>' +
-        '<button class="td-link" data-tm="start" type="button">' + T('Avvia senza inquadrare') + '</button>';
+        '<p class="small">' + T('Quando applichi il dispositivo tocca il pulsante: dopo <b>2 ore</b> ti ricordiamo di toglierlo.') + '</p></div></div>';
+      act = '<button class="btn primary" data-tm="start" type="button">' + T('Ho applicato il dispositivo') + '</button>';
     }
     return '<div class="card today-card" id="today-card">' + main + '<div class="td-act">' + act + '</div><p class="small td-msg" id="today-msg" hidden></p></div>';
   }
@@ -228,19 +228,6 @@
     const b = ev.target.closest('[data-tm]');
     if (!b) return;
     if (b.dataset.tm === 'start') start(); else stop();
-  });
-  // "Inquadra il dispositivo e applicalo": si legge il codice a barre sul retro e parte il promemoria
-  document.addEventListener('click', async (ev) => {
-    if (!ev.target.closest('[data-tm-scan]') || !window.EqScan) return;
-    const msg = (t) => { const m = document.getElementById('today-msg') || document.getElementById('tm-msg'); if (m) { m.textContent = t; m.hidden = false; } };
-    try {
-      const text = await window.EqScan.open({ accept: (t) => /^[A-Z0-9-]{5,24}$/.test(t.toUpperCase().replace(/[^A-Z0-9-]/g, '')) && /\d/.test(t) });
-      if (text) start(text.toUpperCase().replace(/[^A-Z0-9-]/g, ''));
-    } catch (e) {
-      msg(e.message === 'denied'
-        ? T('Per inquadrare il dispositivo consenti l’uso della fotocamera, oppure tocca «Avvia senza inquadrare».')
-        : T('Non riesco ad aprire la fotocamera: tocca «Avvia senza inquadrare».'));
-    }
   });
   document.addEventListener('click', (ev) => {
     if (ev.target.closest('#timerbar')) { const c = document.getElementById('tm-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); else location.hash = '#/promemoria'; }
