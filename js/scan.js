@@ -100,7 +100,7 @@
       let torchBtn = opts.torch || null;
       if (inline) {
         el.className = 'scan-inline';
-        el.innerHTML = '<video playsinline muted autoplay></video>' + (calm() ? '<span class="scan-line" aria-hidden="true"></span>' : '<canvas class="scan-fx" aria-hidden="true"></canvas>');
+        el.innerHTML = '<video playsinline muted autoplay></video>' + (opts.fx === false ? '' : calm() ? '<span class="scan-line" aria-hidden="true"></span>' : '<canvas class="scan-fx" aria-hidden="true"></canvas>');
         opts.container.appendChild(el);
       } else {
         el.className = 'scan';
@@ -134,6 +134,10 @@
         done = true;
         current = null;
         clearTimeout(timer);
+        // freeze: lascia nel contenitore l'ultimo fotogramma (per le animazioni che seguono la lettura)
+        if (result && opts.freeze && inline && video.videoWidth) {
+          try { const fc = document.createElement('canvas'); fc.className = 'scan-freeze'; fc.width = video.videoWidth; fc.height = video.videoHeight; fc.getContext('2d').drawImage(video, 0, 0); opts.container.appendChild(fc); } catch (e) { /* niente fotogramma */ }
+        }
         if (fx) fx.stop();
         if (stream) stream.getTracks().forEach((t) => t.stop());
         if (torchBtn) { torchBtn.removeEventListener('click', onTorch); torchBtn.classList.remove('on'); if (inline) torchBtn.hidden = true; }
