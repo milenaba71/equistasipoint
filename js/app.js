@@ -820,11 +820,22 @@
     else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
+    // passaggio animato tra le pagine: avanti (scheda più interna) da destra, indietro da sinistra
+    const depth = h.split('/').filter(Boolean).length;
+    app.classList.remove('pg-fwd', 'pg-back');
+    void app.offsetWidth;
+    app.classList.add(depth >= lastDepth ? 'pg-fwd' : 'pg-back');
+    lastDepth = depth;
     updateTabs(page);
     window.translateStatic(app); // aria-label e testi alternativi in inglese
     window.scrollTo(0, 0);
   }
+  let lastDepth = 0;
   window.addEventListener('hashchange', route);
+  // vibrazione leggera al tocco (solo i telefoni che la supportano)
+  document.addEventListener('click', (ev) => {
+    if (navigator.vibrate && ev.target.closest('.tabbar a, .hot, .tp-dot, [data-area], .m-item, .btn')) navigator.vibrate(8);
+  });
 
   /* Avviso iniziale */
   const disc = document.getElementById('disclaimer');

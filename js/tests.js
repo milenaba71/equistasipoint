@@ -171,9 +171,9 @@
   }
 
   function renderList(app) {
-    app.innerHTML = '<img class="ts-hero" style="margin-top:16px" src="' + IMG.hero + '" alt="" loading="lazy" />' + '<div class="detail-head" style="padding-top:0"><div class="eyebrow">' + T('Sport') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Sport') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
       '<p class="small muted" style="margin:6px 0 0">' + T('Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.') + '</p></div>' +
-      SAFETY + '<div class="list">' + Object.keys(TESTS).map((k) => {
+      '<img class="ts-hero" src="' + IMG.hero + '" alt="" loading="lazy" />' + SAFETY + '<div class="list">' + Object.keys(TESTS).map((k) => {
         const tt = TESTS[k]; const n = results().filter((r) => r.type === k).length;
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
           (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
