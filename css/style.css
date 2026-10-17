@@ -950,3 +950,6 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .apply-steps p { margin: 6px 2px 0; font-size: 13px; line-height: 1.3; }
 @media (min-width: 900px) { .apply-steps { grid-template-columns: repeat(4, 1fr); } }
 .device:not(:has(img)) { display: block; }
+.tut-phone { position: relative; }
+.tut-sound { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); border: 0; border-radius: 999px; padding: 10px 16px;
+  background: rgba(6,9,26,.82); color: #fff; font: 600 .95rem/1 inherit; box-shadow: 0 4px 16px rgba(0,0,0,.4); cursor: pointer; }
