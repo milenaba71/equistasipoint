@@ -1019,12 +1019,37 @@
     if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
     gateWin(T('Clicca qui e abbina il dispositivo')); gateSn.textContent = gateSnIdle;
+    const accept = (t) => /^[A-Z0-9-]{5,24}$/.test(normSerial(t)) && /\d/.test(t);
+    // schermata a tutto schermo con particelle, anello e suoni; con «riduci movimento» resta la lettura nel disegno
+    if (window.EqPair && !window.EqPair.reduced()) {
+      gateDev.classList.add('scanning');
+      try {
+        const r = await window.EqPair.run({ accept, norm: normSerial, verify: verifySerial });
+        if (!r) return;
+        if (r.ok) {
+          store.set('tp-serial', r.serial);
+          gate.hidden = true; showPaired(r.serial);
+        } else {
+          gateInput.value = r.serial;
+          gateMsg.textContent = r.error === 'net'
+            ? T('Impossibile verificare ora. Controlla la connessione e riprova.')
+            : T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
+        }
+      } catch (e) {
+        gateMsg.textContent = e.message === 'denied'
+          ? T('Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.')
+          : T('Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.');
+      } finally {
+        gateDev.classList.remove('scanning');
+      }
+      return;
+    }
     gateDev.classList.add('scanning'); gateScanBar.hidden = false;
     try {
       const text = await window.EqScan.open({
         container: gateScan,
         torch: document.getElementById('gate-torch'),
-        accept: (t) => /^[A-Z0-9-]{5,24}$/.test(normSerial(t)) && /\d/.test(t),
+        accept,
       });
       if (!text) return;
       const serial = normSerial(text);
