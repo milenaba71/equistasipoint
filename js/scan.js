@@ -7,7 +7,8 @@
    EqScan.stop() chiude la fotocamera. */
 (function () {
   const BASE = 'js/vendor/zxing/';
-  const FORMATS = ['Code128', 'Code39', 'Code93', 'DataMatrix', 'QRCode'];
+  // seriali con lettere e numeri (es. EQX25001801) o solo numeri: Code 128/39/93, ITF, Codabar, EAN/UPC, DataMatrix, QR
+  const FORMATS = ['Code128', 'Code39', 'Code93', 'ITF', 'Codabar', 'EAN13', 'EAN8', 'UPCA', 'UPCE', 'DataMatrix', 'QRCode'];
   let lib = null;
   let current = null;
 
