@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Equistasi Point usa la fotocamera per scattare le foto dell’analisi della postura. Le foto restano sul telefono.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Equistasi Point apre le foto che scegli per l’analisi della postura. Le foto restano sul telefono.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Equistasi Point usa i sensori di movimento per i test di equilibrio e salto nella sezione Sport.</string>
+	<string>Equistasi Point usa i sensori di movimento per i test di equilibrio, salto e postura.</string>
     <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
