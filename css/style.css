@@ -764,3 +764,37 @@ main { padding-top: 0; padding-bottom: 12px; }
 .paired-sn { color: var(--ink, #222) !important; font-size: 17px !important; margin: 0 0 6px !important; }
 .paired-ok-txt { font-size: 17px !important; color: #157a3c !important; font-weight: 700; margin: 0 0 10px !important; }
 .paired-note { font-size: 13px !important; margin: 0 0 18px !important; }
+
+/* Home: saluto e scheda "Oggi" con il dispositivo applicato */
+.hello { color: rgba(255, 255, 255, .9) !important; font-size: 15px !important; font-weight: 600; margin: 0 0 10px !important; position: relative; z-index: 1; }
+.today-card { margin-top: 14px; }
+.td-main { display: flex; align-items: center; gap: 16px; }
+.td-main h3 { margin: 2px 0 4px; font-size: 18px; }
+.td-main .small { margin: 0; }
+.td-k { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--eqblue); }
+.td-act { display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-top: 14px; }
+.td-act .btn { width: 100%; text-align: center; text-decoration: none; }
+.td-scan { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.td-scan svg { width: 22px; height: 22px; flex: none; }
+.td-link { background: none; border: 0; color: var(--eqblue); font: inherit; font-size: 14px; font-weight: 700; padding: 6px; cursor: pointer; }
+.td-msg { color: var(--red, #c0392b) !important; margin: 8px 0 0 !important; }
+.tm-ringbox { position: relative; flex: none; }
+.tm-ringbox svg { position: absolute; inset: 0; }
+.tm-ringin { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.tm-track { stroke: #eef0f6; }
+.tm-prog { stroke: var(--eqblue); transition: stroke-dasharray .6s ease; }
+.dev-mini.td-dev { width: 58px; border-radius: 10px; }
+.td-dev::before { inset: 3px; border-radius: 7px; }
+.td-dev .dev-mini-win { font-size: 13px; border-radius: 5px; }
+.td-dev .dev-mini-win.idle { background: var(--indigo); }
+.td-dev .dev-mini-sn { font-size: 5.5px; top: 62%; }
+.td-dev .dev-mini-ce { font-size: 6px; }
+/* Promemoria: anello grande nella scheda indaco */
+.tm-big { display: flex; justify-content: center; margin: 4px 0 12px; }
+.tm-card .tm-track { stroke: rgba(255, 255, 255, .14); }
+.tm-card .tm-prog { stroke: var(--yellow); }
+.tm-big b { font-size: 34px; color: var(--yellow) !important; letter-spacing: -.02em; line-height: 1.1; }
+.tm-big-l { font-size: 13px; color: rgba(255, 255, 255, .8); }
+/* Profilo: nome */
+.ob-name { margin-bottom: 4px; }
+.ob-hint { font-size: 12.5px !important; margin: 0 0 14px !important; text-align: left !important; }

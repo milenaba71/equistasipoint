@@ -134,6 +134,13 @@
       '<g>' + a + '</g><g transform="' + window.Body.MIRROR + '">' + b + '</g></svg>';
   }
 
+  // Saluto in cima alla home, con il nome scelto nel profilo (resta solo sul telefono)
+  const hello = () => {
+    const h = new Date().getHours();
+    const w = h >= 5 && h < 12 ? T('Buongiorno') : h >= 12 && h < 18 ? T('Buon pomeriggio') : T('Buonasera');
+    const n = store.get('tp-name', '');
+    return '<p class="hello">' + esc(w) + (n ? ', ' + esc(n) : '') + ' 👋</p>';
+  };
   // Profilo attuale + pulsante grande "Cambia profilo"
   const SWAP_ICON = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const profileChip = () => T('<div class="profile-bar"><span class="profile-now"><span class="small">Il tuo profilo</span><b>') +
@@ -173,12 +180,13 @@
     const p = getProfile();
     const EQ = window.EQUISTASI;
     app.innerHTML =
-      '<section class="hero">' + profileChip() + T('<div class="eyebrow">Il tuo percorso con Equistasi</div>') +
+      '<section class="hero">' + hello() + profileChip() + T('<div class="eyebrow">Il tuo percorso con Equistasi</div>') +
       '<h1><span class="hl">' + esc(profileName(p)) + '</span></h1>' +
       T('<p>Qui trovi i protocolli di applicazione e i video dedicati al tuo profilo. Segui sempre le indicazioni del tuo neurologo o fisioterapista.</p>') +
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
+      window.EqTimer.todayHtml() +
       T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
@@ -229,12 +237,13 @@
     if (prof.type === 'neuro') return renderNeuroHome();
     const sport = prof.type === 'sport';
     app.innerHTML =
-      '<section class="hero">' + profileChip() + '<div class="eyebrow">' + (sport ? T('Sport e performance') : T('Mappa dei trigger point')) + '</div>' +
+      '<section class="hero">' + hello() + profileChip() + '<div class="eyebrow">' + (sport ? T('Sport e performance') : T('Mappa dei trigger point')) + '</div>' +
       '<h1>' + (sport ? T('Contratture o <span class="hl">dolori muscolari</span>?') : T('Dove senti <span class="hl">dolore</span>?')) + '</h1>' +
       T('<p>Tocca la zona sul corpo o scegli dall’elenco: ti mostriamo dove applicare il dispositivo Equistasi.</p>') +
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
+      window.EqTimer.todayHtml() +
       (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Il metamero</b> è come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa i metameri</a></div></div>')) +
       (sport ? window.EqTests.cardHtml() + window.EqPosture.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
@@ -699,7 +708,7 @@
       T('<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>') +
       '</ul></div>' +
       T('<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello <a href="https://github.com/Z-Anatomy" target="_blank" rel="noopener">Z-Anatomy – The libre 3D atlas of anatomy</a> (CC BY-SA 4.0), basato su <a href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/" target="_blank" rel="noopener">BodyParts3D – The Database Center for Life Science</a> (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p></div>') +
-      T('<div class="card"><h3>Il tuo profilo</h3><p class="small">') + esc(profileName() || '—') + T('</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>') +
+      T('<div class="card"><h3>Il tuo profilo</h3><p class="small">') + (store.get('tp-name', '') ? '<b>' + esc(store.get('tp-name', '')) + '</b> · ' : '') + esc(profileName() || '—') + T('</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>') +
       '<div class="card"><h3>Lingua · Language</h3><div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it" aria-pressed="' + (window.LANG === 'it') + '">Italiano</button><button type="button" data-lang="en" aria-pressed="' + (window.LANG === 'en') + '">English</button></div></div>' +
       T('<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>') +
       '</div>';
@@ -878,6 +887,7 @@
     ob$.type = p ? p.type : null;
     ob$.patologia = p ? p.patologia || null : null;
     document.getElementById('ob-eta').value = (p && p.eta) || '';
+    document.getElementById('ob-name').value = store.get('tp-name', '');
     document.getElementById('ob-read').checked = !!p;
     document.getElementById('ob-consent').checked = !!(p && p.consent);
     document.getElementById('ob-cancel').hidden = !(editing && p);
@@ -937,6 +947,7 @@
       ts: new Date().toISOString(),
     };
     store.set('tp-profile', JSON.stringify(p));
+    store.set('tp-name', document.getElementById('ob-name').value.trim().slice(0, 40));
     const changed = !prev || prev.type !== p.type || prev.patologia !== p.patologia || prev.eta !== p.eta || (!prev.consent && p.consent);
     if (changed) sendProfile(p);
     ob.hidden = true;
