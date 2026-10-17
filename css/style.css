@@ -844,3 +844,5 @@ main.pg-back { animation: pg-back .26s cubic-bezier(.2, .8, .2, 1); }
 .detail-head { margin-bottom: 4px; }
 .detail-head .example-note, .detail-head .example-note b, .detail-head .warn, .detail-head .warn b, .detail-head .callout, .detail-head .callout b { color: var(--warn-txt, #29235C) !important; }
 .detail-head .example-note { position: relative; margin-bottom: 0; }
+/* Senza il piè di pagina, lo spazio per la barra in basso lo dà il contenuto stesso */
+@media (max-width: 819px) { main { padding-bottom: calc(var(--tab-h) + 28px + env(safe-area-inset-bottom)); } }
