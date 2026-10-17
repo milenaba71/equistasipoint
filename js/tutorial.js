@@ -10,10 +10,12 @@
     [15.7, 20.36, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
     [18.7, 26.86, 'In Promemoria vedi quanto manca e i giorni di fila'],
     [21.7, 31.29, 'Nei Video impari ad applicarlo nel modo giusto'],
-    [24.6, 34.94, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
+    // la scena dei test sport c'è solo nel video doppiato: in quello muto dura 0
+    [24.6, 34.94, 'Se fai sport, in Progressi misuri equilibrio, salto e sprint: fai i test senza e con Equistasi e confronta i risultati'],
+    [24.6, 50.06, 'In Info trovi il tuo dispositivo abbinato e come leggere la mappa'],
   ];
   // versione con la voce maschile in italiano dei tutorial Equistasi (Higgsfield); in inglese, o senza H.264, il video muto del sito
-  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/d657031e-9d07-467c-a0cd-412aecb071b7.mp4';
+  const DUB = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/1c633788-c6f6-44be-a15e-56e3146cf077.mp4';
 
   function show() {
     return new Promise((resolve) => {
@@ -37,14 +39,16 @@
       v.muted = !dub;
       const snd = el.querySelector('.tut-sound'); const cap = el.querySelector('.tut-cap'); const bars = el.querySelectorAll('.tut-bars i');
       let cur = -1; let raf = 0; let done = false;
+      const fitBars = () => bars.forEach((b, k) => { b.parentNode.hidden = k + 1 < STEPS.length && STEPS[k + 1][col] === STEPS[k][col]; });
+      fitBars();
 
       function tick() {
-        const t = v.currentTime; const d = v.duration || (dub ? 42.2 : 26);
+        const t = v.currentTime; const d = v.duration || (dub ? 57.3 : 26);
         let i = 0; while (i + 1 < STEPS.length && t >= STEPS[i + 1][col]) i++;
         if (i !== cur) { cur = i; cap.classList.remove('in'); void cap.offsetWidth; cap.textContent = T(STEPS[i][2]); cap.classList.add('in'); }
         bars.forEach((b, k) => {
           const a = STEPS[k][col], z = k + 1 < STEPS.length ? STEPS[k + 1][col] : d;
-          b.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (t - a) / (z - a))) + ')';
+          if (z > a) b.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (t - a) / (z - a))) + ')';
         });
         raf = requestAnimationFrame(tick);
       }
@@ -58,7 +62,7 @@
       // se la versione doppiata non si carica si usa quella muta del sito; se manca anche quella si passa all'app
       v.addEventListener('error', () => {
         if (!dub) { close(); return; }
-        dub = false; col = 0; snd.hidden = true; v.muted = true; v.src = 'media/tutorial.mp4'; v.play().catch(() => {});
+        dub = false; col = 0; fitBars(); snd.hidden = true; v.muted = true; v.src = 'media/tutorial.mp4'; v.play().catch(() => {});
       });
       el.querySelector('.tut-skip').addEventListener('click', close);
       el.querySelector('.tut-go').addEventListener('click', close);

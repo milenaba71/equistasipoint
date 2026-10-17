@@ -250,6 +250,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Seriale non riconosciuto": "Serial not recognised",
   "Nessuna connessione": "No connection",
   "Tutto pronto": "All set",
+  "Se fai sport, in Progressi misuri equilibrio, salto e sprint: fai i test senza e con Equistasi e confronta i risultati": "If you do sport, in Progress you measure balance, jump and sprint: do the tests without and with Equistasi and compare the results",
   "Il dispositivo si è abbinato all’app": "The device is paired with the app",
   "Come usare l’app": "How to use the app",
   "Salta": "Skip",
