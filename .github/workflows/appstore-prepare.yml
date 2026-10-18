@@ -8,12 +8,11 @@ on:
       build:
         description: "Numero di build da collegare (es. 33)"
         required: true
-        default: "33"
+        default: "51"
       notes:
         description: "Note per i revisori Apple"
         required: true
-        default: "L'app richiede il numero di serie del dispositivo Equistasi. Numero di serie di prova: DEMO2026. Inseriscilo nella schermata «Attiva l'app», scegli un profilo (es. Dolore) e spunta «Accetto ed entro». Il link Shop apre il negozio online dei dispositivi fisici Equistasi (shop.equistasi.com). / The app requires the serial number of the Equistasi device. Demo serial number: DEMO2026. Enter it on the first screen, choose a profile and tick «Accetto ed entro»."
-
+        default: "L'app richiede il numero di serie del dispositivo Equistasi. Numero di serie di prova: DEMO2026. Nella prima schermata scrivilo nel campo «Scrivi qui il numero di serie» e tocca «Accedi» (la fotocamera serve solo per leggere il codice a barre sul dispositivo fisico). Dopo l'abbinamento parte un breve video tutorial con il pulsante «Salta»; poi scegli un profilo (es. Dolore), spunta «Accetto ed entro» e tocca «Continua». Video e attivazione richiedono la connessione a internet. Il link Shop apre il negozio online dei dispositivi fisici Equistasi (shop.equistasi.com). / The app requires the serial number of the Equistasi device. Demo serial number: DEMO2026. On the first screen type it in the serial field and tap «Accedi» (the camera is only used to read the barcode on the physical device). A short tutorial video with a «Skip» button follows; then choose a profile, tick «Accetto ed entro» and tap «Continua». Videos and activation need an internet connection."
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -40,6 +39,8 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
+          WHATS_NEW_IT: "• Abbina il dispositivo inquadrandolo con la fotocamera, senza digitare il seriale\n• Nuovo video «Come usare l'app» con voce, in italiano e in inglese\n• Guida passo passo per applicare il dispositivo con il cerotto\n• Pagina «Oggi» e promemoria delle 2 ore più semplici\n• Test Sport in Progressi e miglioramenti generali"
+          WHATS_NEW_EN: "• Pair your device by framing it with the camera, no need to type the serial\n• New voiced video «How to use the app», in Italian and English\n• Step-by-step guide to apply the device with the patch\n• Simpler «Today» page and 2-hour reminder\n• Sport tests in Progress and general improvements"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
