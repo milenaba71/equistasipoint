@@ -10,7 +10,15 @@ from asc_upload import call
 
 def main(bundle_id, version, build):
     app = call("GET", "/apps?filter[bundleId]=%s" % bundle_id)["data"][0]
-    ver = call("GET", "/apps/%s/appStoreVersions?filter[platform]=IOS&filter[versionString]=%s" % (app["id"], version))["data"][0]
+    found = call("GET", "/apps/%s/appStoreVersions?filter[platform]=IOS&filter[versionString]=%s" % (app["id"], version))["data"]
+    if found:
+        ver = found[0]
+    else:
+        # la nuova versione non esiste ancora su App Store Connect: la crea
+        ver = call("POST", "/appStoreVersions", {"data": {"type": "appStoreVersions",
+             "attributes": {"platform": "IOS", "versionString": version, "releaseType": "MANUAL"},
+             "relationships": {"app": {"data": {"type": "apps", "id": app["id"]}}}}})["data"]
+        print("Versione %s creata" % version)
     print("Versione %s: stato %s" % (version, ver["attributes"].get("appStoreState")))
 
     b = call("GET", "/builds?filter[app]=%s&filter[version]=%s&filter[preReleaseVersion.version]=%s" % (app["id"], build, version))["data"]
@@ -37,8 +45,13 @@ def main(bundle_id, version, build):
              "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": ver["id"]}}}}})
     print("Informazioni per la revisione salvate")
 
+    # «Novità di questa versione»: italiano per it, inglese per tutte le altre lingue
     for loc in call("GET", "/appStoreVersions/%s/appStoreVersionLocalizations" % ver["id"])["data"]:
-        print("Lingua %s – novità: %s" % (loc["attributes"]["locale"], (loc["attributes"].get("whatsNew") or "(vuoto)")[:80]))
+        text = os.environ.get("WHATS_NEW_IT" if loc["attributes"]["locale"].startswith("it") else "WHATS_NEW_EN", "")
+        if text:
+            call("PATCH", "/appStoreVersionLocalizations/" + loc["id"], {"data": {"type": "appStoreVersionLocalizations",
+                 "id": loc["id"], "attributes": {"whatsNew": text}}}, allow_fail=True)
+        print("Lingua %s – novità: %s" % (loc["attributes"]["locale"], (text or loc["attributes"].get("whatsNew") or "(vuoto)")[:80]))
     print("Pronta: in App Store Connect tocca «Aggiungi per la revisione» e poi «Invia ad App Review»")
 
 
