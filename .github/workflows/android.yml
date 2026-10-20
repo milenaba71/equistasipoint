@@ -60,6 +60,11 @@ jobs:
         run: |
           echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/equistasi.jks"
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/equistasi.jks"
+          # controllo: impronta del file (da confrontare con Get-FileHash sul PC) e prova della password
+          echo "File della chiave: $(stat -c %s "$ANDROID_KEYSTORE_PATH") byte, SHA256 $(sha256sum "$ANDROID_KEYSTORE_PATH" | cut -d' ' -f1)"
+          if keytool -list -keystore "$ANDROID_KEYSTORE_PATH" -storepass:env ANDROID_KEYSTORE_PASSWORD > /dev/null 2>&1; then echo "ANDROID_KEYSTORE_PASSWORD: giusta"; else echo "ANDROID_KEYSTORE_PASSWORD: NON apre la chiave"; fi
+          if [ "$ANDROID_KEYSTORE_PASSWORD" = "$ANDROID_KEY_PASSWORD" ]; then echo "ANDROID_KEY_PASSWORD: uguale all'altra"; else echo "ANDROID_KEY_PASSWORD: DIVERSA dall'altra"; fi
+          echo "ANDROID_KEY_ALIAS: $( [ "$ANDROID_KEY_ALIAS" = equistasi ] && echo giusto || echo 'NON è equistasi' )"
           ./gradlew bundleRelease --no-daemon
           # impronta pubblica della chiave di caricamento: deve coincidere con quella registrata su Play Console
           keytool -printcert -jarfile app/build/outputs/bundle/release/*.aab | grep -E "SHA1|SHA256"
