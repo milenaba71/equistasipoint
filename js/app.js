@@ -192,7 +192,7 @@
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
       window.EqTimer.todayHtml() +
-      T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + videoPromo + '</div><div>' +
+      T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + window.EqChair.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
       '<figure><img src="' + NEURO_IMG.s2 + T('" alt="" loading="lazy" /><figcaption><b>2</b> Applica Equistasi e avvia il promemoria</figcaption></figure>') +
@@ -826,6 +826,7 @@
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
     else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
+    else if (page === 'sedia' || page === 'beta') { setBack(true); window.EqChair.render(app, page === 'beta' ? 'beta' : arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
     else renderHome();
     // passaggio animato tra le pagine: avanti (scheda più interna) da destra, indietro da sinistra

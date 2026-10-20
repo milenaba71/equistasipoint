@@ -815,7 +815,7 @@ img { -webkit-touch-callout: none; -webkit-user-drag: none; }
 .brand img { background: #fff; border-radius: 10px; padding: 3px 8px; height: 32px; }
 
 /* Titolo delle pagine interne nella fascia blu, il contenuto sale come un foglio */
-.detail-head { position: relative; background: var(--indigo); color: #fff; margin: 0 -16px 14px; padding: 14px 20px 40px; }
+.detail-head { position: relative; overflow: hidden; background: var(--indigo); color: #fff; margin: 0 -16px 14px; padding: 14px 20px 40px; }
 .detail-head::before { content: ""; position: absolute; right: -60px; top: -80px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, rgba(250, 220, 0, .22), rgba(250, 220, 0, 0) 65%); pointer-events: none; }
 .detail-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 24px; background: var(--bg); border-radius: 24px 24px 0 0; }
 .detail-head .eyebrow { color: var(--yellow); position: relative; }
@@ -953,3 +953,12 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .tut-phone { position: relative; }
 .tut-sound { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); border: 0; border-radius: 999px; padding: 10px 16px;
   background: rgba(6,9,26,.82); color: #fff; font: 600 .95rem/1 inherit; box-shadow: 0 4px 16px rgba(0,0,0,.4); cursor: pointer; }
+
+/* Alzati dalla sedia (funzione in prova) */
+.beta-tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; background: var(--yellow, #FADC00); color: #1B1840; border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+.ch-ok { display: flex; gap: 10px; align-items: flex-start; margin: 12px 0 4px; font-size: 15px; line-height: 1.4; }
+.ch-ok input { width: 22px; height: 22px; flex: none; margin: 0; accent-color: #29235C; }
+.ch-confirm { margin: 12px 0 0; }
+.ch-count { display: flex; align-items: center; justify-content: center; gap: 22px; }
+.ch-count b { font-size: 44px; min-width: 70px; text-align: center; }
+.ch-count .btn { width: 56px; height: 56px; padding: 0; font-size: 26px; border-radius: 50%; }
