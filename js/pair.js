@@ -5,7 +5,7 @@
    - verify(serial) → Promise<boolean>: controllo del seriale, parte appena il codice è letto. */
 (function () {
   const COLS = [[127, 182, 232], [72, 140, 197], [250, 220, 0], [255, 255, 255]];
-  const MIN_READ = 3600; // dopo la lettura l'anello impiega almeno questo tempo a chiudersi
+  const MIN_READ = 900; // dopo la lettura l'anello impiega almeno questo tempo a chiudersi
   const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
   const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   const out = (x) => 1 - Math.pow(1 - x, 3);
@@ -149,19 +149,19 @@
         prog.style.strokeDashoffset = (C * (1 - p)).toFixed(1);
         $('.pair-st').textContent = phase === 'scan' ? T('Ricerca del dispositivo…') : phase === 'read' ? T('Lettura {p}%', { p: Math.floor(p * 100) }) : '';
         // nuvola: dentro il cerchio mentre legge, poi converge e si sparge
-        if (phase === 'scan' || phase === 'read' || (phase === 'ok' && now - tEnd < 700)) {
-          const col = phase === 'ok' ? ease(cl((now - tEnd) / 650)) : 0;
+        if (phase === 'scan' || phase === 'read' || (phase === 'ok' && now - tEnd < 350)) {
+          const col = phase === 'ok' ? ease(cl((now - tEnd) / 300)) : 0;
           fx.save(); fx.beginPath(); fx.arc(cx, cy, rad, 0, Math.PI * 2); fx.clip();
           drawCloud(fx, P, cx, cy, rad * 0.86, t * (phase === 'read' ? 1.6 : 1.2), { alpha: cl(t * 1.5), swirl: phase === 'read' ? 1 : 0.3, spin: phase === 'read' ? 1.8 : 1, collapse: col });
           fx.restore();
         }
         if (phase === 'ok') {
           const k = now - tEnd;
-          const fl = cl((k - 600) / 120) * (1 - cl((k - 720) / 500));
+          const fl = cl((k - 300) / 120) * (1 - cl((k - 420) / 500));
           if (fl > 0) { const g = fx.createRadialGradient(cx, cy, 0, cx, cy, rad * 1.6); g.addColorStop(0, 'rgba(255,255,255,' + fl + ')'); g.addColorStop(0.4, 'rgba(200,225,255,' + fl * 0.6 + ')'); g.addColorStop(1, 'rgba(120,170,255,0)'); fx.fillStyle = g; fx.fillRect(0, 0, W, H); }
-          const bu = cl((k - 650) / 2200);
+          const bu = cl((k - 350) / 2200);
           if (bu > 0 && bu < 1) drawCloud(fx, P, cx, cy, rad * 0.86, t, { burst: out(bu) * 2.4 });
-          if (k > 700) for (let i = 0; i < 2; i++) { const q = (((k - 700) / 1000) * 0.6 + i * 0.5) % 1; fx.strokeStyle = 'rgba(31,174,91,' + ((1 - q) * 0.7).toFixed(3) + ')'; fx.lineWidth = 4; fx.beginPath(); fx.arc(cx, cy, rad * (0.55 + q * 0.9), 0, Math.PI * 2); fx.stroke(); }
+          if (k > 350) for (let i = 0; i < 2; i++) { const q = (((k - 350) / 1000) * 0.6 + i * 0.5) % 1; fx.strokeStyle = 'rgba(31,174,91,' + ((1 - q) * 0.7).toFixed(3) + ')'; fx.lineWidth = 4; fx.beginPath(); fx.arc(cx, cy, rad * (0.55 + q * 0.9), 0, Math.PI * 2); fx.stroke(); }
         }
         // scintillii sonori
         if ((phase === 'scan' || phase === 'read') && now - lastSpark > (phase === 'read' ? 70 : 160)) { lastSpark = now; sfx('sparkle'); }
@@ -173,11 +173,11 @@
         phase = ok ? 'ok' : 'ko'; tEnd = now;
         el.classList.add(ok ? 'ok' : 'ko');
         if (ok) {
-          sfx('success'); setTimeout(() => { if (navigator.vibrate) navigator.vibrate([30, 40, 60]); }, 650);
+          sfx('success'); setTimeout(() => { if (navigator.vibrate) navigator.vibrate([30, 40, 60]); }, 300);
           $('.pair-t').textContent = T('Abbinamento…'); $('.pair-s').textContent = T('Collegamento all’app');
           $('.pair-done-sn').textContent = SER.text;
-          setTimeout(() => { $('.pair-t').textContent = T('Tutto pronto'); $('.pair-s').textContent = T('Il dispositivo si è abbinato all’app'); }, 1100);
-          setTimeout(() => close({ serial: SER.text, ok: true }), 3000);
+          setTimeout(() => { $('.pair-t').textContent = T('Tutto pronto'); $('.pair-s').textContent = T('Il dispositivo si è abbinato all’app'); }, 400);
+          setTimeout(() => close({ serial: SER.text, ok: true }), 700);
         } else {
           sfx('error');
           $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : T('Seriale non riconosciuto'); $('.pair-s').textContent = SER.text;
