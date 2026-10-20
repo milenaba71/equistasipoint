@@ -61,6 +61,9 @@ jobs:
           echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/equistasi.jks"
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/equistasi.jks"
           ./gradlew bundleRelease --no-daemon
+          # impronta pubblica della chiave di caricamento: deve coincidere con quella registrata su Play Console
+          keytool -printcert -jarfile app/build/outputs/bundle/release/*.aab | grep -E "SHA1|SHA256"
+          rm -f "$RUNNER_TEMP/equistasi.jks"
 
       - uses: actions/upload-artifact@v4
         if: ${{ hashFiles('mobile/android/app/build/outputs/bundle/release/*.aab') != '' }}
