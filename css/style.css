@@ -962,3 +962,12 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .ch-count { display: flex; align-items: center; justify-content: center; gap: 22px; }
 .ch-count b { font-size: 44px; min-width: 70px; text-align: center; }
 .ch-count .btn { width: 56px; height: 56px; padding: 0; font-size: 26px; border-radius: 50%; }
+
+/* Cornice di posizionamento del codice a barre nella schermata di abbinamento */
+.pair-guide { position: absolute; z-index: 1; left: 50%; top: 50%; width: 76%; height: 34%; transform: translate(-50%, -50%); border-radius: 10px; background: rgba(250, 220, 0, .06); pointer-events: none; transition: opacity .3s ease; }
+.pair-guide i { position: absolute; width: 22px; height: 22px; border: 3px solid var(--yellow, #FADC00); }
+.pair-guide i:nth-child(1) { left: -2px; top: -2px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.pair-guide i:nth-child(2) { right: -2px; top: -2px; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.pair-guide i:nth-child(3) { left: -2px; bottom: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.pair-guide i:nth-child(4) { right: -2px; bottom: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.pair.read .pair-guide, .pair.ok .pair-guide, .pair.ko .pair-guide { opacity: 0; }

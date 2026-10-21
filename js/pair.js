@@ -96,8 +96,8 @@
       el.innerHTML =
         '<canvas class="pair-bg" aria-hidden="true"></canvas>' +
         '<button type="button" class="pair-x" aria-label="' + T('Annulla') + '">✕</button>' +
-        '<div class="pair-head"><h2 class="pair-t">' + T('Abbina il dispositivo') + '</h2><p class="pair-s">' + T('Inquadra il retro del dispositivo nel cerchio') + '</p></div>' +
-        '<div class="pair-vf"><div class="pair-feed"></div></div>' +
+        '<div class="pair-head"><h2 class="pair-t">' + T('Abbina il dispositivo') + '</h2><p class="pair-s">' + T('Metti il codice a barre dentro il riquadro giallo') + '</p></div>' +
+        '<div class="pair-vf"><div class="pair-feed"></div><div class="pair-guide" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>' +
         '<svg class="pair-ring" viewBox="0 0 330 330" aria-hidden="true"><defs><linearGradient id="pairgr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fb6e8"/><stop offset="1" stop-color="#FADC00"/></linearGradient></defs>' +
         '<g class="pair-ticks">' + ticks + '</g><circle class="pair-track" cx="165" cy="165" r="146"/><circle class="pair-prog" cx="165" cy="165" r="146" transform="rotate(-90 165 165)"/></svg>' +
         '<canvas class="pair-fx" aria-hidden="true"></canvas>' +
@@ -193,7 +193,7 @@
       }
       $('.pair-x').addEventListener('click', () => close(null));
 
-      window.EqScan.open({ container: $('.pair-feed'), fx: false, freeze: true, torch: $('.pair-torch'), accept: opts.accept }).then((text) => {
+      window.EqScan.open({ container: $('.pair-feed'), guide: $('.pair-guide'), fx: false, freeze: true, torch: $('.pair-torch'), accept: opts.accept }).then((text) => {
         if (!text || finished) { if (!finished) close(null); return; }
         SER.text = opts.norm ? opts.norm(text) : text; phase = 'read'; tRead = performance.now(); pRead = 0.32 * (1 - Math.exp(-((tRead - t0) / 1000) / 2.2));
         el.classList.add('read'); digits(0);
