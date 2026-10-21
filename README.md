@@ -18,6 +18,9 @@ Mappe basate su Travell, Simons & Simons, *Myofascial Pain and Dysfunction: The 
 - Ricerca per disturbo (es. "cefalea", "sciatica", "tallone").
 - Installabile sullo smartphone e utilizzabile offline.
 
+## Elvy (sport)
+Nella cartella [`elvy/`](elvy/README.md) c'è **Elvy**, l'app per lo sport: test di equilibrio, salti, corsa, core, reazione e mobilità con l'accelerometro del telefono, con e senza Elvy. Si apre su `/elvy/`.
+
 ## Struttura
 | File | Contenuto |
 |---|---|
