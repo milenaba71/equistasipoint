@@ -503,7 +503,23 @@
         date: dateStr(r.t) + ' ' + timeStr(r.t), cond: condTxt(r.cond),
         val: r.mode === 'trenta' ? T('{n} alzate in 30 s', { n: r.count }) : (r.done ? T('5 alzate in {s} s', { s: fmt(r.time, 1) }) : T('{n} alzate su 5', { n: r.count })) }));
     } catch (e) { chair = []; }
+    // test della sezione Progressi (profilo Sport): media senza e con Equistasi
+    let tests = [];
+    try { tests = JSON.parse(localStorage.getItem('tp-tests') || '[]') || []; } catch (e) { tests = []; }
+    const S = (label, type, unit, d, better, f) => {
+      const one = (cond) => { const l = tests.filter((r) => r.type === type && r.cond === cond && (!f || f(r))); if (!l.length) return null; const raw = mean(l.map((r) => r.value)); return { raw, v: fmt(raw, d), n: l.length }; };
+      return { label, unit, d, better, s: one('senza'), c: one('con') };
+    };
+    const sport = [
+      S(T('Equilibrio su una gamba (oscillazione)'), 'equilibrio', 'm/s²', 2, 'low'),
+      S(T('Equilibrio in piedi (oscillazione)'), 'ortostasi', 'm/s²', 2, 'low'),
+      S(T('Salto verticale'), 'salto', 'cm', 0, 'high'),
+      S(T('Sprint 10 m'), 'sprint', 's', 2, 'low', (r) => /^10 m/.test(r.note || '')),
+      S(T('Sprint 20 m'), 'sprint', 's', 2, 'low', (r) => /^20 m/.test(r.note || '')),
+      S(T('Sprint 30 m'), 'sprint', 's', 2, 'low', (r) => /^30 m/.test(r.note || '')),
+    ].filter((r) => r.s || r.c);
     return {
+      sport,
       name, date: dateStr(Date.now()) + ' ' + new Date().getFullYear(),
       stability: last ? { value: index(last.m.area), area: fmt(last.m.area, 1), vel: fmt(last.m.vel, 1), eyes: EYES[last.eyes] + ' · ' + MOUNT[last.mount], cond: condTxt(last.cond),
         date: dateStr(last.t) + ' ' + timeStr(last.t), diff: prev ? index(last.m.area) - index(prev.m.area) : null } : null,
@@ -534,6 +550,8 @@
       '<div class="card"><h3>' + T('Senza e con Equistasi') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
       data.rows.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') +
       '</tbody></table></div><p class="small muted" style="margin:8px 0 0">' + T('Media delle prove (numero tra parentesi). Verde: valore migliorato con Equistasi; per l’oscillazione un valore più basso indica più stabilità.') + '</p></div>' +
+      (data.sport.length ? '<div class="card"><h3>' + T('Test di progressi (sport)') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
+        data.sport.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') + '</tbody></table></div></div>' : '') +
       (data.photos.length ? '<div class="card"><h3>' + T('Foto della postura') + '</h3><div class="pz-photo-grid">' + store.get(PHOTO_KEY, []).slice(-6).map((p) => photoFigure(p, true)).join('') + '</div></div>' : '') +
       '<p class="small muted">' + T('Valori stimati con i sensori e la fotocamera del telefono, indicativi e non diagnostici. Area: ellisse al 95% dell’oscillazione stimata del corpo; velocità: percorso medio al secondo.') + '</p></div>';
     const msg = document.getElementById('pz-pdf-msg');
@@ -542,7 +560,7 @@
       msg.className = 'gate-msg'; msg.textContent = T('Preparo il PDF…');
       try {
         const blob = await window.EqReportPdf.make(reportData());
-        const name = 'Equistasi-report-postura-' + new Date().toISOString().slice(0, 10) + '.pdf';
+        const name = 'Equistasi-report-' + new Date().toISOString().slice(0, 10) + '.pdf';
         const how = await window.EqReportPdf.deliver(blob, name, dl);
         msg.className = 'ts-done'; msg.textContent = how === 'download' ? T('PDF scaricato: lo trovi nella cartella dei download.') : how === 'share' ? T('PDF pronto.') : '';
       } catch (e) {

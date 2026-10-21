@@ -45,7 +45,7 @@
     function header(first) {
       fill([255, 255, 255]); doc.rect(0, 0, W, H, 'F');
       if (logo) doc.addImage(logo, 'PNG', M, 10, 34, 34 * 107 / 471);
-      font(9, false); ink(MUTED); text(T('Report postura') + ' · ' + data.date, W - M, 15, { align: 'right' });
+      font(9, false); ink(MUTED); text(T('Report Equistasi') + ' · ' + data.date, W - M, 15, { align: 'right' });
       y = 22;
       if (!first) { draw(LINE); doc.setLineWidth(0.3); doc.line(M, y, W - M, y); y += 8; }
     }
@@ -67,7 +67,7 @@
     // titolo
     fill(INDIGO); doc.roundedRect(M, y, CW, 30, 4, 4, 'F');
     fill(YELLOW); doc.circle(W - M - 16, y + 15, 9, 'F'); fill(INDIGO); doc.circle(W - M - 16, y + 15, 6.5, 'F');
-    font(18, true); ink([255, 255, 255]); text(T('Riepilogo della postura'), M + 8, y + 12);
+    font(18, true); ink([255, 255, 255]); text(T('Riepilogo delle misure'), M + 8, y + 12);
     font(10, false); ink([217, 215, 238]);
     text(T('Per il fisioterapista') + ' · ' + T('creato il {d}', { d: data.date }), M + 8, y + 19.5);
     if (data.name) text(T('Paziente: {n}', { n: data.name }), M + 8, y + 25.5);
@@ -101,15 +101,16 @@
     }
 
     // tabella senza / con
-    if (data.rows.some((r) => r.s || r.c)) {
-      section(T('Senza e con Equistasi'));
+    function table(title, rows, note) {
+      if (!rows || !rows.some((r) => r.s || r.c)) return;
+      section(title);
       const cols = [M, M + 78, M + 112, M + 146];
       need(12);
       fill(INDIGO); doc.roundedRect(M, y, CW, 8, 2, 2, 'F');
       font(8.5, true); ink([255, 255, 255]);
       text(T('Misura (media, n. prove)'), cols[0] + 3, y + 5.4); text(T('Senza'), cols[1] + 3, y + 5.4); text(T('Con Equistasi'), cols[2] + 3, y + 5.4); text(T('Variazione'), cols[3] + 3, y + 5.4);
       y += 8;
-      data.rows.forEach((r, i) => {
+      rows.forEach((r, i) => {
         need(9);
         if (i % 2 === 0) { fill(SOFT); doc.rect(M, y, CW, 8.5, 'F'); }
         font(9, false); ink(INK); text(r.label, cols[0] + 3, y + 5.6);
@@ -129,9 +130,11 @@
       });
       draw(LINE); doc.setLineWidth(0.3); doc.line(M, y, W - M, y);
       font(7.5, false); ink(MUTED);
-      text(T('Verde: valore migliorato con Equistasi. Per l’oscillazione un valore più basso indica più stabilità.'), M, y + 5);
+      text(note, M, y + 5);
       y += 12;
     }
+    table(T('Senza e con Equistasi'), data.rows, T('Verde: valore migliorato con Equistasi. Per l’oscillazione un valore più basso indica più stabilità.'));
+    table(T('Test di progressi (sport)'), data.sport, T('Verde: valore migliorato con Equistasi (oscillazione e tempo più bassi, salto più alto).'));
 
     // grafico
     if (data.chart.length >= 2) {
