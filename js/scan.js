@@ -87,6 +87,94 @@
       stop: () => cancelAnimationFrame(raf),
     };
   }
+  // Scala di grigi presa dal canale più chiaro (R, G o B): sul fondo colorato il contrasto con le barre nere è massimo
+  function maxChannel(img) {
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) { const m = Math.max(d[i], d[i + 1], d[i + 2]); d[i] = d[i + 1] = d[i + 2] = m; }
+    return img;
+  }
+  // Media verticale su "bands" fasce orizzontali, con contrasto riportato da 0 a 255
+  function smooth(img, bands) {
+    const W = img.width, H = img.height, d = img.data;
+    const out = new ImageData(W, H); const o = out.data;
+    const bh = H / bands;
+    let lo = 255, hi = 0; const val = new Float32Array(W * bands);
+    for (let b = 0; b < bands; b++) {
+      const y0 = Math.floor(b * bh), y1 = Math.max(y0 + 1, Math.floor((b + 1) * bh));
+      for (let x = 0; x < W; x++) {
+        let sum = 0;
+        for (let y = y0; y < y1; y++) { const i = (y * W + x) * 4; sum += d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; }
+        const v = sum / (y1 - y0); val[b * W + x] = v; if (v < lo) lo = v; if (v > hi) hi = v;
+      }
+    }
+    const k = 255 / Math.max(1, hi - lo);
+    for (let y = 0; y < H; y++) {
+      const b = Math.min(bands - 1, Math.floor(y / bh));
+      for (let x = 0; x < W; x++) { const v = (val[b * W + x] - lo) * k; const i = (y * W + x) * 4; o[i] = o[i + 1] = o[i + 2] = v; o[i + 3] = 255; }
+    }
+    return out;
+  }
+
+  // Lettura dei numeri stampati sotto le barre (Tesseract), per le etichette con le barre rovinate.
+  // Si carica solo se il codice a barre non si legge entro qualche secondo; tutto resta sul telefono.
+  const OCR_BASE = 'js/vendor/tesseract/';
+  let ocrP = null;
+  function loadOcr() {
+    if (ocrP) return ocrP;
+    ocrP = new Promise((resolve, reject) => {
+      const go = () => {
+        const abs = (p) => new URL(OCR_BASE + p, location.href).href;
+        window.Tesseract.createWorker('eng', 1, { workerPath: abs('worker.min.js'), corePath: abs(''), langPath: abs(''), workerBlobURL: false, cacheMethod: 'none', gzip: true })
+          .then((w) => w.setParameters({ tessedit_char_whitelist: '0123456789', tessedit_pageseg_mode: '7' }).then(() => resolve(w)))
+          .catch(reject);
+      };
+      if (window.Tesseract) { go(); return; }
+      const sc = document.createElement('script'); sc.src = OCR_BASE + 'tesseract.min.js';
+      sc.onload = go; sc.onerror = () => reject(new Error('ocr'));
+      document.head.appendChild(sc);
+    });
+    ocrP.catch(() => { ocrP = null; });
+    return ocrP;
+  }
+  // Riga dei numeri sotto le barre, pronta per la lettura: canale (luminosità o più chiaro), contrasto e ingrandimento ×2.
+  // "turn" alterna l'altezza della riga e il canale, perché da un fotogramma all'altro riesce meglio l'uno o l'altro.
+  function digitsLine(img, b, turn) {
+    const W = img.width, H = img.height;
+    let x0 = 0, y0 = 0, x1 = W, y1 = H;
+    if (b) {
+      const hh = turn % 2 ? 0.75 : 0.55;
+      // in larghezza tutta la cornice: lo sporco può spezzare le barre e allora la zona trovata è più corta delle cifre
+      const wide = turn % 4 >= 2;
+      x0 = Math.max(0, b.x - b.w * (wide ? 0.35 : 0.15)); x1 = Math.min(W, b.x + b.w * (wide ? 1.8 : 1.4));
+      y0 = Math.min(H - 2, b.y + b.h); y1 = Math.min(H, y0 + b.h * hh);
+    }
+    const cw = Math.max(2, Math.round(x1 - x0)), ch = Math.max(2, Math.round(y1 - y0));
+    const d = img.data; const g = new Uint8ClampedArray(cw * ch); const hist = new Uint32Array(256);
+    const useMax = (turn >> 2) % 2 === 1;
+    for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
+      const i = ((Math.round(y0) + y) * W + Math.round(x0) + x) * 4;
+      const v = useMax ? Math.max(d[i], d[i + 1], d[i + 2]) : d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11;
+      g[y * cw + x] = v; hist[g[y * cw + x]]++;
+    }
+    // contrasto: taglia il 2% più scuro e più chiaro
+    let lo = 0, hi = 255, acc = 0; const cut = cw * ch * 0.02;
+    while (lo < 255 && (acc += hist[lo]) < cut) lo++;
+    acc = 0; while (hi > 0 && (acc += hist[hi]) < cut) hi--;
+    const k = 255 / Math.max(1, hi - lo);
+    const small = document.createElement('canvas'); small.width = cw; small.height = ch;
+    const sd = small.getContext('2d'); const id = sd.createImageData(cw, ch);
+    for (let j = 0; j < g.length; j++) { const v = (g[j] - lo) * k; id.data[j * 4] = id.data[j * 4 + 1] = id.data[j * 4 + 2] = v; id.data[j * 4 + 3] = 255; }
+    sd.putImageData(id, 0, 0);
+    const big = document.createElement('canvas'); big.width = cw * 2; big.height = ch * 2;
+    const bd = big.getContext('2d'); bd.imageSmoothingQuality = 'high'; bd.drawImage(small, 0, 0, cw * 2, ch * 2);
+    return big;
+  }
+  // Numero di serie nel testo letto: le etichette con solo numeri hanno 11 cifre che iniziano con l'anno (es. 20150004127)
+  function serialIn(text) {
+    const m = String(text).replace(/[ \t]+/g, '').match(/(?:^|\D)(20\d{9})(?!\d)/);
+    return m ? m[1] : null;
+  }
+
   // Trova le barre in un'immagine: zona dove la luminosità cambia molto in orizzontale e poco in verticale.
   // Serve perché il lettore sbaglia se ai lati delle barre ci sono il bordo dell'etichetta o la plastica:
   // ritagliando stretto attorno alle barre il bordo dell'immagine fa da margine bianco.
@@ -188,7 +276,7 @@
         if (done) return;
         done = true;
         current = null;
-        clearTimeout(timer);
+        clearTimeout(timer); clearTimeout(ocrTimer);
         // freeze: lascia nel contenitore l'ultimo fotogramma (per le animazioni che seguono la lettura)
         if (result && opts.freeze && inline && video.videoWidth) {
           try { const fc = document.createElement('canvas'); fc.className = 'scan-freeze'; fc.width = video.videoWidth; fc.height = video.videoHeight; fc.getContext('2d').drawImage(video, 0, 0); opts.container.appendChild(fc); } catch (e) { /* niente fotogramma */ }
@@ -228,18 +316,23 @@
       let turn = 0;
       function candidate() {
         const vw = video.videoWidth; const vh = video.videoHeight;
-        const step = turn++ % 4;
+        const step = turn++ % 6;
         const r = regionOf(guide, 0.12);
-        if (r && step < 2) {
+        if (r && step < 4) {
           const img = grab(r, 1600);
           const b = locate(img);
           if (!b) return img;
           const up = step === 1 || b.w < 360 ? 2 : 1;
-          if (up === 1) return ctx.getImageData(b.x, b.y, b.w, b.h);
-          const sx = r.w / img.width;
-          return grab({ x: r.x + b.x * sx, y: r.y + b.y * sx, w: b.w * sx, h: b.h * sx }, 1600, up);
+          let out;
+          if (up === 1) out = ctx.getImageData(b.x, b.y, b.w, b.h);
+          else { const sx = r.w / img.width; out = grab({ x: r.x + b.x * sx, y: r.y + b.y * sx, w: b.w * sx, h: b.h * sx }, 1600, up); }
+          // etichette azzurre o blu: il canale più chiaro dà più contrasto tra barre e fondo
+          if (step === 2) return maxChannel(out);
+          // barre sporche o consumate: media in verticale su 8 fasce, che cancella i puntini
+          if (step === 3) return smooth(out, 8);
+          return out;
         }
-        if (r && step === 2) return grab(r, 1280);
+        if (r && step === 4) return grab(r, 1280);
         // zona centrale dell'immagine, ridotta a max 1280 px di larghezza (come prima)
         const cw = Math.round(vw * 0.9); const ch = Math.round(vh * 0.7);
         return grab({ x: (vw - cw) / 2, y: (vh - ch) / 2, w: cw, h: ch }, 1280);
@@ -263,6 +356,42 @@
         }
         timer = setTimeout(() => tick(Z), 120);
       }
+
+      // Seconda strada: se dopo 3 secondi il codice a barre non si è letto, si leggono i numeri stampati.
+      // Un numero vale solo quando esce uguale in due letture, perché a volte una cifra si legge male.
+      const votes = {}; let ocrBusy = false; let ocrTimer = null; let ocrTurn = 0;
+      const t0 = performance.now();
+      async function ocrTick() {
+        if (done) return;
+        if (!ocrBusy && video.readyState >= 2 && video.videoWidth && performance.now() - t0 > 2500) {
+          ocrBusy = true;
+          try {
+            const w = await loadOcr();
+            const r = regionOf(guide, 0.12);
+            if (r && !done) {
+              // la cornice più la zona sotto, dove sono stampati i numeri
+              const vh = video.videoHeight;
+              const rr = { x: r.x, y: r.y, w: r.w, h: Math.min(vh - r.y, r.h * 2) };
+              const img = grab(rr, 1100);
+              const oc = digitsLine(img, locate(img), ocrTurn++);
+              const res = await w.recognize(oc);
+              const sn = serialIn(res && res.data && res.data.text);
+              if (window.EQ_DEBUG) console.log('ocr', JSON.stringify(res && res.data && res.data.text), sn, oc.width + 'x' + oc.height);
+              if (sn && accept(sn) && !done) {
+                votes[sn] = (votes[sn] || 0) + 1;
+                if (votes[sn] >= 2) {
+                  if (navigator.vibrate) navigator.vibrate(60);
+                  if (fx) fx.collapse(700).then(() => close(sn)); else close(sn);
+                  return;
+                }
+              }
+            }
+          } catch (e) { /* lettore dei numeri non disponibile: resta solo il codice a barre */ }
+          ocrBusy = false;
+        }
+        if (!done) ocrTimer = setTimeout(ocrTick, 250);
+      }
+      ocrTimer = setTimeout(ocrTick, 1500);
 
       const libReady = loadLib();
       libReady.catch(() => {});
