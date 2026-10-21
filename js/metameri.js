@@ -10,7 +10,7 @@
   const SPINE = {
     C2: 58.8, C3: 61.9, C4: 64.6, C5: 67.4, C6: 70.3, C7: 73.6,
     T1: 77.7, T2: 82.5, T3: 88.3, T4: 92.8, T5: 101, T6: 109.8, T7: 114.9, T8: 122, T9: 127.6, T10: 136.4, T11: 141, T12: 148.8,
-    L1: 156.2, L2: 163.6, L3: 169.8, L4: 175.8, L5: 180.8, S1: 186, S2: 192,
+    L1: 156.2, L2: 163.6, L3: 169.8, L4: 175.8, L5: 180.8, S1: 186, S2: 192, S3: 197.5, S4: 202.5,
   };
 
   const IMG_BASE = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/';
@@ -40,6 +40,11 @@
       it: 'Pancia: T7 sotto lo sterno, T10 all’altezza dell’ombelico, T12 sopra l’inguine.', en: 'Belly: T7 below the breastbone, T10 at the navel, T12 above the groin.' },
     { area: 'lombare', seg: 'L1–L5', v: ['L1', 'L2', 'L3', 'L4', 'L5'],
       it: 'Zona lombare: palpa le vertebre lombari e scegli la più dolente.', en: 'Lower back: palpate the lumbar vertebrae and choose the most tender.' },
+    // zona sacrale: non è una zona della mappa dei trigger point, per i muscoli rimanda ad anca e gluteo
+    { area: 'sacro', name: ['Osso sacro e coccige', 'Sacrum and coccyx'], icon: '🦴', muscles: 'anca_gluteo', seg: 'S2–S5 · Co', v: ['S1', 'S2', 'S3', 'S4'],
+      it: 'S2 dietro la coscia e nel gluteo; S3 parte interna dei glutei; S4–S5 zona attorno all’ano e al perineo («a sella»); coccige. Per il dolore all’osso sacro, al coccige e nella parte bassa e posteriore del bacino: palpa le vertebre sacrali (la cresta al centro dell’osso sacro) e scegli la più dolente.',
+      en: 'S2 back of the thigh and buttock; S3 inner part of the buttocks; S4–S5 area around the anus and perineum (“saddle”); coccyx. For pain in the sacrum, the coccyx and the lower back of the pelvis: palpate the sacral vertebrae (the ridge in the middle of the sacrum) and choose the most tender.',
+      warn: ['Se compaiono formicolio o perdita di sensibilità nella zona «a sella», debolezza alle gambe o difficoltà a urinare, rivolgiti subito a un medico.', 'If you notice tingling or loss of feeling in the “saddle” area, weakness in the legs or difficulty passing urine, see a doctor straight away.'] },
     { area: 'anca_gluteo', seg: 'L1–L2 · S1–S3', v: ['L1', 'L2', 'S1', 'S2'],
       it: 'L1–L2 inguine e anca davanti; S1–S3 gluteo.', en: 'L1–L2 groin and front of the hip; S1–S3 buttock.' },
     { area: 'coscia', seg: 'L2–L3 · S1–S2', v: ['L2', 'L3', 'S1', 'S2'],
@@ -104,13 +109,14 @@
 
   function regionCard(r, open) {
     return '<details class="card meta-region" id="meta-' + r.area + '"' + (open ? ' open' : '') + '><summary>' +
-      '<span class="ico" aria-hidden="true">' + areaIcon(r.area) + '</span><b>' + esc(areaName(r.area)) + '</b><span class="seg-badge">' + esc(r.seg) + '</span></summary>' +
+      '<span class="ico" aria-hidden="true">' + (r.icon || areaIcon(r.area)) + '</span><b>' + esc(r.name ? L(r.name[0], r.name[1]) : areaName(r.area)) + '</b><span class="seg-badge">' + esc(r.seg) + '</span></summary>' +
       '<div class="meta-body"><div class="meta-figs">' + spineFigure(r) + '</div><div>' +
       '<p class="small"><b>' + L('Dermatomero', 'Dermatome') + ':</b> ' + esc(L(r.it, r.en)) + '</p>' +
       '<p class="small"><b>' + L('Vertebre da palpare', 'Vertebrae to palpate') + ':</b> ' + r.v.join(', ') + '. ' +
       L('Applica il primo dispositivo su quella <b>più dolente</b> alla pressione.', 'Apply the first device on the one that is <b>most tender</b> to pressure.') + '</p>' +
       '<p class="small">' + L('Secondo dispositivo sul punto di massimo dolore; terzo, se serve, sul muscolo:', 'Second device on the point of greatest pain; third, if needed, on the muscle:') +
-      ' <a href="#/area/' + r.area + '">' + L('vedi i muscoli di questa zona', 'see the muscles for this area') + ' ›</a></p>' +
+      ' <a href="#/area/' + (r.muscles || r.area) + '">' + L('vedi i muscoli di questa zona', 'see the muscles for this area') + ' ›</a></p>' +
+      (r.warn ? '<p class="small warn" style="margin-top:8px">' + esc(L(r.warn[0], r.warn[1])) + '</p>' : '') +
       '</div></div></details>';
   }
 
