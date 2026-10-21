@@ -39,16 +39,8 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Riquadro di posizionamento per leggere il codice a barre del dispositivo, anche sulle etichette azzurre o consumate (lettura dei numeri stampati)
-• Abbinamento più veloce
-• Report in PDF per il fisioterapista, da condividere o salvare, con test, postura e foto senza e con Equistasi
-• Report anche nella sezione Progressi
-• Metamero e dermatomero: aggiunta la zona dell’osso sacro e del coccige"
-          WHATS_NEW_EN: "• Positioning frame to read the device barcode, including blue or worn labels (reads the printed numbers)
-• Faster pairing
-• PDF report for your physiotherapist, to share or save, with tests, posture and photos without and with Equistasi
-• Report also available in Progress
-• Metamere and dermatome: added the sacrum and coccyx area"
+          WHATS_NEW_IT: "• Riquadro di posizionamento per leggere il codice a barre del dispositivo, anche sulle etichette azzurre o consumate (lettura dei numeri stampati)\n• Abbinamento più veloce\n• Report in PDF per il fisioterapista, da condividere o salvare, con test, postura e foto senza e con Equistasi\n• Report anche nella sezione Progressi\n• Metamero e dermatomero: aggiunta la zona dell’osso sacro e del coccige"
+          WHATS_NEW_EN: "• Positioning frame to read the device barcode, including blue or worn labels (reads the printed numbers)\n• Faster pairing\n• PDF report for your physiotherapist, to share or save, with tests, posture and photos without and with Equistasi\n• Report also available in Progress\n• Metamere and dermatome: added the sacrum and coccyx area"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
