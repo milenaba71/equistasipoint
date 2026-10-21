@@ -8,7 +8,7 @@ on:
       build:
         description: "Numero di build da collegare (es. 33)"
         required: true
-        default: "51"
+        default: "54"
       notes:
         description: "Note per i revisori Apple"
         required: true
@@ -39,8 +39,16 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Abbina il dispositivo inquadrandolo con la fotocamera, senza digitare il seriale\n• Nuovo video «Come usare l'app» con voce, in italiano e in inglese\n• Guida passo passo per applicare il dispositivo con il cerotto\n• Pagina «Oggi» e promemoria delle 2 ore più semplici\n• Test Sport in Progressi e miglioramenti generali"
-          WHATS_NEW_EN: "• Pair your device by framing it with the camera, no need to type the serial\n• New voiced video «How to use the app», in Italian and English\n• Step-by-step guide to apply the device with the patch\n• Simpler «Today» page and 2-hour reminder\n• Sport tests in Progress and general improvements"
+          WHATS_NEW_IT: "• Riquadro di posizionamento per leggere il codice a barre del dispositivo, anche sulle etichette azzurre o consumate (lettura dei numeri stampati)
+• Abbinamento più veloce
+• Report in PDF per il fisioterapista, da condividere o salvare, con test, postura e foto senza e con Equistasi
+• Report anche nella sezione Progressi
+• Metamero e dermatomero: aggiunta la zona dell’osso sacro e del coccige"
+          WHATS_NEW_EN: "• Positioning frame to read the device barcode, including blue or worn labels (reads the printed numbers)
+• Faster pairing
+• PDF report for your physiotherapist, to share or save, with tests, posture and photos without and with Equistasi
+• Report also available in Progress
+• Metamere and dermatome: added the sacrum and coccyx area"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
