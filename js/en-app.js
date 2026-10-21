@@ -242,6 +242,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Applicato adesso": "Applied just now",
   "Abbina il dispositivo": "Pair the device",
   "Inquadra il retro del dispositivo nel cerchio": "Frame the back of the device inside the circle",
+  "Metti il codice a barre dentro il riquadro giallo": "Put the barcode inside the yellow frame",
   "Ricerca del dispositivo…": "Looking for the device…",
   "Lettura {p}%": "Reading {p}%",
   "Lettura del dispositivo in corso…": "Reading the device…",

@@ -4,6 +4,7 @@
    - container: elemento in cui mostrare la fotocamera (es. la finestra del dispositivo disegnato);
      senza container la fotocamera si apre a tutto schermo.
    - torch: pulsante (facoltativo) per accendere la luce, mostrato solo se il telefono la supporta.
+   - guide: elemento cornice (facoltativo) in cui mettere il codice a barre: quella zona viene letta a piena risoluzione.
    EqScan.stop() chiude la fotocamera. */
 (function () {
   const BASE = 'js/vendor/zxing/';
@@ -86,6 +87,60 @@
       stop: () => cancelAnimationFrame(raf),
     };
   }
+  // Trova le barre in un'immagine: zona dove la luminosità cambia molto in orizzontale e poco in verticale.
+  // Serve perché il lettore sbaglia se ai lati delle barre ci sono il bordo dell'etichetta o la plastica:
+  // ritagliando stretto attorno alle barre il bordo dell'immagine fa da margine bianco.
+  // Restituisce { x, y, w, h } nelle coordinate dell'immagine, o null.
+  function locate(img) {
+    const W = img.width, H = img.height, d = img.data;
+    const k = Math.min(1, 320 / W); const w = Math.max(8, Math.round(W * k)); const h = Math.max(8, Math.round(H * k));
+    const g = new Float32Array(w * h);
+    for (let y = 0; y < h; y++) {
+      const sy = Math.min(H - 1, Math.floor(y / k));
+      for (let x = 0; x < w; x++) { const i = (sy * W + Math.min(W - 1, Math.floor(x / k))) * 4; g[y * w + x] = d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; }
+    }
+    // gx − gy, poi media su una finestra (immagine integrale)
+    const I = new Float64Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) {
+      let row = 0;
+      for (let x = 0; x < w; x++) {
+        const v = g[y * w + x];
+        const gx = Math.abs((x + 1 < w ? g[y * w + x + 1] : v) - v); const gy = Math.abs((y + 1 < h ? g[(y + 1) * w + x] : v) - v);
+        row += gx - gy; I[(y + 1) * (w + 1) + x + 1] = I[y * (w + 1) + x + 1] + row;
+      }
+    }
+    const rx = Math.max(3, Math.round(w * 0.02)); const ry = Math.max(3, Math.round(h * 0.02));
+    const sc = new Float32Array(w * h); let max = 0;
+    for (let y = 0; y < h; y++) {
+      const y0 = Math.max(0, y - ry), y1 = Math.min(h, y + ry + 1);
+      for (let x = 0; x < w; x++) {
+        const x0 = Math.max(0, x - rx), x1 = Math.min(w, x + rx + 1);
+        const v = (I[y1 * (w + 1) + x1] - I[y0 * (w + 1) + x1] - I[y1 * (w + 1) + x0] + I[y0 * (w + 1) + x0]) / ((y1 - y0) * (x1 - x0));
+        sc[y * w + x] = v; if (v > max) max = v;
+      }
+    }
+    const th = Math.max(max * 0.45, 6);
+    if (max <= 6) return null;
+    // zona più grande sopra la soglia
+    const lab = new Int32Array(w * h); const q = new Int32Array(w * h); let best = null;
+    for (let i = 0, n = 0; i < w * h; i++) {
+      if (sc[i] < th || lab[i]) continue;
+      n++; let qh = 0, qt = 0; q[qt++] = i; lab[i] = n;
+      let x0 = w, y0 = h, x1 = 0, y1 = 0, cnt = 0;
+      while (qh < qt) {
+        const j = q[qh++]; const x = j % w, y = (j / w) | 0; cnt++;
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        const nb = [x > 0 ? j - 1 : -1, x < w - 1 ? j + 1 : -1, y > 0 ? j - w : -1, y < h - 1 ? j + w : -1];
+        for (const m of nb) if (m >= 0 && !lab[m] && sc[m] >= th) { lab[m] = n; q[qt++] = m; }
+      }
+      if (!best || cnt > best.cnt) best = { cnt, x0, y0, x1, y1 };
+    }
+    if (!best || best.x1 - best.x0 < 6) return null;
+    const bw = (best.x1 - best.x0 + 1) / k; const bh = (best.y1 - best.y0 + 1) / k;
+    const x = Math.max(0, best.x0 / k - bw * 0.04); const y = Math.max(0, best.y0 / k);
+    return { x: Math.round(x), y: Math.round(y), w: Math.round(Math.min(W - x, bw * 1.08)), h: Math.round(Math.min(H - y, bh)) };
+  }
+
   const calm = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function open(opts) {
@@ -149,18 +204,53 @@
       const onHide = () => { if (document.hidden) close(null); };
       document.addEventListener('visibilitychange', onHide);
 
+      // Zona dell'elemento "node" (cornice o finestra visibile) nelle coordinate del video, con margine "pad".
+      function regionOf(node, pad) {
+        const vw = video.videoWidth, vh = video.videoHeight;
+        if (!node || !vw) return null;
+        const vr = video.getBoundingClientRect(); const g = node.getBoundingClientRect();
+        if (!vr.width || !g.width) return null;
+        const s = Math.max(vr.width / vw, vr.height / vh); // object-fit: cover
+        const ox = vr.left + (vr.width - vw * s) / 2; const oy = vr.top + (vr.height - vh * s) / 2;
+        let w = g.width / s * (1 + 2 * pad); let h = g.height / s * (1 + 2 * pad);
+        let x = (g.left - ox) / s - g.width / s * pad; let y = (g.top - oy) / s - g.height / s * pad;
+        x = Math.max(0, x); y = Math.max(0, y); w = Math.min(vw - x, w); h = Math.min(vh - y, h);
+        return w > 24 && h > 24 ? { x, y, w, h } : null;
+      }
+      function grab(r, maxW, up) {
+        const k = Math.min(maxW / r.w, up || 1);
+        canvas.width = Math.max(1, Math.round(r.w * k)); canvas.height = Math.max(1, Math.round(r.h * k));
+        ctx.drawImage(video, r.x, r.y, r.w, r.h, 0, 0, canvas.width, canvas.height);
+        return ctx.getImageData(0, 0, canvas.width, canvas.height);
+      }
+      // A turno: barre trovate nella cornice (ritaglio stretto), stesse barre ingrandite, cornice intera, zona centrale
+      const guide = opts.guide || (inline ? opts.container : el.querySelector('.scan-frame'));
+      let turn = 0;
+      function candidate() {
+        const vw = video.videoWidth; const vh = video.videoHeight;
+        const step = turn++ % 4;
+        const r = regionOf(guide, 0.12);
+        if (r && step < 2) {
+          const img = grab(r, 1600);
+          const b = locate(img);
+          if (!b) return img;
+          const up = step === 1 || b.w < 360 ? 2 : 1;
+          if (up === 1) return ctx.getImageData(b.x, b.y, b.w, b.h);
+          const sx = r.w / img.width;
+          return grab({ x: r.x + b.x * sx, y: r.y + b.y * sx, w: b.w * sx, h: b.h * sx }, 1600, up);
+        }
+        if (r && step === 2) return grab(r, 1280);
+        // zona centrale dell'immagine, ridotta a max 1280 px di larghezza (come prima)
+        const cw = Math.round(vw * 0.9); const ch = Math.round(vh * 0.7);
+        return grab({ x: (vw - cw) / 2, y: (vh - ch) / 2, w: cw, h: ch }, 1280);
+      }
+
       async function tick(Z) {
         if (done) return;
         if (!busy && video.readyState >= 2 && video.videoWidth) {
           busy = true;
           try {
-            // zona centrale dell'immagine, ridotta a max 1280 px di larghezza
-            const vw = video.videoWidth; const vh = video.videoHeight;
-            const cw = Math.round(vw * 0.9); const ch = Math.round(vh * 0.7);
-            const k = Math.min(1, 1280 / cw);
-            canvas.width = Math.round(cw * k); canvas.height = Math.round(ch * k);
-            ctx.drawImage(video, (vw - cw) / 2, (vh - ch) / 2, cw, ch, 0, 0, canvas.width, canvas.height);
-            const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const img = candidate();
             const res = await Z.readBarcodes(img, { formats: FORMATS, tryHarder: true, tryRotate: true, maxNumberOfSymbols: 1 });
             const hit = res.find((r) => r.isValid && r.text && accept(r.text));
             if (hit) {
@@ -171,18 +261,20 @@
           } catch (e) { /* fotogramma non leggibile: si riprova */ }
           busy = false;
         }
-        timer = setTimeout(() => tick(Z), 180);
+        timer = setTimeout(() => tick(Z), 120);
       }
 
       const libReady = loadLib();
       libReady.catch(() => {});
-      navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } }).then((s) => {
+      navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 2560 }, height: { ideal: 1440 } } }).then((s) => {
         stream = s;
         if (done) { s.getTracks().forEach((t) => t.stop()); return null; }
         video.srcObject = s;
         const track = s.getVideoTracks()[0];
         const caps = track && track.getCapabilities ? track.getCapabilities() : {};
         if (caps.focusMode && caps.focusMode.includes('continuous')) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+        // un po' di zoom: il telefono si tiene più lontano, dove mette a fuoco, e il codice resta grande
+        if (caps.zoom && caps.zoom.max >= 1.8) track.applyConstraints({ advanced: [{ zoom: Math.min(2, caps.zoom.max) }] }).catch(() => {});
         if (caps.torch && torchBtn) { torchBtn.hidden = false; torchBtn.addEventListener('click', onTorch); }
         video.play().catch(() => {});
         return libReady;
@@ -193,5 +285,5 @@
     });
   }
 
-  window.EqScan = { open, stop: () => { if (current) current(null); }, _loadLib: loadLib };
+  window.EqScan = { open, stop: () => { if (current) current(null); }, _loadLib: loadLib, _locate: locate };
 })();
