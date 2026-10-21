@@ -178,6 +178,9 @@
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
           (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
+      '<h2 class="sec-title">' + T('Report') + '</h2>' +
+      '<a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></span>' +
+      '<span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Test, postura e foto senza e con Equistasi, da inviare al fisioterapista o all’allenatore') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' +
       '<p class="small muted" style="margin-top:14px">' + T('I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo.') + '</p>';
   }
 
