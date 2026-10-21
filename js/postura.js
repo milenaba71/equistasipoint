@@ -466,34 +466,92 @@
       '<div class="card"><h3>' + T('Ultime misure') + '</h3>' + (all.length ? '<ul class="ts-hist">' + all.map((r) => '<li><span>' + label(r) + '<br><small class="muted">' + dateStr(r.t) + ' ' + timeStr(r.t) + ' · ' + (r.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</small></span><b>' + val(r) + '</b></li>').join('') + '</ul>' : '<p class="small muted">' + T('Nessuna misura ancora.') + '</p>') + '</div></div></div>' + NOTE;
     bindPrefs(app, () => renderProgress(app));
   }
-  function renderReport(app) {
+  // Dati del report: stessi valori della pagina e del PDF
+  function reportData() {
     const recs = records();
-    const avg = (test, cond, f) => { const v = recs.filter((r) => r.test === test && r.cond === cond && (!f || f(r))); return v.length ? v : null; };
-    const row = (lab, list, get, unit, d) => {
-      const s = list('senza'); const c = list('con');
-      const m = (l) => l ? fmt(mean(l.map(get)), d) + ' ' + unit + ' <small>(' + l.length + ')</small>' : '—';
-      return '<tr><th>' + lab + '</th><td>' + m(s) + '</td><td>' + m(c) + '</td></tr>';
+    const pick = (test, cond, f) => recs.filter((r) => r.test === test && r.cond === cond && (!f || f(r)));
+    const R = (label, test, f, get, unit, d, better) => {
+      const one = (cond) => { const l = pick(test, cond, f); if (!l.length) return null; const raw = mean(l.map(get)); return { raw, v: fmt(raw, d), n: l.length }; };
+      return { label, unit, d, better, s: one('senza'), c: one('con') };
     };
-    const photos = store.get(PHOTO_KEY, []).slice(-6);
-    app.innerHTML = '<div class="pz-report">' + head(T('Report'), T('Postura · riepilogo'), T('Creato il {d}. Medie delle misure salvate su questo telefono (numero di prove tra parentesi).', { d: dateStr(Date.now()) + ' ' + new Date().getFullYear() })) +
-      '<div class="card"><table class="pz-table"><thead><tr><th></th><th>' + T('Senza Equistasi') + '</th><th>' + T('Con Equistasi') + '</th></tr></thead><tbody>' +
-      row(T('Area di oscillazione, occhi aperti'), (c) => avg('stabilita', c, (r) => r.eyes === 'aperti'), (r) => r.m.area, 'cm²', 1) +
-      row(T('Area di oscillazione, occhi chiusi'), (c) => avg('stabilita', c, (r) => r.eyes === 'chiusi'), (r) => r.m.area, 'cm²', 1) +
-      row(T('Velocità media, occhi aperti'), (c) => avg('stabilita', c, (r) => r.eyes === 'aperti'), (r) => r.m.vel, 'mm/s', 1) +
-      row(T('Inclinazione del tronco (avanti)'), (c) => avg('tronco', c), (r) => r.ap, '°', 1) +
-      row(T('Inclinazione della testa (avanti)'), (c) => avg('testa', c), (r) => r.ap, '°', 1) +
-      row(T('Curva dorsale stimata'), (c) => avg('schiena', c), (r) => r.k, '°', 0) +
-      '</tbody></table></div>' +
-      (photos.length ? '<div class="card"><h3>' + T('Foto della postura') + '</h3><div class="pz-photo-grid">' + photos.map((p) => photoFigure(p, true)).join('') + '</div></div>' : '') +
-      '<p class="small muted">' + T('Valori stimati con i sensori e la fotocamera del telefono, indicativi e non diagnostici. Area: ellisse al 95% dell’oscillazione stimata del corpo; velocità: percorso medio al secondo.') + '</p>' +
-      '<div class="btn-col pz-noprint"><button class="btn primary" type="button" id="pz-print">' + T('Stampa o salva in PDF') + '</button>' +
-      (navigator.share ? '<button class="btn" type="button" id="pz-share">' + T('Condividi il riepilogo') + '</button>' : '') + '</div></div>';
-    document.getElementById('pz-print').addEventListener('click', () => { try { window.print(); } catch (e) { /* non disponibile */ } });
-    const sh = document.getElementById('pz-share');
-    if (sh) sh.addEventListener('click', () => {
-      const txt = [...app.querySelectorAll('.pz-table tr')].map((tr) => [...tr.children].map((c) => c.textContent.trim()).join(' | ')).join('\n');
-      navigator.share({ title: T('Equistasi Postura · riepilogo'), text: txt }).catch(() => {});
+    const rows = [
+      R(T('Area di oscillazione, occhi aperti'), 'stabilita', (r) => r.eyes === 'aperti', (r) => r.m.area, 'cm²', 1, 'low'),
+      R(T('Area di oscillazione, occhi chiusi'), 'stabilita', (r) => r.eyes === 'chiusi', (r) => r.m.area, 'cm²', 1, 'low'),
+      R(T('Velocità media, occhi aperti'), 'stabilita', (r) => r.eyes === 'aperti', (r) => r.m.vel, 'mm/s', 1, 'low'),
+      R(T('Inclinazione del tronco (avanti)'), 'tronco', null, (r) => r.ap, '°', 1, null),
+      R(T('Inclinazione della testa (avanti)'), 'testa', null, (r) => r.ap, '°', 1, null),
+      R(T('Curva dorsale stimata'), 'schiena', null, (r) => r.k, '°', 0, null),
+    ];
+    const st = recs.filter((r) => r.test === 'stabilita');
+    const last = st[st.length - 1];
+    const prev = last ? st.slice(0, -1).reverse().find((r) => r.eyes === last.eyes && r.mount === last.mount) : null;
+    const condTxt = (c) => (c === 'con' ? T('con Equistasi') : T('senza Equistasi'));
+    const label = (r) => r.test === 'stabilita' ? TESTS.stabilita.name + ' · ' + (r.eyes === 'chiusi' ? T('occhi chiusi') : T('occhi aperti')) : TESTS[r.test].name;
+    const val = (r) => r.test === 'stabilita' ? T('indice {i} · {a} cm²', { i: index(r.m.area), a: fmt(r.m.area, 1) }) : r.test === 'schiena' ? fmt(r.k, 0) + '°' : fmt(r.ap, 1) + '° / ' + fmt(r.ml, 1) + '°';
+    const photos = store.get(PHOTO_KEY, []).slice(-6).map((p) => {
+      const kind = kindOf(p.view);
+      const ref = kind === 'lato' ? p.pts.ank[0] : (p.pts.ankL[0] + p.pts.ankR[0]) / 2;
+      const ms = (p.metrics && p.metrics.length ? p.metrics : photoMetrics(kind, p.pts, p.w, p.h)).slice(0, 4);
+      const labOf = (m) => m.lab || (photoMetrics(kind, p.pts, p.w, p.h).find((x) => x.k === m.k) || {}).lab || m.k;
+      return { thumb: p.thumb, w: p.w, h: p.h, pts: p.pts, lines: LINES[kind], ref, title: VIEWS[p.view] + ' · ' + dateStr(p.t) + ' · ' + condTxt(p.cond),
+        metrics: ms.map((m) => ({ lab: labOf(m), val: fmt(m.v, 1) + '°', note: m.note || '' })) };
     });
+    let name = ''; try { name = (localStorage.getItem('tp-name') || '').trim(); } catch (e) { /* storage non disponibile */ }
+    let chair = [];
+    try {
+      chair = (JSON.parse(localStorage.getItem('tp-chair') || '[]') || []).slice(-6).reverse().map((r) => ({
+        date: dateStr(r.t) + ' ' + timeStr(r.t), cond: condTxt(r.cond),
+        val: r.mode === 'trenta' ? T('{n} alzate in 30 s', { n: r.count }) : (r.done ? T('5 alzate in {s} s', { s: fmt(r.time, 1) }) : T('{n} alzate su 5', { n: r.count })) }));
+    } catch (e) { chair = []; }
+    return {
+      name, date: dateStr(Date.now()) + ' ' + new Date().getFullYear(),
+      stability: last ? { value: index(last.m.area), area: fmt(last.m.area, 1), vel: fmt(last.m.vel, 1), eyes: EYES[last.eyes] + ' · ' + MOUNT[last.mount], cond: condTxt(last.cond),
+        date: dateStr(last.t) + ' ' + timeStr(last.t), diff: prev ? index(last.m.area) - index(prev.m.area) : null } : null,
+      rows, chart: st.filter((r) => r.eyes === 'aperti').slice(-20).map((r) => ({ v: index(r.m.area), con: r.cond === 'con' })),
+      recent: recs.slice(-10).reverse().map((r) => ({ label: label(r), date: dateStr(r.t) + ' ' + timeStr(r.t), cond: condTxt(r.cond), val: val(r) })),
+      photos, chair,
+    };
+  }
+
+  function renderReport(app) {
+    const data = reportData();
+    const cell = (x, unit) => x ? '<b>' + x.v + ' ' + unit + '</b> <small class="muted">(' + x.n + ')</small>' : '<span class="muted">—</span>';
+    const change = (r) => {
+      if (!r.s || !r.c || !r.s.raw) return '<span class="muted">—</span>';
+      const pct = Math.round((r.c.raw - r.s.raw) / Math.abs(r.s.raw) * 100);
+      const good = r.better === 'low' ? pct <= 0 : pct >= 0;
+      return '<b class="' + (r.better ? (good ? 'ok' : 'ko') : '') + '">' + (pct > 0 ? '+' : '') + pct + '%</b>';
+    };
+    const s = data.stability;
+    const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    app.innerHTML = '<div class="pz-report">' + head(T('Report'), T('Report per il fisioterapista'), T('Riepilogo delle misure salvate su questo telefono, creato il {d}.', { d: data.date })) +
+      '<div class="card pz-rep-actions"><div><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Un file impaginato con indice di stabilità, confronto senza e con Equistasi, grafico e foto, da inviare al fisioterapista.') + '</span></div>' +
+      '<div class="btn-col"><button class="btn primary" type="button" id="pz-pdf">' + (native ? T('Condividi o salva il PDF') : T('Condividi il PDF')) + '</button>' +
+      (native ? '' : '<button class="btn" type="button" id="pz-pdf-dl">' + T('Scarica il PDF') + '</button>') + '</div>' +
+      '<p class="gate-msg" id="pz-pdf-msg" role="status"></p></div>' +
+      (s ? '<div class="card pz-hero"><div class="pz-hero-top"><span>' + T('INDICE DI STABILITÀ') + '</span><span>' + s.date + '</span></div><div class="pz-hero-row"><b class="pz-rep-big">' + s.value + '<small>/100</small></b><div><b>' + s.eyes + ' · ' + s.cond + '</b><br><span>' + T('Area {a} cm² · velocità {v} mm/s', { a: s.area, v: s.vel }) + '</span>' +
+        (s.diff != null ? '<span class="pz-pill">' + (s.diff >= 0 ? '+' : '') + s.diff + ' ' + T('rispetto alla misura precedente') + '</span>' : '') + '</div></div></div>' : '') +
+      '<div class="card"><h3>' + T('Senza e con Equistasi') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
+      data.rows.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') +
+      '</tbody></table></div><p class="small muted" style="margin:8px 0 0">' + T('Media delle prove (numero tra parentesi). Verde: valore migliorato con Equistasi; per l’oscillazione un valore più basso indica più stabilità.') + '</p></div>' +
+      (data.photos.length ? '<div class="card"><h3>' + T('Foto della postura') + '</h3><div class="pz-photo-grid">' + store.get(PHOTO_KEY, []).slice(-6).map((p) => photoFigure(p, true)).join('') + '</div></div>' : '') +
+      '<p class="small muted">' + T('Valori stimati con i sensori e la fotocamera del telefono, indicativi e non diagnostici. Area: ellisse al 95% dell’oscillazione stimata del corpo; velocità: percorso medio al secondo.') + '</p></div>';
+    const msg = document.getElementById('pz-pdf-msg');
+    const go = async (dl) => {
+      const btns = app.querySelectorAll('#pz-pdf, #pz-pdf-dl'); btns.forEach((b) => { b.disabled = true; });
+      msg.className = 'gate-msg'; msg.textContent = T('Preparo il PDF…');
+      try {
+        const blob = await window.EqReportPdf.make(reportData());
+        const name = 'Equistasi-report-postura-' + new Date().toISOString().slice(0, 10) + '.pdf';
+        const how = await window.EqReportPdf.deliver(blob, name, dl);
+        msg.className = 'ts-done'; msg.textContent = how === 'download' ? T('PDF scaricato: lo trovi nella cartella dei download.') : how === 'share' ? T('PDF pronto.') : '';
+      } catch (e) {
+        msg.className = 'gate-msg'; msg.textContent = T('Non è stato possibile creare il PDF. Riprova; se il problema continua, aggiorna l’app.');
+      }
+      btns.forEach((b) => { b.disabled = false; });
+    };
+    document.getElementById('pz-pdf').addEventListener('click', () => go(false));
+    const dl = document.getElementById('pz-pdf-dl'); if (dl) dl.addEventListener('click', () => go(true));
   }
 
   /* ───────── Analisi da foto ───────── */

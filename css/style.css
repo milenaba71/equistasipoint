@@ -971,3 +971,12 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .pair-guide i:nth-child(3) { left: -2px; bottom: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
 .pair-guide i:nth-child(4) { right: -2px; bottom: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
 .pair.read .pair-guide, .pair.ok .pair-guide, .pair.ko .pair-guide { opacity: 0; }
+
+/* Report per il fisioterapista */
+.pz-rep-actions { display: grid; gap: 12px; }
+.pz-rep-actions .btn-col { display: grid; gap: 8px; }
+.pz-rep-actions .gate-msg:empty { display: none; }
+.pz-rep-big { font-size: 46px; line-height: 1; color: #fff; }
+.pz-rep-big small { font-size: 14px; color: #D9D7EE; margin-left: 2px; }
+.pz-table-wrap { overflow-x: auto; }
+.pz-table b.ok { color: #1f9650; } .pz-table b.ko { color: #c8372d; }
