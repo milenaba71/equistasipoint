@@ -203,9 +203,9 @@
     let setup = '';
     let how = '';
     if (type === 'ortostasi') {
-      setup = '<div class="toolbar">' + seg('stance', { uniti: T('Piedi uniti'), tandem: T('Un piede davanti all’altro') }, prefs.stance || 'uniti', T('Posizione dei piedi')) + '</div>' +
+      setup = '<div class="toolbar">' + seg('stance', { uniti: T('Piedi larghi come le anche'), tandem: T('Un piede davanti all’altro') }, prefs.stance || 'uniti', T('Posizione dei piedi')) + '</div>' +
         '<div class="toolbar">' + seg('eyes', { aperti: T('Occhi aperti'), chiusi: T('Occhi chiusi') }, prefs.eyes, T('Occhi')) + '</div>';
-      how = '<li>' + T('Mettiti <b>in piedi, fermo</b>, con le braccia che tengono il telefono <b>appoggiato al petto</b>.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il conto alla rovescia resta immobile per <b>30 secondi</b>, guardando avanti (o a occhi chiusi).') + '</li><li>' + T('Se perdi l’equilibrio e devi spostare un piede, tocca lo schermo. Fai il test vicino a un muro o con qualcuno accanto.') + '</li>';
+      how = '<li>' + T('Mettiti <b>in piedi, fermo</b>, con i <b>piedi alla larghezza delle anche</b> e le braccia che tengono il telefono <b>appoggiato al petto</b>.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il conto alla rovescia resta immobile per <b>30 secondi</b>, guardando avanti (o a occhi chiusi).') + '</li><li>' + T('Se perdi l’equilibrio e devi spostare un piede, tocca lo schermo. Fai il test vicino a un muro o con qualcuno accanto.') + '</li>';
     } else if (type === 'equilibrio') {
       setup = '<div class="toolbar">' + seg('leg', { dx: T('Gamba destra'), sx: T('Gamba sinistra') }, prefs.leg, T('Gamba')) + '</div>' +
         '<div class="toolbar">' + seg('eyes', { aperti: T('Occhi aperti'), chiusi: T('Occhi chiusi') }, prefs.eyes, T('Occhi')) + '</div>';
@@ -284,7 +284,7 @@
       const held = Math.min(DUR, performance.now() - t0) / 1000;
       const score = swayScore(samples);
       if (score == null) { msg.textContent = T('Il sensore di movimento non ha inviato dati: prova dal telefono.'); go.disabled = false; live.hidden = true; return; }
-      const pos = type === 'ortostasi' ? ((prefs.stance || 'uniti') === 'uniti' ? T('piedi uniti') : T('tandem')) : (prefs.leg === 'dx' ? T('gamba dx') : T('gamba sx'));
+      const pos = type === 'ortostasi' ? ((prefs.stance || 'uniti') === 'uniti' ? T('piedi larghi come le anche') : T('tandem')) : (prefs.leg === 'dx' ? T('gamba dx') : T('gamba sx'));
       const note = pos + ' · ' + (prefs.eyes === 'chiusi' ? T('occhi chiusi') : T('occhi aperti')) + (held < 29.5 ? ' · ' + fmt(held, 0) + ' s' : '');
       addResult({ type, value: score, note, held, leg: prefs.leg, eyes: prefs.eyes, stance: prefs.stance });
       renderTest(app, type);
