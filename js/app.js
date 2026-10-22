@@ -813,6 +813,7 @@
   }
 
   function route() {
+    const ab = document.getElementById('acct-btn'); if (ab) ab.hidden = !getProfile();
     const h = location.hash.replace(/^#\/?/, '');
     const [page, arg, arg2, arg3] = h.split('/');
     if (page === 'area') renderArea(arg);
@@ -1116,6 +1117,31 @@
       gateBtn.disabled = false; gateBtn.textContent = T('Accedi');
     }
   });
+
+  /* Pulsante «Profilo» nella barra in alto (tutte le pagine): profilo attuale e dispositivo, con Cambia profilo e Cambia dispositivo */
+  const acctBtn = document.getElementById('acct-btn'); const acctSheet = document.getElementById('acct-sheet');
+  function openAcct() {
+    const p = getProfile(); const sn = store.get('tp-serial', ''); const nm = store.get('tp-name', '');
+    acctSheet.querySelector('.acct-panel').innerHTML =
+      '<div class="acct-head"><h2 id="acct-title">' + T('Profilo e dispositivo') + '</h2><button type="button" class="icon-btn acct-x" aria-label="' + esc(T('Chiudi')) + '">✕</button></div>' +
+      '<div class="acct-row"><span class="acct-ico" aria-hidden="true">' + ((window.PROFILES[(p || {}).type] || {}).icon || '👤') + '</span><span><span class="small muted">' + T('Il tuo profilo') + '</span><br><b>' + (nm ? esc(nm) + ' · ' : '') + esc(profileName() || '—') + '</b></span></div>' +
+      '<a class="btn primary" href="#/profilo" data-acct-close>' + SWAP_ICON + ' ' + T('Cambia profilo') + '</a>' +
+      '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
+      '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
+      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>';
+    acctSheet.hidden = false; requestAnimationFrame(() => acctSheet.classList.add('on'));
+    acctSheet.querySelector('.acct-x').focus();
+  }
+  function closeAcct() { acctSheet.classList.remove('on'); setTimeout(() => { acctSheet.hidden = true; }, 200); }
+  if (acctBtn && acctSheet) {
+    acctBtn.addEventListener('click', openAcct);
+    acctSheet.addEventListener('click', (e) => {
+      if (e.target === acctSheet || e.target.closest('.acct-x') || e.target.closest('[data-acct-close]')) closeAcct();
+      if (e.target.closest('[data-acct-device]') && window.confirm(T('Vuoi abbinare un altro dispositivo Equistasi?'))) window.tpLogout();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !acctSheet.hidden) closeAcct(); });
+    window.addEventListener('hashchange', () => { if (!acctSheet.hidden) closeAcct(); });
+  }
 
   window.tpLogout = function () {
     try { localStorage.removeItem('tp-serial'); } catch (e) { /* storage non disponibile */ }

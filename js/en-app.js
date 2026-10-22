@@ -277,4 +277,9 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Dispositivo fissato sulla pelle con il cerotto": "Device fixed on the skin with the patch",
   "Applicalo sulla pelle con il <b>centro del dispositivo sulla X</b>": "Apply it on the skin with the <b>centre of the device on the X</b>",
   "Applicalo sulla pelle <b>nel punto indicato</b>": "Apply it on the skin <b>at the indicated point</b>",
+  "Il tuo profilo": "Your profile",
+  "Cambia profilo": "Change profile",
+  "Profilo e dispositivo": "Profile and device",
+  "Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.": "Change device if you use another Equistasi: you will scan or type the new serial number. Your tests and measurements stay saved.",
+  "Vuoi abbinare un altro dispositivo Equistasi?": "Do you want to pair another Equistasi device?",
 });
