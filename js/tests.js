@@ -220,7 +220,7 @@
       '<div class="home-grid"><div>' +
       '<div class="card"><img class="ts-hero" src="' + IMG[type] + '" alt="" loading="lazy" />' +
       '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' + setup +
-      SAFETY + '<ol class="steps">' + how + '</ol>' +
+      SAFETY + (type === 'salto' ? beltFigure() : '') + '<ol class="steps">' + how + '</ol>' +
       '<div class="ts-live" id="ts-live" hidden><div class="ts-big" id="ts-big"></div><div class="small muted" id="ts-sub"></div></div>' +
       '<p class="gate-msg" id="ts-msg" role="alert"></p>' +
       '<button class="btn primary" id="ts-go" type="button">' + T('Inizia') + '</button></div>' +
@@ -233,6 +233,14 @@
       savePrefs(); renderTest(app, type);
     }));
     document.getElementById('ts-go').addEventListener('click', () => run(app, type));
+  }
+
+  // Come indossare la cintura sul petto (salto): uomo e donna, per la donna sopra il seno
+  function beltFigure() {
+    return '<div class="belt-fig">' +
+      '<figure><img src="img/cintura-petto-uomo.jpg" width="600" height="796" loading="lazy" alt="' + T('Uomo con la cintura sul petto e il telefono al centro') + '"><figcaption>' + T('Cintura sul petto, telefono al centro') + '</figcaption></figure>' +
+      '<figure><img src="img/cintura-petto-donna.jpg" width="600" height="796" loading="lazy" alt="' + T('Donna con la cintura sul petto, sopra il seno') + '"><figcaption>' + T('Per le donne: sopra il seno') + '</figcaption></figure>' +
+      '</div>';
   }
 
   async function run(app, type) {

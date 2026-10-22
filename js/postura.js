@@ -256,7 +256,7 @@
         T('Senza cintura la misura è meno precisa: usa sempre lo stesso modo per confrontare le misure.')];
     app.innerHTML = head(T('Postura'), TESTS.stabilita.name) +
       '<div class="home-grid"><div><div class="card">' +
-      '<div class="pz-pose">' + bodySvg(belt ? 'cintura' : 'petto') + '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol></div>' +
+      '<div class="pz-pose">' + (belt ? '<figure class="pz-photo"><img src="img/cintura-schiena.jpg" width="600" height="796" alt="' + esc(T('Telefono nella cintura dietro la schiena, zona lombare')) + '"><figcaption>' + T('Telefono dietro, al centro') + '</figcaption></figure>' : bodySvg('petto')) + '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol></div>' +
       '<div class="toolbar">' + seg('mount', MOUNT, prefs.mount, T('Posizione del telefono')) + '</div>' +
       '<div class="toolbar">' + seg('eyes', EYES, prefs.eyes, T('Occhi')) + '</div>' +
       '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' + SAFETY + (window.EqRemote ? window.EqRemote.cardHtml() : '') +

@@ -283,4 +283,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   'telefono inclinato: {r}° di lato, {p}° avanti/indietro': 'phone tilted: {r}° sideways, {p}° forward/back',
   'Attenzione: il telefono era inclinato ({r}° di lato, {p}° avanti/indietro), gli angoli possono essere meno precisi.': 'Note: the phone was tilted ({r}° sideways, {p}° forward/back), so the angles may be less accurate.',
   'Con <b>Scatta con la griglia</b>: scatta quando la griglia è <b>verde</b> (telefono dritto) e la persona sta tra la linea della <b>testa</b> e quella dei <b>piedi</b>, sulla linea centrale.': 'With <b>Take with the grid</b>: take the photo when the grid is <b>green</b> (phone level) and the person stands between the <b>head</b> line and the <b>feet</b> line, on the centre line.',
+  'Telefono nella cintura dietro la schiena, zona lombare': 'Phone in the belt behind the back, lower back',
+  'Telefono dietro, al centro': 'Phone at the back, in the centre',
 });

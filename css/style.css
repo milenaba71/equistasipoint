@@ -1056,3 +1056,10 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .acct-wopt.danger { border-color: #e6a29d; background: rgba(179, 38, 30, .06); }
 .acct-wopt.danger b { color: #b3261e; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct-danger, :root:not([data-theme="light"]) .acct-wopt.danger b { color: #ff9a92; } }
+/* Foto: come indossare la cintura (stabilità e salto) */
+.pz-photo { flex: none; width: 128px; margin: 0; }
+.pz-photo img, .belt-fig img { display: block; width: 100%; height: auto; border-radius: 14px; background: #eef0f4; }
+.pz-photo figcaption, .belt-fig figcaption { font-size: 12px; font-weight: 700; text-align: center; margin-top: 4px; color: var(--muted); }
+.belt-fig { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 12px; }
+.belt-fig figure { margin: 0; }
+@media (min-width: 700px) { .belt-fig { max-width: 420px; } }
