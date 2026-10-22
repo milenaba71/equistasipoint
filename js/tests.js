@@ -30,7 +30,7 @@
     },
     salto: {
       icon: '⤒', name: T('Salto verticale'), short: T('Salto'),
-      desc: T('L’altezza del salto calcolata dal tempo in volo.'),
+      desc: T('Media di 3 salti, calcolata dal tempo in volo.'),
       unit: 'cm', better: 'high', label: T('Altezza'),
     },
     sprint: {
@@ -119,7 +119,20 @@
     return Math.sqrt(sum / n);
   }
 
-  // Salto: il volo è il tratto più lungo in cui il telefono è quasi in caduta libera
+  // Salti: ogni volo è un tratto in cui il telefono è quasi in caduta libera (sotto 0,35 g, finisce sopra 0,6 g).
+  // Restituisce la durata in secondi di ogni volo valido (0,12–1 s), nell'ordine.
+  function flights(samples) {
+    const out = []; let startT = null;
+    samples.forEach((s) => {
+      const m = Math.hypot(s.gx, s.gy, s.gz);
+      if (startT == null) { if (m < 0.35 * G) startT = s.t; } else if (m > 0.6 * G) {
+        const t = (s.t - startT) / 1000; startT = null;
+        if (t >= 0.12 && t <= 1.0) out.push(t);
+      }
+    });
+    return out;
+  }
+  // Salto singolo (volo più lungo), usato dalle prove automatiche
   function flightTime(samples) {
     let best = 0; let startT = null;
     samples.forEach((s) => {
@@ -198,7 +211,7 @@
         '<div class="toolbar">' + seg('eyes', { aperti: T('Occhi aperti'), chiusi: T('Occhi chiusi') }, prefs.eyes, T('Occhi')) + '</div>';
       how = '<li>' + T('Tieni il telefono <b>appoggiato al petto</b> con entrambe le mani.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il conto alla rovescia sollevi un piede e resti in equilibrio per <b>30 secondi</b>.') + '</li><li>' + T('Se appoggi il piede, tocca lo schermo: salviamo il tempo che hai resistito.') + '</li>';
     } else if (type === 'salto') {
-      how = '<li>' + T('Tieni il telefono <b>stretto al petto</b> con entrambe le mani, gomiti fermi.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il "Via" hai <b>8 secondi</b> per fare un salto verso l’alto, il più alto possibile.') + '</li><li>' + T('Atterra sugli avampiedi, senza piegare troppo le ginocchia in volo.') + '</li>';
+      how = '<li>' + T('Metti il telefono nella <b>cintura sul petto</b> (fascia toracica), ben stretto, così hai le mani libere.') + '</li><li>' + T('Tocca <b>Inizia</b>: dopo il "Via" hai <b>15 secondi</b> per fare <b>3 salti</b> verso l’alto, il più alto possibile, con una breve pausa tra un salto e l’altro.') + '</li><li>' + T('Atterra sugli avampiedi, senza piegare troppo le ginocchia in volo. Il risultato è la <b>media dei 3 salti</b>.') + '</li>';
     } else {
       setup = '<div class="toolbar">' + seg('dist', { 10: '10 m', 20: '20 m', 30: '30 m' }, prefs.dist, T('Distanza')) + '</div>';
       how = '<li>' + T('Misura la distanza e prepara un compagno con il telefono all’arrivo (oppure tienilo tu).') + '</li><li>' + T('Tocca <b>Inizia</b>: al bip del "Via" parti.') + '</li><li>' + T('Tocca <b>Stop</b> sul traguardo.') + '</li>';
@@ -256,7 +269,7 @@
       go.disabled = false; return;
     }
     live.hidden = false;
-    sub.textContent = type === 'salto' ? T('Telefono stretto al petto') : T('Preparati: telefono al petto');
+    sub.textContent = type === 'salto' ? T('Telefono nella cintura sul petto') : T('Preparati: telefono al petto');
     await countdown(big);
 
     if (type === 'equilibrio' || type === 'ortostasi') {
@@ -280,16 +293,26 @@
     }
 
     // salto
-    sub.textContent = T('Salta ora!');
-    const samples = await record(8000);
+    // 3 salti: si conta ogni atterraggio; dopo il terzo si chiude
+    big.textContent = '0 / 3'; sub.textContent = T('Salta ora! 3 salti');
+    let n = 0; let lastLand = 0;
+    const samples = await record(15000, (smp, all) => {
+      const k = flights(all.slice(-120)).length; // ultimi ~2 s: basta per vedere un volo appena finito
+      if (k && smp.t - lastLand > 500) {
+        const tot = flights(all).length;
+        if (tot > n) { n = tot; lastLand = smp.t; beep(990, 90); big.textContent = Math.min(n, 3) + ' / 3'; sub.textContent = n < 3 ? T('Bene! Ancora {k}', { k: 3 - n }) : T('Fatto!'); }
+      }
+      return n >= 3 && smp.t - lastLand > 300;
+    });
     beep(1100, 300);
-    const t = flightTime(samples);
     if (!samples.length) { msg.textContent = T('Il sensore di movimento non ha inviato dati: prova dal telefono.'); go.disabled = false; live.hidden = true; return; }
-    if (t == null) { msg.textContent = T('Non abbiamo riconosciuto il salto: tieni il telefono ben stretto al petto e riprova.'); go.disabled = false; big.textContent = ''; return; }
-    const h = heightCm(t);
-    addResult({ type, value: h, note: T('volo {ms} ms', { ms: fmt(t * 1000, 0) }) });
+    const fl = flights(samples).slice(0, 3);
+    if (!fl.length) { msg.textContent = T('Non abbiamo riconosciuto i salti: stringi bene la cintura sul petto e riprova.'); go.disabled = false; big.textContent = ''; return; }
+    const hs = fl.map(heightCm); const h = hs.reduce((a, b) => a + b, 0) / hs.length;
+    const list = hs.map((x) => fmt(x, 0)).join(' · ');
+    addResult({ type, value: h, note: fl.length === 3 ? T('media di 3 salti: {l} cm', { l: list }) : T('solo {n} salti su 3: {l} cm', { n: fl.length, l: list }) });
     renderTest(app, type);
-    showDone(T('Salto di {cm} cm (volo {ms} ms)', { cm: fmt(h, 0), ms: fmt(t * 1000, 0) }));
+    showDone(fl.length === 3 ? T('Media dei 3 salti {cm} cm ({l} cm)', { cm: fmt(h, 0), l: list }) : T('Media di {n} salti {cm} cm ({l} cm): la prossima volta fanne 3', { n: fl.length, cm: fmt(h, 0), l: list }));
   }
 
   function showDone(text) {
@@ -310,5 +333,5 @@
     store.set(KEY, all.slice(-300));
     return T('{dist} m in {time} s · velocità media {speed} km/h', { dist, time: fmt(time, 2), speed: fmt(v * 3.6, 1) });
   }
-  window.EqTests = { cardHtml, render, IMG, setPrefs, addSprint, _flightTime: flightTime, _swayScore: swayScore, _heightCm: heightCm };
+  window.EqTests = { cardHtml, render, IMG, setPrefs, addSprint, _flightTime: flightTime, _flights: flights, _swayScore: swayScore, _heightCm: heightCm };
 })();
