@@ -250,7 +250,7 @@
     const how = belt
       ? ['<b>' + T('Telefono nella cintura') + '</b>: ' + T('dietro la schiena, zona lombare, al centro. Telefono in orizzontale o in verticale, schermo verso l’esterno.'),
         T('Tocca <b>Inizia</b> e metti il telefono nella cintura: hai <b>10 secondi</b>.'),
-        T('Piedi uniti, braccia lungo i fianchi. Una voce ti dice quando iniziare e quando finire: resta fermo per <b>30 secondi</b>.')]
+        T('Piedi alla larghezza delle anche, braccia lungo i fianchi. Una voce ti dice quando iniziare e quando finire: resta fermo per <b>30 secondi</b>.')]
       : ['<b>' + T('Telefono sul petto') + '</b>: ' + T('tenuto con due mani all’altezza dello sterno, schermo verso di te.'),
         T('Tocca <b>Inizia</b>: dopo il conto alla rovescia resta fermo per <b>30 secondi</b>.'),
         T('Senza cintura la misura è meno precisa: usa sempre lo stesso modo per confrontare le misure.')];
@@ -283,7 +283,7 @@
     let cancelled = false; let moved = false;
     document.getElementById('pz-moved').onclick = () => { moved = true; if (stopRec) stopRec(); else cancelled = true; };
     const prep = belt ? 10 : 3;
-    say(belt ? T('Metti il telefono nella cintura e resta in piedi, piedi uniti.') : T('Tieni il telefono sul petto. Pronti.'));
+    say(belt ? T('Metti il telefono nella cintura e resta in piedi, con i piedi alla larghezza delle anche.') : T('Tieni il telefono sul petto. Pronti.'));
     for (let i = prep; i > 0 && !cancelled; i--) {
       big.textContent = i; sub.textContent = belt ? T('Metti il telefono nella cintura') : T('Preparati');
       if (i <= 3) { beep(660, 120); if (belt) say(String(i)); }
