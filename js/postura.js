@@ -654,7 +654,8 @@
   }
   function photoFigure(p, small) {
     return '<figure class="pz-photo' + (small ? ' small' : '') + '"><div class="pz-photo-box" style="aspect-ratio:' + p.w + '/' + p.h + '"><img src="' + p.thumb + '" alt="' + esc(T('Foto della postura, vista {v}', { v: VIEWS[p.view] })) + '">' + overlaySvg(p, false) + '</div>' +
-      '<figcaption><b>' + VIEWS[p.view] + '</b> · ' + dateStr(p.t) + ' · ' + (p.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</figcaption></figure>';
+      '<figcaption><b>' + VIEWS[p.view] + '</b> · ' + dateStr(p.t) + ' · ' + (p.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) +
+      (p.level ? '<br><span class="' + (p.level.ok ? 'pz-lv-ok' : 'pz-lv-ko') + '">' + (p.level.ok ? T('✓ telefono dritto') : T('telefono inclinato: {r}° di lato, {p}° avanti/indietro', { r: Math.abs(p.level.roll).toFixed(0), p: Math.abs(p.level.pitch).toFixed(0) })) + '</span>' : '') + '</figcaption></figure>';
   }
   function metricsList(ms) {
     return '<ul class="ts-hist pz-ms">' + ms.map((m) => '<li><span>' + m.lab + '<br><small class="muted">' + m.note + '</small></span><b>' + fmt(m.v, 1) + '°</b></li>').join('') + '</ul>';
@@ -668,14 +669,96 @@
       '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' +
       '<ol class="steps"><li>' + T('Persona in piedi, ferma, con abiti aderenti, su uno sfondo semplice. Piedi visibili.') + '</li>' +
       '<li>' + T('Telefono dritto, a circa <b>2,5 m</b> e all’altezza della vita. Inquadra tutto il corpo, dalla testa ai piedi.') + '</li>' +
-      '<li>' + T('Usa sempre la stessa distanza, altezza e luce per confrontare le foto nel tempo.') + '</li></ol>' +
-      '<div class="pz-photo-btns"><label class="btn primary">' + ICON.foto + ' ' + T('Scatta la foto') + '<input type="file" accept="image/*" capture="environment" id="pz-cam" hidden></label>' +
+      '<li>' + T('Usa sempre la stessa distanza, altezza e luce per confrontare le foto nel tempo.') + '</li>' +
+      (liveCam ? '<li>' + T('Con <b>Scatta con la griglia</b>: scatta quando la griglia è <b>verde</b> (telefono dritto) e la persona sta tra la linea della <b>testa</b> e quella dei <b>piedi</b>, sulla linea centrale.') + '</li>' : '') + '</ol>' +
+      '<div class="pz-photo-btns">' + (liveCam ? '<button type="button" class="btn primary" id="pz-live">' + ICON.foto + ' ' + T('Scatta con la griglia') + '</button>' : '<label class="btn primary">' + ICON.foto + ' ' + T('Scatta la foto') + '<input type="file" accept="image/*" capture="environment" id="pz-cam" hidden></label>') +
       '<label class="btn">' + T('Carica dalla galleria') + '<input type="file" accept="image/*" id="pz-gal" hidden></label></div>' +
       '<p class="gate-msg" id="pz-msg" role="alert"></p><div id="pz-work"></div></div></div><div>' +
       '<div class="card"><h3>' + T('Foto salvate') + '</h3>' + (saved.length ? '<div class="pz-photo-grid">' + saved.slice(0, 8).map((p) => photoFigure(p, true)).join('') + '</div><a class="btn" href="#/postura/fotoconfronto" style="margin-top:10px">' + T('Confronta prima e dopo') + '</a>' : '<p class="small muted" style="margin:0">' + T('Nessuna foto salvata.') + '</p>') + '</div>' +
       '</div></div>' + NOTE;
     bindPrefs(app, () => renderPhoto(app));
-    ['pz-cam', 'pz-gal'].forEach((id) => document.getElementById(id).addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) analyse(app, f); }));
+    ['pz-cam', 'pz-gal'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) analyse(app, f); }); });
+    const live = document.getElementById('pz-live'); if (live) live.addEventListener('click', () => openCamera(app));
+  }
+
+  /* ───────── Fotocamera con griglia e livella ─────────
+     Linea di piombo al centro, terzi, linee per testa e piedi (stessa misura della persona in ogni foto)
+     e livella con i sensori: verde quando il telefono è dritto (entro 2° di lato e 3° avanti/indietro).
+     La foto salva anche l'inclinazione del telefono al momento dello scatto. */
+  const liveCam = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const LEVEL_ROLL = 2, LEVEL_PITCH = 3;
+  async function openCamera(app) {
+    // permesso ai sensori (iPhone): va chiesto con il tocco sul pulsante
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') { try { await DeviceMotionEvent.requestPermission(); } catch (e) { /* senza livella */ } }
+    const el = document.createElement('div');
+    el.className = 'pz-cam'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', T('Fotocamera con griglia'));
+    el.innerHTML = '<video playsinline muted autoplay></video>' +
+      '<svg class="pz-grid" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' +
+      '<line x1="33.33" y1="0" x2="33.33" y2="100"/><line x1="66.67" y1="0" x2="66.67" y2="100"/><line x1="0" y1="33.33" x2="100" y2="33.33"/><line x1="0" y1="66.67" x2="100" y2="66.67"/>' +
+      '<line class="pz-plumb" x1="50" y1="0" x2="50" y2="100"/><line class="pz-head" x1="22" y1="17" x2="78" y2="17"/><line class="pz-feet" x1="22" y1="83" x2="78" y2="83"/></svg>' +
+      '<span class="pz-cam-lab pz-cam-head">' + T('Testa') + '</span><span class="pz-cam-lab pz-cam-feet">' + T('Piedi') + '</span>' +
+      '<div class="pz-horizon" aria-hidden="true"><i></i></div>' +
+      '<div class="pz-cam-top"><b class="pz-level-txt" aria-live="polite">' + T('Livella in attesa dei sensori…') + '</b><span class="small">' + T('Persona tra la linea della testa e quella dei piedi, sulla linea centrale') + '</span></div>' +
+      '<div class="pz-cam-count" hidden></div>' +
+      '<div class="pz-cam-bar"><button type="button" class="btn pz-cam-x">' + T('Annulla') + '</button>' +
+      '<button type="button" class="pz-shutter" aria-label="' + esc(T('Scatta')) + '"></button>' +
+      '<button type="button" class="btn pz-cam-timer" aria-pressed="false">' + T('Autoscatto 5 s') + '</button></div>';
+    document.body.appendChild(el);
+    const video = el.querySelector('video'); const txt = el.querySelector('.pz-level-txt'); const hor = el.querySelector('.pz-horizon');
+    let stream = null; let level = null; let timer = false; let busy = false; let closed = false;
+    const close = () => {
+      if (closed) return; closed = true;
+      window.removeEventListener('devicemotion', onMotion);
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+      el.remove();
+    };
+    // gravità filtrata → inclinazione di lato (roll) e avanti/indietro (pitch), con il telefono in verticale
+    let gx = 0, gy = 0, gz = 0, n = 0;
+    function onMotion(e) {
+      const a = e.accelerationIncludingGravity || {};
+      if (a.x == null) return;
+      const k = n++ ? 0.15 : 1; gx += (a.x - gx) * k; gy += (a.y - gy) * k; gz += (a.z - gz) * k;
+      const sgn = gy < 0 ? -1 : 1; // su alcuni telefoni i segni sono invertiti
+      const x = gx * sgn, y = gy * sgn, z = gz * sgn;
+      const roll = Math.atan2(-x, y) * 180 / Math.PI;     // positivo = parte alta verso destra
+      const pitch = Math.atan2(z, Math.hypot(x, y)) * 180 / Math.PI; // positivo = schermo verso l'alto (fotocamera verso il basso)
+      level = { roll: Math.round(roll * 10) / 10, pitch: Math.round(pitch * 10) / 10 };
+      const ok = Math.abs(roll) <= LEVEL_ROLL && Math.abs(pitch) <= LEVEL_PITCH;
+      el.classList.toggle('ok', ok);
+      hor.style.transform = 'rotate(' + (-roll).toFixed(1) + 'deg)';
+      const parts = [];
+      if (Math.abs(roll) > LEVEL_ROLL) parts.push(T('storto di {v}° verso {d}', { v: Math.abs(roll).toFixed(0), d: roll > 0 ? T('destra') : T('sinistra') }));
+      if (Math.abs(pitch) > LEVEL_PITCH) parts.push(pitch > 0 ? T('fotocamera verso il basso di {v}°: porta in avanti la parte alta del telefono', { v: Math.abs(pitch).toFixed(0) }) : T('fotocamera verso l’alto di {v}°: porta indietro la parte alta del telefono', { v: Math.abs(pitch).toFixed(0) }));
+      txt.textContent = ok ? T('✓ Telefono dritto') : T('Raddrizza il telefono: {p}', { p: parts.join(', ') });
+    }
+    window.addEventListener('devicemotion', onMotion);
+    el.querySelector('.pz-cam-x').addEventListener('click', close);
+    const tb = el.querySelector('.pz-cam-timer');
+    tb.addEventListener('click', () => { timer = !timer; tb.setAttribute('aria-pressed', String(timer)); tb.classList.toggle('on', timer); });
+    el.querySelector('.pz-shutter').addEventListener('click', async () => {
+      if (busy || !video.videoWidth) return; busy = true;
+      if (timer) {
+        const cd = el.querySelector('.pz-cam-count'); cd.hidden = false;
+        for (let i = 5; i > 0 && !closed; i--) { cd.textContent = i; beep(660, 100); await wait(1000); }
+        cd.hidden = true; if (closed) return;
+      }
+      beep(1200, 80);
+      // ritaglio della parte visibile sullo schermo (video a tutto schermo, object-fit: cover), così la griglia corrisponde alla foto
+      const vw = video.videoWidth, vh = video.videoHeight, cw = el.clientWidth, ch = el.clientHeight;
+      const sc = Math.max(cw / vw, ch / vh); const sw = cw / sc, sh = ch / sc;
+      const c = document.createElement('canvas'); c.width = Math.round(sw); c.height = Math.round(sh);
+      c.getContext('2d').drawImage(video, (vw - sw) / 2, (vh - sh) / 2, sw, sh, 0, 0, c.width, c.height);
+      const shot = level ? Object.assign({ ok: Math.abs(level.roll) <= LEVEL_ROLL && Math.abs(level.pitch) <= LEVEL_PITCH }, level) : null;
+      c.toBlob((blob) => { close(); if (blob) analyse(app, blob, shot); }, 'image/jpeg', 0.92);
+    });
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
+      if (closed) { stream.getTracks().forEach((t) => t.stop()); return; }
+      video.srcObject = stream; video.play().catch(() => {});
+    } catch (e) {
+      close();
+      const m = document.getElementById('pz-msg'); if (m) { m.className = 'gate-msg'; m.textContent = T('Non riusciamo ad aprire la fotocamera: consenti l’accesso oppure carica una foto dalla galleria.'); }
+    }
   }
 
   function fileToImage(file) {
@@ -695,7 +778,7 @@
     return { canvas: c, url: q ? c.toDataURL('image/jpeg', q) : null };
   }
 
-  async function analyse(app, file) {
+  async function analyse(app, file, level) {
     const msg = document.getElementById('pz-msg'); const work = document.getElementById('pz-work');
     msg.className = 'gate-msg'; msg.textContent = T('Analisi della foto in corso…');
     let loaded;
@@ -722,8 +805,10 @@
     const found = !!pts;
     if (!pts) pts = JSON.parse(JSON.stringify(DEFAULT[kind]));
     const p = { id: Date.now().toString(36), t: Date.now(), view, cond: prefs.cond, w: thumb.canvas.width, h: thumb.canvas.height, thumb: thumb.url, pts };
+    if (level) p.level = level;
     msg.className = found ? 'ts-done' : 'gate-msg';
-    msg.textContent = found ? T('Punti trovati. Controllali e, se serve, trascinali nella posizione giusta.') : T('Non abbiamo trovato la persona: trascina i punti a mano sulla foto.');
+    msg.textContent = (found ? T('Punti trovati. Controllali e, se serve, trascinali nella posizione giusta.') : T('Non abbiamo trovato la persona: trascina i punti a mano sulla foto.')) +
+      (level && !level.ok ? ' ' + T('Attenzione: il telefono era inclinato ({r}° di lato, {p}° avanti/indietro), gli angoli possono essere meno precisi.', { r: Math.abs(level.roll).toFixed(0), p: Math.abs(level.pitch).toFixed(0) }) : '');
     editor(app, work, p);
     work.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
