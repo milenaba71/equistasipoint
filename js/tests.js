@@ -235,12 +235,13 @@
     document.getElementById('ts-go').addEventListener('click', () => run(app, type));
   }
 
-  // Come indossare la cintura sul petto (salto): uomo e donna, per la donna sopra il seno
+  // Disegno: cintura sul petto in alto (per le donne sopra il seno), telefono al centro
   function beltFigure() {
-    return '<div class="belt-fig">' +
-      '<figure><img src="img/cintura-petto-uomo.jpg" width="600" height="796" loading="lazy" alt="' + T('Uomo con la cintura sul petto e il telefono al centro') + '"><figcaption>' + T('Cintura sul petto, telefono al centro') + '</figcaption></figure>' +
-      '<figure><img src="img/cintura-petto-donna.jpg" width="600" height="796" loading="lazy" alt="' + T('Donna con la cintura sul petto, sopra il seno') + '"><figcaption>' + T('Per le donne: sopra il seno') + '</figcaption></figure>' +
-      '</div>';
+    const line = 'fill="none" stroke="#D9D7EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"';
+    return '<div class="belt-fig"><svg viewBox="0 0 150 270" width="110" height="198" role="img" aria-label="' + T('Cintura sul petto, telefono al centro') + '">' +
+      '<circle cx="75" cy="30" r="20" ' + line + '/><path d="M45 62 Q75 52 105 62 L100 150 L50 150 Z" ' + line + '/><path d="M50 150 L56 262 M100 150 L94 262 M45 66 L36 140 M105 66 L114 140" ' + line + '/><path d="M40 262 H110" stroke="#5E58A0" stroke-width="3" stroke-linecap="round"/>' +
+      '<rect x="45" y="74" width="60" height="12" rx="4" fill="#7FB2E5"/><rect x="61" y="66" width="28" height="28" rx="5" fill="#FADC00" stroke="#1B1840" stroke-width="2"/></svg>' +
+      '<p class="small"><b>' + T('Cintura sul petto, telefono al centro') + '</b><br>' + T('In alto, sotto le ascelle: per le donne <b>sopra il seno</b>, non sotto.') + '</p></div>';
   }
 
   async function run(app, type) {
