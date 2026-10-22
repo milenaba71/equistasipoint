@@ -813,7 +813,13 @@
   }
 
   function route() {
-    const ab = document.getElementById('acct-btn'); if (ab) ab.hidden = !getProfile();
+    const ab = document.getElementById('acct-btn');
+    if (ab) {
+      ab.hidden = !getProfile();
+      const sn = store.get('tp-serial', '');
+      document.getElementById('acct-sn').textContent = sn ? 'N° ' + sn : T('Abbina dispositivo');
+      ab.setAttribute('aria-label', T('Dispositivo abbinato') + (sn ? ' ' + sn : '') + ' · ' + T('Profilo e dispositivo'));
+    }
     const h = location.hash.replace(/^#\/?/, '');
     const [page, arg, arg2, arg3] = h.split('/');
     if (page === 'area') renderArea(arg);

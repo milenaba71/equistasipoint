@@ -1010,7 +1010,7 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .pz-lv-ok { color: #1f9650; font-weight: 600; } .pz-lv-ko { color: #c8372d; font-weight: 600; }
 
 /* Pulsante «Profilo» in alto (tutte le pagine) e foglio Profilo e dispositivo */
-.acct-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px 0 10px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .45); background: rgba(255, 255, 255, .12); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; flex: none; }
+.acct-btn { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 12px 0 10px; border-radius: 12px; text-align: left; line-height: 1.1; border: 1px solid rgba(255, 255, 255, .45); background: rgba(255, 255, 255, .12); color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; flex: none; }
 .acct-btn:hover { background: rgba(255, 255, 255, .22); }
 .acct-btn[hidden] { display: none; }
 .acct-sheet { position: fixed; inset: 0; z-index: 60; background: rgba(20, 18, 50, 0); display: flex; align-items: flex-end; justify-content: center; transition: background .2s; }
@@ -1026,5 +1026,11 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .acct-dev::before { inset: 2px; border-radius: 6px; }
 .acct-dev .dev-mini-win { font-size: 10px; border-radius: 3px; }
 .acct-note { margin: 2px 0 0; }
-@media (max-width: 360px) { .acct-btn span { display: none; } .acct-btn { padding: 0 9px; } }
+.acct-txt { display: flex; flex-direction: column; min-width: 0; }
+.acct-lbl { font-size: 10.5px; font-weight: 600; opacity: .85; white-space: nowrap; }
+.acct-sn { font-size: 14px; font-weight: 800; letter-spacing: .02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.top .brand { overflow: hidden; }
+.top .brand img { min-width: 0; max-width: 100%; object-fit: contain; }
+@media (max-width: 380px) { .acct-btn > svg { display: none; } .acct-btn { padding: 0 8px; } .brand span { display: none; } .top { gap: 4px; } }
+@media (max-width: 340px) { .acct-sn { font-size: 13px; } .acct-lbl { font-size: 9.5px; } }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct-ico { background: #2c2660; } }

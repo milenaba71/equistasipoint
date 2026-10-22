@@ -282,4 +282,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Profilo e dispositivo": "Profile and device",
   "Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.": "Change device if you use another Equistasi: you will scan or type the new serial number. Your tests and measurements stay saved.",
   "Vuoi abbinare un altro dispositivo Equistasi?": "Do you want to pair another Equistasi device?",
+  "Dispositivo abbinato": "Paired device",
+  "Abbina dispositivo": "Pair device",
 });
