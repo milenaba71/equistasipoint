@@ -607,6 +607,9 @@
     return poseP;
   }
 
+  // Se il riconoscimento dei punti non risponde entro il tempo, si va avanti con i punti da sistemare a mano
+  const within = (pr, ms) => Promise.race([pr, new Promise((res, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+
   function photoMetrics(kind, P, w, h) {
     const px = (k) => ({ x: P[k][0] * w, y: P[k][1] * h });
     const tiltLine = (a, b) => { const A = px(a); const B = px(b); return deg(Math.atan2(Math.abs(A.y - B.y), Math.abs(A.x - B.x))); };
@@ -690,6 +693,7 @@
   async function openCamera(app) {
     // permesso ai sensori (iPhone): va chiesto con il tocco sul pulsante
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') { try { await DeviceMotionEvent.requestPermission(); } catch (e) { /* senza livella */ } }
+    loadPose().catch(() => {}); // il riconoscimento dei punti si carica mentre si inquadra
     const el = document.createElement('div');
     el.className = 'pz-cam'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', T('Fotocamera con griglia'));
     el.innerHTML = '<video playsinline muted autoplay></video>' +
@@ -780,7 +784,7 @@
 
   async function analyse(app, file, level) {
     const msg = document.getElementById('pz-msg'); const work = document.getElementById('pz-work');
-    msg.className = 'gate-msg'; msg.textContent = T('Analisi della foto in corso…');
+    msg.className = 'gate-msg'; msg.textContent = T('Analisi della foto in corso… La prima volta può servire qualche secondo.');
     let loaded;
     try { loaded = await fileToImage(file); } catch (e) { msg.textContent = T('Non riusciamo ad aprire questa foto. Prova con un’altra.'); return; }
     const view = prefs.view; const kind = kindOf(view);
@@ -789,7 +793,8 @@
     URL.revokeObjectURL(loaded.url);
     let pts = null;
     try {
-      const pose = await loadPose();
+      const pose = await within(loadPose(), 20000);
+      await new Promise((r) => setTimeout(r, 30)); // lascia aggiornare lo schermo prima del calcolo
       const res = pose.detect(work1.canvas);
       const L = res && res.landmarks && res.landmarks[0];
       if (L) {
