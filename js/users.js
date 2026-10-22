@@ -72,5 +72,15 @@
     return true;
   }
 
-  window.EqUsers = { list, active, label, switchTo, add, remove, count: () => (active(), ids().length) };
+  // Cancella solo i risultati della persona attiva: profilo e dispositivo restano
+  const RESULTS = ['tp-posture', 'tp-posture-photos', 'tp-tests', 'tp-chair', 'tp-session', 'tp-log', 'tp-daily'];
+  function clearResults() { RESULTS.forEach((k) => ls.del(k)); }
+  // Cancella tutto su questo telefono (tutte le persone) e si riparte dall'inizio; resta solo la lingua
+  function wipeAll() {
+    const lang = ls.get('tp-lang');
+    try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
+    if (lang) ls.set('tp-lang', lang);
+  }
+
+  window.EqUsers = { clearResults, wipeAll, list, active, label, switchTo, add, remove, count: () => (active(), ids().length) };
 })();

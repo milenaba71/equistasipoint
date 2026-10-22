@@ -698,9 +698,7 @@
         if (confirm(T('Vuoi cancellare i tuoi dati (profilo, dispositivo e test) da questo telefono? Le altre persone restano.'))) window.EqUsers.remove(window.EqUsers.active());
         return;
       }
-      if (!confirm(T('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?'))) return;
-      try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
-      location.hash = '#/'; location.reload();
+      wipeData('all');
     });
   }
 
@@ -1143,7 +1141,12 @@
       '<a class="btn primary" href="#/profilo" data-acct-close>' + SWAP_ICON + ' ' + T('Cambia profilo') + '</a>' +
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
       '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
-      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>';
+      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>' +
+      '<button type="button" class="btn acct-danger" data-acct-wipe>' + T('Cancella i dati e ricomincia') + '</button>' +
+      '<div class="acct-wipe" hidden>' +
+      '<button type="button" class="acct-wopt" data-wipe="results"><b>' + T('Cancella solo i risultati') + '</b><span class="small muted">' + T('Test, salti, sprint, sedia, postura con le foto e promemoria di {n}. Profilo e dispositivo restano.', { n: esc(nm || T('questa persona')) }) + '</span></button>' +
+      '<button type="button" class="acct-wopt danger" data-wipe="all"><b>' + T('Cancella tutto e ricomincia da capo') + '</b><span class="small muted">' + (window.EqUsers && window.EqUsers.count() > 1 ? T('Tutte le persone, i profili, i dispositivi e i risultati su questo telefono.') : T('Profilo, dispositivo e tutti i risultati su questo telefono.')) + ' ' + T('Si riparte dall’abbinamento del dispositivo.') + '</span></button>' +
+      '</div>';
     acctSheet.hidden = false; requestAnimationFrame(() => acctSheet.classList.add('on'));
     acctSheet.querySelector('.acct-x').focus();
   }
@@ -1170,6 +1173,9 @@
     acctSheet.addEventListener('click', (e) => {
       if (e.target === acctSheet || e.target.closest('.acct-x') || e.target.closest('[data-acct-close]')) closeAcct();
       if (e.target.closest('[data-acct-device]') && window.confirm(T('Vuoi abbinare un altro dispositivo Equistasi?'))) window.tpLogout();
+      if (e.target.closest('[data-acct-wipe]')) { e.target.closest('[data-acct-wipe]').hidden = true; acctSheet.querySelector('.acct-wipe').hidden = false; }
+      const wipe = e.target.closest('[data-wipe]');
+      if (wipe) wipeData(wipe.dataset.wipe);
       const pick = e.target.closest('[data-acct-user]'); if (pick) window.EqUsers.switchTo(pick.dataset.acctUser);
       const del = e.target.closest('[data-acct-del]');
       if (del && window.confirm(T('Vuoi eliminare questa persona e i suoi test da questo telefono?'))) { window.EqUsers.remove(del.dataset.acctDel); openAcct(); route(); }
@@ -1185,6 +1191,19 @@
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !acctSheet.hidden) closeAcct(); });
     window.addEventListener('hashchange', () => { if (!acctSheet.hidden) closeAcct(); });
+  }
+
+  async function wipeData(kind) {
+    if (kind === 'results') {
+      if (!confirm(T('Vuoi cancellare tutti i risultati (test, postura e foto, promemoria)? Non si possono recuperare.'))) return;
+      if (window.EqTimer && window.EqTimer.clearAll) await window.EqTimer.clearAll();
+      window.EqUsers.clearResults();
+    } else {
+      if (!confirm(T('Vuoi cancellare tutto da questo telefono e ricominciare da capo? I dati non si possono recuperare.'))) return;
+      if (window.EqTimer && window.EqTimer.clearAll) await window.EqTimer.clearAll();
+      window.EqUsers.wipeAll();
+    }
+    location.hash = '#/'; location.reload();
   }
 
   window.tpLogout = function () {
