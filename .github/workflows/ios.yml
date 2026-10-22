@@ -132,5 +132,5 @@ jobs:
           fi
           echo "Caricamento con xcodebuild non riuscito: provo con la Build Upload API di App Store Connect"
           VERSION=$(grep -m1 'MARKETING_VERSION' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/[^0-9.]//g')
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
           python3 .github/scripts/asc_upload.py "$(ls "$RUNNER_TEMP"/export/*.ipa)" "$BUNDLE" "$VERSION" "$BUILD"

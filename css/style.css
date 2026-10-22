@@ -980,3 +980,9 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .pz-rep-big small { font-size: 14px; color: #D9D7EE; margin-left: 2px; }
 .pz-table-wrap { overflow-x: auto; }
 .pz-table b.ok { color: #1f9650; } .pz-table b.ko { color: #c8372d; }
+
+/* Telecomando Apple Watch */
+.watch-card { display: grid; gap: 10px; }
+.watch-row { display: flex; gap: 12px; align-items: center; }
+.watch-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--chip); color: var(--indigo, #29235C); display: grid; place-items: center; flex: none; }
+.watch-card .gate-msg:empty { display: none; }

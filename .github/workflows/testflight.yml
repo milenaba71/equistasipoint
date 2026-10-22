@@ -25,5 +25,5 @@ jobs:
 
       - name: Distribuisci l'ultima build ai tester interni
         run: |
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | sed 's/.*= *//; s/;//')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' mobile/ios/App/App.xcodeproj/project.pbxproj | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
           cd .github/scripts && python3 asc_testflight.py "$BUNDLE"

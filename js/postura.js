@@ -229,7 +229,7 @@
         (diff != null ? '<span class="pz-pill">' + (diff >= 0 ? '+' : '') + diff + ' ' + T('rispetto alla misura precedente') + '</span>' : '') + '</div></div></div>';
     }
     app.innerHTML = head(T('Postura'), T('Misura la tua <span class="hl">postura</span>'), T('Test con i sensori del telefono e analisi da foto. Ripetili nel tempo, senza e con Equistasi, e confronta i risultati.')) +
-      hero +
+      hero + (window.EqRemote ? window.EqRemote.cardHtml() : '') +
       '<h2 class="sec-title">' + T('Test con i sensori') + '</h2><div class="pz-tiles">' +
       Object.keys(TESTS).map((k) => tile(k, '#/postura/' + k, TESTS[k].name, TESTS[k].desc)).join('') + '</div>' +
       '<h2 class="sec-title">' + T('Analisi da foto') + '</h2><div class="pz-tiles">' +
@@ -259,7 +259,7 @@
       '<div class="pz-pose">' + bodySvg(belt ? 'cintura' : 'petto') + '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol></div>' +
       '<div class="toolbar">' + seg('mount', MOUNT, prefs.mount, T('Posizione del telefono')) + '</div>' +
       '<div class="toolbar">' + seg('eyes', EYES, prefs.eyes, T('Occhi')) + '</div>' +
-      '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' + SAFETY +
+      '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' + SAFETY + (window.EqRemote ? window.EqRemote.cardHtml() : '') +
       '<div class="pz-live" id="pz-live" hidden><div class="pz-live-in"><div class="pz-big" id="pz-big"></div><div class="small" id="pz-sub"></div><div id="pz-trace"></div>' +
       '<button class="btn" id="pz-moved" type="button">' + T('Ha spostato un piede') + '</button></div></div>' +
       '<p class="gate-msg" id="pz-msg" role="alert"></p>' +
@@ -821,5 +821,8 @@
     else renderHome(app);
   }
 
-  window.EqPosture = { render, cardHtml, _sway: sway, _tilt: tilt, _photoMetrics: photoMetrics, _index: index };
+  // usato dal telecomando dell'Apple Watch (js/remote.js)
+  const setPrefs = (o) => { Object.assign(prefs, o); savePrefs(); };
+  const lastRecord = () => records().slice(-1)[0] || null;
+  window.EqPosture = { render, cardHtml, setPrefs, lastRecord, index, _sway: sway, _tilt: tilt, _photoMetrics: photoMetrics, _index: index };
 })();

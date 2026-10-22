@@ -173,7 +173,7 @@
   function renderList(app) {
     app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Sport') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
       '<p class="small muted" style="margin:6px 0 0">' + T('Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.') + '</p></div>' +
-      '<img class="ts-hero" src="' + IMG.hero + '" alt="" loading="lazy" />' + SAFETY + '<div class="list">' + Object.keys(TESTS).map((k) => {
+      '<img class="ts-hero" src="' + IMG.hero + '" alt="" loading="lazy" />' + SAFETY + (window.EqRemote ? window.EqRemote.cardHtml() : '') + '<div class="list">' + Object.keys(TESTS).map((k) => {
         const tt = TESTS[k]; const n = results().filter((r) => r.type === k).length;
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
           (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
@@ -301,5 +301,14 @@
     if (arg) renderTest(app, arg); else renderList(app);
   }
 
-  window.EqTests = { cardHtml, render, IMG, _flightTime: flightTime, _swayScore: swayScore, _heightCm: heightCm };
+  // usati dal telecomando dell'Apple Watch (js/remote.js): opzioni dei test e sprint cronometrato sull'orologio
+  const setPrefs = (o) => { Object.assign(prefs, o); savePrefs(); };
+  function addSprint(time, dist, cond) {
+    const v = dist / time;
+    const all = results();
+    all.push({ t: Date.now(), cond, type: 'sprint', value: time, note: T('{dist} m · {speed} km/h', { dist, speed: fmt(v * 3.6, 1) }), watch: true });
+    store.set(KEY, all.slice(-300));
+    return T('{dist} m in {time} s · velocità media {speed} km/h', { dist, time: fmt(time, 2), speed: fmt(v * 3.6, 1) });
+  }
+  window.EqTests = { cardHtml, render, IMG, setPrefs, addSprint, _flightTime: flightTime, _swayScore: swayScore, _heightCm: heightCm };
 })();
