@@ -5,6 +5,10 @@ name: "App Store: prepara revisione"
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Versione (vuoto = quella del progetto, es. 1.2.1)"
+        required: false
+        default: ""
       build:
         description: "Numero di build da collegare (es. 33)"
         required: true
@@ -44,5 +48,5 @@ jobs:
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
-          VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
+          VERSION="${{ inputs.version }}"; [ -n "$VERSION" ] || VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
           cd .github/scripts && python3 asc_prepare.py "$BUNDLE" "$VERSION" "$BUILD"
