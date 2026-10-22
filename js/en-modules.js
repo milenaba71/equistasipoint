@@ -120,4 +120,8 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   'Media dei 3 salti {cm} cm ({l} cm)': 'Average of the 3 jumps {cm} cm ({l} cm)',
   'Media di {n} salti {cm} cm ({l} cm): la prossima volta fanne 3': 'Average of {n} jumps {cm} cm ({l} cm): next time do 3',
   'Media di 3 salti, calcolata dal tempo in volo.': 'Average of 3 jumps, calculated from flight time.',
+  'Uomo con la cintura sul petto e il telefono al centro': 'Man with the chest belt and the phone in the centre',
+  'Cintura sul petto, telefono al centro': 'Chest belt, phone in the centre',
+  'Donna con la cintura sul petto, sopra il seno': 'Woman with the chest belt, above the breasts',
+  'Per le donne: sopra il seno': 'For women: above the breasts',
 });
