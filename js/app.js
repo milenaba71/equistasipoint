@@ -694,6 +694,10 @@
       T('<div class="card privacy-box" style="max-height:none"><h3>Informativa sintetica</h3>') + privacyHtml() + '</div>' +
       '</div>';
     document.getElementById('wipe').addEventListener('click', () => {
+      if (window.EqUsers && window.EqUsers.count() > 1) {
+        if (confirm(T('Vuoi cancellare i tuoi dati (profilo, dispositivo e test) da questo telefono? Le altre persone restano.'))) window.EqUsers.remove(window.EqUsers.active());
+        return;
+      }
       if (!confirm(T('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?'))) return;
       try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
       location.hash = '#/'; location.reload();
@@ -817,8 +821,12 @@
     if (ab) {
       ab.hidden = !getProfile();
       const sn = store.get('tp-serial', '');
+      const people = window.EqUsers ? window.EqUsers.list() : [];
+      const me = people.findIndex((u) => u.active);
+      const lbl = people.length > 1 && me >= 0 ? T('Dispositivo di {n}', { n: window.EqUsers.label(people[me], me) }) : T('Dispositivo abbinato');
+      ab.querySelector('.acct-lbl').textContent = lbl;
       document.getElementById('acct-sn').textContent = sn ? 'N° ' + sn : T('Abbina dispositivo');
-      ab.setAttribute('aria-label', T('Dispositivo abbinato') + (sn ? ' ' + sn : '') + ' · ' + T('Profilo e dispositivo'));
+      ab.setAttribute('aria-label', lbl + (sn ? ' ' + sn : '') + ' · ' + T('Profilo e dispositivo'));
     }
     const h = location.hash.replace(/^#\/?/, '');
     const [page, arg, arg2, arg3] = h.split('/');
@@ -1130,6 +1138,7 @@
     const p = getProfile(); const sn = store.get('tp-serial', ''); const nm = store.get('tp-name', '');
     acctSheet.querySelector('.acct-panel').innerHTML =
       '<div class="acct-head"><h2 id="acct-title">' + T('Profilo e dispositivo') + '</h2><button type="button" class="icon-btn acct-x" aria-label="' + esc(T('Chiudi')) + '">✕</button></div>' +
+      peopleHtml() +
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true">' + ((window.PROFILES[(p || {}).type] || {}).icon || '👤') + '</span><span><span class="small muted">' + T('Il tuo profilo') + '</span><br><b>' + (nm ? esc(nm) + ' · ' : '') + esc(profileName() || '—') + '</b></span></div>' +
       '<a class="btn primary" href="#/profilo" data-acct-close>' + SWAP_ICON + ' ' + T('Cambia profilo') + '</a>' +
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
@@ -1138,12 +1147,41 @@
     acctSheet.hidden = false; requestAnimationFrame(() => acctSheet.classList.add('on'));
     acctSheet.querySelector('.acct-x').focus();
   }
+  // Persone della famiglia sullo stesso telefono: ognuna con i suoi test e il suo dispositivo
+  function peopleHtml() {
+    if (!window.EqUsers) return '';
+    const people = window.EqUsers.list();
+    const rows = people.length > 1 ? people.map((u, i) =>
+      '<div class="acct-person' + (u.active ? ' on' : '') + '">' +
+      '<button type="button" class="acct-pick" data-acct-user="' + esc(u.id) + '"' + (u.active ? ' aria-current="true"' : '') + '><span class="acct-pico" aria-hidden="true">' + ((window.PROFILES[(u.profile || {}).type] || {}).icon || '👤') + '</span>' +
+      '<span class="acct-pname"><b>' + esc(window.EqUsers.label(u, i)) + '</b><span class="small muted">' + (u.active ? T('In uso adesso') : (u.serial ? 'N° ' + esc(u.serial) : T('Nessun dispositivo'))) + '</span></span>' + (u.active ? '<span class="acct-check" aria-hidden="true">✓</span>' : '') + '</button>' +
+      (u.active ? '' : '<button type="button" class="icon-btn acct-del" data-acct-del="' + esc(u.id) + '" aria-label="' + esc(T('Elimina {n}', { n: window.EqUsers.label(u, i) })) + '">🗑</button>') +
+      '</div>').join('') : '';
+    return '<div class="acct-people"><span class="small muted">' + T('Chi usa l’app') + '</span>' + rows +
+      '<button type="button" class="btn acct-add" data-acct-add>＋ ' + T('Aggiungi una persona') + '</button>' +
+      '<form class="acct-addform" hidden><label class="small" for="acct-newname">' + T('Nome della persona') + '</label>' +
+      '<div class="acct-addrow"><input id="acct-newname" maxlength="40" autocomplete="off" placeholder="' + esc(T('Es. Marco')) + '"><button type="submit" class="btn primary">' + T('Aggiungi') + '</button></div>' +
+      '<p class="small muted">' + T('Ogni persona ha il suo profilo, il suo dispositivo e i suoi Progressi. Il nome resta solo su questo telefono.') + '</p></form>' +
+      '</div>';
+  }
   function closeAcct() { acctSheet.classList.remove('on'); setTimeout(() => { acctSheet.hidden = true; }, 200); }
   if (acctBtn && acctSheet) {
     acctBtn.addEventListener('click', openAcct);
     acctSheet.addEventListener('click', (e) => {
       if (e.target === acctSheet || e.target.closest('.acct-x') || e.target.closest('[data-acct-close]')) closeAcct();
       if (e.target.closest('[data-acct-device]') && window.confirm(T('Vuoi abbinare un altro dispositivo Equistasi?'))) window.tpLogout();
+      const pick = e.target.closest('[data-acct-user]'); if (pick) window.EqUsers.switchTo(pick.dataset.acctUser);
+      const del = e.target.closest('[data-acct-del]');
+      if (del && window.confirm(T('Vuoi eliminare questa persona e i suoi test da questo telefono?'))) { window.EqUsers.remove(del.dataset.acctDel); openAcct(); route(); }
+      if (e.target.closest('[data-acct-add]')) {
+        const f = acctSheet.querySelector('.acct-addform'); f.hidden = false; e.target.closest('[data-acct-add]').hidden = true;
+        document.getElementById('acct-newname').focus();
+      }
+    });
+    acctSheet.addEventListener('submit', (e) => {
+      if (!e.target.closest('.acct-addform')) return;
+      e.preventDefault();
+      window.EqUsers.add(document.getElementById('acct-newname').value.trim());
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !acctSheet.hidden) closeAcct(); });
     window.addEventListener('hashchange', () => { if (!acctSheet.hidden) closeAcct(); });
