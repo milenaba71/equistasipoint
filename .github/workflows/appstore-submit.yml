@@ -26,6 +26,6 @@ jobs:
       - name: Invia la versione
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
           VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
           cd .github/scripts && python3 asc_submit.py "$BUNDLE" "$VERSION"

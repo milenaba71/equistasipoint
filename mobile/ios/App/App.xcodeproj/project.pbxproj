@@ -7,18 +7,51 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F6B3F8326B898FEFA22AF60 /* WatchBridgePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77A8B1A8DA76A6257D447F32 /* WatchBridgePlugin.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
+		4EF979BC8FBE5F94729EA33E /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC04424B2543EBE1C5A08CB9 /* MainViewController.swift */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
 		504EC3081FED79650016851F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504EC3071FED79650016851F /* AppDelegate.swift */; };
 		504EC30D1FED79650016851F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30B1FED79650016851F /* Main.storyboard */; };
 		504EC30F1FED79650016851F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 504EC30E1FED79650016851F /* Assets.xcassets */; };
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
+		6BAF4ED525A2CA9E72F52D9F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FDB7C9004AA3C5A5CF710A0 /* Foundation.framework */; };
+		7044413F3BF91CA647173FE6 /* WatchSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465B0373F9ADD12BE3678734 /* WatchSession.swift */; };
+		A596CBACF2A33E42A5D0F0F1 /* EquistasiWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FE5B348B614BB862A5C7AD33 /* EquistasiWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		BCFDDF9D4C6E912B3E187388 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C0FAC3421D8E65C036BB083F /* Assets.xcassets */; };
+		E581E688DB6B2FC173965683 /* EquistasiWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C45B3571D302AD1C98EC1306 /* EquistasiWatchApp.swift */; };
+		FEAC464AF736E014A4B5BFB7 /* Strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F141768A9370065DCA0C073A /* Strings.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5D9564E9A63AC85BBE717C6A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 504EC2FC1FED79650016851F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F327FF9E3B4E51FEB6D395E6;
+			remoteInfo = EquistasiWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CA09D2F402EB3F61FFF70531 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				A596CBACF2A33E42A5D0F0F1 /* EquistasiWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
+		465B0373F9ADD12BE3678734 /* WatchSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchSession.swift; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		504EC3071FED79650016851F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -27,7 +60,14 @@
 		504EC3111FED79650016851F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		504EC3131FED79650016851F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
+		77A8B1A8DA76A6257D447F32 /* WatchBridgePlugin.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WatchBridgePlugin.swift; sourceTree = "<group>"; };
+		8FDB7C9004AA3C5A5CF710A0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/WatchOS.platform/Developer/SDKs/WatchOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		C0FAC3421D8E65C036BB083F /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C45B3571D302AD1C98EC1306 /* EquistasiWatchApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = EquistasiWatchApp.swift; sourceTree = "<group>"; };
+		DC04424B2543EBE1C5A08CB9 /* MainViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		F141768A9370065DCA0C073A /* Strings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Strings.swift; sourceTree = "<group>"; };
+		FE5B348B614BB862A5C7AD33 /* EquistasiWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EquistasiWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,15 +79,33 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D95F04E90945F258294E8531 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6BAF4ED525A2CA9E72F52D9F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4FEFD7466C66F0A34736FDC5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				647AA95E5299B965C533C406 /* watchOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		504EC2FB1FED79650016851F = {
 			isa = PBXGroup;
 			children = (
 				958DCC722DB07C7200EA8C5F /* debug.xcconfig */,
 				504EC3061FED79650016851F /* App */,
 				504EC3051FED79650016851F /* Products */,
+				4FEFD7466C66F0A34736FDC5 /* Frameworks */,
+				A2AA4D3D84036DFE0C509861 /* EquistasiWatch */,
 			);
 			sourceTree = "<group>";
 		};
@@ -55,6 +113,7 @@
 			isa = PBXGroup;
 			children = (
 				504EC3041FED79650016851F /* App.app */,
+				FE5B348B614BB862A5C7AD33 /* EquistasiWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -70,8 +129,30 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				77A8B1A8DA76A6257D447F32 /* WatchBridgePlugin.swift */,
+				DC04424B2543EBE1C5A08CB9 /* MainViewController.swift */,
 			);
 			path = App;
+			sourceTree = "<group>";
+		};
+		647AA95E5299B965C533C406 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				8FDB7C9004AA3C5A5CF710A0 /* Foundation.framework */,
+			);
+			name = watchOS;
+			sourceTree = "<group>";
+		};
+		A2AA4D3D84036DFE0C509861 /* EquistasiWatch */ = {
+			isa = PBXGroup;
+			children = (
+				C45B3571D302AD1C98EC1306 /* EquistasiWatchApp.swift */,
+				465B0373F9ADD12BE3678734 /* WatchSession.swift */,
+				F141768A9370065DCA0C073A /* Strings.swift */,
+				C0FAC3421D8E65C036BB083F /* Assets.xcassets */,
+			);
+			name = EquistasiWatch;
+			path = EquistasiWatch;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -84,10 +165,12 @@
 				504EC3001FED79650016851F /* Sources */,
 				504EC3011FED79650016851F /* Frameworks */,
 				504EC3021FED79650016851F /* Resources */,
+				CA09D2F402EB3F61FFF70531 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6EDEF8CAD735CC59D52B9956 /* PBXTargetDependency */,
 			);
 			name = App;
 			packageProductDependencies = (
@@ -95,6 +178,23 @@
 			);
 			productName = App;
 			productReference = 504EC3041FED79650016851F /* App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F327FF9E3B4E51FEB6D395E6 /* EquistasiWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7ABC3DEEA2FAB3F7195C31F9 /* Build configuration list for PBXNativeTarget "EquistasiWatch" */;
+			buildPhases = (
+				C7C8BDB288FF8DADA5BFEF1D /* Sources */,
+				D95F04E90945F258294E8531 /* Frameworks */,
+				55FA803081CF407DDFC1492E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EquistasiWatch;
+			productName = EquistasiWatch;
+			productReference = FE5B348B614BB862A5C7AD33 /* EquistasiWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -130,6 +230,7 @@
 			projectRoot = "";
 			targets = (
 				504EC3031FED79650016851F /* App */,
+				F327FF9E3B4E51FEB6D395E6 /* EquistasiWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -148,6 +249,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		55FA803081CF407DDFC1492E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCFDDF9D4C6E912B3E187388 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -156,10 +265,31 @@
 			buildActionMask = 2147483647;
 			files = (
 				504EC3081FED79650016851F /* AppDelegate.swift in Sources */,
+				1F6B3F8326B898FEFA22AF60 /* WatchBridgePlugin.swift in Sources */,
+				4EF979BC8FBE5F94729EA33E /* MainViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7C8BDB288FF8DADA5BFEF1D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E581E688DB6B2FC173965683 /* EquistasiWatchApp.swift in Sources */,
+				7044413F3BF91CA647173FE6 /* WatchSession.swift in Sources */,
+				FEAC464AF736E014A4B5BFB7 /* Strings.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		6EDEF8CAD735CC59D52B9956 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = EquistasiWatch;
+			target = F327FF9E3B4E51FEB6D395E6 /* EquistasiWatch */;
+			targetProxy = 5D9564E9A63AC85BBE717C6A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		504EC30B1FED79650016851F /* Main.storyboard */ = {
@@ -181,6 +311,31 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		36F17389EF80D4D520FE1DBB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Equistasi;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.equistasi.triggerpoint;
+				MARKETING_VERSION = 1.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.equistasi.triggerpoint.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 		504EC3141FED79650016851F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 958DCC722DB07C7200EA8C5F /* debug.xcconfig */;
@@ -296,15 +451,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = JTWA5725M3;
 				CURRENT_PROJECT_VERSION = 21;
+				DEVELOPMENT_TEAM = JTWA5725M3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.3.0;
 				OTHER_SWIFT_FLAGS = "$(inherited) \"-D\" \"COCOAPODS\" \"-DDEBUG\"";
 				PRODUCT_BUNDLE_IDENTIFIER = com.equistasi.triggerpoint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -319,15 +474,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = JTWA5725M3;
 				CURRENT_PROJECT_VERSION = 21;
+				DEVELOPMENT_TEAM = JTWA5725M3;
 				INFOPLIST_FILE = App/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.1;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.equistasi.triggerpoint;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
@@ -335,6 +490,30 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
+		};
+		685ACD00A90C3CC6E880614D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Equistasi;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.equistasi.triggerpoint;
+				MARKETING_VERSION = 1.3.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.equistasi.triggerpoint.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
 		};
 /* End XCBuildConfiguration section */
 
@@ -353,6 +532,15 @@
 			buildConfigurations = (
 				504EC3171FED79650016851F /* Debug */,
 				504EC3181FED79650016851F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7ABC3DEEA2FAB3F7195C31F9 /* Build configuration list for PBXNativeTarget "EquistasiWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				36F17389EF80D4D520FE1DBB /* Release */,
+				685ACD00A90C3CC6E880614D /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
