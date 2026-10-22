@@ -1050,3 +1050,9 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .acct-addrow input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); color: inherit; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct-person.on { background: rgba(255, 255, 255, .06); border-color: #8f88d6; } }
 .acct-addrow .btn { width: auto; flex: none; margin: 0; }
+.acct-danger { color: #b3261e; margin-top: 8px; }
+.acct-wipe { display: grid; gap: 8px; margin-top: 4px; }
+.acct-wopt { display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--card); cursor: pointer; }
+.acct-wopt.danger { border-color: #e6a29d; background: rgba(179, 38, 30, .06); }
+.acct-wopt.danger b { color: #b3261e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .acct-danger, :root:not([data-theme="light"]) .acct-wopt.danger b { color: #ff9a92; } }

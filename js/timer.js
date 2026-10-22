@@ -243,5 +243,13 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   window.addEventListener('load', tick);
 
-  window.EqTimer = { cardHtml, todayHtml, render, tick, start };
+  // Toglie tutte le notifiche programmate (quando si cancellano i dati)
+  async function clearAll() {
+    clearTimeout(webTimer);
+    const LN = native(); if (!LN) return;
+    const ids = [{ id: NOTIF_ID }];
+    for (let w = 2; w <= 6; w++) ids.push({ id: 3000 + w }, { id: 3010 + w });
+    try { await LN.cancel({ notifications: ids }); } catch (e) { /* nessuna notifica */ }
+  }
+  window.EqTimer = { cardHtml, todayHtml, render, tick, start, clearAll };
 })();
