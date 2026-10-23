@@ -73,4 +73,8 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   '{n} alzate in 30 s': '{n} stands in 30 s',
   '{n} alzate su 5': '{n} of 5 stands',
   '⚠️ Fai il test solo con una persona accanto': '⚠️ Only do the test with someone next to you',
+  'Fascia sul petto': 'Chest strap',
+  '<b>Telefono nella fascia sul petto</b> (cintura toracica), ben stretta, schermo verso l’esterno. Dopo Inizia hai <b>10 secondi</b> per metterlo.': '<b>Phone in the chest strap</b>, fastened tightly, screen facing outwards. After Start you have <b>10 seconds</b> to put it in.',
+  'Metti il telefono nella fascia sul petto e siediti.': 'Put the phone in the chest strap and sit down.',
+  'Metti il telefono nella fascia e resta seduto': 'Put the phone in the strap and stay seated',
 });

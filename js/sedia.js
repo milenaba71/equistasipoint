@@ -1,5 +1,5 @@
 /* "Alzati dalla sedia" (profilo Neurologico, funzione in prova): test della forza delle gambe con il telefono
-   sul petto o in cintura. Due versioni note in letteratura: quante volte ti alzi in 30 secondi
+   in una fascia sul petto o in cintura. Due versioni note in letteratura: quante volte ti alzi in 30 secondi
    (30-second chair stand) e quanto tempo servono 5 alzate (five times sit-to-stand).
    Le alzate si riconoscono dall'accelerazione verticale: usiamo il modulo dell'accelerazione, che non
    cambia quando il busto si inclina, e lo integriamo per avere la velocità di salita e discesa.
@@ -22,7 +22,8 @@
 
   const MODE = { trenta: T('30 secondi'), cinque: T('5 alzate') };
   const ARMS = { incrociate: T('Braccia incrociate'), mani: T('Con l’aiuto delle mani') };
-  const MOUNT = { petto: T('Sul petto'), cintura: T('In cintura (lombare)') };
+  // il telefono va sempre in una fascia o cintura (più sicuro: mani libere)
+  const MOUNT = { petto: T('Fascia sul petto'), cintura: T('In cintura (lombare)') };
   const COND = { senza: T('Senza Equistasi'), con: T('Con Equistasi') };
   const DUR30 = 30000; const MAX5 = 60000;
 
@@ -180,7 +181,7 @@
   function how() {
     const phone = prefs.mount === 'cintura'
       ? T('<b>Telefono nella cintura</b>, dietro la schiena in zona lombare, schermo verso l’esterno. Dopo Inizia hai <b>10 secondi</b> per metterlo.')
-      : T('<b>Telefono sul petto</b>, tenuto fermo con le braccia incrociate sullo sterno.');
+      : T('<b>Telefono nella fascia sul petto</b> (cintura toracica), ben stretta, schermo verso l’esterno. Dopo Inizia hai <b>10 secondi</b> per metterlo.');
     const arms = prefs.arms === 'mani'
       ? T('Puoi spingerti con le mani sulle cosce o sulla seduta: usa sempre lo stesso modo per confrontare le prove.')
       : T('Braccia incrociate sul petto per tutta la prova.');
@@ -247,10 +248,10 @@
     window.addEventListener('devicemotion', onPrep);
     stop = () => { cancelled = true; };
     document.getElementById('ch-stop').onclick = () => stop && stop();
-    say(belt ? T('Metti il telefono nella cintura e siediti.') : T('Siediti con le braccia incrociate e il telefono sul petto.'));
-    const prep = belt ? 10 : 5;
+    say(belt ? T('Metti il telefono nella cintura e siediti.') : T('Metti il telefono nella fascia sul petto e siediti.'));
+    const prep = 10; // il tempo per mettere il telefono nella fascia o nella cintura
     for (let i = prep; i > 0 && !cancelled; i--) {
-      big.textContent = i; sub.textContent = belt ? T('Metti il telefono nella cintura e resta seduto') : T('Resta seduto e fermo');
+      big.textContent = i; sub.textContent = belt ? T('Metti il telefono nella cintura e resta seduto') : T('Metti il telefono nella fascia e resta seduto');
       if (i <= 3) { beep(660, 120); say(String(i)); }
       await wait(1000);
     }
