@@ -727,7 +727,7 @@
   function renderTimer() {
     setBack(true);
     app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>') +
-      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
+      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + (window.EqPro ? window.EqPro.painCardHtml() : '') + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
   /* ───────── Visore PDF dentro l'app (così non si esce dall'app) ───────── */

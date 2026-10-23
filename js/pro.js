@@ -30,7 +30,7 @@
   const CONDS = () => ({ senza: T('Senza Equistasi'), con: T('Con Equistasi') });
   const REGIONS = () => ({ toracica: T('Toracica'), toracolombare: T('Toraco-lombare'), lombare: T('Lombare') });
 
-  const head = (title, sub) => '<div class="detail-head"><div class="eyebrow">' + T('Professionista') + ' · <span class="beta-tag">' + T('in prova') + '</span></div><h1>' + title + '</h1>' +
+  const head = (title, sub, eyebrow) => '<div class="detail-head"><div class="eyebrow">' + (eyebrow || T('Professionista') + ' · <span class="beta-tag">' + T('in prova') + '</span>') + '</div><h1>' + title + '</h1>' +
     (sub ? '<p class="small muted" style="margin:6px 0 0">' + sub + '</p>' : '') + '</div>';
   const NOTE = '<p class="small muted" style="margin-top:14px">' + T('Misure indicative fatte con i sensori del telefono, a supporto della visita: non diagnostiche e non sostitutive della valutazione clinica.') + '</p>';
   const seg = (name, opts, cur, label) => '<div class="seg" role="group" aria-label="' + esc(label) + '">' +
@@ -247,9 +247,9 @@
   function renderPain(app) {
     const p = store.get(PAIN, []).slice(-12).reverse();
     const lines = painSummary(); const use = useLines();
-    app.innerHTML = head(T('Dolore e uso del dispositivo'), T('Dolore da 0 a 10 prima di applicare Equistasi e dopo le 2 ore, e quanto viene usato il dispositivo.')) +
+    app.innerHTML = head(T('Dolore e uso del dispositivo'), T('Dolore da 0 a 10 prima di applicare Equistasi e dopo le 2 ore, e quanto viene usato il dispositivo.'), T('Promemoria')) +
       '<div class="card"><h3>' + T('Riepilogo') + '</h3>' +
-      ((lines.length || use.length) ? '<ul class="small pro-sum">' + lines.concat(use).map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="small muted" style="margin:0">' + T('Ancora nessun dato: quando il paziente tocca «Ho applicato il dispositivo» nel Promemoria, l’app chiede il dolore prima e dopo le 2 ore.') + '</p>') +
+      ((lines.length || use.length) ? '<ul class="small pro-sum">' + lines.concat(use).map((x) => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="small muted" style="margin:0">' + T('Ancora nessun dato: quando tocchi «Ho applicato il dispositivo» nel Promemoria, l’app chiede il dolore prima e dopo le 2 ore.') + '</p>') +
       '</div><div class="card"><h3>' + T('Segna il dolore adesso') + '</h3><p class="small muted" style="margin:0 0 8px">' + T('0 = nessun dolore, 10 = il peggiore immaginabile.') + '</p>' + scale('now') + '<p class="gate-msg" id="pro-msg" role="status"></p></div>' +
       (p.length ? '<div class="card"><h3>' + T('Ultimi valori') + '</h3><div class="pz-table-wrap"><table class="pz-table"><tbody>' +
         p.map((x) => '<tr><th>' + dateStr(x.t) + ' ' + pad(new Date(x.t).getHours()) + ':' + pad(new Date(x.t).getMinutes()) + '</th><td>' + ({ pre: T('prima'), post: T('dopo 2 ore'), now: T('libero') }[x.ph]) + '</td><td><b>' + x.v + '</b>/10</td></tr>').join('') +
@@ -263,8 +263,8 @@
   function addPain(ph, v, s) { const all = store.get(PAIN, []); all.push({ t: Date.now(), ph, v, s }); store.set(PAIN, all.slice(-500)); }
 
   // Finestra «Quanto dolore senti?» quando si applica o si toglie il dispositivo (solo noleggio prof)
+  // per tutti: il dolore lo vede e lo segna anche il paziente
   function askPain(ph, s) {
-    if (!isPro()) return;
     const el = document.createElement('div');
     el.className = 'acct-sheet on pro-ask'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true');
     el.innerHTML = '<div class="acct-panel"><div class="acct-head"><h2>' + (ph === 'pre' ? T('Dolore prima dell’applicazione') : T('Dolore dopo le 2 ore')) + '</h2></div>' +
@@ -306,6 +306,7 @@
   }
   function render(app, arg) {
     stopMotion();
+    if (arg === 'dolore') { renderPain(app); return; } // dolore e uso: per tutti
     if (!isPro()) { renderLocked(app); return; }
     if (arg === 'gonio') renderGonio(app);
     else if (arg === 'scolio') renderScolio(app);
@@ -316,10 +317,10 @@
 
   // Righe per il report (web e PDF): gruppi con titolo e righe { label, val }
   function reportGroups() {
-    if (!isPro()) return [];
     const out = [];
     const pain = painSummary().concat(useLines());
     if (pain.length) out.push({ title: T('Dolore e uso del dispositivo'), rows: pain.map((x) => ({ label: x, val: '' })) });
+    if (!isPro()) return out; // goniometro e scoliometro: solo noleggio prof
     const gon = store.get(GONIO, []);
     if (gon.length) {
       const last = {}; gon.forEach((r) => { last[r.j + '|' + r.mv + '|' + r.side] = r; });
@@ -340,5 +341,12 @@
   const cardHtml = () => isPro() ? '<a class="card vpromo pro-card" href="#/pro"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4H9zM5 7h14v14H5z"/><path d="M12 11v6M9 14h6"/></svg></span>' +
     '<span><b>' + T('Strumenti per il professionista') + '</b><br><span class="small muted">' + T('Goniometro, scoliometro, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' : '';
 
-  window.EqPro = { isPro, render, cardHtml, reportGroups, onSessionStart, onSessionEnd, _wrap: wrap, _painSummary: painSummary, _useSummary: useSummary };
+  // Scheda nel Promemoria (per tutti): dolore e uso del dispositivo
+  function painCardHtml() {
+    const l = painSummary().concat(useLines());
+    return '<a class="card vpromo pain-card" href="#/pro/dolore"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg></span>' +
+      '<span><b>' + T('Il tuo dolore e l’uso del dispositivo') + '</b><br><span class="small muted">' + (l.length ? l[0] : T('Segna il dolore da 0 a 10 prima e dopo l’applicazione')) + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+  }
+
+  window.EqPro = { isPro, render, cardHtml, painCardHtml, reportGroups, onSessionStart, onSessionEnd, _wrap: wrap, _painSummary: painSummary, _useSummary: useSummary };
 })();

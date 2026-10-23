@@ -76,7 +76,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Dolore e uso del dispositivo": "Pain and device use",
   "Dolore da 0 a 10 prima di applicare Equistasi e dopo le 2 ore, e quanto viene usato il dispositivo.": "Pain from 0 to 10 before applying Equistasi and after the 2 hours, and how much the device is used.",
   "Riepilogo": "Summary",
-  "Ancora nessun dato: quando il paziente tocca «Ho applicato il dispositivo» nel Promemoria, l’app chiede il dolore prima e dopo le 2 ore.": "No data yet: when the patient taps “I’ve applied the device” in Reminder, the app asks for pain before and after the 2 hours.",
+  "Ancora nessun dato: quando tocchi «Ho applicato il dispositivo» nel Promemoria, l’app chiede il dolore prima e dopo le 2 ore.": "No data yet: when you tap “I’ve applied the device” in Reminder, the app asks for pain before and after the 2 hours.",
   "Segna il dolore adesso": "Record pain now",
   "0 = nessun dolore, 10 = il peggiore immaginabile.": "0 = no pain, 10 = worst imaginable.",
   "Ultimi valori": "Latest values",
@@ -100,4 +100,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "destra": "right",
   "sinistra": "left",
   "Simmetria destra/sinistra": "Right/left symmetry",
+  "Il tuo dolore e l’uso del dispositivo": "Your pain and device use",
+  "Segna il dolore da 0 a 10 prima e dopo l’applicazione": "Record pain from 0 to 10 before and after application",
 });
