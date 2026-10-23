@@ -5,7 +5,7 @@
 (function () {
   const KEYS = ['tp-profile', 'tp-name', 'tp-serial', 'tp-side', 'tp-devtype', 'tp-posture', 'tp-posture-photos', 'tp-posture-prefs',
     'tp-tests', 'tp-test-prefs', 'tp-chair', 'tp-chair-prefs', 'tp-session', 'tp-log', 'tp-daily',
-    'tp-pro', 'tp-pro-at', 'tp-pro-prefs', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use'];
+    'tp-pro', 'tp-pro-at', 'tp-pro-prefs', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use', 'tp-clin'];
   const LIST = 'tp-users';
   const ACTIVE = 'tp-user';
   const ls = {
@@ -74,7 +74,7 @@
   }
 
   // Cancella solo i risultati della persona attiva: profilo e dispositivo restano
-  const RESULTS = ['tp-posture', 'tp-posture-photos', 'tp-tests', 'tp-chair', 'tp-session', 'tp-log', 'tp-daily', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use'];
+  const RESULTS = ['tp-posture', 'tp-posture-photos', 'tp-tests', 'tp-chair', 'tp-session', 'tp-log', 'tp-daily', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use', 'tp-clin'];
   function clearResults() { RESULTS.forEach((k) => ls.del(k)); }
   // Cancella tutto su questo telefono (tutte le persone) e si riparte dall'inizio; resta solo la lingua
   function wipeAll() {
