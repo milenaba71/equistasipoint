@@ -73,13 +73,16 @@
     const log = store.get(LOG, []);
     log.push(now);
     store.set(LOG, log.filter((t) => now - t < 30 * 864e5));
+    if (window.EqPro) window.EqPro.onSessionStart(s); // dolore prima (solo noleggio prof)
     render(); // la scheda si aggiorna subito, anche mentre il telefono chiede il permesso per le notifiche
     const ok = await askPermission().catch(() => false);
     await schedule(s.end).catch(() => {});
     render(ok ? '' : T('Le notifiche non sono attive: tieni aperta l’app o controlla l’orario indicato qui sopra.'));
   }
   async function stop() {
+    const s = store.get(KEY, null);
     store.del(KEY);
+    if (window.EqPro) window.EqPro.onSessionEnd(s); // ore di uso e dolore dopo (solo noleggio prof)
     await cancel();
     render();
   }

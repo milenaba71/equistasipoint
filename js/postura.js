@@ -526,6 +526,7 @@
       rows, chart: st.filter((r) => r.eyes === 'aperti').slice(-20).map((r) => ({ v: index(r.m.area), con: r.cond === 'con' })),
       recent: recs.slice(-10).reverse().map((r) => ({ label: label(r), date: dateStr(r.t) + ' ' + timeStr(r.t), cond: condTxt(r.cond), val: val(r) })),
       photos, chair,
+      pro: window.EqPro ? window.EqPro.reportGroups() : [],
     };
   }
 
@@ -552,6 +553,8 @@
       '</tbody></table></div><p class="small muted" style="margin:8px 0 0">' + T('Media delle prove (numero tra parentesi). Verde: valore migliorato con Equistasi; per l’oscillazione un valore più basso indica più stabilità.') + '</p></div>' +
       (data.sport.length ? '<div class="card"><h3>' + T('Test di progressi (sport)') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
         data.sport.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') + '</tbody></table></div></div>' : '') +
+      data.pro.map((gr) => '<div class="card"><h3>' + gr.title + '</h3><div class="pz-table-wrap"><table class="pz-table"><tbody>' +
+        gr.rows.map((r) => '<tr><th>' + r.label + '</th>' + (r.val ? '<td><b>' + r.val + '</b></td>' : '') + '</tr>').join('') + '</tbody></table></div></div>').join('') +
       (data.photos.length ? '<div class="card"><h3>' + T('Foto della postura') + '</h3><div class="pz-photo-grid">' + store.get(PHOTO_KEY, []).slice(-6).map((p) => photoFigure(p, true)).join('') + '</div></div>' : '') +
       '<p class="small muted">' + T('Valori stimati con i sensori e la fotocamera del telefono, indicativi e non diagnostici. Area: ellisse al 95% dell’oscillazione stimata del corpo; velocità: percorso medio al secondo.') + '</p></div>';
     const msg = document.getElementById('pz-pdf-msg');
