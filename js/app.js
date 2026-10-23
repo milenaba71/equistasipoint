@@ -191,7 +191,7 @@
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
-      window.EqTimer.todayHtml() +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
       T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + window.EqChair.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
@@ -247,7 +247,7 @@
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
-      window.EqTimer.todayHtml() +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
       (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Il metamero</b> è come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa i metameri</a></div></div>')) +
       (sport ? window.EqTests.cardHtml() + window.EqPosture.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
@@ -730,7 +730,7 @@
   function renderTimer() {
     setBack(true);
     app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>') +
-      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + (window.EqPro ? window.EqPro.painCardHtml() : '') + '</div><div>' + scheduleCard() + '</div></div>';
+      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + (window.EqCalib ? window.EqCalib.cardHtml() : '') + (window.EqPro ? window.EqPro.painCardHtml() : '') + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
   /* ───────── Visore PDF dentro l'app (così non si esce dall'app) ───────── */
@@ -1029,7 +1029,10 @@
       const data = await r.json();
       const ok = data && (data.valid === true || data.valid === 'true');
       // dispositivo a noleggio professionale: sblocca gli strumenti per il professionista
-      if (ok) { store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now())); }
+      if (ok) {
+        store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
+        if (window.EqCalib) window.EqCalib.update(serial, data.cal); // calibrazione annuale
+      }
       return ok;
     } finally { clearTimeout(t); }
   }
@@ -1148,6 +1151,7 @@
       '<a class="btn primary" href="#/profilo" data-acct-close>' + SWAP_ICON + ' ' + T('Cambia profilo') + '</a>' +
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
       '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
+      (window.EqCalib ? window.EqCalib.cardHtml(true) : '') +
       '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>' +
       (window.EqPro && window.EqPro.isPro() ? '<a class="btn" href="#/pro" data-acct-close>' + T('Strumenti per il professionista') + '</a>' : '') +
       '<button type="button" class="btn acct-danger" data-acct-wipe>' + T('Cancella i dati e ricomincia') + '</button>' +

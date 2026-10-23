@@ -97,3 +97,9 @@ La verifica del seriale risponde anche `"pro": true` quando il dispositivo, nell
 **dispositivi disponibili**, ha tipologia **noleggio prof**. L'app allora mostra gli
 «Strumenti per il professionista» (goniometro, scoliometro, dolore e uso del dispositivo).
 L'app ricontrolla una volta al giorno: se si cambia la tipologia su Airtable, l'accesso si aggiorna da solo.
+
+## Calibrazione annuale
+La verifica risponde anche `"cal": "AAAA-MM-GG"`: la «data prossima calibrazione» dell'ultima riga della tabella
+**calibrazioni** che contiene quel numero di serie nelle NOTE. L'app mostra una barra che scorre fino a quella data;
+se non c'è nessuna calibrazione registrata, conta un anno dal giorno in cui il dispositivo è stato attivato nell'app.
+Per far ripartire la barra dopo una calibrazione basta registrarla in **calibrazioni** con i seriali nelle NOTE.

@@ -5,7 +5,7 @@
 (function () {
   const KEYS = ['tp-profile', 'tp-name', 'tp-serial', 'tp-side', 'tp-devtype', 'tp-posture', 'tp-posture-photos', 'tp-posture-prefs',
     'tp-tests', 'tp-test-prefs', 'tp-chair', 'tp-chair-prefs', 'tp-session', 'tp-log', 'tp-daily',
-    'tp-pro', 'tp-pro-at', 'tp-pro-prefs', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use', 'tp-clin'];
+    'tp-pro', 'tp-pro-at', 'tp-pro-prefs', 'tp-gonio', 'tp-scolio', 'tp-pain', 'tp-use', 'tp-clin', 'tp-act', 'tp-act-sn', 'tp-cal-next', 'tp-cal-reset'];
   const LIST = 'tp-users';
   const ACTIVE = 'tp-user';
   const ls = {

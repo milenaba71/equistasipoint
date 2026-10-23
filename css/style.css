@@ -1080,3 +1080,13 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .meta-switch .ms-alt small { font-size: 12px; font-weight: 600; opacity: .8; }
 .meta-switch .ms-alt .chev { margin-left: auto; font-size: 22px; }
 @media (max-width: 360px) { .meta-switch .ms-on { padding: 10px; font-size: 13px; } .meta-switch .ms-alt b { font-size: 13px; } }
+/* Calibrazione annuale: barra che si accorcia fino alla scadenza */
+.cal-card .cal-top { display: flex; gap: 12px; align-items: center; }
+.cal-ico { font-size: 26px; flex: none; }
+.cal-bar { height: 12px; border-radius: 999px; background: var(--chip, #eef1fb); margin-top: 10px; overflow: hidden; }
+.cal-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2e9d5b, #4bc07a); transition: width .4s; }
+.cal-card.soon .cal-bar i { background: linear-gradient(90deg, #e0a100, #FADC00); }
+.cal-card.due { border-color: #e6a29d; background: rgba(179, 38, 30, .05); }
+.cal-card.due .cal-bar i { width: 0 !important; }
+.cal-card .btn { margin-top: 10px; }
+.acct-panel .cal-card { margin: 4px 0 0; box-shadow: none; }
