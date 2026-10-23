@@ -1060,3 +1060,14 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .belt-fig { display: flex; gap: 14px; align-items: center; margin: 0 0 12px; }
 .belt-fig svg { flex: none; background: var(--indigo); border-radius: 16px; padding: 6px; }
 .belt-fig p { margin: 0; }
+
+/* Strumenti per il professionista (noleggio prof) */
+.pro-live { text-align: center; padding: 14px 10px; margin: 6px 0 10px; border-radius: 18px; background: var(--chip, #eef1fb); }
+.pro-big { font-size: 56px; font-weight: 800; line-height: 1.05; color: var(--indigo); font-variant-numeric: tabular-nums; }
+.pro-ico { display: grid; place-items: center; color: var(--indigo); background: var(--chip, #eef1fb); }
+.pro-sum { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.pain-scale { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; margin: 10px 0; }
+.pain-scale button { min-height: 44px; border: 0; border-radius: 10px; font-weight: 800; font-size: 15px; cursor: pointer; color: #1b1840; background: hsl(var(--h) 70% 72%); }
+.pain-scale button:active { transform: scale(.94); }
+.pro-ask { z-index: 70; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pro-big { color: #fff; } :root:not([data-theme="light"]) .pro-live, :root:not([data-theme="light"]) .pro-ico { background: #2c2660; color: #fff; } }

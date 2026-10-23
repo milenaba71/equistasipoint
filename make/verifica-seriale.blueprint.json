@@ -61,13 +61,56 @@
       }
     },
     {
+      "id": 4,
+      "module": "airtable:makeApiCall",
+      "version": 3,
+      "parameters": {
+        "__IMTCONN__": 14440995
+      },
+      "mapper": {
+        "url": "v0/appI8mMIC0khEkLqK/tblmeCftgU0TrG0ck",
+        "method": "GET",
+        "qs": [
+          {
+            "key": "filterByFormula",
+            "value": "AND(LEN(\"{{upper(replace(trim(toString(1.serial)); \"/[^A-Za-z0-9-]/g\"; emptystring))}}\")>=5,UPPER(SUBSTITUTE({verifica id},\" \",\"\"))=\"{{upper(replace(trim(toString(1.serial)); \"/[^A-Za-z0-9-]/g\"; emptystring))}}\",FIND(\"NOLEGGIO PROF\",UPPER(ARRAYJOIN({tipologia},\",\"))))"
+          },
+          {
+            "key": "maxRecords",
+            "value": "1"
+          },
+          {
+            "key": "fields[]",
+            "value": "verifica id"
+          }
+        ]
+      },
+      "metadata": {
+        "restore": {
+          "parameters": {
+            "__IMTCONN__": {
+              "data": {
+                "scoped": "true",
+                "connection": "airtable2"
+              },
+              "label": "EQUITUTTO2026"
+            }
+          }
+        },
+        "designer": {
+          "x": 450,
+          "y": 0
+        }
+      }
+    },
+    {
       "id": 3,
       "module": "gateway:WebhookRespond",
       "version": 1,
       "parameters": {},
       "mapper": {
         "status": 200,
-        "body": "{\"valid\": {{if(length(2.body.records) > 0; \"true\"; \"false\")}}}",
+        "body": "{\"valid\": {{if(length(2.body.records) > 0; \"true\"; \"false\")}}, \"pro\": {{if(length(2.body.records) > 0 & length(4.body.records) > 0; \"true\"; \"false\")}}}",
         "headers": [
           {
             "key": "Content-Type",

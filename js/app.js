@@ -707,7 +707,7 @@
     setBack(true);
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>') +
-      deviceCard() + shopCard + '<div class="cols">' +
+      deviceCard() + (window.EqPro ? window.EqPro.cardHtml() : '') + shopCard + '<div class="cols">' +
       T('<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>') +
       T('<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>') + legend() + '</div>' +
       T('<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>') +
@@ -838,6 +838,7 @@
     else if (page === 'promemoria') renderTimer();
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
+    else if (page === 'pro') { setBack(true); window.EqPro.render(app, arg); }
     else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
     else if (page === 'sedia' || page === 'beta') { setBack(true); window.EqChair.render(app, page === 'beta' ? 'beta' : arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
@@ -1023,7 +1024,10 @@
     try {
       const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'serial=' + encodeURIComponent(serial), { signal: ctrl.signal, cache: 'no-store' });
       const data = await r.json();
-      return data && (data.valid === true || data.valid === 'true');
+      const ok = data && (data.valid === true || data.valid === 'true');
+      // dispositivo a noleggio professionale: sblocca gli strumenti per il professionista
+      if (ok) { store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now())); }
+      return ok;
     } finally { clearTimeout(t); }
   }
 
@@ -1142,6 +1146,7 @@
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
       '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
       '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>' +
+      (window.EqPro && window.EqPro.isPro() ? '<a class="btn" href="#/pro" data-acct-close>' + T('Strumenti per il professionista') + '</a>' : '') +
       '<button type="button" class="btn acct-danger" data-acct-wipe>' + T('Cancella i dati e ricomincia') + '</button>' +
       '<div class="acct-wipe" hidden>' +
       '<button type="button" class="acct-wopt" data-wipe="results"><b>' + T('Cancella solo i risultati') + '</b><span class="small muted">' + T('Test, salti, sprint, sedia, postura con le foto e promemoria di {n}. Profilo e dispositivo restano.', { n: esc(nm || T('questa persona')) }) + '</span></button>' +
@@ -1211,7 +1216,11 @@
     location.hash = '#/'; location.reload();
   };
 
-  if (store.get('tp-serial', '')) start();
+  if (store.get('tp-serial', '')) {
+    start();
+    // una volta al giorno ricontrolla se il dispositivo è a noleggio professionale (senza bloccare l'app)
+    if (Date.now() - Number(store.get('tp-pro-at', '0')) > 864e5) verifySerial(store.get('tp-serial', '')).then(() => { if (/^#\/(pro|test|info)?$/.test(location.hash) || location.hash === '') route(); }).catch(() => {});
+  }
   else { gate.hidden = false; setTimeout(() => gateInput.focus(), 50); }
 
   /* Offline */

@@ -91,3 +91,9 @@ I contenuti con Language = `en` non vengono mostrati.
 Il testo dell'informativa sintetica è in `js/data.js` → `window.PRIVACY` (le parti tra [parentesi] vanno completate
 e il testo va verificato dal consulente privacy / DPO). Il link all'informativa completa si inserisce in
 `js/config.js` → `privacyUrl`: finché è vuoto il link non compare.
+
+## Dispositivi a noleggio professionale
+La verifica del seriale risponde anche `"pro": true` quando il dispositivo, nella tabella
+**dispositivi disponibili**, ha tipologia **noleggio prof**. L'app allora mostra gli
+«Strumenti per il professionista» (goniometro, scoliometro, dolore e uso del dispositivo).
+L'app ricontrolla una volta al giorno: se si cambia la tipologia su Airtable, l'accesso si aggiorna da solo.
