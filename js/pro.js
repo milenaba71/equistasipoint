@@ -32,7 +32,7 @@
 
   const head = (title, sub, eyebrow) => '<div class="detail-head"><div class="eyebrow">' + (eyebrow || T('Professionista') + ' · <span class="beta-tag">' + T('in prova') + '</span>') + '</div><h1>' + title + '</h1>' +
     (sub ? '<p class="small muted" style="margin:6px 0 0">' + sub + '</p>' : '') + '</div>';
-  const NOTE = '<p class="small muted" style="margin-top:14px">' + T('Misure indicative fatte con i sensori del telefono, a supporto della visita: non diagnostiche e non sostitutive della valutazione clinica.') + '</p>';
+  const NOTE = '<p class="small muted" style="margin-top:14px">' + T('Misure indicative fatte con i sensori del telefono: non diagnostiche e non sostitutive della valutazione clinica.') + '</p>';
   const seg = (name, opts, cur, label) => '<div class="seg" role="group" aria-label="' + esc(label) + '">' +
     Object.keys(opts).map((k) => '<button type="button" data-pp="' + name + '" data-val="' + k + '" aria-pressed="' + (k === cur) + '">' + opts[k] + '</button>').join('') + '</div>';
 

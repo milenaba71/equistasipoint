@@ -10,7 +10,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Lombare": "Lumbar",
   "Professionista": "Professional",
   "in prova": "beta",
-  "Misure indicative fatte con i sensori del telefono, a supporto della visita: non diagnostiche e non sostitutive della valutazione clinica.": "Indicative measurements made with the phone sensors to support the examination: not diagnostic and not a substitute for clinical assessment.",
+  "Misure indicative fatte con i sensori del telefono: non diagnostiche e non sostitutive della valutazione clinica.": "Indicative measurements made with the phone sensors: not diagnostic and not a substitute for clinical assessment.",
   "Persona sdraiata o seduta. Appoggia il telefono <b>sul lato esterno della coscia</b>, lungo l’osso, <b>schermo verso l’esterno</b> e parte alta del telefono verso il ginocchio.": "Person lying down or seated. Place the phone <b>on the outer side of the thigh</b>, along the bone, <b>screen facing outwards</b> and the top of the phone towards the knee.",
   "Tocca <b>Segna coscia</b>. Poi appoggia il telefono <b>sul lato esterno della tibia</b>, sempre schermo verso l’esterno e parte alta verso il piede.": "Tap <b>Mark thigh</b>. Then place the phone <b>on the outer side of the shin</b>, still screen facing outwards and top towards the foot.",
   "Fai piegare il ginocchio al massimo e tocca <b>Segna tibia</b>.": "Have the knee bent as far as possible and tap <b>Mark shin</b>.",
