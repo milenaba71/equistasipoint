@@ -285,6 +285,129 @@
     askPain('post', s.start);
   }
 
+
+  /* ───────── Test clinici a tempo: Timed Up and Go e cammino su 10 metri ─────────
+     Due modi: «telefono addosso» (in cintura o in tasca: fine automatica quando la persona si ferma, passi contati)
+     oppure «cronometro» (il professionista tiene il telefono e tocca Stop). */
+  const CLIN = 'tp-clin';
+  const CMODES = () => ({ addosso: T('Telefono addosso'), mano: T('Cronometro in mano') });
+  let actx = null;
+  function beep(f, ms) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(); const gn = actx.createGain(); o.frequency.value = f; o.connect(gn); gn.connect(actx.destination);
+      gn.gain.setValueAtTime(0.25, actx.currentTime); o.start(); o.stop(actx.currentTime + ms / 1000);
+    } catch (e) { /* audio non disponibile */ }
+    if (navigator.vibrate) navigator.vibrate(ms);
+  }
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  let clinStop = null;
+  function renderClin(app, test) {
+    if (clinStop) clinStop();
+    const tug = test === 'tug';
+    const mode = prefs.cmode || 'addosso';
+    const how = tug
+      ? [T('Sedia con schienale e braccioli, segno a terra a <b>3 metri</b>. La persona è seduta con la schiena appoggiata, calzature abituali (ausilio se lo usa).'),
+        mode === 'addosso' ? T('Metti il telefono <b>in cintura o in tasca</b> alla persona.') : T('Tieni tu il telefono e stai accanto alla persona.'),
+        T('Tocca <b>Inizia</b>: al «Via» la persona si alza, cammina fino al segno a passo normale e sicuro, gira, torna e si siede.'),
+        mode === 'addosso' ? T('Il tempo si ferma da solo quando la persona è di nuovo seduta e ferma. Puoi anche toccare <b>Stop</b>.') : T('Tocca <b>Stop</b> quando la schiena torna appoggiata allo schienale.')]
+      : [T('Percorso dritto di <b>10 metri</b>, con 2 metri in più prima e dopo per partire e fermarsi.'),
+        mode === 'addosso' ? T('Metti il telefono <b>in cintura o in tasca</b> alla persona.') : T('Tieni tu il telefono e cammina accanto alla persona.'),
+        mode === 'addosso' ? T('Tocca <b>Inizia</b>: al «Via» la persona cammina a passo normale per i 10 metri e si ferma. Il tempo parte al primo passo e si ferma quando la persona è ferma.')
+          : T('Tocca <b>Inizia</b> quando la persona passa la linea di partenza e <b>Stop</b> quando passa quella dei 10 metri.')];
+    app.innerHTML = head(tug ? T('Timed Up and Go') : T('Cammino su 10 metri'), tug ? T('Alzarsi, camminare 3 metri, girarsi, tornare e sedersi: il tempo in secondi.') : T('Velocità del cammino a passo normale, in metri al secondo.')) +
+      '<div class="card"><div class="toolbar">' + seg('cmode', CMODES(), mode, T('Modo')) + '</div>' +
+      '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
+      '<div class="warn"><b>' + T('⚠️ Resta accanto alla persona per tutto il test') + '</b>, ' + T('pronto a sostenerla se perde l’equilibrio.') + '</div>' +
+      '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
+      '<div class="pro-live"><div class="pro-big" id="pro-big">0,0 s</div><div class="small" id="pro-sub">' + T('Pronto') + '</div></div>' +
+      '<p class="gate-msg" id="pro-msg" role="status"></p>' +
+      '<div class="btn-col"><button class="btn primary" type="button" id="pro-go">' + T('Inizia') + '</button></div></div>' +
+      '<div class="card"><h3>' + T('Risultati') + '</h3>' + clinHistory(test) + '</div>' + NOTE;
+    bindSegs(app, () => renderClin(app, test));
+    const big = document.getElementById('pro-big'); const sub = document.getElementById('pro-sub'); const msg = document.getElementById('pro-msg');
+    const go = document.getElementById('pro-go');
+    let phase = 'idle'; let t0 = 0; let tick = null; let steps = 0; let moved = 0; let stillSince = 0; let lastPeak = 0; let walkStart = 0;
+    const show = () => { big.textContent = fmt((performance.now() - (walkStart || t0)) / 1000, 1) + ' s'; };
+    const finish = (endT) => {
+      if (phase !== 'run') return;
+      phase = 'done'; clearInterval(tick); stopMotion(); beep(1200, 250);
+      const start = walkStart || t0; const secs = Math.max(0, (endT - start) / 1000);
+      if (secs < (tug ? 3 : 2)) { msg.textContent = T('Tempo troppo breve: riprova.'); go.textContent = T('Inizia'); go.disabled = false; phase = 'idle'; return; }
+      const rec = { t: Date.now(), test, v: Math.round(secs * 10) / 10, cond: prefs.cond, mode, steps: mode === 'addosso' ? steps : 0 };
+      const all = store.get(CLIN, []); all.push(rec); store.set(CLIN, all.slice(-300));
+      renderClin(app, test);
+      const m = document.getElementById('pro-msg'); m.className = 'ts-done';
+      m.textContent = tug ? T('Timed Up and Go: {s} s', { s: fmt(secs, 1) }) : T('10 metri in {s} s: {v} m/s', { s: fmt(secs, 1), v: fmt(10 / secs, 2) }) + (rec.steps ? ' · ' + T('{n} passi', { n: rec.steps }) : '');
+    };
+    clinStop = () => { clearInterval(tick); stopMotion(); phase = 'idle'; };
+    go.addEventListener('click', async () => {
+      if (phase === 'run') { finish(performance.now()); return; }
+      if (phase === 'count') return;
+      msg.className = 'gate-msg'; msg.textContent = '';
+      if (mode === 'addosso' && !(await permission())) { msg.textContent = T('Serve il permesso ai sensori di movimento: consenti l’accesso quando richiesto.'); return; }
+      const manualWalk = !tug && mode === 'mano';
+      if (!manualWalk) {
+        phase = 'count'; go.disabled = true;
+        for (const n of [3, 2, 1]) { big.textContent = n; sub.textContent = mode === 'addosso' ? T('Metti il telefono addosso alla persona') : T('Preparati'); beep(660, 120); await wait(1000); if (phase !== 'count') return; }
+        beep(1100, 350); big.textContent = T('Via!');
+      }
+      phase = 'run'; t0 = performance.now(); walkStart = 0; steps = 0; moved = 0; stillSince = 0; lastPeak = 0;
+      go.disabled = false; go.textContent = T('Stop');
+      sub.textContent = tug ? T('In corso…') : (mode === 'addosso' ? T('In attesa del primo passo…') : T('In corso…'));
+      if (manualWalk) walkStart = t0;
+      tick = setInterval(() => { if (phase === 'run' && (tug || walkStart)) show(); }, 100);
+      if (mode !== 'addosso') return;
+      // movimento = accelerazione senza la gravità, media su circa mezzo secondo
+      let grav = null; let lvl = 0; let lastT = performance.now(); let lastMove = performance.now();
+      stopMotion();
+      motionOn = (e) => {
+        const a = e.accelerationIncludingGravity || {}; if (a.x == null || phase !== 'run') return;
+        const now = performance.now(); const dt = Math.min(0.1, (now - lastT) / 1000); lastT = now;
+        if (!grav) grav = { x: a.x, y: a.y, z: a.z };
+        grav.x += (a.x - grav.x) * 0.05; grav.y += (a.y - grav.y) * 0.05; grav.z += (a.z - grav.z) * 0.05;
+        const dx = a.x - grav.x, dy = a.y - grav.y, dz = a.z - grav.z;
+        const d = Math.hypot(dx, dy, dz);
+        // componente verticale (lungo la gravità): un picco per passo
+        const gn = Math.max(0.1, Math.hypot(grav.x, grav.y, grav.z));
+        const dv = (dx * grav.x + dy * grav.y + dz * grav.z) / gn;
+        lvl += (d - lvl) * Math.min(1, dt * 4);
+        if (d > 0.8) lastMove = now;
+        if (dv > 1.2 && now - lastPeak > 280) { lastPeak = now; if (walkStart || tug) steps++; }
+        if (lvl > 0.9) {
+          moved += dt; stillSince = 0;
+          if (!tug && !walkStart && moved > 0.4) { walkStart = now - 400; steps = 1; sub.textContent = T('In corso…'); }
+        } else if (lvl < 0.35) {
+          if (!stillSince) stillSince = now;
+          const need = tug ? 1200 : 1000;
+          // fine = ultimo istante di movimento (la media è in ritardo di qualche decimo)
+          if (moved > (tug ? 3 : 2) && now - stillSince > need) finish(Math.min(stillSince, lastMove + 150));
+        }
+      };
+      window.addEventListener('devicemotion', motionOn);
+    });
+  }
+  function clinHistory(test) {
+    const l = store.get(CLIN, []).filter((r) => r.test === test);
+    if (!l.length) return '<p class="small muted" style="margin:0">' + T('Nessuna misura salvata.') + '</p>';
+    const val = (r) => test === 'tug' ? fmt(r.v, 1) + ' s' : fmt(10 / r.v, 2) + ' m/s <small class="muted">(' + fmt(r.v, 1) + ' s)</small>';
+    return '<div class="pz-table-wrap"><table class="pz-table"><tbody>' + l.slice(-10).reverse().map((r) => '<tr><th>' + dateStr(r.t) + ' · ' + (r.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</th><td><b>' + val(r) + '</b>' +
+      (r.steps ? '<br><small class="muted">' + T('{n} passi', { n: r.steps }) + (test === 'walk' ? ' · ' + T('cadenza {c} passi/min', { c: Math.round(r.steps / r.v * 60) }) : '') + '</small>' : '') + '</td></tr>').join('') + '</tbody></table></div>';
+  }
+  function clinGroups() {
+    const l = store.get(CLIN, []); if (!l.length) return [];
+    const rows = [];
+    [['tug', T('Timed Up and Go')], ['walk', T('Cammino su 10 metri')]].forEach(([k, name]) => {
+      ['senza', 'con'].forEach((c) => {
+        const x = l.filter((r) => r.test === k && r.cond === c); if (!x.length) return;
+        const last = x[x.length - 1];
+        rows.push({ label: name + ' · ' + (c === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + dateStr(last.t) + (x.length > 1 ? ' (' + T('{n} prove', { n: x.length }) + ')' : ''),
+          val: k === 'tug' ? fmt(last.v, 1) + ' s' : fmt(10 / last.v, 2) + ' m/s' });
+      });
+    });
+    return [{ title: T('Test clinici a tempo'), rows }];
+  }
+
   /* ───────── Pagina principale e report ───────── */
   function renderHome(app) {
     const tile = (href, title, sub, ico) => '<a class="m-item" href="' + href + '"><span class="ts-ico pro-ico" aria-hidden="true">' + ico + '</span><span><b>' + title + '</b><br><span class="small muted">' + sub + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
@@ -293,8 +416,11 @@
       '<div class="list">' +
       tile('#/pro/gonio', T('Goniometro'), T('Gradi di movimento di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
+      tile('#/pro/tug', T('Timed Up and Go'), T('Alzarsi, camminare 3 metri, tornare e sedersi'), svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')) +
+      tile('#/pro/cammino', T('Cammino su 10 metri'), T('Velocità del cammino, passi e cadenza'), svg('<path d="M4 20 20 4"/><path d="M14 4h6v6"/>')) +
+      tile('#/sedia/cinque', T('5 alzate dalla sedia'), T('Tempo per alzarsi e sedersi 5 volte'), svg('<path d="M7 3v9h10v9M7 12v9M17 12V8"/>')) +
       tile('#/pro/dolore', T('Dolore e uso del dispositivo'), T('Dolore 0–10 prima e dopo, giorni e ore di utilizzo'), svg('<path d="M3 12h4l2-6 4 12 2-6h6"/>')) +
-      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche goniometro, scoliometro, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
+      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche goniometro, scoliometro, test a tempo, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
   }
   function renderLocked(app) {
     app.innerHTML = head(T('Strumenti per il professionista')) +
@@ -305,15 +431,17 @@
     app.querySelectorAll('[data-pp]').forEach((b) => b.addEventListener('click', () => { stopMotion(); prefs[b.dataset.pp] = b.dataset.val; savePrefs(); rerender(); }));
   }
   function render(app, arg) {
-    stopMotion();
+    stopMotion(); if (clinStop) clinStop();
     if (arg === 'dolore') { renderPain(app); return; } // dolore e uso: per tutti
     if (!isPro()) { renderLocked(app); return; }
     if (arg === 'gonio') renderGonio(app);
+    else if (arg === 'tug') renderClin(app, 'tug');
+    else if (arg === 'cammino') renderClin(app, 'walk');
     else if (arg === 'scolio') renderScolio(app);
     else if (arg === 'dolore') renderPain(app);
     else renderHome(app);
   }
-  window.addEventListener('hashchange', stopMotion);
+  window.addEventListener('hashchange', () => { stopMotion(); if (clinStop) clinStop(); });
 
   // Righe per il report (web e PDF): gruppi con titolo e righe { label, val }
   function reportGroups() {
@@ -333,6 +461,7 @@
       })) });
     }
     const sc = store.get(SCOLIO, []);
+    out.push(...clinGroups());
     if (sc.length) out.push({ title: T('Scoliometro'), rows: sc.slice(-5).reverse().map((r) => ({ label: REGIONS()[r.reg] + ' · ' + (r.side === 'dx' ? T('gibbo a destra') : T('gibbo a sinistra')) + ' · ' + dateStr(r.t), val: fmt(r.v, 1) + '°' })) });
     return out;
   }

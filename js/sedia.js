@@ -27,7 +27,8 @@
   const DUR30 = 30000; const MAX5 = 60000;
 
   // Funzione in prova: visibile solo dopo averla attivata da #/beta
-  const enabled = () => store.get(BETA_KEY, false) === true;
+  // anche per i dispositivi a noleggio professionale (strumenti per il professionista)
+  const enabled = () => store.get(BETA_KEY, false) === true || !!(window.EqPro && window.EqPro.isPro());
 
   const results = () => store.get(KEY, []);
   function addResult(r) {
@@ -339,6 +340,7 @@
     if (stop) stop();
     if (arg === 'beta') { renderBeta(app); return; }
     if (!enabled()) { renderBeta(app); return; }
+    if (arg === 'cinque' || arg === 'trenta') { prefs.mode = arg; store.set('tp-chair-prefs', prefs); }
     renderTest(app);
   }
 
