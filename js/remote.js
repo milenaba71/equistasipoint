@@ -39,7 +39,11 @@
     const t0 = Date.now(); let wentGo = false;
     poll = setInterval(() => {
       let big, sub, done = '', err = '';
-      if (kind === 'postura') {
+      if (kind === 'pro') {
+        big = txt('#pro-big'); sub = txt('#pro-sub');
+        const m = document.getElementById('pro-msg');
+        if (m && m.textContent.trim()) { if (m.classList.contains('ts-done')) done = m.textContent.trim(); else err = m.textContent.trim(); }
+      } else if (kind === 'postura') {
         big = txt('#pz-big'); sub = txt('#pz-sub');
         const m = document.getElementById('pz-msg'); if (m && m.textContent.trim()) err = m.textContent.trim();
         if (/^#\/postura\/risultato\//.test(location.hash)) {
@@ -87,10 +91,20 @@
       setTimeout(() => clickWhenReady('#ts-go', () => follow('tests')), 250);
       return;
     }
+    // test del professionista: Timed Up and Go e cammino su 10 metri, con il telefono addosso alla persona
+    if (c.test === 'tug' || c.test === 'cammino') {
+      if (!window.EqPro || !window.EqPro.isPro()) { send({ phase: 'error', error: T('Solo con un dispositivo a noleggio professionale.') }); return; }
+      window.EqPro.setPrefs({ cond, cmode: 'addosso' });
+      location.hash = '#/pro/' + c.test;
+      setTimeout(() => clickWhenReady('#pro-go', () => follow('pro')), 250);
+      return;
+    }
     send({ phase: 'error', error: T('Test non disponibile dall’orologio.') });
   }
 
   function stop() {
+    const pro = document.getElementById('pro-go');
+    if (pro && /^#\/pro\/(tug|cammino)/.test(location.hash)) { pro.click(); return; }
     const moved = document.getElementById('pz-moved');
     if (moved && moved.offsetParent) { moved.click(); return; }
     document.dispatchEvent(new Event('pointerdown'));
