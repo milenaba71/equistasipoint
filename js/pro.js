@@ -319,6 +319,7 @@
       '<div class="card"><div class="toolbar">' + seg('cmode', CMODES(), mode, T('Modo')) + '</div>' +
       '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
       '<div class="warn"><b>' + T('⚠️ Resta accanto alla persona per tutto il test') + '</b>, ' + T('pronto a sostenerla se perde l’equilibrio.') + '</div>' +
+      (window.EqRemote ? window.EqRemote.cardHtml() : '') +  // Apple Watch: avvia e ferma il test dal polso
       '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
       '<div class="pro-live"><div class="pro-big" id="pro-big">0,0 s</div><div class="small" id="pro-sub">' + T('Pronto') + '</div></div>' +
       '<p class="gate-msg" id="pro-msg" role="status"></p>' +
@@ -413,6 +414,7 @@
     const tile = (href, title, sub, ico) => '<a class="m-item" href="' + href + '"><span class="ts-ico pro-ico" aria-hidden="true">' + ico + '</span><span><b>' + title + '</b><br><span class="small muted">' + sub + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
     const svg = (d) => '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
     app.innerHTML = head(T('Strumenti per il professionista'), T('Riservati ai dispositivi Equistasi a noleggio professionale.')) +
+      (window.EqRemote ? window.EqRemote.cardHtml() : '') +
       '<div class="list">' +
       tile('#/pro/gonio', T('Goniometro'), T('Gradi di movimento di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
@@ -477,5 +479,6 @@
       '<span><b>' + T('Il tuo dolore e l’uso del dispositivo') + '</b><br><span class="small muted">' + (l.length ? l[0] : T('Segna il dolore da 0 a 10 prima e dopo l’applicazione')) + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
-  window.EqPro = { isPro, render, cardHtml, painCardHtml, reportGroups, onSessionStart, onSessionEnd, _wrap: wrap, _painSummary: painSummary, _useSummary: useSummary };
+  const setPrefs = (o) => { Object.assign(prefs, o); savePrefs(); };
+  window.EqPro = { isPro, setPrefs, render, cardHtml, painCardHtml, reportGroups, onSessionStart, onSessionEnd, _wrap: wrap, _painSummary: painSummary, _useSummary: useSummary };
 })();

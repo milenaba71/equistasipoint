@@ -39,6 +39,11 @@ struct HomeView: View {
                 NavigationLink { RemoteSetupView(test: "salto", title: L.t("jump"), cond: cond) } label: { row(L.t("jump"), L.t("phoneChest"), "figure.jumprope") }
                 NavigationLink { SprintView(cond: cond) } label: { row(L.t("sprint"), L.t("sprintSub"), "figure.run") }
             }
+            // test del professionista (il telefono risponde solo con un dispositivo a noleggio professionale)
+            Section(L.t("pro")) {
+                NavigationLink { RemoteSetupView(test: "tug", title: L.t("tug"), cond: cond) } label: { row(L.t("tug"), L.t("phoneOnPerson"), "chair") }
+                NavigationLink { RemoteSetupView(test: "cammino", title: L.t("walk10"), cond: cond) } label: { row(L.t("walk10"), L.t("phoneOnPerson"), "figure.walk") }
+            }
             Section { Text(L.t("safety")).font(.footnote).foregroundStyle(.secondary) }
         }
         .navigationTitle(L.t("title"))
@@ -71,7 +76,7 @@ struct RemoteSetupView: View {
             RemoteRunView(test: test, title: title, running: $running)
         } else {
             List {
-                if test != "salto" {
+                if !["salto", "tug", "cammino"].contains(test) {
                     Picker(L.t("eyes"), selection: $eyes) {
                         Text(L.t("eyesOpen")).tag("aperti")
                         Text(L.t("eyesClosed")).tag("chiusi")

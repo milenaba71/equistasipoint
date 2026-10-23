@@ -44,5 +44,9 @@ enum L {
         "waiting": ("Avvio sul telefono…", "Starting on the phone…"),
         "speed": ("km/h di media", "km/h average"),
         "close": ("Chiudi", "Close"),
+        "pro": ("Professionista", "Professional"),
+        "tug": ("Timed Up and Go", "Timed Up and Go"),
+        "walk10": ("Cammino 10 m", "10 m walk"),
+        "phoneOnPerson": ("Telefono addosso alla persona", "Phone on the person"),
     ]
 }

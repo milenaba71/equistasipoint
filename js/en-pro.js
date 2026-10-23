@@ -136,4 +136,5 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "5 alzate dalla sedia": "5 chair stands",
   "Tempo per alzarsi e sedersi 5 volte": "Time to stand up and sit down 5 times",
   "Il report include anche goniometro, scoliometro, test a tempo, dolore e uso del dispositivo": "The report also includes goniometer, scoliometer, timed tests, pain and device use",
+  "Solo con un dispositivo a noleggio professionale.": "Only with a professional rental device.",
 });
