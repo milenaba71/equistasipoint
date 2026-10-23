@@ -107,6 +107,17 @@
       L('Applica anche sulla vertebra collegata a questa zona', 'Also apply on the vertebra linked to this area') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
+  // Barra in alto nelle pagine dei trigger point: «Trigger point» (qui) | «Metodo alternativo: metamero» (clicca)
+  function switchBar(ids) {
+    const id = (ids || []).find((x) => byArea(x));
+    if (!id) return '';
+    const r = byArea(id);
+    return '<div class="meta-switch" role="navigation" aria-label="' + esc(L('Metodo di applicazione', 'Application method')) + '">' +
+      '<span class="ms-on" aria-current="page"><span aria-hidden="true">✕</span> ' + L('Trigger point', 'Trigger point') + '</span>' +
+      '<a class="ms-alt" href="#/metameri/' + id + '"><span aria-hidden="true">🦴</span><span><b>' + L('Metodo alternativo: metamero', 'Alternative method: metamere') + '</b>' +
+      '<small>' + esc(r.seg) + ' · ' + L('clicca qui', 'tap here') + '</small></span><span class="chev" aria-hidden="true">›</span></a></div>';
+  }
+
   function regionCard(r, open) {
     return '<details class="card meta-region" id="meta-' + r.area + '"' + (open ? ' open' : '') + '><summary>' +
       '<span class="ico" aria-hidden="true">' + (r.icon || areaIcon(r.area)) + '</span><b>' + esc(r.name ? L(r.name[0], r.name[1]) : areaName(r.area)) + '</b><span class="seg-badge">' + esc(r.seg) + '</span></summary>' +
@@ -155,5 +166,5 @@
     if (arg) { const el = app.querySelector('#meta-' + arg); if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60); }
   }
 
-  window.EqMeta = { render, cardHtml, areaLink, REGIONS, SPINE };
+  window.EqMeta = { render, cardHtml, areaLink, switchBar, REGIONS, SPINE };
 })();

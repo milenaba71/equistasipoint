@@ -323,6 +323,7 @@
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>') + esc(a.name) + '</h1>' +
       T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p>') + EXAMPLE_NOTE() + '</div>' +
+      window.EqMeta.switchBar([id]) +
       '<div class="toolbar">' + sideToggle() + '</div>' +
       '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>' + window.EqMeta.areaLink(id);
     bindSide(() => renderArea(id));
@@ -368,6 +369,8 @@
     app.innerHTML =
       '<div class="detail-head"><div class="eyebrow">' + esc(areasTxt) + '</div><h1>' + esc(m.name) + '</h1>' +
       '<p class="latin">' + esc(m.latin) + '</p></div>' +
+      // metodo alternativo con il metamero della zona principale di questo muscolo
+      window.EqMeta.switchBar(Object.keys(m.areas).sort((x, y) => m.areas[y] - m.areas[x])) +
       '<div class="detail-grid"><div class="sticky">' +
       '<div class="card" style="padding:12px">' +
       '<div class="toolbar">' + sideToggle() +
