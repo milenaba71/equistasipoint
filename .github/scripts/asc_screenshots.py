@@ -1,13 +1,14 @@
 """Prepara la versione App Store e ne sostituisce gli screenshot.
 
-Uso: python3 asc_screenshots.py <bundle_id> <versione> <cartella con iphone/ e ipad/> [testo novità]
+Uso: python3 asc_screenshots.py <bundle_id> <versione> <cartella con iphone/, ipad/ e/o watch/> [testo novità]
+Una cartella mancante lascia com'erano gli screenshot di quel dispositivo.
 (KEY_ID, ISSUER_ID, KEY_PATH nell'ambiente). Tocca solo la versione indicata, non quella già in vendita.
 """
 import glob, hashlib, os, sys, time, urllib.request
 
 from asc_upload import call
 
-SETS = {"iphone": ["APP_IPHONE_67"], "ipad": ["APP_IPAD_PRO_3GEN_129"]}
+SETS = {"iphone": ["APP_IPHONE_67"], "ipad": ["APP_IPAD_PRO_3GEN_129"], "watch": ["APP_WATCH_ULTRA"]}
 
 
 def upload_shot(set_id, path):
@@ -48,7 +49,7 @@ def main(bundle_id, version, folder, whats_new=""):
             if not files:
                 continue
             # Svuota tutti i set di questo dispositivo, poi carica nel primo tipo accettato
-            prefix = "APP_IPHONE" if device == "iphone" else "APP_IPAD"
+            prefix = {"iphone": "APP_IPHONE", "ipad": "APP_IPAD", "watch": "APP_WATCH"}[device]
             for t, s in sets.items():
                 if t.startswith(prefix):
                     for r in (s.get("relationships", {}).get("appScreenshots", {}).get("data") or []):

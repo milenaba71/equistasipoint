@@ -1,0 +1,37 @@
+# Carica gli screenshot dell'Apple Watch (cartella store/watch del repository) sulla versione App Store indicata.
+# Gli screenshot di iPhone e iPad restano com'erano. Si avvia a mano: GitHub → Actions → "App Store: screenshot orologio".
+name: "App Store: screenshot orologio"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versione (vuoto = quella del progetto, es. 1.3.0)"
+        required: false
+        default: ""
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Chiave API di App Store Connect
+        env:
+          S_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          S_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          KEY_P8: ${{ secrets.APPSTORE_KEY_P8 }}
+        run: |
+          KEY_ID=$(printf '%s' "$S_KEY_ID" | tr -d '[:space:]'); ISSUER_ID=$(printf '%s' "$S_ISSUER_ID" | tr -d '[:space:]')
+          echo "::add-mask::$KEY_ID"; echo "::add-mask::$ISSUER_ID"
+          printf '%s\n' "$KEY_P8" > "$RUNNER_TEMP/key.p8"
+          { echo "KEY_ID=$KEY_ID"; echo "ISSUER_ID=$ISSUER_ID"; echo "KEY_PATH=$RUNNER_TEMP/key.p8"; } >> "$GITHUB_ENV"
+          pip install --quiet pyjwt cryptography
+
+      - name: Carica gli screenshot dell'orologio
+        run: |
+          P=mobile/ios/App/App.xcodeproj/project.pbxproj
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
+          VERSION="${{ inputs.version }}"; [ -n "$VERSION" ] || VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
+          mkdir -p "$RUNNER_TEMP/shots" && cp -r store/watch "$RUNNER_TEMP/shots/watch" && ls "$RUNNER_TEMP/shots/watch"
+          cd .github/scripts && python3 asc_screenshots.py "$BUNDLE" "$VERSION" "$RUNNER_TEMP/shots"
