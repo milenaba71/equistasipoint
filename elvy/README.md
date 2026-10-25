@@ -4,6 +4,8 @@ Web app (PWA) per lo sport: i test che uno sportivo vuole fare, misurati con l'*
 
 Online: `https://app.equistasi.com/elvy/` (stesso sito di Equistasi Point).
 
+App per **App Store e Google Play**: cartella `mobile-elvy/` (Capacitor), costruita da questi stessi file; le funzioni native (Bluetooth anche su iPhone, condivisione del PDF) sono in `js/native.js`. Vedi `mobile-elvy/README.md`.
+
 ## Marchi
 
 Il logo **elvy** (e verde, lvy argento, come sulla scatola) è in `img/logo-elvy.png` e compare in testa alla schermata di attivazione, al benvenuto e alle schermate Oggi, Test, Progressi e Profilo. In fondo a ogni schermata c'è «un prodotto» con il piccolo logo **Equistasi** (`img/logo-equistasi.png`), che porta a equistasi.com.

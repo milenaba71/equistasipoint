@@ -142,13 +142,20 @@
   }
 
   /* ───────── Fascia cardio o orologio via Bluetooth (servizio standard Heart Rate) ───────── */
-  // Funziona in Chrome/Edge su Android e computer e nel browser Bluefy su iPhone (Safari non ha il Bluetooth web).
+  // Funziona in Chrome/Edge su Android e computer, nel browser Bluefy su iPhone e nell'app Elvy (Bluetooth nativo).
   const heart = {
     device: null, bpm: null, at: 0, subs: [],
-    supported: () => !!(navigator.bluetooth && navigator.bluetooth.requestDevice),
+    supported: () => !!((window.ElvyNative && window.ElvyNative.ble) || (navigator.bluetooth && navigator.bluetooth.requestDevice)),
     name() { return this.device ? this.device.name || 'Sensore cardio' : null; },
-    connected() { return !!(this.device && this.device.gatt && this.device.gatt.connected); },
+    connected() { return !!(this.device && (this.device.native ? this.device.on : this.device.gatt && this.device.gatt.connected)); },
     async connect() {
+      // nell'app per iPhone e Android: Bluetooth nativo (js/native.js)
+      const N = window.ElvyNative && window.ElvyNative.ble;
+      if (N) {
+        const d = await N.connect((v) => this.parse(v), () => { if (this.device) this.device.on = false; this.bpm = null; this.emit(null); });
+        this.device = { native: true, on: true, id: d.id, name: d.name };
+        return d.name;
+      }
       if (navigator.bluetooth.getAvailability && !(await navigator.bluetooth.getAvailability().catch(() => true))) {
         const e = new Error('Bluetooth spento o non disponibile su questo dispositivo'); e.name = 'NetworkError'; throw e;
       }
@@ -162,7 +169,11 @@
       await ch.startNotifications();
       return dev.name;
     },
-    disconnect() { if (this.connected()) this.device.gatt.disconnect(); this.device = null; this.bpm = null; },
+    disconnect() {
+      if (this.device && this.device.native) window.ElvyNative.ble.disconnect(this.device.id);
+      else if (this.connected()) this.device.gatt.disconnect();
+      this.device = null; this.bpm = null;
+    },
     // formato standard: flag, battito (8 o 16 bit), energia (facoltativa), intervalli RR in 1/1024 s
     parse(dv) {
       const flags = dv.getUint8(0); let i = 1;
