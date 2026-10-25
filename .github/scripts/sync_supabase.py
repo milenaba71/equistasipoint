@@ -4,12 +4,14 @@
 - Tipologia (SILICON, GEL, SLIM, EQUIX, noleggio prof…): tabella «dispositivi disponibili».
   Slim ed Equix entrano comunque nell'elenco, così l'app può dire che non usano Equistasi Point.
 - Prossima calibrazione: tabella calibrazioni, il seriale è scritto nelle NOTE (vale la calibrazione più recente).
+- Rubrica: nome, tipo di cliente e dati del noleggio di chi ha un kit, con i seriali collegati
+  (kit venduti: campo «Rubrica» del kit; kit a noleggio: campo «Rubrica 2»). Niente email né telefoni.
 Variabili: AIRTABLE_TOKEN (sola lettura), SUPABASE_URL, SUPABASE_SECRET_KEY. Stampa solo conteggi, mai i dati.
 """
 import json, os, re, sys, time, urllib.parse, urllib.request, urllib.error
 
 BASE = "appI8mMIC0khEkLqK"
-T_KIT, T_DEV, T_TIPO, T_CAL = "tbldfuiVOiGFIq9vv", "tblmeCftgU0TrG0ck", "tbl9Am32xXmH6gubq", "tblI6t11kS44O6UD7"
+T_KIT, T_DEV, T_TIPO, T_CAL, T_RUB = "tbldfuiVOiGFIq9vv", "tblmeCftgU0TrG0ck", "tbl9Am32xXmH6gubq", "tblI6t11kS44O6UD7", "tbllNx7iSqpAtbQde"
 NO_ACCESS = {"EQUIX", "SLIM", "SLIM MEDINAT"}
 KEEP = {"DEMO2026"}  # seriale di prova dei revisori, non viene da Airtable
 
@@ -71,11 +73,15 @@ def supabase(method, path, body=None, prefer=None):
 
 # 1) seriali collegati ai kit
 valid = set()
-for r in airtable(T_KIT, ["Abbinamento seriali (testo)"]):
-    for s in text(r.get("fields", {}).get("Abbinamento seriali (testo)")).split(","):
-        s = norm(s)
-        if len(s) >= 5:
-            valid.add(s)
+links = []  # (id cliente in Rubrica, seriale, vendita|noleggio, codice kit)
+for r in airtable(T_KIT, ["Abbinamento seriali (testo)", "Rubrica", "Rubrica 2", "Codice scatola e Lotto"]):
+    f = r.get("fields", {})
+    serials = [s for s in (norm(x) for x in text(f.get("Abbinamento seriali (testo)")).split(",")) if len(s) >= 5]
+    valid.update(serials)
+    kit = text(f.get("Codice scatola e Lotto")).strip()[:120]
+    for rel, fld in (("vendita", "Rubrica"), ("noleggio", "Rubrica 2")):
+        for cid in f.get(fld, []) or []:
+            links += [(cid, s, rel, kit) for s in serials]
 print("Seriali collegati ai kit:", len(valid))
 
 # 2) tipologia di ogni seriale
@@ -131,7 +137,17 @@ for i in range(0, len(lst), 500):
 print("Copiati su Supabase")
 
 # 5) togli i seriali che non sono più su Airtable (mai più di un quinto in una volta)
-have = {r["serial"] for r in supabase("GET", "devices?select=serial", None)}
+def all_rows(path):
+    out, start = [], 0
+    while True:
+        page = supabase("GET", "%s&limit=1000&offset=%d" % (path, start), None)
+        out += page
+        if len(page) < 1000:
+            return out
+        start += 1000
+
+
+have = {r["serial"] for r in all_rows("devices?select=serial&order=serial")}
 gone = sorted(have - set(rows) - KEEP)
 if gone and len(gone) <= max(20, len(have) // 5):
     for i in range(0, len(gone), 100):
@@ -139,3 +155,40 @@ if gone and len(gone) <= max(20, len(have) // 5):
     print("Tolti", len(gone), "seriali non più presenti su Airtable")
 elif gone:
     print("::warning::%d seriali non più su Airtable: troppi per toglierli in automatico, controlla" % len(gone))
+
+# 6) Rubrica: solo i clienti con almeno un kit, con i loro seriali
+ids = {c for c, _, _, _ in links}
+FIELDS = ["Nome e cognome", "Tipologia cliente", "Data noleggio", "data scadenza noleggio", "Noleggio reso", "RESO IN DATA", "STATO NOLEGGIO"]
+day = lambda v: v[:10] if isinstance(v, str) and re.match(r"^\d{4}-\d{2}-\d{2}", v) else None
+cust = []
+for r in airtable(T_RUB, FIELDS):
+    if r["id"] not in ids:
+        continue
+    f = r.get("fields", {})
+    st = f.get("STATO NOLEGGIO")
+    cust.append({"airtable_id": r["id"], "nome": text(f.get("Nome e cognome")).strip()[:200],
+                 "tipologia_cliente": text(f.get("Tipologia cliente")).strip()[:100],
+                 "data_noleggio": day(f.get("Data noleggio")), "scadenza_noleggio": day(f.get("data scadenza noleggio")),
+                 "noleggio_reso": bool(f.get("Noleggio reso")), "reso_in_data": day(f.get("RESO IN DATA")),
+                 "stato_noleggio": ", ".join(st) if isinstance(st, list) else text(st),
+                 "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
+known = {c["airtable_id"] for c in cust}
+pairs = {}
+for c, s, rel, kit in links:
+    if c in known:
+        pairs[(c, s, rel)] = {"customer_id": c, "serial": s, "relazione": rel, "kit": kit}
+print("Clienti con kit:", len(cust), "· dispositivi collegati:", len(pairs),
+      "· a noleggio:", sum(1 for p in pairs.values() if p["relazione"] == "noleggio"))
+for i in range(0, len(cust), 500):
+    supabase("POST", "customers?on_conflict=airtable_id", cust[i:i + 500], "resolution=merge-duplicates,return=minimal")
+# i collegamenti si riscrivono da capo (così spariscono quelli tolti su Airtable)
+if pairs:
+    supabase("DELETE", "customer_devices?serial=not.is.null", None, "return=minimal")
+    lst = list(pairs.values())
+    for i in range(0, len(lst), 500):
+        supabase("POST", "customer_devices", lst[i:i + 500], "return=minimal")
+old_c = {r["airtable_id"] for r in all_rows("customers?select=airtable_id&order=airtable_id")} - known
+if old_c and len(old_c) <= max(20, len(known) // 5):
+    for chunk in [sorted(old_c)[i:i + 100] for i in range(0, len(old_c), 100)]:
+        supabase("DELETE", "customers?airtable_id=in.(%s)" % ",".join('"%s"' % x for x in chunk), None, "return=minimal")
+print("Rubrica copiata su Supabase")
