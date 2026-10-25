@@ -184,6 +184,22 @@
       y += 4;
     }
 
+    // strumenti per il professionista (noleggio prof): dolore, uso, goniometro, scoliometro
+    (data.pro || []).forEach((gr) => {
+      section(gr.title);
+      gr.rows.forEach((r) => {
+        font(9, false); ink(INK);
+        const lines = doc.splitTextToSize(r.label, CW - (r.val ? 30 : 4));
+        need(lines.length * 4.2 + 5);
+        text(lines, M + 2, y + 4);
+        if (r.val) { font(10, true); ink(INDIGO); text(r.val, W - M - 2, y + 4, { align: 'right' }); }
+        y += lines.length * 4.2 + 2.5;
+        draw(LINE); doc.setLineWidth(0.2); doc.line(M, y, W - M, y);
+        y += 2.5;
+      });
+      y += 4;
+    });
+
     // foto con i punti
     if (data.photos.length) {
       section(T('Foto della postura'));

@@ -1,7 +1,7 @@
 // Cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'tp-v88';
+const VERSION = 'tp-v108';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/report-pdf.js', 'js/vendor/jspdf/jspdf.umd.min.js', 'js/sedia.js', 'js/en-sedia.js', 'js/scan.js', 'js/pair.js', 'js/tutorial.js', 'js/native.js',
+  './', 'index.html', 'css/style.css', 'js/config.js', 'js/i18n.js', 'js/en-app.js', 'js/en-modules.js', 'js/body.js', 'js/data.js', 'js/data-en.js', 'js/calib.js', 'js/pro.js', 'js/users.js', 'js/app.js', 'js/timer.js', 'js/tests.js', 'js/metameri.js', 'js/postura.js', 'js/en-postura.js', 'js/report-pdf.js', 'js/vendor/jspdf/jspdf.umd.min.js', 'js/sedia.js', 'js/en-sedia.js', 'js/en-pro.js', 'js/scan.js', 'js/pair.js', 'js/tutorial.js', 'js/native.js', 'js/remote.js',
   'img/logo.png', 'img/dispositivo.jpg', 'img/icon-192.png', 'img/icon-512.png', 'manifest.webmanifest',
 ];
 

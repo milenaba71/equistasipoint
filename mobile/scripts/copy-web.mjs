@@ -8,7 +8,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const www = join(root, 'mobile', 'www');
 rmSync(www, { recursive: true, force: true });
 mkdirSync(www, { recursive: true });
-for (const f of ['index.html', 'manifest.webmanifest', 'css', 'js', 'img', 'media']) {
+for (const f of ['index.html', 'manifest.webmanifest', 'css', 'js', 'img']) {
   cpSync(join(root, f), join(www, f), { recursive: true });
 }
 console.log('Web app copiata in', www);

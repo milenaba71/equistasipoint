@@ -5,10 +5,14 @@ name: "App Store: prepara revisione"
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Versione (vuoto = quella del progetto, es. 1.2.1)"
+        required: false
+        default: ""
       build:
         description: "Numero di build da collegare (es. 33)"
         required: true
-        default: "51"
+        default: "54"
       notes:
         description: "Note per i revisori Apple"
         required: true
@@ -39,10 +43,10 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Abbina il dispositivo inquadrandolo con la fotocamera, senza digitare il seriale\n• Nuovo video «Come usare l'app» con voce, in italiano e in inglese\n• Guida passo passo per applicare il dispositivo con il cerotto\n• Pagina «Oggi» e promemoria delle 2 ore più semplici\n• Test Sport in Progressi e miglioramenti generali"
-          WHATS_NEW_EN: "• Pair your device by framing it with the camera, no need to type the serial\n• New voiced video «How to use the app», in Italian and English\n• Step-by-step guide to apply the device with the patch\n• Simpler «Today» page and 2-hour reminder\n• Sport tests in Progress and general improvements"
+          WHATS_NEW_IT: "• Nuovo video «Come usare l’app», in italiano e in inglese, con tutte le novità: dispositivo abbinato, promemoria e dolore, metamero, calibrazione, postura, report PDF, test e Apple Watch\n• Piccoli miglioramenti e correzioni"
+          WHATS_NEW_EN: "• New “How to use the app” video, in Italian and English, covering all the new features: paired device, reminder and pain, metamere, calibration, posture, PDF report, tests and Apple Watch\n• Minor improvements and fixes"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
-          VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
+          VERSION="${{ inputs.version }}"; [ -n "$VERSION" ] || VERSION=$(grep -m1 'MARKETING_VERSION' $P | sed 's/[^0-9.]//g')
           cd .github/scripts && python3 asc_prepare.py "$BUNDLE" "$VERSION" "$BUILD"

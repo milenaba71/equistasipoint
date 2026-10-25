@@ -29,14 +29,14 @@ jobs:
       - name: Copia da App Store Connect
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
           OUT="$GITHUB_WORKSPACE/backup/appstore"
           cd .github/scripts && python3 asc_backup.py "$BUNDLE" "$OUT"
 
       - name: Scheda pubblica e icona
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
-          BUNDLE=$(grep -m1 'PRODUCT_BUNDLE_IDENTIFIER' $P | sed 's/.*= *//; s/;//')
+          BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
           D=$(ls -d backup/appstore/*/ | sort -V | tail -1)
           curl -s "https://itunes.apple.com/lookup?bundleId=$BUNDLE&country=it" > "$D/scheda-pubblica-it.json"
           ICON=$(python3 -c "import json;print(json.load(open('$D/scheda-pubblica-it.json'))['results'][0]['artworkUrl512'])")

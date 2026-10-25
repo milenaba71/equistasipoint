@@ -73,13 +73,16 @@
     const log = store.get(LOG, []);
     log.push(now);
     store.set(LOG, log.filter((t) => now - t < 30 * 864e5));
+    if (window.EqPro) window.EqPro.onSessionStart(s); // dolore prima (solo noleggio prof)
     render(); // la scheda si aggiorna subito, anche mentre il telefono chiede il permesso per le notifiche
     const ok = await askPermission().catch(() => false);
     await schedule(s.end).catch(() => {});
     render(ok ? '' : T('Le notifiche non sono attive: tieni aperta l’app o controlla l’orario indicato qui sopra.'));
   }
   async function stop() {
+    const s = store.get(KEY, null);
     store.del(KEY);
+    if (window.EqPro) window.EqPro.onSessionEnd(s); // ore di uso e dolore dopo (solo noleggio prof)
     await cancel();
     render();
   }
@@ -243,5 +246,13 @@
   document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
   window.addEventListener('load', tick);
 
-  window.EqTimer = { cardHtml, todayHtml, render, tick, start };
+  // Toglie tutte le notifiche programmate (quando si cancellano i dati)
+  async function clearAll() {
+    clearTimeout(webTimer);
+    const LN = native(); if (!LN) return;
+    const ids = [{ id: NOTIF_ID }];
+    for (let w = 2; w <= 6; w++) ids.push({ id: 3000 + w }, { id: 3010 + w });
+    try { await LN.cancel({ notifications: ids }); } catch (e) { /* nessuna notifica */ }
+  }
+  window.EqTimer = { cardHtml, todayHtml, render, tick, start, clearAll };
 })();

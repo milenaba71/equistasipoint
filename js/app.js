@@ -191,7 +191,7 @@
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
-      window.EqTimer.todayHtml() +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
       T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + window.EqChair.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
@@ -247,7 +247,7 @@
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
-      window.EqTimer.todayHtml() +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
       (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Il metamero</b> è come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa i metameri</a></div></div>')) +
       (sport ? window.EqTests.cardHtml() + window.EqPosture.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
@@ -323,6 +323,7 @@
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Dolore a</div><h1>') + esc(a.name) + '</h1>' +
       T('<p class="muted small" style="margin:4px 0 12px">Questi muscoli possono causare dolore in questa zona. Scegli quello la cui descrizione somiglia di più al tuo disturbo.</p>') + EXAMPLE_NOTE() + '</div>' +
+      window.EqMeta.switchBar([id]) +
       '<div class="toolbar">' + sideToggle() + '</div>' +
       '<div class="list">' + list.map((m) => item(m, id)).join('') + '</div>' + window.EqMeta.areaLink(id);
     bindSide(() => renderArea(id));
@@ -368,6 +369,8 @@
     app.innerHTML =
       '<div class="detail-head"><div class="eyebrow">' + esc(areasTxt) + '</div><h1>' + esc(m.name) + '</h1>' +
       '<p class="latin">' + esc(m.latin) + '</p></div>' +
+      // metodo alternativo con il metamero della zona principale di questo muscolo
+      window.EqMeta.switchBar(Object.keys(m.areas).sort((x, y) => m.areas[y] - m.areas[x])) +
       '<div class="detail-grid"><div class="sticky">' +
       '<div class="card" style="padding:12px">' +
       '<div class="toolbar">' + sideToggle() +
@@ -694,9 +697,11 @@
       T('<div class="card privacy-box" style="max-height:none"><h3>Informativa sintetica</h3>') + privacyHtml() + '</div>' +
       '</div>';
     document.getElementById('wipe').addEventListener('click', () => {
-      if (!confirm(T('Vuoi cancellare numero di serie, profilo e preferenze da questo telefono?'))) return;
-      try { localStorage.clear(); } catch (e) { /* storage non disponibile */ }
-      location.hash = '#/'; location.reload();
+      if (window.EqUsers && window.EqUsers.count() > 1) {
+        if (confirm(T('Vuoi cancellare i tuoi dati (profilo, dispositivo e test) da questo telefono? Le altre persone restano.'))) window.EqUsers.remove(window.EqUsers.active());
+        return;
+      }
+      wipeData('all');
     });
   }
 
@@ -705,7 +710,7 @@
     setBack(true);
     app.innerHTML =
       T('<div class="detail-head"><div class="eyebrow">Informazioni</div><h1>Come leggere la mappa</h1></div>') +
-      deviceCard() + shopCard + '<div class="cols">' +
+      deviceCard() + (window.EqPro ? window.EqPro.cardHtml() : '') + shopCard + '<div class="cols">' +
       T('<div class="card"><h3>Cos’è un trigger point</h3><p class="small">Un trigger point miofasciale è un punto molto sensibile all’interno di un muscolo contratto. Spesso il dolore non si sente nel punto stesso, ma <b>a distanza</b>: è il cosiddetto <b>dolore riferito</b>. Per esempio un trigger point nel trapezio può dare mal di testa alla tempia.</p>') +
       T('<p class="small" style="margin:0">Nella mappa la <b>X</b> indica il trigger point, cioè dove applicare il dispositivo Equistasi; le zone <b style="color:var(--blue)">blu</b> indicano dove si irradia il dolore.</p>') + legend() + '</div>' +
       T('<div class="card"><h3>Avvertenze</h3><p class="small">Le informazioni hanno carattere generale e non sostituiscono la visita medica. Non applicare il dispositivo su pelle lesa, irritata o con ferite. Segui sempre il foglietto illustrativo e chiedi consiglio al farmacista, al medico o al fisioterapista.</p>') +
@@ -725,7 +730,7 @@
   function renderTimer() {
     setBack(true);
     app.innerHTML = T('<div class="detail-head"><div class="eyebrow">Promemoria</div><h1>Quanto tempo <span class="hl">tenerlo</span></h1></div>') +
-      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + '</div><div>' + scheduleCard() + '</div></div>';
+      '<div class="home-grid"><div>' + window.EqTimer.cardHtml() + (window.EqCalib ? window.EqCalib.cardHtml() : '') + (window.EqPro ? window.EqPro.painCardHtml() : '') + '</div><div>' + scheduleCard() + '</div></div>';
   }
 
   /* ───────── Visore PDF dentro l'app (così non si esce dall'app) ───────── */
@@ -813,6 +818,17 @@
   }
 
   function route() {
+    const ab = document.getElementById('acct-btn');
+    if (ab) {
+      ab.hidden = !getProfile();
+      const sn = store.get('tp-serial', '');
+      const people = window.EqUsers ? window.EqUsers.list() : [];
+      const me = people.findIndex((u) => u.active);
+      const lbl = people.length > 1 && me >= 0 ? T('Dispositivo di {n}', { n: window.EqUsers.label(people[me], me) }) : T('Dispositivo abbinato');
+      ab.querySelector('.acct-lbl').textContent = lbl;
+      document.getElementById('acct-sn').textContent = sn ? 'N° ' + sn : T('Abbina dispositivo');
+      ab.setAttribute('aria-label', lbl + (sn ? ' ' + sn : '') + ' · ' + T('Profilo e dispositivo'));
+    }
     const h = location.hash.replace(/^#\/?/, '');
     const [page, arg, arg2, arg3] = h.split('/');
     if (page === 'area') renderArea(arg);
@@ -825,6 +841,7 @@
     else if (page === 'promemoria') renderTimer();
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
+    else if (page === 'pro') { setBack(true); window.EqPro.render(app, arg); }
     else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
     else if (page === 'sedia' || page === 'beta') { setBack(true); window.EqChair.render(app, page === 'beta' ? 'beta' : arg); }
     else if (page === 'profilo') { showOnboarding(true); return; }
@@ -1010,7 +1027,13 @@
     try {
       const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'serial=' + encodeURIComponent(serial), { signal: ctrl.signal, cache: 'no-store' });
       const data = await r.json();
-      return data && (data.valid === true || data.valid === 'true');
+      const ok = data && (data.valid === true || data.valid === 'true');
+      // dispositivo a noleggio professionale: sblocca gli strumenti per il professionista
+      if (ok) {
+        store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
+        if (window.EqCalib) window.EqCalib.update(serial, data.cal); // calibrazione annuale
+      }
+      return ok;
     } finally { clearTimeout(t); }
   }
 
@@ -1117,12 +1140,94 @@
     }
   });
 
+  /* Pulsante «Profilo» nella barra in alto (tutte le pagine): profilo attuale e dispositivo, con Cambia profilo e Cambia dispositivo */
+  const acctBtn = document.getElementById('acct-btn'); const acctSheet = document.getElementById('acct-sheet');
+  function openAcct() {
+    const p = getProfile(); const sn = store.get('tp-serial', ''); const nm = store.get('tp-name', '');
+    acctSheet.querySelector('.acct-panel').innerHTML =
+      '<div class="acct-head"><h2 id="acct-title">' + T('Profilo e dispositivo') + '</h2><button type="button" class="icon-btn acct-x" aria-label="' + esc(T('Chiudi')) + '">✕</button></div>' +
+      peopleHtml() +
+      '<div class="acct-row"><span class="acct-ico" aria-hidden="true">' + ((window.PROFILES[(p || {}).type] || {}).icon || '👤') + '</span><span><span class="small muted">' + T('Il tuo profilo') + '</span><br><b>' + (nm ? esc(nm) + ' · ' : '') + esc(profileName() || '—') + '</b></span></div>' +
+      '<a class="btn primary" href="#/profilo" data-acct-close>' + SWAP_ICON + ' ' + T('Cambia profilo') + '</a>' +
+      '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
+      '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
+      (window.EqCalib ? window.EqCalib.cardHtml(true) : '') +
+      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>' +
+      (window.EqPro && window.EqPro.isPro() ? '<a class="btn" href="#/pro" data-acct-close>' + T('Strumenti per il professionista') + '</a>' : '') +
+      '<button type="button" class="btn acct-danger" data-acct-wipe>' + T('Cancella i dati e ricomincia') + '</button>' +
+      '<div class="acct-wipe" hidden>' +
+      '<button type="button" class="acct-wopt" data-wipe="results"><b>' + T('Cancella solo i risultati') + '</b><span class="small muted">' + T('Test, salti, sprint, sedia, postura con le foto e promemoria di {n}. Profilo e dispositivo restano.', { n: esc(nm || T('questa persona')) }) + '</span></button>' +
+      '<button type="button" class="acct-wopt danger" data-wipe="all"><b>' + T('Cancella tutto e ricomincia da capo') + '</b><span class="small muted">' + (window.EqUsers && window.EqUsers.count() > 1 ? T('Tutte le persone, i profili, i dispositivi e i risultati su questo telefono.') : T('Profilo, dispositivo e tutti i risultati su questo telefono.')) + ' ' + T('Si riparte dall’abbinamento del dispositivo.') + '</span></button>' +
+      '</div>';
+    acctSheet.hidden = false; requestAnimationFrame(() => acctSheet.classList.add('on'));
+    acctSheet.querySelector('.acct-x').focus();
+  }
+  // Persone della famiglia sullo stesso telefono: ognuna con i suoi test e il suo dispositivo
+  function peopleHtml() {
+    if (!window.EqUsers) return '';
+    const people = window.EqUsers.list();
+    const rows = people.length > 1 ? people.map((u, i) =>
+      '<div class="acct-person' + (u.active ? ' on' : '') + '">' +
+      '<button type="button" class="acct-pick" data-acct-user="' + esc(u.id) + '"' + (u.active ? ' aria-current="true"' : '') + '><span class="acct-pico" aria-hidden="true">' + ((window.PROFILES[(u.profile || {}).type] || {}).icon || '👤') + '</span>' +
+      '<span class="acct-pname"><b>' + esc(window.EqUsers.label(u, i)) + '</b><span class="small muted">' + (u.active ? T('In uso adesso') : (u.serial ? 'N° ' + esc(u.serial) : T('Nessun dispositivo'))) + '</span></span>' + (u.active ? '<span class="acct-check" aria-hidden="true">✓</span>' : '') + '</button>' +
+      (u.active ? '' : '<button type="button" class="icon-btn acct-del" data-acct-del="' + esc(u.id) + '" aria-label="' + esc(T('Elimina {n}', { n: window.EqUsers.label(u, i) })) + '">🗑</button>') +
+      '</div>').join('') : '';
+    return '<div class="acct-people"><span class="small muted">' + T('Chi usa l’app') + '</span>' + rows +
+      '<button type="button" class="btn acct-add" data-acct-add>＋ ' + T('Aggiungi una persona') + '</button>' +
+      '<form class="acct-addform" hidden><label class="small" for="acct-newname">' + T('Nome della persona') + '</label>' +
+      '<div class="acct-addrow"><input id="acct-newname" maxlength="40" autocomplete="off" placeholder="' + esc(T('Es. Marco')) + '"><button type="submit" class="btn primary">' + T('Aggiungi') + '</button></div>' +
+      '<p class="small muted">' + T('Ogni persona ha il suo profilo, il suo dispositivo e i suoi Progressi. Il nome resta solo su questo telefono.') + '</p></form>' +
+      '</div>';
+  }
+  function closeAcct() { acctSheet.classList.remove('on'); setTimeout(() => { acctSheet.hidden = true; }, 200); }
+  if (acctBtn && acctSheet) {
+    acctBtn.addEventListener('click', openAcct);
+    acctSheet.addEventListener('click', (e) => {
+      if (e.target === acctSheet || e.target.closest('.acct-x') || e.target.closest('[data-acct-close]')) closeAcct();
+      if (e.target.closest('[data-acct-device]') && window.confirm(T('Vuoi abbinare un altro dispositivo Equistasi?'))) window.tpLogout();
+      if (e.target.closest('[data-acct-wipe]')) { e.target.closest('[data-acct-wipe]').hidden = true; acctSheet.querySelector('.acct-wipe').hidden = false; }
+      const wipe = e.target.closest('[data-wipe]');
+      if (wipe) wipeData(wipe.dataset.wipe);
+      const pick = e.target.closest('[data-acct-user]'); if (pick) window.EqUsers.switchTo(pick.dataset.acctUser);
+      const del = e.target.closest('[data-acct-del]');
+      if (del && window.confirm(T('Vuoi eliminare questa persona e i suoi test da questo telefono?'))) { window.EqUsers.remove(del.dataset.acctDel); openAcct(); route(); }
+      if (e.target.closest('[data-acct-add]')) {
+        const f = acctSheet.querySelector('.acct-addform'); f.hidden = false; e.target.closest('[data-acct-add]').hidden = true;
+        document.getElementById('acct-newname').focus();
+      }
+    });
+    acctSheet.addEventListener('submit', (e) => {
+      if (!e.target.closest('.acct-addform')) return;
+      e.preventDefault();
+      window.EqUsers.add(document.getElementById('acct-newname').value.trim());
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !acctSheet.hidden) closeAcct(); });
+    window.addEventListener('hashchange', () => { if (!acctSheet.hidden) closeAcct(); });
+  }
+
+  async function wipeData(kind) {
+    if (kind === 'results') {
+      if (!confirm(T('Vuoi cancellare tutti i risultati (test, postura e foto, promemoria)? Non si possono recuperare.'))) return;
+      if (window.EqTimer && window.EqTimer.clearAll) await window.EqTimer.clearAll();
+      window.EqUsers.clearResults();
+    } else {
+      if (!confirm(T('Vuoi cancellare tutto da questo telefono e ricominciare da capo? I dati non si possono recuperare.'))) return;
+      if (window.EqTimer && window.EqTimer.clearAll) await window.EqTimer.clearAll();
+      window.EqUsers.wipeAll();
+    }
+    location.hash = '#/'; location.reload();
+  }
+
   window.tpLogout = function () {
     try { localStorage.removeItem('tp-serial'); } catch (e) { /* storage non disponibile */ }
     location.hash = '#/'; location.reload();
   };
 
-  if (store.get('tp-serial', '')) start();
+  if (store.get('tp-serial', '')) {
+    start();
+    // una volta al giorno ricontrolla se il dispositivo è a noleggio professionale (senza bloccare l'app)
+    if (Date.now() - Number(store.get('tp-pro-at', '0')) > 864e5) verifySerial(store.get('tp-serial', '')).then(() => { if (/^#\/(pro|test|info)?$/.test(location.hash) || location.hash === '') route(); }).catch(() => {});
+  }
   else { gate.hidden = false; setTimeout(() => gateInput.focus(), 50); }
 
   /* Offline */
