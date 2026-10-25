@@ -1004,10 +1004,11 @@
 
   function renderWelcome() {
     document.body.classList.add('gated'); // niente barra in basso finché non si è presentati
+    const owner = (window.ElvyGate && ElvyGate.owner && ElvyGate.owner()) || ''; // nome registrato in Airtable
     $app.innerHTML = '<div style="text-align:center;margin-top:10px"><img src="img/logo-elvy.png" alt="Elvy" style="width:150px" /></div>' +
-      '<div style="margin-top:18px">' + talk(IMG.hi, 'Ciao! Sono <b>Elvy</b>, il tuo allenatore. Con i sensori del telefono misuriamo equilibrio, salti, corsa e riflessi. Ogni test lo facciamo <b>prima senza Elvy e poi con Elvy</b>, e nei progressi vediamo come cambi.', true) + '</div>' +
+      '<div style="margin-top:18px">' + talk(IMG.hi, 'Ciao' + (owner ? ' <b>' + esc(owner) + '</b>' : '') + '! Sono <b>Elvy</b>, il tuo allenatore. Con i sensori del telefono misuriamo equilibrio, salti, corsa e riflessi. Ogni test lo facciamo <b>prima senza Elvy e poi con Elvy</b>, e nei progressi vediamo come cambi.', true) + '</div>' +
       '<div class="card" style="margin-top:18px"><h3>Come ti chiami?</h3>' +
-      '<label class="field"><span>Nome</span><input id="w-name" autocomplete="given-name" maxlength="30" /></label>' +
+      '<label class="field"><span>Nome</span><input id="w-name" autocomplete="given-name" maxlength="40" value="' + esc(owner) + '" /></label>' +
       '<label class="field"><span>Sport</span><input id="w-sport" placeholder="es. calcio, corsa, tennis" maxlength="40" /></label>' +
       '<label class="field"><span>Peso (kg) · per stimare la potenza</span><input id="w-mass" type="number" inputmode="decimal" min="25" max="200" /></label>' +
       '<label class="check"><input type="checkbox" id="w-ok" /><span>Ho capito: i risultati sono stime per l\'allenamento e non hanno valore medico. Le misure restano sul mio telefono.</span></label>' +
