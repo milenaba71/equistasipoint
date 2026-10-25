@@ -1,0 +1,63 @@
+/* Elvy · abbinamento a tutto schermo (../js/pair.js), con i colori di Elvy.
+   Ricavato dal blocco .pair di css/style.css: se cambia lì, aggiornare anche qui. */
+.pair { --d: min(74vw, 44vh, 340px); --cy: 46%; position: fixed; inset: 0; z-index: 200; color: #fff; overflow: hidden;
+  background: radial-gradient(120% 80% at 50% 46%, #2f5f5d 0%, #2c2c30 48%, #161618 100%);
+  opacity: 0; transition: opacity .3s ease; font-family: inherit; -webkit-user-select: none; user-select: none; }
+.pair.on { opacity: 1; }
+.pair.off { opacity: 0; pointer-events: none; }
+.pair-bg, .pair-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pair-fx { z-index: 3; }
+.pair-x { position: absolute; z-index: 6; top: calc(14px + env(safe-area-inset-top)); right: 14px; width: 44px; height: 44px; border-radius: 50%;
+  border: 0; background: rgba(255,255,255,.12); color: #fff; font-size: 18px; cursor: pointer; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.pair-head { position: absolute; z-index: 4; left: 24px; right: 24px; top: calc(var(--cy) - var(--d) * .62 - 92px); text-align: center; }
+.pair-t { margin: 0; font-size: 1.45rem; font-weight: 700; letter-spacing: .01em; }
+.pair-s { margin: .4rem 0 0; font-size: .95rem; color: rgba(228,228,232,.75); }
+.pair-vf { position: absolute; z-index: 1; left: 50%; top: var(--cy); width: var(--d); height: var(--d); transform: translate(-50%, -50%);
+  border-radius: 50%; overflow: hidden; background: #050817; box-shadow: 0 0 0 1px rgba(127,214,209,.25), 0 0 60px rgba(72,140,197,.35) inset; }
+.pair-feed { position: absolute; inset: 0; transition: opacity .6s ease, transform .9s ease; }
+.pair-feed .scan-inline, .pair-feed video, .pair-feed .scan-freeze { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pair-feed video, .pair-feed .scan-freeze { filter: brightness(.55) saturate(.7) contrast(1.1); }
+.pair.read .pair-feed { opacity: .45; transform: scale(1.06); }
+.pair.ok .pair-feed { opacity: 0; transform: scale(.85); }
+.pair-ring { position: absolute; z-index: 2; left: 50%; top: var(--cy); width: calc(var(--d) * 1.18); height: calc(var(--d) * 1.18); transform: translate(-50%, -50%); overflow: visible; pointer-events: none; }
+.pair-ticks { stroke: rgba(127,214,209,.35); stroke-width: 1.2; transform-origin: 165px 165px; animation: pair-spin 24s linear infinite; }
+.pair.read .pair-ticks { animation-duration: 6s; stroke: rgba(127,214,209,.6); }
+.pair-track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 6; }
+.pair-prog { fill: none; stroke: url(#pairgr); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(127,214,209,.9)); transition: stroke .4s; }
+.pair.ok .pair-prog { stroke: #4BA6A3; filter: drop-shadow(0 0 10px rgba(75,166,163,.9)); }
+.pair.ok .pair-ticks { stroke: rgba(75,166,163,.6); }
+.pair.ko .pair-prog { stroke: #e5484d; filter: drop-shadow(0 0 8px rgba(229,72,77,.8)); }
+.pair.ko .pair-ring, .pair.ko .pair-vf { animation: pair-shake .45s ease; }
+.pair-check { position: absolute; z-index: 4; left: 50%; top: var(--cy); width: calc(var(--d) * .9); height: calc(var(--d) * .9); transform: translate(-50%, -50%) scale(.6); opacity: 0; pointer-events: none; }
+.pair-check circle { fill: rgba(75,166,163,.16); stroke: #4BA6A3; stroke-width: 6; }
+.pair-check path { fill: none; stroke: #fff; stroke-width: 16; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 220; stroke-dashoffset: 220; filter: drop-shadow(0 0 10px rgba(75,166,163,.9)); }
+.pair.ok .pair-check { animation: pair-pop .6s .65s cubic-bezier(.2,1.4,.4,1) forwards; }
+.pair.ok .pair-check path { animation: pair-draw .5s .9s ease-out forwards; }
+.pair-sn { position: absolute; z-index: 4; left: 12px; right: 12px; top: calc(var(--cy) + var(--d) * .62 + 14px); text-align: center;
+  font: 600 1.35rem/1 var(--head); letter-spacing: .14em; min-height: 1.4rem; }
+.pair-sn span { color: rgba(127,214,209,.35); transition: color .2s, text-shadow .2s; }
+.pair-sn span.on { color: #fff; text-shadow: 0 0 10px rgba(127,214,209,.95); }
+.pair.ok .pair-sn { opacity: 0; transition: opacity .3s; }
+.pair-st { position: absolute; z-index: 4; left: 12px; right: 12px; top: calc(var(--cy) + var(--d) * .62 + 52px); text-align: center;
+  font-size: .8rem; letter-spacing: .18em; text-transform: uppercase; color: rgba(127,214,209,.75); }
+.pair-done { position: absolute; z-index: 4; left: 12px; right: 12px; top: calc(var(--cy) + var(--d) * .62 + 6px); text-align: center; opacity: 0; transform: translateY(10px); }
+.pair-done b { display: block; font-size: 1.5rem; color: #fff; }
+.pair-done-sn { display: block; margin-top: .35rem; font: 600 1rem var(--head); letter-spacing: .14em; color: #7FD6D1; }
+.pair.ok .pair-done { animation: pair-up .5s 1.1s ease-out forwards; }
+.pair-torch { position: absolute; z-index: 5; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.2); }
+.pair.read .pair-torch, .pair.ok .pair-torch { display: none; }
+@keyframes pair-spin { to { transform: rotate(360deg); } }
+@keyframes pair-pop { to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes pair-draw { to { stroke-dashoffset: 0; } }
+@keyframes pair-up { to { opacity: 1; transform: none; } }
+@keyframes pair-shake { 0%,100% { margin-left: 0; } 20% { margin-left: -10px; } 40% { margin-left: 9px; } 60% { margin-left: -6px; } 80% { margin-left: 3px; } }
+@media (max-height: 560px) { .pair { --d: min(60vw, 40vh, 260px); } .pair-t { font-size: 1.15rem; } }
+.pair-guide { position: absolute; z-index: 1; left: 50%; top: 50%; width: 76%; height: 34%; transform: translate(-50%, -50%); border-radius: 10px; background: rgba(127, 214, 209, .06); pointer-events: none; transition: opacity .3s ease; }
+.pair-guide i { position: absolute; width: 22px; height: 22px; border: 3px solid #7FD6D1; }
+.pair-guide i:nth-child(1) { left: -2px; top: -2px; border-right: 0; border-bottom: 0; border-top-left-radius: 10px; }
+.pair-guide i:nth-child(2) { right: -2px; top: -2px; border-left: 0; border-bottom: 0; border-top-right-radius: 10px; }
+.pair-guide i:nth-child(3) { left: -2px; bottom: -2px; border-right: 0; border-top: 0; border-bottom-left-radius: 10px; }
+.pair-guide i:nth-child(4) { right: -2px; bottom: -2px; border-left: 0; border-top: 0; border-bottom-right-radius: 10px; }
+.pair.read .pair-guide, .pair.ok .pair-guide, .pair.ko .pair-guide { opacity: 0; }
+.pair-t { font-family: var(--head); }

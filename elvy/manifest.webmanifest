@@ -1,0 +1,16 @@
+{
+  "name": "Elvy · by Equistasi",
+  "short_name": "Elvy",
+  "description": "Test sportivi con l'accelerometro del telefono: equilibrio, salti, corsa, core, reazione e mobilità, con e senza Elvy.",
+  "lang": "it",
+  "start_url": "./#/oggi",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#424244",
+  "theme_color": "#424244",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

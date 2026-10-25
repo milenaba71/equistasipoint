@@ -5,9 +5,15 @@
      senza container la fotocamera si apre a tutto schermo.
    - torch: pulsante (facoltativo) per accendere la luce, mostrato solo se il telefono la supporta.
    - guide: elemento cornice (facoltativo) in cui mettere il codice a barre: quella zona viene letta a piena risoluzione.
+   - ocr: 'alnum' per leggere anche i seriali stampati con lettere e numeri (es. EQX25001801);
+     senza, solo le 11 cifre che iniziano con 20. prefixes: sigle note dei seriali (es. ['EQX']).
+   - colors: colori [r, g, b] delle particelle (4 colori), per le app con un'altra grafica.
    EqScan.stop() chiude la fotocamera. */
 (function () {
-  const BASE = 'js/vendor/zxing/';
+  // cartella js/ ricavata da dove si carica questo file: funziona anche da elvy/
+  const ROOT = document.currentScript && document.currentScript.src ? new URL('./', document.currentScript.src).href : 'js/';
+  const T = window.T || ((s) => s);
+  const BASE = ROOT + 'vendor/zxing/';
   // seriali con lettere e numeri (es. EQX25001801) o solo numeri: Code 128/39/93, ITF, Codabar, EAN/UPC, DataMatrix, QR
   const FORMATS = ['Code128', 'Code39', 'Code93', 'ITF', 'Codabar', 'EAN13', 'EAN8', 'UPCA', 'UPCE', 'DataMatrix', 'QRCode'];
   let lib = null;
@@ -37,7 +43,8 @@
   // Nuvola di particelle nella finestra mentre si legge (stile abbinamento Apple Watch):
   // gira finché la lettura è in corso, poi converge al centro con un lampo.
   const COLS = [[127, 182, 232], [72, 140, 197], [250, 220, 0], [255, 255, 255]];
-  function particles(cv) {
+  function particles(cv, cols) {
+    cols = cols || COLS;
     const ctx = cv.getContext('2d');
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const w = cv.clientWidth || 200; const h = cv.clientHeight || 90;
@@ -66,7 +73,7 @@
         const x = p.x * wv, y = p.y * wv, z = p.z * wv;
         const x1 = x * ca + z * sa, z1 = -x * sa + z * ca; const y2 = y * cb - z1 * sb, z2 = y * sb + z1 * cb;
         const pz = 2.6 + z2; const px = cx + x1 * R * k * 2.2 / pz * 1.6, py = cy + y2 * R * k * 2.2 / pz;
-        const dep = Math.min(1, Math.max(0, (1.6 - z2) / 2.4)); const c = COLS[p.c < .55 ? 0 : p.c < .8 ? 1 : p.c < .95 ? 2 : 3];
+        const dep = Math.min(1, Math.max(0, (1.6 - z2) / 2.4)); const c = cols[p.c < .55 ? 0 : p.c < .8 ? 1 : p.c < .95 ? 2 : 3];
         const al = (0.3 + 0.7 * dep) * (0.6 + 0.4 * Math.sin(t * 6 + p.ph)); const sz = p.s * (0.45 + dep * 0.75);
         ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (al * 0.25).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(px, py, sz * 1.5, 0, 6.2832); ctx.fill();
@@ -117,15 +124,20 @@
 
   // Lettura dei numeri stampati sotto le barre (Tesseract), per le etichette con le barre rovinate.
   // Si carica solo se il codice a barre non si legge entro qualche secondo; tutto resta sul telefono.
-  const OCR_BASE = 'js/vendor/tesseract/';
-  let ocrP = null;
-  function loadOcr() {
+  const OCR_BASE = ROOT + 'vendor/tesseract/';
+  const DIGITS = '0123456789';
+  const ALNUM = DIGITS + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let ocrP = null; let ocrChars = DIGITS;
+  function loadOcr(chars) {
+    // stesso lettore, cambia solo l'elenco dei caratteri ammessi
+    if (ocrP && chars !== ocrChars) { ocrChars = chars; return ocrP.then((w) => w.setParameters({ tessedit_char_whitelist: chars }).then(() => w)); }
+    ocrChars = chars;
     if (ocrP) return ocrP;
     ocrP = new Promise((resolve, reject) => {
       const go = () => {
         const abs = (p) => new URL(OCR_BASE + p, location.href).href;
         window.Tesseract.createWorker('eng', 1, { workerPath: abs('worker.min.js'), corePath: abs(''), langPath: abs(''), workerBlobURL: false, cacheMethod: 'none', gzip: true })
-          .then((w) => w.setParameters({ tessedit_char_whitelist: '0123456789', tessedit_pageseg_mode: '7' }).then(() => resolve(w)))
+          .then((w) => w.setParameters({ tessedit_char_whitelist: ocrChars, tessedit_pageseg_mode: '7' }).then(() => resolve(w)))
           .catch(reject);
       };
       if (window.Tesseract) { go(); return; }
@@ -173,6 +185,25 @@
   function serialIn(text) {
     const m = String(text).replace(/[ \t]+/g, '').match(/(?:^|\D)(20\d{9})(?!\d)/);
     return m ? m[1] : null;
+  }
+  // Seriali con lettere e numeri: 2-4 lettere e 6-10 cifre (es. EQX25001801). Corregge gli scambi tipici
+  // del lettore (O/0, I/1, S/5, B/8, Z/2) secondo la parte, lettere o cifre, in cui cadono.
+  const TO_DIGIT = { O: '0', Q: '0', D: '0', I: '1', L: '1', T: '1', Z: '2', S: '5', B: '8', G: '6' };
+  const TO_LETTER = { 0: 'O', 1: 'I', 2: 'Z', 5: 'S', 8: 'B', 6: 'G' };
+  // prefixes: sigle note (es. ['EQX']): una sigla letta con una lettera sbagliata viene corretta
+  function serialAlnum(text, prefixes) {
+    const lines = String(text).toUpperCase().split(/\n/).map((l) => l.replace(/[^A-Z0-9]/g, ''));
+    for (const l of lines) {
+      const num = serialIn(l); if (num) return num;
+      const m = l.match(/([A-Z0-9]{2,4}?)([0-9OQDILTZSBG]{6,10})$/) || l.match(/([A-Z]{2,4})([0-9OQDILTZSBG]{6,10})/);
+      if (!m) continue;
+      let head = m[1].split('').map((c) => TO_LETTER[c] || c).join('');
+      const near = (prefixes || []).find((p) => p.length === head.length && p.split('').filter((c, i) => c !== head[i]).length === 1);
+      if (near) head = near;
+      const tail = m[2].split('').map((c) => TO_DIGIT[c] || c).join('');
+      if (/^[A-Z]{2,4}$/.test(head) && /^\d{6,10}$/.test(tail)) return head + tail;
+    }
+    return null;
   }
 
   // Trova le barre in un'immagine: zona dove la luminosità cambia molto in orizzontale e poco in verticale.
@@ -260,7 +291,7 @@
         el.querySelector('.scan-cancel').addEventListener('click', () => close(null));
       }
       const video = el.querySelector('video');
-      const fxc = el.querySelector('.scan-fx'); const fx = fxc ? particles(fxc) : null;
+      const fxc = el.querySelector('.scan-fx'); const fx = fxc ? particles(fxc, opts.colors) : null;
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       let stream = null; let timer = null; let busy = false; let done = false; let torch = false;
@@ -359,6 +390,7 @@
 
       // Seconda strada: se dopo 3 secondi il codice a barre non si è letto, si leggono i numeri stampati.
       // Un numero vale solo quando esce uguale in due letture, perché a volte una cifra si legge male.
+      const alnum = opts.ocr === 'alnum';
       const votes = {}; let ocrBusy = false; let ocrTimer = null; let ocrTurn = 0;
       const t0 = performance.now();
       async function ocrTick() {
@@ -366,16 +398,19 @@
         if (!ocrBusy && video.readyState >= 2 && video.videoWidth && performance.now() - t0 > 2500) {
           ocrBusy = true;
           try {
-            const w = await loadOcr();
+            const w = await loadOcr(alnum ? ALNUM : DIGITS);
             const r = regionOf(guide, 0.12);
             if (r && !done) {
               // la cornice più la zona sotto, dove sono stampati i numeri
               const vh = video.videoHeight;
               const rr = { x: r.x, y: r.y, w: r.w, h: Math.min(vh - r.y, r.h * 2) };
               const img = grab(rr, 1100);
-              const oc = digitsLine(img, locate(img), ocrTurn++);
+              // seriali con lettere: un turno sì e uno no si legge tutta la zona, perché senza barre leggibili
+              // il "trova barre" può scambiare la scritta per le barre e cercare i caratteri più in basso
+              const t = ocrTurn++;
+              const oc = digitsLine(img, alnum && t % 2 ? null : locate(img), alnum ? t >> 1 : t);
               const res = await w.recognize(oc);
-              const sn = serialIn(res && res.data && res.data.text);
+              const txt = res && res.data && res.data.text; const sn = alnum ? serialAlnum(txt, opts.prefixes) : serialIn(txt);
               if (window.EQ_DEBUG) console.log('ocr', JSON.stringify(res && res.data && res.data.text), sn, oc.width + 'x' + oc.height);
               if (sn && accept(sn) && !done) {
                 votes[sn] = (votes[sn] || 0) + 1;
@@ -414,5 +449,5 @@
     });
   }
 
-  window.EqScan = { open, stop: () => { if (current) current(null); }, _loadLib: loadLib, _locate: locate };
+  window.EqScan = { open, stop: () => { if (current) current(null); }, _loadLib: loadLib, _locate: locate, _serialIn: serialIn, _serialAlnum: serialAlnum };
 })();
