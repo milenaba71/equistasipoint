@@ -337,3 +337,56 @@ body.running .by { display: none; }
 .vid-count.rec { font-size: 40px; color: #ff4d4d; top: calc(14px + env(safe-area-inset-top)); left: auto; right: 20px; animation: rec 1s steps(2) infinite; }
 @keyframes rec { 50% { opacity: .2; } }
 .vid-bar { position: absolute; left: 16px; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); display: grid; gap: 10px; }
+
+/* ───────── Voce della mascotte ───────── */
+.brandbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.brandbar .brand { margin: 4px 0 6px; }
+.voice-tg { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 12px 7px 9px; background: var(--card); color: var(--muted); font-weight: 700; font-size: 13px; cursor: pointer; }
+.voice-tg svg, .talk-mute svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.voice-tg[aria-pressed="false"] { color: var(--teal-l); }
+.voice-tg[aria-pressed="true"] { background: #4a3d3d; color: #F5B3AD; }
+.talk-bubble { padding-right: 40px; }
+.talk-mute { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: rgba(255,255,255,.06); color: var(--dim); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.talk-mute span { display: none; }
+.talk-mute[aria-pressed="true"] { color: #F5B3AD; background: rgba(242,139,130,.14); }
+
+/* ───────── Report ───────── */
+.card.rep-link { display: flex; align-items: center; gap: 14px; color: #fff; margin-top: 14px; }
+.rep-ico { flex: none; width: 46px; height: 54px; border-radius: 8px; background: linear-gradient(160deg, var(--teal), var(--purple)); display: grid; place-items: center; font-family: var(--head); font-weight: 700; font-size: 13px; color: #fff; }
+.chev { margin-left: auto; color: var(--dim); font-size: 26px; }
+.rep-prev { margin-top: 14px; background: #fff; color: #1e1e24; border-radius: 18px; padding: 0 0 14px; overflow: hidden; box-shadow: 0 14px 30px rgba(0,0,0,.35); }
+.rep-top { display: flex; gap: 14px; align-items: center; padding: 16px; background: radial-gradient(120% 140% at 85% 20%, rgba(125,78,183,.55), transparent 55%), radial-gradient(90% 120% at 70% 0%, rgba(75,166,163,.5), transparent 60%), #2b2b2f; color: #fff; border-bottom: 3px solid var(--teal); }
+.rep-top img { width: 84px; }
+.rep-top b { display: block; font-family: var(--head); font-size: 17px; }
+.rep-top span { display: block; font-size: 12.5px; color: #d6d6dc; margin-top: 2px; }
+.rep-prev .grid3, .rep-prev p { padding: 0 14px; }
+.rep-prev .stat { background: #f4f4f7; }
+.rep-prev .stat .l { color: #70707a; }
+.rep-prev .stat .v { color: #1e1e24; }
+
+/* ───────── Guida ───────── */
+.tabbar a { min-width: 0; flex: 1; padding: 4px 4px; font-size: 12px; }
+.g-step { display: grid; grid-template-columns: 44% 1fr; gap: 14px; align-items: center; margin-top: 14px; }
+.g-img { position: relative; }
+.g-img img { display: block; width: 100%; border-radius: 14px; }
+.g-img i { position: absolute; left: 8px; top: 8px; width: 28px; height: 28px; border-radius: 50%; background: var(--teal); color: var(--ink); font-style: normal; font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+.g-step b { display: block; font-family: var(--head); font-size: 16px; }
+.g-step span { display: block; color: var(--muted); font-size: 14.5px; margin-top: 4px; line-height: 1.4; }
+.map-card { padding: 14px; }
+.map-wrap { background: radial-gradient(70% 60% at 50% 45%, #5a5a60, #3a3a3e); border-radius: 16px; padding: 14px 0; text-align: center; }
+.map-wrap img { width: 66%; max-width: 300px; }
+.map-legend { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
+.map-legend li { display: flex; gap: 12px; align-items: flex-start; }
+.map-legend i { flex: none; min-width: 34px; height: 30px; padding: 0 8px; border-radius: 9px; background: var(--purple); color: #fff; font-style: normal; font-weight: 800; display: grid; place-items: center; font-size: 13px; }
+.map-legend b { display: block; }
+.map-legend span { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; line-height: 1.4; }
+.vid-card { margin-bottom: 12px; }
+.vid-frame { position: relative; border-radius: 14px; overflow: hidden; background: #000; aspect-ratio: 16 / 9; }
+.vid-frame iframe, .vid-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.soon { border: 1.5px dashed #6a6a72; background: transparent; }
+.soon-tag { display: inline-block; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: var(--teal-d); color: var(--teal-l); }
+
+/* ───────── Spostare Elvy su questo telefono ───────── */
+.move-ov { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.6); display: flex; align-items: flex-end; justify-content: center; }
+.move-box { background: #48484B; width: 100%; max-width: 560px; border-radius: 26px 26px 0 0; padding: 22px var(--pad) calc(22px + env(safe-area-inset-bottom)); }
+.move-face { width: 72px; border-radius: 16px; float: right; margin-left: 12px; }

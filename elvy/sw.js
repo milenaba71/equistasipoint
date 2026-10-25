@@ -1,8 +1,8 @@
 // Elvy: cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'elvy-v9';
+const VERSION = 'elvy-v12';
 const FILES = [
-  './', 'index.html', 'css/elvy.css', 'css/pair.css', 'js/analysis.js', 'js/sim.js', 'js/sensors.js', 'js/app.js', 'js/gate.js', 'js/video.js', '../js/config.js', '../js/scan.js', '../js/pair.js', 'manifest.webmanifest',
-  'img/icon-elvy-192.png', 'img/icon-elvy-512.png', 'img/apple-touch-icon.png', 'img/favicon-32.png', 'img/logo-elvy.png', 'img/logo-equistasi.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg', 'img/logo-e.png',
+  './', 'index.html', 'css/elvy.css', 'css/pair.css', 'js/analysis.js', 'js/sim.js', 'js/sensors.js', 'js/app.js', 'js/gate.js', 'js/video.js', 'js/report.js', '../js/config.js', '../js/scan.js', '../js/pair.js', 'manifest.webmanifest',
+  'img/icon-elvy-192.png', 'img/icon-elvy-512.png', 'img/apple-touch-icon.png', 'img/favicon-32.png', 'img/logo-elvy.png', 'img/logo-equistasi.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg', 'img/logo-e.png', 'img/mappa-sport.png', 'img/elvy-pelle.jpg', 'img/elvy-cerotto.jpg', 'img/elvy-premi.jpg', 'img/mascotte-report.jpg',
 ];
 
 self.addEventListener('install', (e) => {

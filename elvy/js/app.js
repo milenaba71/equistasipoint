@@ -13,7 +13,7 @@
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* memoria non disponibile */ } },
   };
-  const profile = Object.assign({ name: '', sport: '', mass: null, height: null, voice: true, flip: false, welcomed: false }, store.get('elvy-profile', {}));
+  const profile = Object.assign({ name: '', sport: '', mass: null, height: null, voice: true, mascotVoice: true, flip: false, welcomed: false }, store.get('elvy-profile', {}));
   const device = Object.assign({ on: false, since: null, where: null }, store.get('elvy-device', {}));
   const saveProfile = () => store.set('elvy-profile', profile);
   const saveDevice = () => store.set('elvy-device', device);
@@ -37,7 +37,12 @@
   const durText = (min) => (min < 60 ? min + ' min' : Math.floor(min / 60) + ' h ' + (min % 60) + ' min');
 
   // logo Elvy in testa alle schermate principali
-  const BRAND = '<img class="brand" src="img/logo-elvy.png" alt="Elvy" />';
+  // icone dell'altoparlante per la voce della mascotte
+  const SPK_ON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>';
+  const SPK_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+  const voiceBtn = (cls) => '<button type="button" class="' + cls + '" data-voice aria-pressed="' + !profile.mascotVoice + '" aria-label="' + (profile.mascotVoice ? 'Escludi la voce della mascotte' : 'Riattiva la voce della mascotte') + '">' + (profile.mascotVoice ? SPK_ON : SPK_OFF) + '<span>' + (profile.mascotVoice ? 'Voce Elvy' : 'Voce esclusa') + '</span></button>';
+  // logo Elvy in testa alle schermate principali, con l'interruttore della voce della mascotte
+  const brand = () => '<div class="brandbar"><img class="brand" src="img/logo-elvy.png" alt="Elvy" />' + voiceBtn('voice-tg') + '</div>';
   const paceTxt = (secPerKm) => (secPerKm && isFinite(secPerKm) ? Math.floor(secPerKm / 60) + ':' + String(Math.round(secPerKm % 60)).padStart(2, '0') : '—');
   const readyTxt = (sc) => (sc >= 70 ? 'Pronto per allenarti' : sc >= 45 ? 'Recupero nella media' : 'Oggi vai leggero');
   // GPS acceso per tutta la durata di un test (nei dati simulati no)
@@ -154,7 +159,7 @@
   // Fumetto con Elvy: il testo compare a poco a poco mentre Elvy lo dice con la voce.
   // auto = parla appena la schermata compare. Toccando Elvy o il fumetto ripete.
   const talk = (img, html, auto) => '<div class="talk' + (auto ? ' auto' : '') + '"><button type="button" class="talk-face" aria-label="Ascolta Elvy"><img src="' + img + '" alt="" />' +
-    '<i class="talk-wave" aria-hidden="true"><b></b><b></b><b></b></i></button><p class="talk-bubble"><span class="talk-text">' + html + '</span></p></div>';
+    '<i class="talk-wave" aria-hidden="true"><b></b><b></b><b></b></i></button><p class="talk-bubble"><span class="talk-text">' + html + '</span>' + voiceBtn('talk-mute') + '</p></div>';
   const plain = (html) => String(html).replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
   function speak(el) {
     const tx = el.querySelector('.talk-text');
@@ -170,10 +175,21 @@
       if (n >= text.length) { clearInterval(el.iv); tx.innerHTML = html; return; }
       tx.textContent = text.slice(0, n) + '▍';
     }, 40);
-    if (S.voiceOn() && 'speechSynthesis' in window) S.say(text, { pitch: 1.15, onend: finish });
+    // la mascotte parla solo se la sua voce non è esclusa (la guida vocale dei test è a parte)
+    if (profile.mascotVoice && S.voiceOn() && 'speechSynthesis' in window) S.say(text, { pitch: 1.15, onend: finish });
     el.to = setTimeout(finish, (text.length / cps) * 1000 + 600);
   }
+  function setMascotVoice(on) {
+    profile.mascotVoice = on; saveProfile();
+    if (!on) S.stopVoice();
+    document.querySelectorAll('[data-voice]').forEach((b) => { b.outerHTML = voiceBtn(b.className); });
+    bindVoice(document);
+  }
+  function bindVoice(root) {
+    root.querySelectorAll('[data-voice]').forEach((b) => { b.onclick = (e) => { e.stopPropagation(); setMascotVoice(!profile.mascotVoice); }; });
+  }
   function bindTalks(root) {
+    bindVoice(root);
     root.querySelectorAll('.talk').forEach((el) => { el.onclick = () => speak(el); });
     const a = root.querySelector('.talk.auto');
     if (a) setTimeout(() => { if (a.isConnected) speak(a); }, 350);
@@ -971,7 +987,7 @@
       : 'Oggi ti propongo ' + st.full.toLowerCase() + ', senza e con Elvy. Ogni confronto rende più chiara la tua tendenza.';
     const autoSay = store.get('elvy-said', '') !== new Date().toDateString();
     if (autoSay) store.set('elvy-said', new Date().toDateString());
-    $app.innerHTML = BRAND + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div></div>' +
+    $app.innerHTML = brand() + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div></div>' +
       talk(long ? IMG.point : IMG.hi, hi + line, autoSay) +
       '<div class="row" style="margin:14px 0">' + elvyPill() + (device.on ? '<span class="small muted">' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) + '</span>' : '') + '</div>' +
       (ot ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><h3 style="margin-top:6px">' + ot.full + '</h3><p class="small muted" style="margin-top:4px">Fatto senza Elvy. Ora applica Elvy e ripeti il test.</p><span class="btn small" style="margin-top:12px">Continua</span></a>' : '') +
@@ -1009,7 +1025,7 @@
 
   function renderTests() {
     setTab('test');
-    $app.innerHTML = BRAND + '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
+    $app.innerHTML = brand() + '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
       '<p class="muted">' + (device.on ? 'I test di adesso vengono segnati in automatico «con Elvy».' : 'Applica Elvy e tocca il pulsante: i test verranno segnati «con Elvy».') + '</p>' +
       GROUPS.map((g) => '<div class="k' + (PURPLE.includes(g) ? ' p' : '') + ' sec">' + g + '</div><div class="tiles">' +
         Object.keys(TESTS).filter((k) => TESTS[k].group === g).map((k) => {
@@ -1121,7 +1137,7 @@
       $app.innerHTML = head + stepper(1) +
         '<div class="card row between"><div><div class="small muted">Senza Elvy</div><div class="big" style="font-size:34px;margin-top:4px">' + fmt(sr.main, m.d) + '<small>' + m.unit + '</small></div></div><span class="tag">' + m.label + '</span></div>' +
         '<div style="margin-top:14px">' + talk(IMG.point, 'Fatto! Senza Elvy: ' + val(sr) + '. Ora applica i tre dispositivi: uno sulla <b>settima vertebra cervicale</b>, alla base del collo, e uno su <b>ogni polpaccio</b>, sopra il tendine d\'Achille. Poi rifacciamo lo stesso test.', true) + '</div>' +
-        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b>: parte bassa, sul muscolo soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
+        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b> (tricipite della sura): parte bassa, sul soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
         '<p class="note">Il protocollo Sport consiglia di indossare Elvy prima dell\'attività. Per un confronto corretto ripeti il test nelle stesse condizioni: stesso posto, stesse scarpe, stessa posizione del telefono.</p></div>' +
         '<div class="actions"><button class="btn" id="cmp-on">Ho applicato Elvy · passo 3</button><a class="btn ghost" href="#/oggi">Lo faccio più tardi</a><a class="small" href="#/r/' + sr.id + '" style="text-align:center">Dettagli del test senza Elvy</a></div>';
       document.getElementById('cmp-on').onclick = () => {
@@ -1154,7 +1170,7 @@
           return '<tr><td>' + a[0] + '</td><td>' + fmt(a[1], a[3]) + ' <small>' + a[2] + '</small></td><td>' + fmt(b[1], b[3]) + ' <small>' + b[2] + '</small></td><td class="' + (e.good ? 'up' : e.good === false ? 'down' : '') + '">' + pctTxt(e.pct) + '</td></tr>';
         }).join('') + '</tbody></table></div>' : '') +
       '<p class="note" style="margin-top:14px">Un solo confronto può dipendere da molte cose (stanchezza, riscaldamento, il fatto che il secondo test lo conosci già). Ripetilo in giorni diversi: nei Progressi vedi la tendenza. Sono stime per l\'allenamento, non misure cliniche.</p>' +
-      '<div class="actions"><a class="btn" href="#/progressi/' + sr.test + '">Vedi i progressi</a><a class="btn ghost" href="#/test/' + sr.test + '">Nuovo confronto</a>' +
+      '<div class="actions"><a class="btn" href="#/progressi/' + sr.test + '">Vedi i progressi</a><a class="btn ghost" href="#/report">Condividi il report in PDF</a><a class="btn ghost" href="#/test/' + sr.test + '">Nuovo confronto</a>' +
       '<div class="row" style="justify-content:center;gap:18px"><a class="small" href="#/r/' + sr.id + '">Dettagli senza Elvy</a><a class="small" href="#/r/' + cr.id + '">Dettagli con Elvy</a></div></div>';
     bindCommon();
   }
@@ -1166,7 +1182,8 @@
     const ses = sessions(); const better = ses.filter((x) => x.good).length; const worse = ses.filter((x) => x.good === false).length;
     const sum = !ses.length ? 'Qui vedrai i tuoi progressi e l\'effetto di Elvy. Fai un confronto: lo stesso test senza e con Elvy.'
       : 'Hai fatto ' + (ses.length === 1 ? 'un confronto' : ses.length + ' confronti') + ' senza e con Elvy. ' + (better ? 'Con Elvy sei andato meglio ' + (better === 1 ? 'una volta' : better + ' volte') + (worse ? ', peggio ' + (worse === 1 ? 'una volta' : worse + ' volte') : '') + '.' : 'Per ora nessuna differenza chiara: continua a confrontare.');
-    $app.innerHTML = BRAND + '<div class="top"><h1>Progressi</h1></div>' + talk(ses.length && better ? IMG.jump : IMG.point, sum, true) +
+    $app.innerHTML = brand() + '<div class="top"><h1>Progressi</h1></div>' + talk(ses.length && better ? IMG.jump : IMG.point, sum, true) +
+      '<a class="card rep-link" href="#/report"><span class="rep-ico">PDF</span><span><b>Report da salvare o condividere</b><br><span class="small muted">test, confronti senza e con Elvy, recupero</span></span><span class="chev">›</span></a>' +
       (ses.length ? '<div class="grid3" style="margin-top:14px">' + stat('Confronti', ses.length, '') + stat('Meglio con Elvy', better, '', '', false) + stat('Uguale o peggio', ses.length - better, '', '', true) + '</div>' : '') +
       (ids.length ? '<h3 class="sec">I tuoi test</h3>' + ids.map((k) => {
         const t = TESTS[k]; const list = all.filter((r) => r.test === k);
@@ -1215,19 +1232,144 @@
     bindCommon();
   }
 
+  /* ───────── Guida: video, applicazione, mappatura Sport, protocolli ───────── */
+  // Video e protocolli da Airtable (tabelle Videos e PDF_files) tramite il webhook Make di Equistasi Point:
+  // in Elvy compaiono quelli con «Elvy» nel campo «Profili app».
+  let guideP = null;
+  function loadGuide() {
+    if (guideP) return guideP;
+    const url = (window.APP_CONFIG || {}).videosUrl;
+    const sel = (v) => (v && typeof v === 'object' ? v.name : v) || '';
+    const tags = (v) => (Array.isArray(v) ? v.map(sel) : v ? [sel(v)] : []);
+    const mine = (f) => tags(f['Profili app']).includes('Elvy') && !tags(f['Profili app']).includes('Nascosto');
+    const order = (a, b) => a.order - b.order || a.title.localeCompare(b.title);
+    let cached = null; try { cached = JSON.parse(localStorage.getItem('elvy-guide') || 'null'); } catch (e) { /* */ }
+    if (cached && Date.now() - cached.t < 15 * 60000) return (guideP = Promise.resolve(cached.c));
+    if (!url) return (guideP = Promise.resolve(cached ? cached.c : null));
+    guideP = fetch(url, { cache: 'no-store' }).then((r) => r.json()).then((d) => {
+      const vids = ((d.videos || d).records || []).filter((r) => mine(r.fields || {})).map((r) => { const f = r.fields; const file = (f['Video File'] || [])[0];
+        return { title: (f.Description || '').trim(), url: (f['Video URL'] || '').trim(), file: file ? file.url : '', thumb: f['Preview Image'] || '', order: typeof f.Order === 'number' ? f.Order : 999 }; }).filter((v) => v.url || v.file).sort(order);
+      const pros = ((d.protocols || {}).records || []).filter((r) => mine(r.fields || {})).map((r) => { const f = r.fields; const file = (f['PDF File'] || [])[0];
+        return { title: (f.Title || f.ID || '').trim(), subtitle: (f.Subtitle || '').trim(), url: file ? file.url : '', order: typeof f.Order === 'number' ? f.Order : 999 }; }).filter((x) => x.url).sort(order);
+      const c = { videos: vids, protocols: pros };
+      try { localStorage.setItem('elvy-guide', JSON.stringify({ t: Date.now(), c })); } catch (e) { /* */ }
+      return c;
+    }).catch(() => (cached ? cached.c : null));
+    guideP.then(() => { setTimeout(() => { guideP = null; }, 15 * 60000); });
+    return guideP;
+  }
+  function embedVideo(v) {
+    const u = v.url; let m;
+    if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) return '<iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/))) return '<iframe src="https://player.vimeo.com/video/' + m[1] + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    if (/^https:\/\/(iframe|player)\.mediadelivery\.net\//.test(u)) return '<iframe src="' + esc(u) + (u.includes('?') ? '&' : '?') + 'autoplay=false&preload=true&responsive=true" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    const src = /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(u) ? u : v.file;
+    return src ? '<video src="' + esc(src) + '" controls playsinline preload="metadata"' + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>' : '';
+  }
+  function renderGuide() {
+    setTab('guida');
+    $app.innerHTML = brand() + '<div class="top"><h1>Guida</h1></div>' +
+      talk(IMG.point, 'Qui trovi come si applica Elvy con il cerotto, la mappa dei punti per lo sport e i protocolli. Guarda il video prima del primo confronto!', true) +
+      '<h2 class="sec">Video tutorial</h2><div id="gd-videos"><div class="card"><p class="small muted">Caricamento dei video…</p></div></div>' +
+      '<h2 class="sec">Come si applica</h2><div class="card guide-steps">' +
+      '<p class="small muted">Pelle <b style="color:#fff">pulita e asciutta</b>, senza creme né oli. Poi, per ogni punto:</p>' +
+      [['img/elvy-pelle.jpg', 'Appoggia Elvy', 'Metti il dispositivo Elvy sul punto, a contatto con la pelle.'],
+        ['img/elvy-cerotto.jpg', 'Copri con il cerotto', 'Togli la pellicola centrale del cerotto trasparente in dotazione e mettilo sopra Elvy.'],
+        ['img/elvy-premi.jpg', 'Premi i bordi', 'Togli le linguette laterali e premi bene i bordi, senza pieghe.']]
+        .map((x, i) => '<div class="g-step"><div class="g-img"><img src="' + x[0] + '" alt="" loading="lazy" /><i>' + (i + 1) + '</i></div><div><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>').join('') +
+      '<p class="small muted" style="margin-top:12px">Per toglierlo solleva piano un bordo del cerotto, tenendo ferma la pelle.</p></div>' +
+      '<h2 class="sec">Mappatura Sport</h2><div class="card map-card"><div class="map-wrap"><img src="img/mappa-sport.png" alt="Punti di applicazione per lo sport: C7 e polpacci" /></div>' +
+      '<ol class="map-legend"><li><i>1</i><div><b>C7 · settima vertebra cervicale</b><span>Alla base del collo: è la vertebra che sporge di più quando pieghi la testa in avanti.</span></div></li>' +
+      '<li><i>2·3</i><div><b>Tricipite della sura · polpacci</b><span>Uno per gamba, nella parte bassa del polpaccio, sul soleo, sopra il tendine d\'Achille.</span></div></li></ol>' +
+      '<div class="grid3" style="margin-top:12px">' + stat('Primo giorno', '1–2', 'ore', 'prima dello sport') + stat('Al giorno', '4', 'ore', 'al massimo', true) + stat('A settimana', '5', 'giorni', '+ 2 di pausa') + '</div>' +
+      '<p class="small muted" style="margin-top:10px">Dal secondo giorno usa Elvy durante gli allenamenti e le gare. Se ti alleni più volte al giorno puoi applicarlo più volte, senza superare le 4 ore.</p>' +
+      '<div class="warn" style="margin-top:12px">Togli i dispositivi se senti un fastidio qualsiasi. In caso di malessere (nausea, vertigini, mal di testa) toglili subito e riprova il giorno dopo.</div></div>' +
+      '<h2 class="sec">Protocolli</h2><div id="gd-protos"><div class="card"><p class="small muted">Caricamento…</p></div></div>' +
+      '<p class="note" style="margin-top:16px">Queste informazioni non sostituiscono il parere del medico, del fisioterapista o del preparatore atletico, che possono adattare punti e tempi a te e al tuo sport.</p>';
+    bindCommon();
+    loadGuide().then((c) => {
+      const vb = document.getElementById('gd-videos'); const pb = document.getElementById('gd-protos'); if (!vb) return;
+      vb.innerHTML = c && c.videos.length ? c.videos.map((v) => '<div class="card vid-card"><div class="vid-frame">' + embedVideo(v) + '</div><h3 style="margin-top:12px">' + esc(v.title) + '</h3></div>').join('')
+        : '<div class="card soon"><span class="soon-tag">In arrivo</span><h3 style="margin-top:8px">Video: come si applica Elvy</h3><p class="small muted" style="margin-top:6px">' + (c ? 'Il video tutorial sarà qui a breve. Intanto segui i passaggi qui sotto.' : 'I video non si caricano ora: controlla la connessione.') + '</p></div>';
+      pb.innerHTML = c && c.protocols.length ? c.protocols.map((x) => '<a class="card rep-link" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="rep-ico">PDF</span><span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<br><span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev">›</span></a>').join('')
+        : '<div class="card soon"><span class="soon-tag">In preparazione</span><h3 style="margin-top:8px">Protocollo Sport Elvy</h3><p class="small muted" style="margin-top:6px">I protocolli per lo sport (allenamento, gara, recupero) arriveranno qui. Per ora segui la mappatura Sport qui sopra.</p></div>';
+    });
+  }
+
+  /* ───────── Report in PDF ───────── */
+  // Dati del report: prove nel periodo (giorni, 0 = tutto), senza le prove simulate se non richieste
+  function reportData(days, withDemo) {
+    const from = days ? Date.now() - days * 864e5 : 0;
+    const list = results().filter((r) => TESTS[r.test] && r.t >= from && (withDemo || !r.demo));
+    const inRange = (x) => x.t >= from && (withDemo || (!x.s.demo && !x.c.demo));
+    const ses = sessions().filter(inRange);
+    const ids = Object.keys(TESTS).filter((k) => list.some((r) => r.test === k));
+    const avgOf = (arr) => (arr.length ? { avg: A.mean(arr.map((r) => r.main)), n: arr.length } : null);
+    const hv = list.filter((r) => r.test === 'hrv');
+    const lastHv = hv[hv.length - 1];
+    const ds = (t) => new Date(t).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+    return {
+      name: profile.name, sport: profile.sport, serial: window.ElvyGate.paired(),
+      period: list.length ? ds(list[0].t) + ' - ' + ds(list[list.length - 1].t) : 'nessuna prova',
+      date: ds(Date.now()),
+      kpi: { tests: list.length, comparisons: ses.length, better: ses.filter((x) => x.good).length, recovery: lastHv && lastHv.res.ready ? lastHv.res.ready.score : null },
+      effect: ids.map((k) => { const ks = ses.filter((x) => x.test === k); if (!ks.length) return null; const avg = A.mean(ks.map((x) => x.pct)); return { name: TESTS[k].full, n: ks.length, pct: avg, good: effect(TESTS[k], 100, 100 + avg).good }; }).filter(Boolean),
+      tests: ids.map((k) => {
+        const t = TESTS[k]; const rs = list.filter((r) => r.test === k); const vals = rs.map((r) => r.main);
+        return { name: t.full, group: t.group, label: t.metric.label, unit: t.metric.unit, d: t.metric.d, better: t.metric.better, n: rs.length, last: vals[vals.length - 1],
+          best: t.metric.better === 'low' ? Math.min(...vals) : Math.max(...vals), s: avgOf(rs.filter((r) => r.cond !== 'con')), c: avgOf(rs.filter((r) => r.cond === 'con')),
+          series: rs.slice(-24).map((r) => ({ v: r.main, con: r.cond === 'con' })) };
+      }),
+      hrv: lastHv ? { rmssd: lastHv.res.rmssd, hr: lastHv.res.hr, score: lastHv.res.ready ? lastHv.res.ready.score : null, series: hv.slice(-20).map((r) => r.res.rmssd) } : null,
+    };
+  }
+  function renderReport() {
+    setTab('progressi');
+    const o = Object.assign({ days: 30, demo: false }, prefs.report || {});
+    const d = reportData(+o.days, o.demo);
+    $app.innerHTML = '<div class="head">' + backBtn() + '<div><div class="k">Progressi</div><h1>Report in PDF</h1></div></div>' +
+      talk(IMG.point, d.kpi.tests ? 'Ti preparo un report con i tuoi test, i confronti senza e con Elvy e il recupero. Puoi salvarlo o mandarlo al tuo allenatore o fisioterapista.' : 'Nel periodo scelto non ci sono prove. Fai qualche test, poi torna qui.', true) +
+      '<div class="card stack" style="margin-top:14px"><div><div class="small muted" style="font-weight:700;margin-bottom:6px">Periodo</div><div class="seg">' +
+      [[7, '7 giorni'], [30, '30 giorni'], [90, '3 mesi'], [0, 'Tutto']].map(([v, l]) => '<button type="button" data-days="' + v + '" aria-pressed="' + (+o.days === v) + '">' + l + '</button>').join('') + '</div></div>' +
+      '<label class="check" style="margin-top:4px"><input type="checkbox" id="rp-demo"' + (o.demo ? ' checked' : '') + ' /><span>Includi le prove con dati simulati</span></label></div>' +
+      '<div class="rep-prev"><div class="rep-top"><img src="img/logo-elvy.png" alt="Elvy" /><div><b>Report di allenamento</b><span>' + esc([profile.name || 'Atleta', profile.sport].filter(Boolean).join(' · ')) + '</span><span>' + esc(d.period) + '</span></div></div>' +
+      '<div class="grid3" style="margin-top:12px">' + stat('Test', d.kpi.tests, '') + stat('Confronti', d.kpi.comparisons, '') + stat('Meglio con Elvy', d.kpi.better, '', '', true) + '</div>' +
+      '<p class="small muted" style="margin-top:12px">' + d.tests.length + (d.tests.length === 1 ? ' test' : ' test diversi') + (d.hrv ? ' · recupero (HRV)' : '') + ' · piè di pagina con il marchio Equistasi e l\'avviso che i dati non sono diagnostici.</p></div>' +
+      '<div class="actions"><button class="btn" id="rp-share"' + (d.kpi.tests ? '' : ' disabled') + '>Condividi il report</button><button class="btn ghost" id="rp-save"' + (d.kpi.tests ? '' : ' disabled') + '>Salva in PDF</button></div><p class="err" id="rp-msg"></p>' +
+      '<p class="note" style="margin-top:10px">Il PDF si crea sul telefono: nessun dato viene inviato finché non decidi tu di condividerlo.</p>';
+    $app.querySelectorAll('[data-days]').forEach((b) => { b.onclick = () => { prefs.report = Object.assign({}, o, { days: +b.dataset.days }); savePrefs(); renderReport(); }; });
+    document.getElementById('rp-demo').onchange = (e) => { prefs.report = Object.assign({}, o, { demo: e.target.checked }); savePrefs(); renderReport(); };
+    const go = async (how, btn) => {
+      const msg = document.getElementById('rp-msg'); msg.textContent = '';
+      const label = btn.textContent; btn.disabled = true; btn.textContent = 'Preparo il PDF…';
+      try {
+        const blob = await window.ElvyReport.make(reportData(+o.days, o.demo));
+        const name = 'Report Elvy ' + (profile.name ? profile.name + ' ' : '') + new Date().toISOString().slice(0, 10) + '.pdf';
+        const r = await window.ElvyReport.deliver(blob, name, how);
+        if (r === 'download') msg.innerHTML = '<span style="color:var(--teal-l)">PDF salvato: lo trovi nei download del telefono.</span>';
+      } catch (e) { msg.textContent = 'Non sono riuscito a creare il PDF: controlla la connessione la prima volta (serve scaricare il generatore) e riprova.'; }
+      btn.disabled = false; btn.textContent = label;
+    };
+    document.getElementById('rp-share').onclick = (e) => go('share', e.currentTarget);
+    document.getElementById('rp-save').onclick = (e) => go('save', e.currentTarget);
+    bindCommon();
+  }
+
   function renderProfile() {
     setTab('profilo');
     const n = results().length;
-    $app.innerHTML = BRAND + '<div class="top" style="align-items:center"><h1>Profilo</h1><img class="face" src="' + IMG.hi + '" alt="" /></div>' +
+    $app.innerHTML = brand() + '<div class="top" style="align-items:center"><h1>Profilo</h1><img class="face" src="' + IMG.hi + '" alt="" /></div>' +
       '<div class="card"><label class="field" style="margin-top:0"><span>Nome</span><input id="p-name" value="' + esc(profile.name) + '" maxlength="30" /></label>' +
       '<label class="field"><span>Sport</span><input id="p-sport" value="' + esc(profile.sport) + '" maxlength="40" /></label>' +
       '<div class="grid2"><label class="field"><span>Peso (kg)</span><input id="p-mass" type="number" inputmode="decimal" value="' + (profile.mass || '') + '" /></label>' +
       '<label class="field"><span>Altezza (cm)</span><input id="p-height" type="number" inputmode="numeric" value="' + (profile.height || '') + '" /></label></div>' +
-      '<label class="check"><input type="checkbox" id="p-voice"' + (profile.voice ? ' checked' : '') + ' /><span>Guida vocale durante i test</span></label>' +
+      '<label class="check"><input type="checkbox" id="p-voice"' + (profile.voice ? ' checked' : '') + ' /><span>Guida vocale durante i test (conto alla rovescia, «salta», «via»)</span></label>' +
+      '<label class="check"><input type="checkbox" id="p-mvoice"' + (profile.mascotVoice ? ' checked' : '') + ' /><span>Voce della mascotte (se la togli, Elvy scrive soltanto)</span></label>' +
       '<label class="check"><input type="checkbox" id="p-flip"' + (profile.flip ? ' checked' : '') + ' /><span>Corsa: inverti destra e sinistra (se il telefono è girato al contrario in cintura)</span></label>' +
       '<div class="actions"><button class="btn" id="p-save">Salva</button></div><p class="small" id="p-msg" style="color:var(--teal-l);margin-top:8px"></p></div>' +
       '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired(), 'front') + '</div>' +
       '<div class="row between" style="margin-top:14px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div>' +
+      '<p class="note" style="margin-top:12px">Il dispositivo funziona su un solo telefono o computer alla volta. Se lo abbini altrove, qui si scollega (massimo 3 spostamenti in 30 giorni).</p>' +
       '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
       '<div class="card" style="margin-top:12px" id="watch"><div class="row" style="gap:10px"><span class="watch-ico">' + ICON.watch + '</span><h3>Orologio e fascia cardio</h3></div>' +
       (S.heart.supported()
@@ -1236,7 +1378,7 @@
         : '<p class="small muted" style="margin-top:8px">' + (S.isIOS ? 'Su iPhone il collegamento con <b>Apple Watch</b> (battito, HRV e GPS dell\'orologio da Apple Salute) arriva con l\'app Elvy per App Store.' : 'Per collegare una fascia o un orologio via Bluetooth apri Elvy con <b>Chrome</b>. Il collegamento con Wear OS e Health Connect arriva con l\'app Elvy per Google Play.') + '</p>') +
       '</div>' +
       '<div class="card" style="margin-top:12px"><h3>I tuoi dati</h3><p class="small muted" style="margin-top:6px">' + n + ' prove salvate solo su questo telefono.</p>' +
-      '<div class="actions"><button class="btn ghost" id="p-csv"' + (n ? '' : ' disabled') + '>Esporta in CSV (Excel)</button><button class="btn danger" id="p-del"' + (n ? '' : ' disabled') + '>Cancella tutti i risultati</button></div></div>' +
+      '<div class="actions"><a class="btn" href="#/report">Report in PDF</a><button class="btn ghost" id="p-csv"' + (n ? '' : ' disabled') + '>Esporta in CSV (Excel)</button><button class="btn danger" id="p-del"' + (n ? '' : ' disabled') + '>Cancella tutti i risultati</button></div></div>' +
       '<p class="note" style="margin-top:18px">Elvy · by Equistasi. Le misure sono stime fatte con i sensori dello smartphone, utili per l\'allenamento: non hanno valore clinico e non sostituiscono la valutazione di medici, fisioterapisti o preparatori. L\'eventuale beneficio di Equistasi varia da persona a persona.</p>' +
       '<p class="note" style="margin-top:8px"><a href="../">Equistasi Point</a> · <a href="https://equistasi.com" rel="noopener">equistasi.com</a></p>';
     document.getElementById('p-save').onclick = () => {
@@ -1245,6 +1387,7 @@
       const m = parseFloat(document.getElementById('p-mass').value); profile.mass = m >= 25 && m <= 200 ? m : null;
       const h = parseFloat(document.getElementById('p-height').value); profile.height = h >= 100 && h <= 230 ? h : null;
       profile.voice = document.getElementById('p-voice').checked; profile.flip = document.getElementById('p-flip').checked;
+      profile.mascotVoice = document.getElementById('p-mvoice').checked;
       S.setVoice(profile.voice); saveProfile();
       document.getElementById('p-msg').textContent = 'Salvato.';
     };
@@ -1288,11 +1431,17 @@
       case 'video': setTab('test'); return window.ElvyVideo ? window.ElvyVideo.render($app, { backBtn, talk, bindCommon, results, saveResults, device, PROTO, fmt }) : renderTests();
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
       case 'profilo': return renderProfile();
+      case 'report': return renderReport();
+      case 'guida': return renderGuide();
       default: return renderOggi();
     }
   }
   window.addEventListener('hashchange', route);
   route();
+  // un dispositivo su un solo telefono: controllo all'avvio e quando si torna nell'app (non durante un test)
+  const lostHere = () => { if (!document.body.classList.contains('running')) route(); };
+  window.ElvyGate.recheck(lostHere, true);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !document.body.classList.contains('running')) window.ElvyGate.recheck(lostHere); });
 
   window.Elvy = { TESTS, results, route };
 })();

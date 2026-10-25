@@ -17,7 +17,46 @@
   // particelle nei colori Elvy: verde acqua, viola, verde chiaro, bianco
   const COLORS = [[127, 214, 209], [196, 166, 242], [75, 166, 163], [255, 255, 255]];
 
-  async function verify(serial) {
+  /* ───────── Un dispositivo, un telefono (come Equistasi Point) ───────── */
+  // Codice casuale del telefono, creato al primo avvio. Stessa chiave di Equistasi Point:
+  // sullo stesso telefono e nello stesso sito le due app contano come un solo telefono.
+  const PHONE_KEY = 'eq-phone-id';
+  function phoneId() {
+    let id = store.get(PHONE_KEY, null);
+    if (!id) {
+      id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Array.from({ length: 4 }, () => Math.random().toString(36).slice(2, 10)).join('-');
+      store.set(PHONE_KEY, id);
+    }
+    return id;
+  }
+  const lockOn = () => { const c = window.APP_CONFIG || {}; return !!(c.supabaseUrl && c.supabaseKey); };
+  // pair_device: { valid, access, status: ok | other_phone | moved | limit }
+  async function pairDevice(serial, move) {
+    const c = window.APP_CONFIG;
+    const h = { apikey: c.supabaseKey, 'Content-Type': 'application/json' };
+    if (!c.supabaseKey.startsWith('sb_')) h.Authorization = 'Bearer ' + c.supabaseKey; // chiave anon «legacy»
+    const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const r = await fetch(c.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/pair_device', { method: 'POST', headers: h, body: JSON.stringify({ p_serial: serial, p_phone: phoneId(), p_move: !!move }), cache: 'no-store', signal: ctrl.signal });
+      if (!r.ok) throw new Error('net');
+      return await r.json();
+    } finally { clearTimeout(t); }
+  }
+  let last = null; // esito dell'ultima verifica: { ok, reason }
+  // Verifica del seriale: con Supabase anche il telefono attivo; senza, il webhook Make
+  async function check(serial) {
+    if (lockOn()) {
+      const d = await pairDevice(serial, false);
+      if (!d || !d.valid) return (last = { ok: false, reason: 'invalid' });
+      if (d.access === false) return (last = { ok: false, reason: 'noaccess' });
+      if (d.status === 'other_phone') return (last = { ok: false, reason: 'other' });
+      return (last = { ok: true });
+    }
+    return (last = { ok: await verifyMake(serial) });
+  }
+  const verify = async (serial) => (await check(serial)).ok;
+
+  async function verifyMake(serial) {
     const url = (window.APP_CONFIG || {}).verifyUrl;
     if (!url) throw new Error('config');
     const ctrl = new AbortController();
@@ -59,6 +98,7 @@
     $app.innerHTML = '<form class="gate" id="g-form" novalidate>' +
       '<img class="gate-mark" src="img/logo-elvy.png" alt="Elvy" />' +
       '<h1>Attiva Elvy</h1>' +
+      (store.get('elvy-lost', null) ? '<div class="gate-fail" style="margin-top:14px">' + (store.get('elvy-lost') === 'other' ? 'Il tuo Elvy è stato attivato su un altro telefono o computer, quindi qui è stato scollegato. Un dispositivo funziona su un solo telefono alla volta: per usarlo qui abbinalo di nuovo.' : 'Il dispositivo non risulta più valido. Per informazioni scrivi a Equistasi.') + ' I tuoi risultati restano su questo telefono.</div>' : '') +
       '<p class="gate-lead">Prendi il dispositivo e inquadra il <b>retro</b>: il codice a barre o il numero di serie. Elvy si abbina all\'app.</p>' +
       deviceHtml('') +
       '<div class="gate-bar" id="g-bar" hidden><button type="button" class="btn small ghost" id="g-torch" hidden>Luce</button><button type="button" class="btn small ghost" id="g-cancel">Annulla</button></div>' +
@@ -94,6 +134,26 @@
     const CAM_ERR = (e) => (e && e.message === 'denied'
       ? 'La fotocamera non è consentita. Scrivi il numero di serie stampato sul retro del dispositivo.'
       : 'Non riesco ad aprire la fotocamera. Scrivi il numero di serie stampato sul retro del dispositivo.');
+    const NOACCESS = 'Questo dispositivo non si usa con l\'app Elvy. Per informazioni scrivi a Equistasi.';
+    // Il dispositivo è attivo su un altro telefono o computer: si può spostare qui (massimo 3 volte in 30 giorni)
+    function askMove(serial) {
+      const box = document.createElement('div'); box.className = 'move-ov';
+      box.innerHTML = '<div class="move-box" role="dialog" aria-modal="true"><img src="img/punta.jpg" alt="" class="move-face" />' +
+        '<h2>Elvy è già attivo su un altro telefono</h2><p class="muted" style="margin-top:8px">Il dispositivo <b>' + esc(serial) + '</b> funziona su <b>un solo telefono o computer alla volta</b>. Vuoi spostarlo su questo? L\'altro verrà scollegato. Puoi spostarlo al massimo 3 volte in 30 giorni.</p>' +
+        '<p class="err" id="mv-msg"></p><div class="actions"><button class="btn" id="mv-go" type="button">Sposta su questo telefono</button><button class="btn ghost" id="mv-x" type="button">Annulla</button></div></div>';
+      document.body.appendChild(box);
+      const close = () => box.remove();
+      box.querySelector('#mv-x').onclick = () => { close(); setWin(IDLE); sn.textContent = DOTS; };
+      box.querySelector('#mv-go').onclick = async () => {
+        const b = box.querySelector('#mv-go'); const m = box.querySelector('#mv-msg'); b.disabled = true; b.textContent = 'Sposto Elvy…';
+        try {
+          const d = await pairDevice(serial, true);
+          if (d && d.valid && (d.status === 'moved' || d.status === 'ok')) { close(); store.set(KEY, { serial, at: Date.now() }); store.set('elvy-lost', null); showPaired($app, serial, onDone); return; }
+          m.textContent = d && d.status === 'limit' ? 'Hai già spostato questo dispositivo 3 volte negli ultimi 30 giorni. Per sbloccarlo scrivi a Equistasi.' : 'Spostamento non riuscito.';
+        } catch (e) { m.textContent = 'Impossibile collegarsi ora. Controlla la connessione e riprova.'; }
+        b.disabled = false; b.textContent = 'Sposta su questo telefono';
+      };
+    }
     const NO_READ = 'Non riesco a leggere il codice. Scrivi il numero di serie stampato sul retro del dispositivo, sotto il codice a barre.';
     document.getElementById('g-pair').onclick = () => win.click();
     document.getElementById('g-retry').onclick = () => win.click();
@@ -112,7 +172,9 @@
             hint: 'Inquadra il codice a barre o il numero di serie sul retro di Elvy', scan: { ocr: 'alnum', prefixes: ['EQX'] },
           });
           if (!r) { if (timedOut) showManual(NO_READ); return; }
-          if (r.ok) { store.set(KEY, { serial: r.serial, at: Date.now() }); showPaired($app, r.serial, onDone); return; }
+          if (r.ok) { store.set(KEY, { serial: r.serial, at: Date.now() }); store.set('elvy-lost', null); showPaired($app, r.serial, onDone); return; }
+          if (last && last.reason === 'other') { askMove(r.serial); return; }
+          if (last && last.reason === 'noaccess') { showManual(NOACCESS, r.serial); return; }
           showManual(r.error === 'net'
             ? 'Impossibile verificare ora: controlla la connessione. Puoi riprovare o confermare il numero di serie qui sotto.'
             : 'Il codice letto non è stato riconosciuto. Controlla il numero di serie stampato sul retro e correggilo qui sotto.', r.serial);
@@ -144,13 +206,15 @@
       btn.disabled = true; btn.textContent = 'Verifica in corso…'; msg.textContent = '';
       try {
         if (await verify(serial)) {
-          store.set(KEY, { serial, at: Date.now() });
+          store.set(KEY, { serial, at: Date.now() }); store.set('elvy-lost', null);
           sn.textContent = serial; setWin('✓ Abbinato', 'paired');
           if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
           setTimeout(() => showPaired($app, serial, onDone), 900);
           return;
         }
         setWin(IDLE); sn.textContent = DOTS;
+        if (last && last.reason === 'other') { btn.disabled = false; btn.textContent = 'Accedi'; askMove(serial); return; }
+        if (last && last.reason === 'noaccess') { if (manual.hidden) showManual(NOACCESS, serial); else msg.textContent = NOACCESS; btn.disabled = false; btn.textContent = 'Accedi'; return; }
         // letto dalla fotocamera (riquadro manuale ancora nascosto): si apre il riquadro per correggerlo
         if (manual.hidden) showManual('Il codice letto non è stato riconosciuto. Controlla il numero di serie stampato sul retro e correggilo qui sotto.', serial);
         else msg.textContent = 'Numero di serie non riconosciuto. Controlla di averlo scritto bene (lettere e numeri, es. EQX25001801).';
@@ -174,8 +238,21 @@
     document.getElementById('g-go').onclick = () => { document.body.classList.remove('gated'); onDone(serial); };
   }
 
+  // Controllo del telefono attivo: all'avvio e quando si torna nell'app (al massimo ogni 5 minuti).
+  // Se il dispositivo è passato su un altro telefono, qui viene scollegato. Senza rete si continua.
+  let lastCheck = 0;
+  async function recheck(onLost, force) {
+    const sn = paired();
+    if (!sn || !lockOn() || (!force && Date.now() - lastCheck < 5 * 60000)) return;
+    lastCheck = Date.now();
+    try {
+      const d = await pairDevice(sn, false);
+      const lost = !d || !d.valid ? 'invalid' : d.access === false ? 'invalid' : d.status === 'other_phone' ? 'other' : null;
+      if (lost) { unpair(); store.set('elvy-lost', lost); onLost(lost); }
+    } catch (e) { /* senza rete: si riprova più tardi */ }
+  }
   const paired = () => { const v = store.get(KEY, null); return v && v.serial ? v.serial : null; };
   function unpair() { try { localStorage.removeItem(KEY); } catch (e) { /* */ } }
 
-  window.ElvyGate = { show, paired, unpair, deviceHtml, flip, _norm: norm };
+  window.ElvyGate = { show, paired, unpair, deviceHtml, flip, recheck, phoneId, _norm: norm };
 })();
