@@ -2,8 +2,12 @@
    che "legge" il dispositivo, anello che si chiude, seriale che si accende cifra per cifra, poi le particelle
    convergono, lampo, ✓ verde e suono di conferma. Suoni creati al momento con Web Audio (nessun file).
    Uso: EqPair.run({ accept, norm, verify }) → Promise<{ serial, ok }> oppure null se annullato.
-   - verify(serial) → Promise<boolean>: controllo del seriale, parte appena il codice è letto. */
+   - verify(serial) → Promise<boolean>: controllo del seriale, parte appena il codice è letto.
+   Facoltativi, per le app con un'altra grafica (es. Elvy): theme (classe CSS in più), colors (4 colori [r, g, b]
+   delle particelle), ring (2 colori dell'anello), ok ([r, g, b] del successo), hint (testo sotto il titolo), hold (ms in cui resta visibile il ✓ finale),
+   scan (opzioni in più per EqScan.open, es. { ocr: 'alnum', prefixes: ['EQX'] }). */
 (function () {
+  const T = window.T || ((s, v) => String(s).replace(/\{(\w+)\}/g, (m, k) => (v && v[k] != null ? v[k] : m)));
   const COLS = [[127, 182, 232], [72, 140, 197], [250, 220, 0], [255, 255, 255]];
   const MIN_READ = 900; // dopo la lettura l'anello impiega almeno questo tempo a chiudersi
   const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -62,7 +66,7 @@
     }
     return P;
   }
-  function drawCloud(ctx, P, cx, cy, R, t, { alpha = 1, swirl = 0, spin = 1, collapse = 0, burst = 0 }) {
+  function drawCloud(ctx, P, cx, cy, R, t, { alpha = 1, swirl = 0, spin = 1, collapse = 0, burst = 0, cols = COLS }) {
     const a = t * 0.8 * spin; const b = 0.35 + Math.sin(t * 0.45) * 0.25;
     const ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
     ctx.globalCompositeOperation = 'lighter';
@@ -73,7 +77,7 @@
       const x1 = x * ca + z * sa, z1 = -x * sa + z * ca; const y2 = y * cb - z1 * sb, z2 = y * sb + z1 * cb;
       const k = 1 - collapse; const pz = 2.6 + z2;
       const px = cx + x1 * R * k * 2.2 / pz, py = cy + y2 * R * k * 2.2 / pz;
-      const dep = cl((1.6 - z2) / 2.4); const c = COLS[p.c < 0.55 ? 0 : p.c < 0.8 ? 1 : p.c < 0.95 ? 2 : 3];
+      const dep = cl((1.6 - z2) / 2.4); const c = cols[p.c < 0.55 ? 0 : p.c < 0.8 ? 1 : p.c < 0.95 ? 2 : 3];
       const al = alpha * (0.3 + 0.7 * dep) * (0.6 + 0.4 * Math.sin(t * 5 + p.ph)) * (burst ? Math.max(0, 1 - burst / 2.4) : 1);
       const sz = p.s * (0.7 + dep * 1.3) * (R / 150);
       ctx.fillStyle = 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (al * 0.2).toFixed(3) + ')';
@@ -88,17 +92,18 @@
   function run(opts) {
     opts = opts || {};
     audio(); // va creato nel tocco dell'utente (iPhone)
+    const cols = opts.colors || COLS; const ring = opts.ring || ['#7fb6e8', '#FADC00']; const okc = (opts.ok || [31, 174, 91]).join(',');
     return new Promise((resolve, reject) => {
       const el = document.createElement('div');
-      el.className = 'pair'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', T('Abbina il dispositivo'));
+      el.className = 'pair' + (opts.theme ? ' ' + opts.theme : ''); el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', T('Abbina il dispositivo'));
       let ticks = '';
       for (let i = 0; i < 120; i++) { const an = (i / 120) * Math.PI * 2; const r1 = 153, r2 = i % 10 === 0 ? 160 : 157; ticks += '<line x1="' + (165 + Math.cos(an) * r1).toFixed(1) + '" y1="' + (165 + Math.sin(an) * r1).toFixed(1) + '" x2="' + (165 + Math.cos(an) * r2).toFixed(1) + '" y2="' + (165 + Math.sin(an) * r2).toFixed(1) + '"/>'; }
       el.innerHTML =
         '<canvas class="pair-bg" aria-hidden="true"></canvas>' +
         '<button type="button" class="pair-x" aria-label="' + T('Annulla') + '">✕</button>' +
-        '<div class="pair-head"><h2 class="pair-t">' + T('Abbina il dispositivo') + '</h2><p class="pair-s">' + T('Metti il codice a barre dentro il riquadro giallo') + '</p></div>' +
+        '<div class="pair-head"><h2 class="pair-t">' + T('Abbina il dispositivo') + '</h2><p class="pair-s">' + (opts.hint || T('Metti il codice a barre dentro il riquadro giallo')) + '</p></div>' +
         '<div class="pair-vf"><div class="pair-feed"></div><div class="pair-guide" aria-hidden="true"><i></i><i></i><i></i><i></i></div></div>' +
-        '<svg class="pair-ring" viewBox="0 0 330 330" aria-hidden="true"><defs><linearGradient id="pairgr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fb6e8"/><stop offset="1" stop-color="#FADC00"/></linearGradient></defs>' +
+        '<svg class="pair-ring" viewBox="0 0 330 330" aria-hidden="true"><defs><linearGradient id="pairgr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="' + ring[0] + '"/><stop offset="1" stop-color="' + ring[1] + '"/></linearGradient></defs>' +
         '<g class="pair-ticks">' + ticks + '</g><circle class="pair-track" cx="165" cy="165" r="146"/><circle class="pair-prog" cx="165" cy="165" r="146" transform="rotate(-90 165 165)"/></svg>' +
         '<canvas class="pair-fx" aria-hidden="true"></canvas>' +
         '<svg class="pair-check" viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="128"/><path d="M90 156l40 40 82-86"/></svg>' +
@@ -152,7 +157,7 @@
         if (phase === 'scan' || phase === 'read' || (phase === 'ok' && now - tEnd < 350)) {
           const col = phase === 'ok' ? ease(cl((now - tEnd) / 300)) : 0;
           fx.save(); fx.beginPath(); fx.arc(cx, cy, rad, 0, Math.PI * 2); fx.clip();
-          drawCloud(fx, P, cx, cy, rad * 0.86, t * (phase === 'read' ? 1.6 : 1.2), { alpha: cl(t * 1.5), swirl: phase === 'read' ? 1 : 0.3, spin: phase === 'read' ? 1.8 : 1, collapse: col });
+          drawCloud(fx, P, cx, cy, rad * 0.86, t * (phase === 'read' ? 1.6 : 1.2), { alpha: cl(t * 1.5), swirl: phase === 'read' ? 1 : 0.3, spin: phase === 'read' ? 1.8 : 1, collapse: col, cols });
           fx.restore();
         }
         if (phase === 'ok') {
@@ -160,8 +165,8 @@
           const fl = cl((k - 300) / 120) * (1 - cl((k - 420) / 500));
           if (fl > 0) { const g = fx.createRadialGradient(cx, cy, 0, cx, cy, rad * 1.6); g.addColorStop(0, 'rgba(255,255,255,' + fl + ')'); g.addColorStop(0.4, 'rgba(200,225,255,' + fl * 0.6 + ')'); g.addColorStop(1, 'rgba(120,170,255,0)'); fx.fillStyle = g; fx.fillRect(0, 0, W, H); }
           const bu = cl((k - 350) / 2200);
-          if (bu > 0 && bu < 1) drawCloud(fx, P, cx, cy, rad * 0.86, t, { burst: out(bu) * 2.4 });
-          if (k > 350) for (let i = 0; i < 2; i++) { const q = (((k - 350) / 1000) * 0.6 + i * 0.5) % 1; fx.strokeStyle = 'rgba(31,174,91,' + ((1 - q) * 0.7).toFixed(3) + ')'; fx.lineWidth = 4; fx.beginPath(); fx.arc(cx, cy, rad * (0.55 + q * 0.9), 0, Math.PI * 2); fx.stroke(); }
+          if (bu > 0 && bu < 1) drawCloud(fx, P, cx, cy, rad * 0.86, t, { burst: out(bu) * 2.4, cols });
+          if (k > 350) for (let i = 0; i < 2; i++) { const q = (((k - 350) / 1000) * 0.6 + i * 0.5) % 1; fx.strokeStyle = 'rgba(' + okc + ',' + ((1 - q) * 0.7).toFixed(3) + ')'; fx.lineWidth = 4; fx.beginPath(); fx.arc(cx, cy, rad * (0.55 + q * 0.9), 0, Math.PI * 2); fx.stroke(); }
         }
         // scintillii sonori
         if ((phase === 'scan' || phase === 'read') && now - lastSpark > (phase === 'read' ? 70 : 160)) { lastSpark = now; sfx('sparkle'); }
@@ -177,7 +182,7 @@
           $('.pair-t').textContent = T('Abbinamento…'); $('.pair-s').textContent = T('Collegamento all’app');
           $('.pair-done-sn').textContent = SER.text;
           setTimeout(() => { $('.pair-t').textContent = T('Tutto pronto'); $('.pair-s').textContent = T('Il dispositivo si è abbinato all’app'); }, 400);
-          setTimeout(() => close({ serial: SER.text, ok: true }), 700);
+          setTimeout(() => close({ serial: SER.text, ok: true }), opts.hold || 700);
         } else {
           sfx('error');
           $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : T('Seriale non riconosciuto'); $('.pair-s').textContent = SER.text;
@@ -193,7 +198,7 @@
       }
       $('.pair-x').addEventListener('click', () => close(null));
 
-      window.EqScan.open({ container: $('.pair-feed'), guide: $('.pair-guide'), fx: false, freeze: true, torch: $('.pair-torch'), accept: opts.accept }).then((text) => {
+      window.EqScan.open(Object.assign({}, opts.scan, { container: $('.pair-feed'), guide: $('.pair-guide'), fx: false, freeze: true, torch: $('.pair-torch'), accept: opts.accept })).then((text) => {
         if (!text || finished) { if (!finished) close(null); return; }
         SER.text = opts.norm ? opts.norm(text) : text; phase = 'read'; tRead = performance.now(); pRead = 0.32 * (1 - Math.exp(-((tRead - t0) / 1000) / 2.2));
         el.classList.add('read'); digits(0);

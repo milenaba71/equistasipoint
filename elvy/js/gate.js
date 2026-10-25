@@ -76,6 +76,27 @@
     win.addEventListener('click', async () => {
       if (dev.classList.contains('scanning') || !window.EqScan) return;
       msg.textContent = ''; setWin(IDLE); sn.textContent = DOTS;
+      // abbinamento a tutto schermo in stile Apple Watch (con «riduci movimento» resta la lettura nel disegno)
+      if (window.EqPair && !window.EqPair.reduced()) {
+        dev.classList.add('scanning');
+        try {
+          const r = await window.EqPair.run({
+            accept: looksSerial, norm, verify, theme: 'elvy', colors: COLORS, ring: ['#7FD6D1', '#C4A6F2'], ok: [75, 166, 163], hold: 2600,
+            hint: 'Inquadra il codice a barre o il numero di serie sul retro di Elvy', scan: { ocr: 'alnum', prefixes: ['EQX'] },
+          });
+          if (!r) return;
+          if (r.ok) { store.set(KEY, { serial: r.serial, at: Date.now() }); showPaired($app, r.serial, onDone); return; }
+          input.value = r.serial;
+          msg.textContent = r.error === 'net'
+            ? 'Impossibile verificare ora. Controlla la connessione e riprova.'
+            : 'Numero di serie non riconosciuto. Controlla il dispositivo o scrivi il seriale qui sotto.';
+        } catch (e) {
+          msg.textContent = e.message === 'denied'
+            ? 'Per inquadrare il seriale consenti l\'uso della fotocamera, oppure scrivilo qui sotto.'
+            : 'Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.';
+        } finally { dev.classList.remove('scanning'); }
+        return;
+      }
       dev.classList.add('scanning'); bar.hidden = false;
       try {
         const text = await window.EqScan.open({ container: win, torch: document.getElementById('g-torch'), accept: looksSerial, ocr: 'alnum', prefixes: ['EQX'], colors: COLORS });
