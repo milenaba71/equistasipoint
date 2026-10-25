@@ -36,6 +36,8 @@
   const clock = (sec) => { const t = Math.round(sec); return ((t >= 60 ? Math.floor(t / 60) + ' min ' : '') + (t % 60 || t < 60 ? (t % 60) + ' s' : '')).trim(); };
   const durText = (min) => (min < 60 ? min + ' min' : Math.floor(min / 60) + ' h ' + (min % 60) + ' min');
 
+  // logo Elvy in testa alle schermate principali
+  const BRAND = '<img class="brand" src="img/logo-elvy.png" alt="Elvy" />';
   const IMG = { hi: 'img/mascotte.jpg', ok: 'img/pollice.jpg', point: 'img/punta.jpg', jump: 'img/salta.jpg' };
   const ICON = {
     back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -668,7 +670,7 @@
     const sug = ROTATION.slice().sort((a, b) => lastT(a) - lastT(b))[0];
     const st = TESTS[sug];
     const recent = []; all.slice().reverse().forEach((r) => { if (!recent.find((x) => x.test === r.test) && TESTS[r.test]) recent.push(r); });
-    $app.innerHTML = '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div><img class="face" src="' + IMG.hi + '" alt="Elvy" /></div>' +
+    $app.innerHTML = BRAND + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div><img class="face" src="' + IMG.hi + '" alt="Elvy" /></div>' +
       '<div class="row" style="margin-bottom:14px">' + elvyPill() + (device.on ? '<span class="small muted">' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) + '</span>' : '') + '</div>' +
       card +
       '<div class="card hero" style="margin-top:14px;padding:0;padding-right:18px"><img src="' + IMG.point + '" alt="" style="width:34%;max-width:150px;border-radius:0;align-self:stretch" /><div style="padding:18px 0 18px 0"><div class="k p">Oggi ti consiglio</div><h3 style="margin-top:8px;font-size:20px;line-height:1.25">' + st.full + ', ' + st.sub + '</h3>' +
@@ -680,7 +682,8 @@
   }
 
   function renderWelcome() {
-    $app.innerHTML = '<div style="text-align:center;margin-top:10px"><img src="img/wordmark.png" alt="Elvy" style="width:150px" /></div>' +
+    document.body.classList.add('gated'); // niente barra in basso finché non si è presentati
+    $app.innerHTML = '<div style="text-align:center;margin-top:10px"><img src="img/logo-elvy.png" alt="Elvy" style="width:150px" /></div>' +
       '<div class="say" style="margin-top:18px"><img src="' + IMG.hi + '" alt="" style="width:110px" /><p>Ciao! Sono <b>Elvy</b>. Con i sensori del tuo telefono misuriamo equilibrio, salti, corsa, core, riflessi e mobilità. Poi confrontiamo i risultati <b>con e senza Elvy</b>.</p></div>' +
       '<div class="card" style="margin-top:18px"><h3>Come ti chiami?</h3>' +
       '<label class="field"><span>Nome</span><input id="w-name" autocomplete="given-name" maxlength="30" /></label>' +
@@ -694,13 +697,13 @@
       profile.name = document.getElementById('w-name').value.trim();
       profile.sport = document.getElementById('w-sport').value.trim();
       const m = parseFloat(document.getElementById('w-mass').value); profile.mass = m >= 25 && m <= 200 ? m : null;
-      profile.welcomed = true; saveProfile(); renderOggi();
+      profile.welcomed = true; saveProfile(); document.body.classList.remove('gated'); renderOggi();
     };
   }
 
   function renderTests() {
     setTab('test');
-    $app.innerHTML = '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
+    $app.innerHTML = BRAND + '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
       '<p class="muted">' + (device.on ? 'I test di adesso vengono segnati in automatico «con Elvy».' : 'Applica Elvy e tocca il pulsante: i test verranno segnati «con Elvy».') + '</p>' +
       GROUPS.map((g, gi) => '<div class="k' + (gi === 3 ? ' p' : '') + ' sec">' + g + '</div><div class="tiles">' +
         Object.keys(TESTS).filter((k) => TESTS[k].group === g).map((k) => {
@@ -771,7 +774,7 @@
     setTab('progressi');
     const all = results();
     const ids = Object.keys(TESTS).filter((k) => all.some((r) => r.test === k));
-    $app.innerHTML = '<div class="top"><h1>Progressi</h1></div>' +
+    $app.innerHTML = BRAND + '<div class="top"><h1>Progressi</h1></div>' +
       (ids.length ? '<p class="muted" style="margin-bottom:14px">L\'andamento di ogni test nel tempo, con e senza Elvy.</p>' + ids.map((k) => {
         const t = TESTS[k]; const list = all.filter((r) => r.test === k);
         const c = list.filter((r) => r.cond === 'con'); const s = list.filter((r) => r.cond !== 'con');
@@ -812,7 +815,7 @@
   function renderProfile() {
     setTab('profilo');
     const n = results().length;
-    $app.innerHTML = '<div class="top" style="align-items:center"><h1>Profilo</h1><img class="face" src="' + IMG.hi + '" alt="" /></div>' +
+    $app.innerHTML = BRAND + '<div class="top" style="align-items:center"><h1>Profilo</h1><img class="face" src="' + IMG.hi + '" alt="" /></div>' +
       '<div class="card"><label class="field" style="margin-top:0"><span>Nome</span><input id="p-name" value="' + esc(profile.name) + '" maxlength="30" /></label>' +
       '<label class="field"><span>Sport</span><input id="p-sport" value="' + esc(profile.sport) + '" maxlength="40" /></label>' +
       '<div class="grid2"><label class="field"><span>Peso (kg)</span><input id="p-mass" type="number" inputmode="decimal" value="' + (profile.mass || '') + '" /></label>' +

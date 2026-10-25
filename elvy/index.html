@@ -14,11 +14,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/elvy.css?v=4" />
+  <link rel="stylesheet" href="css/elvy.css?v=5" />
   <link rel="stylesheet" href="css/pair.css?v=1" />
 </head>
 <body>
   <main id="app" tabindex="-1"></main>
+  <!-- in fondo a ogni schermata: Elvy è un prodotto Equistasi -->
+  <footer class="by"><span>un prodotto</span><a href="https://equistasi.com" rel="noopener" aria-label="Equistasi"><img src="img/logo-equistasi.png" alt="Equistasi" /></a></footer>
 
   <nav class="tabbar" id="tabbar" aria-label="Sezioni">
     <a href="#/oggi" data-tab="oggi"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/></svg><span>Oggi</span></a>
@@ -32,11 +34,11 @@
   <script src="../js/config.js"></script>
   <script src="../js/scan.js"></script>
   <script src="../js/pair.js"></script>
-  <script src="js/gate.js?v=4"></script>
+  <script src="js/gate.js?v=5"></script>
   <script src="js/analysis.js?v=1"></script>
   <script src="js/sim.js?v=1"></script>
   <script src="js/sensors.js?v=1"></script>
-  <script src="js/app.js?v=2"></script>
+  <script src="js/app.js?v=3"></script>
   <script>
     if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js', { scope: './' });
   </script>

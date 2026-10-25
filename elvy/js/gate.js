@@ -51,7 +51,7 @@
   function show($app, onDone) {
     document.body.classList.add('gated');
     $app.innerHTML = '<form class="gate" id="g-form" novalidate>' +
-      '<img class="gate-mark" src="img/wordmark.png" alt="Elvy" />' +
+      '<img class="gate-mark" src="img/logo-elvy.png" alt="Elvy" />' +
       '<h1>Attiva Elvy</h1>' +
       '<p class="gate-lead">Prendi il dispositivo e inquadra il <b>retro</b>: il codice a barre o il numero di serie. Elvy si abbina all\'app.</p>' +
       deviceHtml('') +
@@ -159,7 +159,7 @@
 
   function showPaired($app, serial, onDone) {
     $app.innerHTML = '<div class="gate">' +
-      '<img class="gate-mark" src="img/wordmark.png" alt="Elvy" />' +
+      '<img class="gate-mark" src="img/logo-elvy.png" alt="Elvy" />' +
       '<h1 style="margin-bottom:20px">Elvy è abbinato!</h1>' + deviceHtml(serial) +
       '<div class="say" style="margin-top:22px"><img src="img/pollice.jpg" alt="" /><p>Perfetto! Il tuo dispositivo <b>' + esc(serial) + '</b> è collegato all\'app. Ora ti preparo i test.</p></div>' +
       '<div class="actions"><button class="btn" id="g-go" type="button">Iniziamo</button></div></div>';

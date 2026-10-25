@@ -4,6 +4,10 @@ Web app (PWA) per lo sport: i test che uno sportivo vuole fare, misurati con l'*
 
 Online: `https://app.equistasi.com/elvy/` (stesso sito di Equistasi Point).
 
+## Marchi
+
+Il logo **elvy** (e verde, lvy argento, come sulla scatola) è in `img/logo-elvy.png` e compare in testa alla schermata di attivazione, al benvenuto e alle schermate Oggi, Test, Progressi e Profilo. In fondo a ogni schermata c'è «un prodotto» con il piccolo logo **Equistasi** (`img/logo-equistasi.png`), che porta a equistasi.com.
+
 ## Accesso con il numero di serie
 
 Alla prima apertura c'è la schermata **Attiva Elvy** con il dispositivo disegnato come l'etichetta reale (logo Elvy a sinistra, codice a barre, seriale e CE a destra).
