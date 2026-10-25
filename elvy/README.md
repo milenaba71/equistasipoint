@@ -20,6 +20,21 @@ Alla prima apertura c'è la schermata **Attiva Elvy** con il **retro** del dispo
 
 Codice: `js/gate.js`.
 
+## Confronto senza / con Elvy
+
+Ogni test si fa come **confronto in 3 passi** («Inizia il confronto»):
+1. **Senza Elvy**: misura di base (se i dispositivi sono applicati, l'app chiede di toglierli).
+2. **Applica Elvy** secondo il protocollo Sport di Equistasi: un dispositivo sulla settima vertebra cervicale (C7) e uno su ogni polpaccio (soleo, sopra il tendine d'Achille). La figura mostra i punti.
+3. **Con Elvy**: stesso test, stesse opzioni.
+
+Poi la schermata di confronto mostra senza / con Elvy, la differenza in % (verde se migliore, secondo il verso della misura), le misure di dettaglio e il commento di Elvy. Il confronto a metà si può riprendere più tardi da Oggi. Resta anche «Solo una prova», segnata con o senza Elvy secondo il pulsante «Elvy applicato».
+
+In **Progressi** ci sono il numero di confronti, quante volte è andata meglio con Elvy, l'effetto medio di Elvy per test e un grafico a coppie (grigio senza, verde con Elvy) per ogni confronto, oltre all'andamento nel tempo.
+
+## Elvy parla
+
+La mascotte parla con la voce del telefono e il testo compare a poco a poco nel fumetto mentre lo dice (onde animate e mascotte che si muove). Parla al benvenuto, in Oggi (una volta al giorno), quando spiega un test, nei passi del confronto, sui risultati e nei Progressi; toccandola ripete. La voce si spegne dal Profilo («Guida vocale»).
+
 ## I test
 
 | Gruppo | Test | Dove sta il telefono | Cosa misura |
@@ -38,6 +53,26 @@ Codice: `js/gate.js`.
 **Oggi** mostra la *forma di oggi* (salto verticale confrontato con la tua media), il test consigliato e gli ultimi risultati. **Progressi** mostra l'andamento di ogni test, con le medie senza e con Elvy. Il pulsante **Elvy applicato** segna i test «con Elvy» e ricorda dove e da quanto è applicato. Una **voce** guida i test (il telefono è in cintura e non si vede lo schermo), lo schermo resta acceso.
 
 Sul computer (niente sensore) ogni test si può provare con **dati simulati**: il risultato viene segnato come prova.
+
+## Sensori, fotocamera, GPS e orologi
+
+| Funzione | Come | Dove funziona |
+|---|---|---|
+| **Giroscopio** | velocità di rotazione (°/s) registrata insieme all'accelerometro | tutti i telefoni con giroscopio |
+| **Swing** (nuovo test) | picchi di rotazione di 5 swing; velocità della punta = rotazione × leva (braccio 0,7 m, racchetta 1 m, mazza 1,6 m) | tutti; oltre ~2000 °/s il sensore satura (segnalato) |
+| **Equilibrio** | in più, la velocità angolare del tronco (°/s) | dove c'è il giroscopio |
+| **Battito e HRV** (nuovo test, gruppo Recupero) | dito sulla fotocamera posteriore con il flash: luminosità del rosso → battiti → RMSSD, SDNN, battito a riposo; «Recupero di oggi» 0–100 rispetto alla tua media (dalla 4ª misura) | Android (flash acceso dal browser); su iPhone dal browser il flash non si accende: serve una luce forte, o l'app nativa |
+| **GPS del telefono** | nella corsa (distanza, passo, velocità massima) e nel nuovo **Test di Cooper** (12 min → VO2max) | ovunque, all'aperto |
+| **Fascia cardio / orologio Bluetooth** | servizio standard Heart Rate: battito durante tutti i test, HRV dagli intervalli RR | Chrome su Android e computer (Web Bluetooth); fasce Polar, Garmin, Wahoo; orologi Garmin, Polar, Coros, Suunto con la trasmissione del battito |
+| **Video analisi** | registra o carica un video (anche slow-motion 120–240 fps fatto con la fotocamera del telefono), riproduzione a 0,1× · 0,25× · 0,5×, fotogramma per fotogramma; riconoscimento del corpo (MediaPipe Pose, sul telefono): angoli di ginocchio e anca, tronco, **valgismo delle ginocchia** all'atterraggio; **altezza del salto** segnando stacco e atterraggio (precisione indicata in base ai fotogrammi al secondo) | ovunque; il rallentatore vero viene dai video slow-motion caricati |
+
+### Cosa serve l'app nativa (App Store e Google Play)
+
+Il browser non può leggere Apple Salute, Health Connect né parlare con le app degli orologi. Per **Apple Watch** e **Wear OS** (battito e HRV dall'orologio, GPS dell'orologio, telecomando dei test dal polso) serve l'app nativa di Elvy, come quella di Equistasi Point in `mobile/` (Capacitor, che ha già un'app Apple Watch per il telecomando):
+
+1. **iPhone + Apple Watch**: HealthKit (battito, HRV SDNN, allenamenti con percorso GPS), app watchOS per avviare i test e vedere il battito; lettura NFC del dispositivo Elvy.
+2. **Android + Wear OS**: Health Connect (battito, HRV RMSSD, allenamenti ed esercizi con percorso), app Wear OS; Bluetooth nativo per le fasce anche senza Chrome.
+3. Lo stesso codice web di Elvy dentro l'app: i test e le schermate restano questi; l'app nativa aggiunge solo i collegamenti.
 
 ## Come funzionano le misure
 
@@ -62,6 +97,7 @@ Sono **stime per l'allenamento**, non misure cliniche: vanno confrontate sempre 
 | `js/sim.js` | simulatore di segnali (test automatici e modalità prova) |
 | `js/sensors.js` | accelerometro, voce, bip, schermo acceso |
 | `js/gate.js` | attivazione con il numero di serie e disegno del dispositivo |
+| `js/video.js` | video analisi: registrazione, rallentatore, riconoscimento del corpo, angoli, salto |
 | `js/app.js` | test, schermate, salvataggio dei risultati (localStorage) |
 | `test/analysis.test.js` | test degli algoritmi su segnali simulati |
 | `sw.js`, `manifest.webmanifest` | installazione e uso offline |

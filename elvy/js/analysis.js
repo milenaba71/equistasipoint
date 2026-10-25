@@ -291,6 +291,7 @@
     return {
       ok: true, area, held, fell: end < sig.n, velocity: pathLen / (d1.length / FS),
       rmsAcc: Math.sqrt(mean(ah.map((v) => v * v))) * 1000, // mm/s²
+      angVel: gyroRms(samples, samples[0].t + skip * 1000 / FS, samples[0].t + end * 1000 / FS), // °/s, se c'è il giroscopio
       ellipse: { rx: Math.sqrt(5.991 * l1), ry: Math.sqrt(5.991 * l2), angle: ang }, path,
     };
   }
@@ -465,10 +466,170 @@
     return s.some((p) => Math.hypot(p.x - g[0], p.y - g[1], p.z - g[2]) > threshold);
   }
 
+  /* ───────── Giroscopio ───────── */
+  // Velocità di rotazione media (valore efficace, °/s) tra t0 e t1; null se il telefono non ha il giroscopio
+  function gyroRms(samples, t0 = -Infinity, t1 = Infinity) {
+    const inWin = samples.filter((q) => q.t >= t0 && q.t <= t1);
+    const g = inWin.filter((q) => isFinite(q.rx) && isFinite(q.ry) && isFinite(q.rz));
+    if (g.length < 10 || g.length < inWin.length * 0.5) return null;
+    const m = [mean(g.map((q) => q.rx)), mean(g.map((q) => q.ry)), mean(g.map((q) => q.rz))];
+    return Math.sqrt(mean(g.map((q) => (q.rx - m[0]) ** 2 + (q.ry - m[1]) ** 2 + (q.rz - m[2]) ** 2)));
+  }
+  // Swing (racchetta, mazza, braccio): picchi della velocità di rotazione. lever = distanza in metri
+  // dal polso alla punta (braccio 0,7 · racchetta 1,0 · mazza da golf 1,6) per stimare la velocità della punta.
+  function swings(samples, opts = {}) {
+    const g = samples.filter((q) => isFinite(q.rx));
+    if (g.length < 20) return { ok: false, reason: 'nogyro' };
+    const sig = { fs: FS, ...resampleKeys(g, ['rx', 'ry', 'rz']) };
+    const w = sig.rx.map((v, i) => Math.hypot(v, sig.ry[i], sig.rz[i]));
+    const thr = opts.threshold || 300; const gap = Math.round(0.7 * FS);
+    const peaks = [];
+    for (let i = 1; i < w.length - 1; i++) {
+      if (w[i] > thr && w[i] >= w[i - 1] && w[i] > w[i + 1]) {
+        const last = peaks[peaks.length - 1];
+        if (last != null && i - last < gap) { if (w[i] > w[last]) peaks[peaks.length - 1] = i; } else peaks.push(i);
+      }
+    }
+    if (!peaks.length) return { ok: false, reason: 'noswing' };
+    const lever = opts.lever || 1;
+    const list = peaks.map((i) => ({ dps: w[i], kmh: (w[i] * Math.PI / 180) * lever * 3.6, at: i / FS }));
+    const best = list.reduce((a, b) => (b.dps > a.dps ? b : a));
+    // i sensori dei telefoni arrivano di solito a ~2000 °/s: oltre la misura è tagliata
+    return { ok: true, swings: list, best: best.dps, bestKmh: best.kmh, avg: mean(list.map((x) => x.dps)), saturated: best.dps > 1950 };
+  }
+  // ricampiona a 100 Hz le chiavi indicate
+  function resampleKeys(s, keys) {
+    const t0 = s[0].t; const n = Math.floor((s[s.length - 1].t - t0) / 1000 * FS) + 1;
+    const out = { n, t0 }; keys.forEach((k) => { out[k] = new Array(n); });
+    let j = 0;
+    for (let i = 0; i < n; i++) {
+      const t = t0 + i * 1000 / FS;
+      while (j < s.length - 2 && s[j + 1].t < t) j++;
+      const a = s[j]; const b = s[Math.min(j + 1, s.length - 1)];
+      const k = b.t > a.t ? Math.min(1, Math.max(0, (t - a.t) / (b.t - a.t))) : 0;
+      keys.forEach((key) => { out[key][i] = a[key] + (b[key] - a[key]) * k; });
+    }
+    return out;
+  }
+
+  /* ───────── Battito e HRV dalla fotocamera (fotopletismografia) ───────── */
+  // Ingresso: { t (ms), v } = luminosità media del rosso di ogni fotogramma, dito sull'obiettivo con il flash.
+  // Il sangue che arriva a ogni battito assorbe luce: la luminosità scende. Battiti = minimi del segnale.
+  function ppg(frames, opts = {}) {
+    const f = frames.filter((q) => isFinite(q.v));
+    if (f.length < 100) return { ok: false, reason: 'nodata' };
+    const fs = 50;
+    const s = resampleKeys(f, ['v']);
+    // i campioni sono a 100 Hz: ne tengo uno su due (50 Hz bastano)
+    const raw = s.v.filter((_, i) => i % 2 === 0);
+    const skip = Math.round((opts.skip != null ? opts.skip : 4) * fs); // primi secondi: il dito si assesta
+    if (raw.length - skip < 15 * fs) return { ok: false, reason: 'short' };
+    const x = lowpass(highpass(raw, 0.6, fs), 4, fs).slice(skip).map((v) => -v);
+    // picchi: massimo locale in ±0,25 s e sopra metà dell'ampiezza tipica dei dintorni
+    const win = Math.round(0.25 * fs); const peaks = [];
+    for (let i = win; i < x.length - win; i++) {
+      let isMax = true;
+      for (let k = i - win; k <= i + win; k++) if (x[k] > x[i]) { isMax = false; break; }
+      if (!isMax) continue;
+      const a = Math.max(0, i - 2 * fs); const b = Math.min(x.length, i + 2 * fs);
+      const loc = x.slice(a, b); const amp = Math.max(...loc) - Math.min(...loc);
+      if (x[i] - Math.min(...loc) > amp * 0.5) {
+        // posizione del picco più precisa con una parabola sui tre punti
+        const y0 = x[i - 1], y1 = x[i], y2 = x[i + 1]; const den = y0 - 2 * y1 + y2;
+        peaks.push(i + (den ? 0.5 * (y0 - y2) / den : 0));
+      }
+    }
+    const rrAll = []; for (let i = 1; i < peaks.length; i++) rrAll.push((peaks[i] - peaks[i - 1]) / fs * 1000);
+    const valid = rrAll.filter((r) => r > 330 && r < 1500);
+    if (valid.length < 10) return { ok: false, reason: 'nobeats' };
+    const med = median(valid);
+    // battiti buoni: vicini alla mediana (scarta i battiti persi o doppi)
+    const clean = rrAll.map((r) => (r > 330 && r < 1500 && Math.abs(r - med) < 0.2 * med ? r : null));
+    const rr = clean.filter((r) => r != null);
+    let sq = 0; let nd = 0;
+    for (let i = 1; i < clean.length; i++) if (clean[i] != null && clean[i - 1] != null) { sq += (clean[i] - clean[i - 1]) ** 2; nd++; }
+    if (nd < 8) return { ok: false, reason: 'noisy' };
+    const rmssd = Math.sqrt(sq / nd);
+    const quality = rr.length / rrAll.length;
+    // un battito vero si ripete: il segnale deve somigliare a sé stesso spostato di un battito
+    const lag = Math.round((med / 1000) * fs); const mx = mean(x);
+    let c = 0; let c0 = 0; let c1 = 0;
+    for (let i = 0; i + lag < x.length; i++) { const a = x[i] - mx; const b = x[i + lag] - mx; c += a * b; c0 += a * a; c1 += b * b; }
+    const periodic = c / Math.sqrt(c0 * c1 || 1);
+    if (periodic < 0.35 || quality < 0.6) return { ok: false, reason: 'noisy', periodic, quality };
+    return { ok: true, periodic, hr: 60000 / mean(rr), rmssd, sdnn: std(rr), lnrmssd: Math.log(rmssd), quality, beats: rr.length, rr: rr.map((r) => Math.round(r)), wave: x.filter((_, i) => i % 2 === 0).slice(0, 300).map((v) => +v.toFixed(3)) };
+  }
+  // Stessi indici da intervalli RR già pronti (fascia cardio o orologio Bluetooth), in ms
+  function hrvFromRR(rrIn) {
+    const v = rrIn.filter((r) => r > 300 && r < 2000);
+    if (v.length < 10) return { ok: false, reason: 'nodata' };
+    const med = median(v); const rr = v.filter((r) => Math.abs(r - med) < 0.2 * med);
+    let sq = 0; for (let i = 1; i < rr.length; i++) sq += (rr[i] - rr[i - 1]) ** 2;
+    const rmssd = Math.sqrt(sq / (rr.length - 1));
+    return { ok: true, hr: 60000 / mean(rr), rmssd, sdnn: std(rr), lnrmssd: Math.log(rmssd), quality: rr.length / v.length, beats: rr.length, rr };
+  }
+  // Recupero (0-100) dall'HRV di oggi rispetto alla tua media: come fanno gli orologi sportivi, su ln(RMSSD)
+  function readinessHRV(today, history) {
+    const base = history.filter((x) => isFinite(x));
+    if (base.length < 3) return null;
+    const m = mean(base); const sd = Math.max(0.08, std(base));
+    const z = (today - m) / sd;
+    return { score: Math.max(0, Math.min(100, Math.round(75 + z * 15))), z };
+  }
+
+  /* ───────── GPS ───────── */
+  const R_EARTH = 6371000;
+  function haversine(a, b) {
+    const r = Math.PI / 180; const dLat = (b.lat - a.lat) * r; const dLon = (b.lon - a.lon) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+    return 2 * R_EARTH * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  // Percorso: distanza, tempo, passo, velocità massima, parziali al km. Scarta i punti imprecisi e i salti impossibili.
+  function track(points, opts = {}) {
+    const maxAcc = opts.maxAcc || 30; const vmax = opts.vmax || 12.5;
+    const p = points.filter((q) => isFinite(q.lat) && isFinite(q.lon) && (!q.acc || q.acc <= maxAcc));
+    if (p.length < 3) return { ok: false, reason: 'nogps' };
+    // via i salti impossibili
+    const ok = [p[0]];
+    for (let i = 1; i < p.length; i++) {
+      const prev = ok[ok.length - 1]; const dt = (p[i].t - prev.t) / 1000;
+      if (dt > 0 && haversine(prev, p[i]) / dt <= vmax) ok.push(p[i]);
+    }
+    // media mobile su 5 punti: toglie lo zig-zag dell'errore del GPS, che allungherebbe la distanza
+    const sm = ok.map((q, i) => {
+      const a = Math.max(0, i - 2); const b = Math.min(ok.length, i + 3); const w = ok.slice(a, b);
+      return { t: q.t, lat: mean(w.map((z) => z.lat)), lon: mean(w.map((z) => z.lon)), acc: q.acc };
+    });
+    const kept = [sm[0]]; let dist = 0; const cum = [0];
+    for (let i = 1; i < sm.length; i++) {
+      const prev = kept[kept.length - 1]; const d = haversine(prev, sm[i]); const dt = (sm[i].t - prev.t) / 1000;
+      if (dt <= 0) continue;
+      if (d < 1.5 && dt < 5) continue; // fermo
+      dist += d; kept.push(sm[i]); cum.push(dist);
+    }
+    const dur = (kept[kept.length - 1].t - kept[0].t) / 1000;
+    if (dur < 10 || kept.length < 3) return { ok: false, reason: 'short' };
+    // velocità massima su finestre di almeno 5 secondi
+    let best = 0; let j = 0;
+    for (let i = 1; i < kept.length; i++) {
+      while (j < i && (kept[i].t - kept[j + 1].t) / 1000 >= 5) j++;
+      const dt = (kept[i].t - kept[j].t) / 1000;
+      if (dt >= 5) best = Math.max(best, (cum[i] - cum[j]) / dt);
+    }
+    const splits = []; let next = 1000; let lastT = kept[0].t;
+    for (let i = 1; i < kept.length; i++) if (cum[i] >= next) { splits.push((kept[i].t - lastT) / 1000); lastT = kept[i].t; next += 1000; }
+    const speed = dist / dur;
+    return { ok: true, distance: dist, duration: dur, speed, pace: speed > 0 ? 1000 / speed : null, maxSpeed: best || speed, splits, points: kept.length,
+      path: kept.filter((_, i) => i % Math.max(1, Math.floor(kept.length / 200)) === 0).map((q) => [+q.lat.toFixed(6), +q.lon.toFixed(6)]) };
+  }
+  // Test di Cooper: VO2max stimato dalla distanza percorsa in 12 minuti (ml/kg/min)
+  const cooperVO2 = (meters) => Math.max(0, (meters - 504.9) / 44.73);
+
   const API = {
     G, FS, mean, median, std, symmetry, resample, sampleRate, magnitude, lowpass, highpass, displacement,
     gravity, project, flights, heightFromFlight, jumps, dropJumps, repeatedJumps, sway, running, plank,
     angleBetween, mobility, motionOnset, movedBefore,
+    gyroRms, swings, ppg, hrvFromRR, readinessHRV, haversine, track, cooperVO2,
   };
   root.ElvyAnalysis = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;

@@ -155,7 +155,58 @@
     return { samples: out, ref: g0 };
   }
 
-  const API = { rng, rotation, BELT, sample, jumpSequence, swaySignal, runSignal, plankSignal, tiltSignal };
+  /* Battito dalla fotocamera: luminosità del rosso a ~30 fotogrammi al secondo.
+     hr = battiti al minuto, rmssd = variabilità desiderata (ms) */
+  function ppgSignal(hr, rmssd, dur, opts = {}) {
+    const r = rng(opts.seed || 9);
+    const base = 60000 / hr; const beats = [0];
+    // RR con alternanza battito-battito (dà l'RMSSD voluto) e un'onda lenta del respiro
+    let sign = 1;
+    while (beats[beats.length - 1] < dur * 1000 + 2000) {
+      const k = beats.length;
+      const rr = base + sign * rmssd * 0.5 + 25 * Math.sin(k * 0.6) * (opts.resp || 1) + gauss(r) * rmssd * 0.15;
+      sign = -sign; beats.push(beats[beats.length - 1] + rr);
+    }
+    const out = []; let t = 0; let j = 0;
+    while (t <= dur * 1000) {
+      while (j < beats.length - 2 && beats[j + 1] <= t) j++;
+      const ph = (t - beats[j]) / (beats[j + 1] - beats[j]);
+      // onda del polso: salita rapida, discesa lenta, piccola onda dicrota
+      const pulse = Math.exp(-((ph - 0.12) ** 2) / 0.004) + 0.35 * Math.exp(-((ph - 0.42) ** 2) / 0.006) + 0.5 * Math.exp(-ph * 3);
+      const v = 180 - 2.5 * pulse + 4 * Math.sin(t / 7000) + (opts.noise != null ? opts.noise : 0.12) * gauss(r);
+      out.push({ t: 1000 + t, v });
+      t += (1000 / 30) * (0.9 + 0.2 * r());
+    }
+    return { frames: out, rr: beats.slice(1).map((b, i) => b - beats[i]) };
+  }
+
+  /* Swing: picchi di velocità di rotazione (°/s) ogni ~2 s, telefono in mano */
+  function swingSignal(peaks, opts = {}) {
+    const r = rng(opts.seed || 4); const out = []; let t = 0; const dur = peaks.length * 2 + 1.5;
+    while (t <= dur) {
+      let w = 0;
+      peaks.forEach((pk, i) => { const c = 1 + i * 2; w += pk * Math.exp(-((t - c) ** 2) / (2 * 0.06 ** 2)); });
+      const g = [0, 0, 9.81];
+      out.push({ t: 1000 + t * 1000, x: g[0] + 0.3 * gauss(r), y: g[1] + 0.3 * gauss(r), z: g[2] + 0.3 * gauss(r), rx: w * 0.3 + 2 * gauss(r), ry: w * 0.2 + 2 * gauss(r), rz: w * 0.93 + 2 * gauss(r) });
+      t += (1 / 100) * (0.9 + 0.2 * r());
+    }
+    return out;
+  }
+
+  /* GPS: corsa a velocità costante (m/s) su un anello di pista, con errore di qualche metro e qualche salto */
+  function gpsTrack(speed, dur, opts = {}) {
+    const r = rng(opts.seed || 2); const out = []; const lat0 = 45.4642; const lon0 = 9.19;
+    const R = 400 / (2 * Math.PI); const mLat = 111320; const mLon = 111320 * Math.cos(lat0 * Math.PI / 180);
+    for (let t = 0; t <= dur; t += 1) {
+      const a = (speed * t) / R; const err = opts.err != null ? opts.err : 2.5;
+      let x = R * Math.cos(a) + err * gauss(r); let y = R * Math.sin(a) + err * gauss(r);
+      if (opts.jumps && r() < 0.01) { x += 80; y += 60; } // salto del GPS
+      out.push({ t: 1000 + t * 1000, lat: lat0 + y / mLat, lon: lon0 + x / mLon, acc: 5 + 3 * r() });
+    }
+    return out;
+  }
+
+  const API = { ppgSignal, swingSignal, gpsTrack, rng, rotation, BELT, sample, jumpSequence, swaySignal, runSignal, plankSignal, tiltSignal };
   root.ElvySim = API;
   if (typeof module !== 'undefined' && module.exports) module.exports = API;
 })(typeof window !== 'undefined' ? window : globalThis);

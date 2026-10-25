@@ -20,6 +20,9 @@
       const a = e.accelerationIncludingGravity;
       if (!a || a.x == null) return;
       const s = { t: performance.now(), x: a.x, y: a.y, z: a.z };
+      // giroscopio (°/s): rotationRate alpha = asse z, beta = asse x, gamma = asse y
+      const r = e.rotationRate;
+      if (r && r.alpha != null) { s.rx = r.beta; s.ry = r.gamma; s.rz = r.alpha; }
       samples.push(s);
       listeners.forEach((f) => f(s));
     };
@@ -64,16 +67,112 @@
     itVoice = vs.find((v) => /^it/i.test(v.lang) && /female|alice|federica|elsa/i.test(v.name)) || vs.find((v) => /^it/i.test(v.lang)) || null;
   }
   if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-  // Il telefono è in cintura: la voce dice cosa fare
-  function say(text) {
-    if (!voiceOn || !('speechSynthesis' in window) || !text) return;
+  // Il telefono è in cintura: la voce dice cosa fare. Anche la mascotte parla con questa voce.
+  // o.onend: chiamata a fine frase (anche se la voce è spenta o non disponibile: subito)
+  function say(text, o = {}) {
+    const done = () => { if (o.onend) { const f = o.onend; o.onend = null; f(); } };
+    if (!voiceOn || !('speechSynthesis' in window) || !text) { done(); return false; }
     try {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, ''));
-      u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1.05;
+      const u = new SpeechSynthesisUtterance(String(text).replace(/<[^>]+>/g, ''));
+      u.lang = 'it-IT'; if (itVoice) u.voice = itVoice;
+      u.rate = o.rate || 1.05; u.pitch = o.pitch || 1;
+      u.onend = done; u.onerror = done;
       speechSynthesis.speak(u);
-    } catch (e) { /* niente voce */ }
+      return true;
+    } catch (e) { done(); return false; }
   }
+  const stopVoice = () => { try { speechSynthesis.cancel(); } catch (e) { /* niente voce */ } };
+
+  /* ───────── Battito con la fotocamera: dito sull'obiettivo, flash acceso ───────── */
+  // Restituisce { video, frames, finger(), torch, stop() }: frames = { t, v } con la luminosità media del rosso.
+  async function ppgCamera() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30 } } });
+    const track = stream.getVideoTracks()[0];
+    let torch = false;
+    try {
+      const caps = track.getCapabilities ? track.getCapabilities() : {};
+      if (caps.torch) { await track.applyConstraints({ advanced: [{ torch: true }] }); torch = true; }
+    } catch (e) { /* luce non disponibile (es. iPhone dal browser) */ }
+    const video = document.createElement('video'); video.playsInline = true; video.muted = true; video.srcObject = stream;
+    await video.play().catch(() => {});
+    const cv = document.createElement('canvas'); cv.width = 32; cv.height = 32;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    const frames = []; let rgb = [0, 0, 0]; let on = true;
+    const grab = () => {
+      if (!on) return;
+      if (video.videoWidth) {
+        // zona centrale dell'immagine, ridotta a 32×32 punti
+        const w = video.videoWidth; const h = video.videoHeight; const c = Math.min(w, h) * 0.5;
+        ctx.drawImage(video, (w - c) / 2, (h - c) / 2, c, c, 0, 0, 32, 32);
+        const d = ctx.getImageData(0, 0, 32, 32).data; let r = 0, g = 0, b = 0;
+        for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+        const n = d.length / 4; rgb = [r / n, g / n, b / n];
+        frames.push({ t: performance.now(), v: rgb[0] });
+      }
+      if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(grab); else requestAnimationFrame(grab);
+    };
+    grab();
+    return {
+      video, frames, torch,
+      // dito sull'obiettivo: immagine rossa e luminosa, quasi senza verde e blu
+      finger: () => rgb[0] > 60 && rgb[0] > rgb[1] * 1.8 && rgb[0] > rgb[2] * 1.8,
+      level: () => rgb,
+      stop() { on = false; try { if (torch) track.applyConstraints({ advanced: [{ torch: false }] }).catch(() => {}); } catch (e) { /* */ } stream.getTracks().forEach((t) => t.stop()); },
+    };
+  }
+
+  /* ───────── GPS del telefono ───────── */
+  function gps() {
+    const points = []; let id = null; let last = null; const subs = [];
+    return {
+      points,
+      start() {
+        if (!('geolocation' in navigator)) return false;
+        id = navigator.geolocation.watchPosition((p) => {
+          last = { t: performance.now(), lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy, speed: p.coords.speed };
+          points.push(last); subs.forEach((f) => f(last));
+        }, () => {}, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+        return true;
+      },
+      stop() { if (id != null) navigator.geolocation.clearWatch(id); id = null; return points; },
+      last: () => last,
+      on(f) { subs.push(f); },
+    };
+  }
+
+  /* ───────── Fascia cardio o orologio via Bluetooth (servizio standard Heart Rate) ───────── */
+  // Funziona nel browser Chrome su Android e computer; su iPhone serve l'app nativa.
+  const heart = {
+    device: null, bpm: null, at: 0, subs: [],
+    supported: () => !!(navigator.bluetooth && navigator.bluetooth.requestDevice),
+    name() { return this.device ? this.device.name || 'Sensore cardio' : null; },
+    connected() { return !!(this.device && this.device.gatt && this.device.gatt.connected); },
+    async connect() {
+      const dev = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] });
+      this.device = dev;
+      dev.addEventListener('gattserverdisconnected', () => { this.bpm = null; this.emit(null); });
+      const server = await dev.gatt.connect();
+      const svc = await server.getPrimaryService('heart_rate');
+      const ch = await svc.getCharacteristic('heart_rate_measurement');
+      ch.addEventListener('characteristicvaluechanged', (ev) => this.parse(ev.target.value));
+      await ch.startNotifications();
+      return dev.name;
+    },
+    disconnect() { if (this.connected()) this.device.gatt.disconnect(); this.device = null; this.bpm = null; },
+    // formato standard: flag, battito (8 o 16 bit), energia (facoltativa), intervalli RR in 1/1024 s
+    parse(dv) {
+      const flags = dv.getUint8(0); let i = 1;
+      const bpm = flags & 1 ? dv.getUint16(i, true) : dv.getUint8(i); i += flags & 1 ? 2 : 1;
+      if (flags & 8) i += 2;
+      const rr = [];
+      if (flags & 16) for (; i + 1 < dv.byteLength; i += 2) rr.push((dv.getUint16(i, true) / 1024) * 1000);
+      this.bpm = bpm; this.at = performance.now();
+      this.emit({ t: this.at, bpm, rr });
+    },
+    emit(x) { this.subs.forEach((f) => f(x)); },
+    on(f) { this.subs.push(f); return () => { this.subs = this.subs.filter((g) => g !== f); }; },
+  };
 
   /* ───────── Schermo acceso ───────── */
   let lock = null;
@@ -85,7 +184,8 @@
   }
 
   window.ElvySensors = {
-    isIOS, permission, recorder, probe, beep, say, keepAwake, unlockAudio,
+    isIOS, permission, recorder, probe, beep, say, stopVoice, keepAwake, unlockAudio, ppgCamera, gps, heart,
+    voiceOn: () => voiceOn,
     setVoice(v) { voiceOn = !!v; },
     // segno degli assi: su iPhone l'accelerazione con gravità ha il verso opposto alle specifiche
     platformSign: isIOS ? -1 : 1,
