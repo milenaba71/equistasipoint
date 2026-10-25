@@ -129,10 +129,10 @@
     return '<ol class="stepper">' + st.map((x, i) => '<li class="' + (i < done ? 'done' : i === done ? 'now' : '') + '"><i>' + (i < done ? '✓' : i + 1) + '</i><b>' + x[0] + '</b><span>' + x[1] + '</span></li>').join('') + '</ol>';
   }
   // Figura vista da dietro con i 3 punti del protocollo Sport: C7 e i due polpacci
-  const BODY_BACK = '<svg class="bodyback" viewBox="0 0 120 230" role="img" aria-label="Punti di applicazione: settima vertebra cervicale e polpacci">' +
+  const BODY_BACK = '<svg class="bodyback" viewBox="0 0 132 230" role="img" aria-label="Punti di applicazione: settima vertebra cervicale e polpacci">' +
     '<g fill="#5b5b61" stroke="#6d6d74" stroke-width="1.5"><circle cx="60" cy="22" r="15"/><path d="M38 44c6-6 38-6 44 0l8 52c1 6-3 9-7 9H37c-4 0-8-3-7-9z"/>' +
     '<path d="M30 50l-12 46c-1 4 5 6 7 2l14-40zM90 50l12 46c1 4-5 6-7 2L81 58z"/><path d="M40 104h19l-2 112c0 5-12 5-12 0zM61 104h19l-5 112c0 5-12 5-12 0z"/></g>' +
-    '<g class="dots"><circle cx="60" cy="42" r="6"/><circle cx="51" cy="168" r="6"/><circle cx="69" cy="168" r="6"/></g>' +
+    '<g class="dots">' + [[60, 42], [51, 168], [69, 168]].map(([x, y]) => '<circle class="halo" cx="' + x + '" cy="' + y + '" r="6"/><rect x="' + (x - 3.5) + '" y="' + (y - 2.75) + '" width="7" height="5.5" rx="1.5"/>').join('') + '</g>' +
     '<g class="lbl"><text x="74" y="38">C7</text><text x="80" y="172">polpacci</text></g></svg>';
   // Barre a coppie: per ogni confronto grigio = senza Elvy, verde = con Elvy
   function pairsChart(list, metric) {
@@ -1157,7 +1157,7 @@
       $app.innerHTML = head + stepper(1) +
         '<div class="card row between"><div><div class="small muted">Senza Elvy</div><div class="big" style="font-size:34px;margin-top:4px">' + fmt(sr.main, m.d) + '<small>' + m.unit + '</small></div></div><span class="tag">' + m.label + '</span></div>' +
         '<div style="margin-top:14px">' + talk(IMG.point, 'Fatto! Senza Elvy: ' + val(sr) + '. Ora applica i tre dispositivi: uno sulla <b>settima vertebra cervicale</b>, alla base del collo, e uno su <b>ogni polpaccio</b>, sopra il tendine d\'Achille. Poi rifacciamo lo stesso test.', true) + '</div>' +
-        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b> (tricipite della sura): parte bassa, sul soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
+        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b> (tricipite della sura): parte bassa, sul soleo, sopra il tendine d\'Achille.</li><li>Metti Elvy sulla parte adesiva del cerotto trasparente, poi applica tutto sulla pelle pulita e asciutta, con il dispositivo a contatto della pelle.</li></ol></div>' +
         '<p class="note">Il protocollo Sport consiglia di indossare Elvy prima dell\'attività. Per un confronto corretto ripeti il test nelle stesse condizioni: stesso posto, stesse scarpe, stessa posizione del telefono.</p></div>' +
         '<div class="actions"><button class="btn" id="cmp-on">Ho applicato Elvy · passo 3</button><a class="btn ghost" href="#/oggi">Lo faccio più tardi</a><a class="small" href="#/r/' + sr.id + '" style="text-align:center">Dettagli del test senza Elvy</a></div>';
       document.getElementById('cmp-on').onclick = () => {
@@ -1293,8 +1293,8 @@
       '<h2 class="sec">Video tutorial</h2><div id="gd-videos"><div class="card"><p class="small muted">Caricamento dei video…</p></div></div>' +
       '<h2 class="sec">Come si applica</h2><div class="card guide-steps">' +
       '<p class="small muted">Pelle <b style="color:#fff">pulita e asciutta</b>, senza creme né oli. Poi, per ogni punto:</p>' +
-      [['img/elvy-pelle.jpg', 'Appoggia Elvy', 'Metti il dispositivo Elvy sul punto, a contatto con la pelle.'],
-        ['img/elvy-cerotto.jpg', 'Copri con il cerotto', 'Togli la pellicola centrale del cerotto trasparente in dotazione e mettilo sopra Elvy.'],
+      [['img/elvy-sul-cerotto.jpg', 'Elvy sul cerotto', 'Prima di tutto togli la pellicola centrale del cerotto trasparente in dotazione e appoggia Elvy al centro, sulla parte adesiva.'],
+        ['img/elvy-cerotto.jpg', 'Applica sulla pelle', 'Metti cerotto ed Elvy insieme sul punto, con il dispositivo a contatto della pelle.'],
         ['img/elvy-premi.jpg', 'Premi i bordi', 'Togli le linguette laterali e premi bene i bordi, senza pieghe.']]
         .map((x, i) => '<div class="g-step"><div class="g-img"><img src="' + x[0] + '" alt="" loading="lazy" /><i>' + (i + 1) + '</i></div><div><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>').join('') +
       '<p class="small muted" style="margin-top:12px">Per toglierlo solleva piano un bordo del cerotto, tenendo ferma la pelle.</p></div>' +
