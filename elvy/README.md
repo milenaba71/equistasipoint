@@ -54,6 +54,22 @@ La mascotte parla con la voce del telefono e il testo compare a poco a poco nel 
 
 Sul computer (niente sensore) ogni test si può provare con **dati simulati**: il risultato viene segnato come prova.
 
+## Report in PDF
+
+Da **Progressi → Report da salvare o condividere** (anche dal Profilo e dalla schermata di confronto): periodo 7 giorni, 30 giorni, 3 mesi o tutto; le prove con dati simulati si possono escludere. Il PDF (A4, creato sul telefono con jsPDF, `js/report.js`) contiene:
+- testata scura con il logo elvy, la mascotte, nome, sport, periodo e dispositivo;
+- riquadri di sintesi: test fatti, confronti, quante volte meglio con Elvy, recupero;
+- «Con e senza Elvy»: effetto medio di Elvy per ogni test;
+- una scheda per test: media senza e con Elvy, ultima e migliore misura, andamento;
+- recupero (HRV) se misurato;
+- in ogni piè di pagina: «Elvy, l'app Elvy e il dispositivo Elvy sono prodotti di proprietà di Equistasi S.r.l.» con il piccolo logo Equistasi e l'avviso che i dati sono stime dei sensori del telefono, non diagnostiche.
+
+**Condividi** apre il foglio di condivisione del telefono (WhatsApp, Mail, File…) dove il browser lo permette; altrimenti il PDF viene salvato nei download.
+
+## Voce della mascotte
+
+Il pulsante **Voce Elvy / Voce esclusa** in alto nelle schermate principali (e l'altoparlante in ogni fumetto) esclude la voce della mascotte: Elvy continua a scrivere nel fumetto. La guida vocale dei test (conto alla rovescia, «salta», «via») è un'impostazione separata nel Profilo.
+
 ## Sensori, fotocamera, GPS e orologi
 
 | Funzione | Come | Dove funziona |
