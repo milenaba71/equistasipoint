@@ -19,4 +19,8 @@ window.APP_CONFIG = {
   privacyUrl: '',
   // Negozio online: icona 🛒 in alto e riquadro «Shop»
   shopUrl: 'https://shop.equistasi.com',
+  // Elvy (cartella elvy/): un dispositivo su un solo telefono, funzione pair_device di Supabase.
+  // supabaseKey = chiave «publishable» (sb_publishable_…). Vuota: verifica con verifyUrl, senza telefono unico.
+  supabaseUrl: 'https://lxnntieqcumhjnvfbbgu.supabase.co',
+  supabaseKey: '',
 };

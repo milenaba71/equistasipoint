@@ -54,6 +54,23 @@ La mascotte parla con la voce del telefono e il testo compare a poco a poco nel 
 
 Sul computer (niente sensore) ogni test si può provare con **dati simulati**: il risultato viene segnato come prova.
 
+## Un dispositivo, un telefono
+
+Come Equistasi Point, un seriale funziona su **un solo telefono o computer alla volta**. Si usa la funzione `pair_device` del progetto Supabase «equistasi-app» (tabelle e funzione in `equistasipoint/supabase/migrations`, dispositivi copiati ogni notte da Airtable):
+- al primo avvio l'app crea un codice casuale del telefono (`eq-phone-id`, la stessa chiave di Equistasi Point);
+- all'abbinamento: seriale libero → abbinato; già su questo telefono → ok; su un altro → l'app chiede se **spostarlo qui** (massimo **3 spostamenti in 30 giorni**, poi serve Equistasi);
+- all'avvio e ogni volta che si torna nell'app (al massimo ogni 5 minuti) controlla il telefono attivo: se il dispositivo è passato altrove, qui si scollega e la schermata di attivazione spiega perché. I risultati restano sul telefono. Senza rete si continua e si ricontrolla dopo.
+
+**Da fare per attivarlo:** in `../js/config.js` scrivere `supabaseKey` = chiave *publishable* del progetto Supabase (Project Settings → API Keys, inizia con `sb_publishable_`; è pensata per stare nelle app). Finché è vuota, la verifica usa il webhook Make (`verifyUrl`) senza legare il dispositivo a un telefono.
+
+## Guida
+
+Nuova scheda **Guida** nella barra in basso:
+- **Video tutorial**: dalla tabella Airtable *Videos* (base Equistasi App), letti con il webhook Make di Equistasi Point (`videosUrl`); compaiono quelli con **«Elvy»** nel campo *Profili app* (va aggiunta l'opzione «Elvy» al campo). YouTube, Vimeo, Bunny Stream o file video.
+- **Come si applica** con il cerotto trasparente, con le foto.
+- **Mappatura Sport** (`img/mappa-sport.png`): C7 e tricipite della sura (polpacci, sul soleo sopra il tendine d'Achille), con i tempi del protocollo Sport (primo giorno 1–2 ore, massimo 4 ore al giorno, 5 giorni a settimana) e quando togliere i dispositivi.
+- **Protocolli**: i PDF della tabella *PDF_files* con «Elvy» in *Profili app*; finché non ci sono, «Protocollo Sport Elvy – in preparazione».
+
 ## Report in PDF
 
 Da **Progressi → Report da salvare o condividere** (anche dal Profilo e dalla schermata di confronto): periodo 7 giorni, 30 giorni, 3 mesi o tutto; le prove con dati simulati si possono escludere. Il PDF (A4, creato sul telefono con jsPDF, `js/report.js`) contiene:

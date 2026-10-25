@@ -1137,7 +1137,7 @@
       $app.innerHTML = head + stepper(1) +
         '<div class="card row between"><div><div class="small muted">Senza Elvy</div><div class="big" style="font-size:34px;margin-top:4px">' + fmt(sr.main, m.d) + '<small>' + m.unit + '</small></div></div><span class="tag">' + m.label + '</span></div>' +
         '<div style="margin-top:14px">' + talk(IMG.point, 'Fatto! Senza Elvy: ' + val(sr) + '. Ora applica i tre dispositivi: uno sulla <b>settima vertebra cervicale</b>, alla base del collo, e uno su <b>ogni polpaccio</b>, sopra il tendine d\'Achille. Poi rifacciamo lo stesso test.', true) + '</div>' +
-        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b>: parte bassa, sul muscolo soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
+        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b> (tricipite della sura): parte bassa, sul soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
         '<p class="note">Il protocollo Sport consiglia di indossare Elvy prima dell\'attività. Per un confronto corretto ripeti il test nelle stesse condizioni: stesso posto, stesse scarpe, stessa posizione del telefono.</p></div>' +
         '<div class="actions"><button class="btn" id="cmp-on">Ho applicato Elvy · passo 3</button><a class="btn ghost" href="#/oggi">Lo faccio più tardi</a><a class="small" href="#/r/' + sr.id + '" style="text-align:center">Dettagli del test senza Elvy</a></div>';
       document.getElementById('cmp-on').onclick = () => {
@@ -1232,6 +1232,71 @@
     bindCommon();
   }
 
+  /* ───────── Guida: video, applicazione, mappatura Sport, protocolli ───────── */
+  // Video e protocolli da Airtable (tabelle Videos e PDF_files) tramite il webhook Make di Equistasi Point:
+  // in Elvy compaiono quelli con «Elvy» nel campo «Profili app».
+  let guideP = null;
+  function loadGuide() {
+    if (guideP) return guideP;
+    const url = (window.APP_CONFIG || {}).videosUrl;
+    const sel = (v) => (v && typeof v === 'object' ? v.name : v) || '';
+    const tags = (v) => (Array.isArray(v) ? v.map(sel) : v ? [sel(v)] : []);
+    const mine = (f) => tags(f['Profili app']).includes('Elvy') && !tags(f['Profili app']).includes('Nascosto');
+    const order = (a, b) => a.order - b.order || a.title.localeCompare(b.title);
+    let cached = null; try { cached = JSON.parse(localStorage.getItem('elvy-guide') || 'null'); } catch (e) { /* */ }
+    if (cached && Date.now() - cached.t < 15 * 60000) return (guideP = Promise.resolve(cached.c));
+    if (!url) return (guideP = Promise.resolve(cached ? cached.c : null));
+    guideP = fetch(url, { cache: 'no-store' }).then((r) => r.json()).then((d) => {
+      const vids = ((d.videos || d).records || []).filter((r) => mine(r.fields || {})).map((r) => { const f = r.fields; const file = (f['Video File'] || [])[0];
+        return { title: (f.Description || '').trim(), url: (f['Video URL'] || '').trim(), file: file ? file.url : '', thumb: f['Preview Image'] || '', order: typeof f.Order === 'number' ? f.Order : 999 }; }).filter((v) => v.url || v.file).sort(order);
+      const pros = ((d.protocols || {}).records || []).filter((r) => mine(r.fields || {})).map((r) => { const f = r.fields; const file = (f['PDF File'] || [])[0];
+        return { title: (f.Title || f.ID || '').trim(), subtitle: (f.Subtitle || '').trim(), url: file ? file.url : '', order: typeof f.Order === 'number' ? f.Order : 999 }; }).filter((x) => x.url).sort(order);
+      const c = { videos: vids, protocols: pros };
+      try { localStorage.setItem('elvy-guide', JSON.stringify({ t: Date.now(), c })); } catch (e) { /* */ }
+      return c;
+    }).catch(() => (cached ? cached.c : null));
+    guideP.then(() => { setTimeout(() => { guideP = null; }, 15 * 60000); });
+    return guideP;
+  }
+  function embedVideo(v) {
+    const u = v.url; let m;
+    if ((m = u.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) return '<iframe src="https://www.youtube-nocookie.com/embed/' + m[1] + '?rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    if ((m = u.match(/vimeo\.com\/(?:video\/)?(\d+)/))) return '<iframe src="https://player.vimeo.com/video/' + m[1] + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    if (/^https:\/\/(iframe|player)\.mediadelivery\.net\//.test(u)) return '<iframe src="' + esc(u) + (u.includes('?') ? '&' : '?') + 'autoplay=false&preload=true&responsive=true" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="lazy" title="' + esc(v.title) + '"></iframe>';
+    const src = /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(u) ? u : v.file;
+    return src ? '<video src="' + esc(src) + '" controls playsinline preload="metadata"' + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>' : '';
+  }
+  function renderGuide() {
+    setTab('guida');
+    $app.innerHTML = brand() + '<div class="top"><h1>Guida</h1></div>' +
+      talk(IMG.point, 'Qui trovi come si applica Elvy con il cerotto, la mappa dei punti per lo sport e i protocolli. Guarda il video prima del primo confronto!', true) +
+      '<h2 class="sec">Video tutorial</h2><div id="gd-videos"><div class="card"><p class="small muted">Caricamento dei video…</p></div></div>' +
+      '<h2 class="sec">Come si applica</h2><div class="card guide-steps">' +
+      '<img src="img/cerotto.jpg" alt="Cerotto trasparente e dispositivi" class="guide-photo" />' +
+      '<ol class="steps" style="margin-top:14px"><li><b>Pelle pulita e asciutta</b>, senza creme né oli.</li>' +
+      '<li>Appoggia il dispositivo Elvy sul punto, <b>a contatto con la pelle</b>.</li>' +
+      '<li>Prendi il <b>cerotto trasparente</b> in dotazione, togli la pellicola centrale e mettilo sopra il dispositivo.</li>' +
+      '<li>Togli le linguette laterali e premi bene i bordi: il cerotto deve aderire senza pieghe.</li>' +
+      '<li>Per toglierlo solleva piano un bordo del cerotto, tenendo ferma la pelle.</li></ol>' +
+      '<img src="img/cerotto-dispositivo.jpg" alt="Dispositivo sul cerotto" class="guide-photo" style="margin-top:6px" /></div>' +
+      '<h2 class="sec">Mappatura Sport</h2><div class="card map-card"><div class="map-wrap"><img src="img/mappa-sport.png" alt="Punti di applicazione per lo sport: C7 e polpacci" /></div>' +
+      '<ol class="map-legend"><li><i>1</i><div><b>C7 · settima vertebra cervicale</b><span>Alla base del collo: è la vertebra che sporge di più quando pieghi la testa in avanti.</span></div></li>' +
+      '<li><i>2·3</i><div><b>Tricipite della sura · polpacci</b><span>Uno per gamba, nella parte bassa del polpaccio, sul soleo, sopra il tendine d\'Achille.</span></div></li></ol>' +
+      '<div class="grid3" style="margin-top:12px">' + stat('Primo giorno', '1–2', 'ore', 'prima dello sport') + stat('Al giorno', '4', 'ore', 'al massimo', true) + stat('A settimana', '5', 'giorni', '+ 2 di pausa') + '</div>' +
+      '<p class="small muted" style="margin-top:10px">Dal secondo giorno usa Elvy durante gli allenamenti e le gare. Se ti alleni più volte al giorno puoi applicarlo più volte, senza superare le 4 ore.</p>' +
+      '<div class="warn" style="margin-top:12px">Togli i dispositivi se senti un fastidio qualsiasi. In caso di malessere (nausea, vertigini, mal di testa) toglili subito e riprova il giorno dopo.</div></div>' +
+      '<h2 class="sec">Protocolli</h2><div id="gd-protos"><div class="card"><p class="small muted">Caricamento…</p></div></div>' +
+      '<p class="note" style="margin-top:16px">Queste informazioni non sostituiscono il parere del medico, del fisioterapista o del preparatore atletico, che possono adattare punti e tempi a te e al tuo sport.</p>';
+    bindCommon();
+    loadGuide().then((c) => {
+      const vb = document.getElementById('gd-videos'); const pb = document.getElementById('gd-protos'); if (!vb) return;
+      vb.innerHTML = c && c.videos.length ? c.videos.map((v) => '<div class="card vid-card"><div class="vid-frame">' + embedVideo(v) + '</div><h3 style="margin-top:12px">' + esc(v.title) + '</h3></div>').join('')
+        : '<div class="card soon"><span class="soon-tag">In arrivo</span><h3 style="margin-top:8px">Video: come si applica Elvy</h3><p class="small muted" style="margin-top:6px">' + (c ? 'Il video tutorial sarà qui a breve. Intanto segui i passaggi qui sotto.' : 'I video non si caricano ora: controlla la connessione.') + '</p></div>';
+      pb.innerHTML = c && c.protocols.length ? c.protocols.map((x) => '<a class="card rep-link" href="' + esc(x.url) + '" target="_blank" rel="noopener"><span class="rep-ico">PDF</span><span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<br><span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev">›</span></a>').join('')
+        : '<div class="card soon"><span class="soon-tag">In preparazione</span><h3 style="margin-top:8px">Protocollo Sport Elvy</h3><p class="small muted" style="margin-top:6px">I protocolli per lo sport (allenamento, gara, recupero) arriveranno qui. Per ora segui la mappatura Sport qui sopra.</p></div>';
+    });
+  }
+
   /* ───────── Report in PDF ───────── */
   // Dati del report: prove nel periodo (giorni, 0 = tutto), senza le prove simulate se non richieste
   function reportData(days, withDemo) {
@@ -1305,6 +1370,7 @@
       '<div class="actions"><button class="btn" id="p-save">Salva</button></div><p class="small" id="p-msg" style="color:var(--teal-l);margin-top:8px"></p></div>' +
       '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired(), 'front') + '</div>' +
       '<div class="row between" style="margin-top:14px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div>' +
+      '<p class="note" style="margin-top:12px">Il dispositivo funziona su un solo telefono o computer alla volta. Se lo abbini altrove, qui si scollega (massimo 3 spostamenti in 30 giorni).</p>' +
       '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
       '<div class="card" style="margin-top:12px" id="watch"><div class="row" style="gap:10px"><span class="watch-ico">' + ICON.watch + '</span><h3>Orologio e fascia cardio</h3></div>' +
       (S.heart.supported()
@@ -1367,11 +1433,16 @@
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
       case 'profilo': return renderProfile();
       case 'report': return renderReport();
+      case 'guida': return renderGuide();
       default: return renderOggi();
     }
   }
   window.addEventListener('hashchange', route);
   route();
+  // un dispositivo su un solo telefono: controllo all'avvio e quando si torna nell'app (non durante un test)
+  const lostHere = () => { if (!document.body.classList.contains('running')) route(); };
+  window.ElvyGate.recheck(lostHere, true);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !document.body.classList.contains('running')) window.ElvyGate.recheck(lostHere); });
 
   window.Elvy = { TESTS, results, route };
 })();
