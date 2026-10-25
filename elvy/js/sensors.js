@@ -64,16 +64,22 @@
     itVoice = vs.find((v) => /^it/i.test(v.lang) && /female|alice|federica|elsa/i.test(v.name)) || vs.find((v) => /^it/i.test(v.lang)) || null;
   }
   if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-  // Il telefono è in cintura: la voce dice cosa fare
-  function say(text) {
-    if (!voiceOn || !('speechSynthesis' in window) || !text) return;
+  // Il telefono è in cintura: la voce dice cosa fare. Anche la mascotte parla con questa voce.
+  // o.onend: chiamata a fine frase (anche se la voce è spenta o non disponibile: subito)
+  function say(text, o = {}) {
+    const done = () => { if (o.onend) { const f = o.onend; o.onend = null; f(); } };
+    if (!voiceOn || !('speechSynthesis' in window) || !text) { done(); return false; }
     try {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, ''));
-      u.lang = 'it-IT'; if (itVoice) u.voice = itVoice; u.rate = 1.05;
+      const u = new SpeechSynthesisUtterance(String(text).replace(/<[^>]+>/g, ''));
+      u.lang = 'it-IT'; if (itVoice) u.voice = itVoice;
+      u.rate = o.rate || 1.05; u.pitch = o.pitch || 1;
+      u.onend = done; u.onerror = done;
       speechSynthesis.speak(u);
-    } catch (e) { /* niente voce */ }
+      return true;
+    } catch (e) { done(); return false; }
   }
+  const stopVoice = () => { try { speechSynthesis.cancel(); } catch (e) { /* niente voce */ } };
 
   /* ───────── Schermo acceso ───────── */
   let lock = null;
@@ -85,7 +91,8 @@
   }
 
   window.ElvySensors = {
-    isIOS, permission, recorder, probe, beep, say, keepAwake, unlockAudio,
+    isIOS, permission, recorder, probe, beep, say, stopVoice, keepAwake, unlockAudio,
+    voiceOn: () => voiceOn,
     setVoice(v) { voiceOn = !!v; },
     // segno degli assi: su iPhone l'accelerazione con gravità ha il verso opposto alle specifiche
     platformSign: isIOS ? -1 : 1,

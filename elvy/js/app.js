@@ -107,8 +107,79 @@
     list.forEach((r, i) => { s += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(r.main).toFixed(1) + '" r="6" fill="' + (r.cond === 'con' ? '#4BA6A3' : '#A8A8AE') + '" stroke="#424244" stroke-width="2"/>'; });
     return s + '</svg><div class="legend"><span><i style="background:#A8A8AE"></i>Senza Elvy</span><span><i style="background:#4BA6A3"></i>Con Elvy</span></div>';
   }
+  // I tre passi del confronto: 0 = nessuno fatto, 1 = senza fatto, 2 = applicato, 3 = finito
+  function stepper(done) {
+    const st = [['Senza Elvy', 'misura di base'], ['Applica Elvy', 'C7 e polpacci'], ['Con Elvy', 'stesso test']];
+    return '<ol class="stepper">' + st.map((x, i) => '<li class="' + (i < done ? 'done' : i === done ? 'now' : '') + '"><i>' + (i < done ? '✓' : i + 1) + '</i><b>' + x[0] + '</b><span>' + x[1] + '</span></li>').join('') + '</ol>';
+  }
+  // Figura vista da dietro con i 3 punti del protocollo Sport: C7 e i due polpacci
+  const BODY_BACK = '<svg class="bodyback" viewBox="0 0 120 230" role="img" aria-label="Punti di applicazione: settima vertebra cervicale e polpacci">' +
+    '<g fill="#5b5b61" stroke="#6d6d74" stroke-width="1.5"><circle cx="60" cy="22" r="15"/><path d="M38 44c6-6 38-6 44 0l8 52c1 6-3 9-7 9H37c-4 0-8-3-7-9z"/>' +
+    '<path d="M30 50l-12 46c-1 4 5 6 7 2l14-40zM90 50l12 46c1 4-5 6-7 2L81 58z"/><path d="M40 104h19l-2 112c0 5-12 5-12 0zM61 104h19l-5 112c0 5-12 5-12 0z"/></g>' +
+    '<g class="dots"><circle cx="60" cy="42" r="6"/><circle cx="51" cy="168" r="6"/><circle cx="69" cy="168" r="6"/></g>' +
+    '<g class="lbl"><text x="74" y="38">C7</text><text x="80" y="172">polpacci</text></g></svg>';
+  // Barre a coppie: per ogni confronto grigio = senza Elvy, verde = con Elvy
+  function pairsChart(list, metric) {
+    if (!list.length) return '';
+    const W = 320; const H = 130; const n = list.length; const gw = W / n; const bw = Math.min(26, gw * 0.32);
+    const max = Math.max(...list.map((x) => Math.max(x.s.main, x.c.main))) || 1;
+    let svg = '<svg class="chart" viewBox="0 -30 ' + W + ' ' + (H + 54) + '" role="img" aria-label="Confronti senza e con Elvy">';
+    list.forEach((x, i) => {
+      const cx = gw * i + gw / 2;
+      [[x.s.main, '#8d8d94', -1], [x.c.main, '#4BA6A3', 1]].forEach(([v, col, k]) => {
+        const h = Math.max(4, (v / max) * (H - 8)); const xx = cx + (k < 0 ? -bw - 2 : 2);
+        svg += '<rect x="' + xx.toFixed(1) + '" y="' + (H - h).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="5" fill="' + col + '"/>';
+      });
+      const top = H - (Math.max(x.s.main, x.c.main) / max) * (H - 8) - 10;
+      svg += '<text x="' + cx.toFixed(1) + '" y="' + top.toFixed(1) + '" text-anchor="middle" style="font-weight:800;fill:' + (x.good ? '#7FD6D1' : x.good === false ? '#F5B3AD' : '#C9C9CF') + '">' + pctTxt(x.pct) + '</text>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (H + 18) + '" text-anchor="middle">' + dateShort(x.t) + '</text>';
+    });
+    return svg + '<path d="M0 ' + H + 'H' + W + '" stroke="#6a6a70"/></svg><div class="legend"><span><i style="background:#8d8d94"></i>Senza Elvy</span><span><i style="background:#4BA6A3"></i>Con Elvy</span></div>';
+  }
   const stat = (l, v, unit, sub, purple) => '<div class="stat"><div class="l">' + l + '</div><div class="v">' + v + (unit ? '<small>' + unit + '</small>' : '') + '</div>' + (sub ? '<div class="s' + (purple ? ' p' : '') + '">' + sub + '</div>' : '') + '</div>';
   const say = (img, text) => '<div class="say"><img src="' + img + '" alt="" /><p>' + text + '</p></div>';
+
+  /* ───────── La mascotte parla ───────── */
+  // Fumetto con Elvy: il testo compare a poco a poco mentre Elvy lo dice con la voce.
+  // auto = parla appena la schermata compare. Toccando Elvy o il fumetto ripete.
+  const talk = (img, html, auto) => '<div class="talk' + (auto ? ' auto' : '') + '"><button type="button" class="talk-face" aria-label="Ascolta Elvy"><img src="' + img + '" alt="" />' +
+    '<i class="talk-wave" aria-hidden="true"><b></b><b></b><b></b></i></button><p class="talk-bubble"><span class="talk-text">' + html + '</span></p></div>';
+  const plain = (html) => String(html).replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  function speak(el) {
+    const tx = el.querySelector('.talk-text');
+    const html = el.dataset.html || (el.dataset.html = tx.innerHTML);
+    const text = plain(html);
+    const cps = 16; // caratteri al secondo, circa il ritmo della voce
+    clearInterval(el.iv); clearTimeout(el.to);
+    el.classList.add('speaking');
+    const t0 = performance.now();
+    const finish = () => { clearInterval(el.iv); clearTimeout(el.to); tx.innerHTML = html; el.classList.remove('speaking'); };
+    el.iv = setInterval(() => {
+      const n = Math.floor(((performance.now() - t0) / 1000) * cps);
+      if (n >= text.length) { clearInterval(el.iv); tx.innerHTML = html; return; }
+      tx.textContent = text.slice(0, n) + '▍';
+    }, 40);
+    if (S.voiceOn() && 'speechSynthesis' in window) S.say(text, { pitch: 1.15, onend: finish });
+    el.to = setTimeout(finish, (text.length / cps) * 1000 + 600);
+  }
+  function bindTalks(root) {
+    root.querySelectorAll('.talk').forEach((el) => { el.onclick = () => speak(el); });
+    const a = root.querySelector('.talk.auto');
+    if (a) setTimeout(() => { if (a.isConnected) speak(a); }, 350);
+  }
+  // Frasi che la mascotte dice spiegando ogni test
+  const INTRO = {
+    'una-gamba': 'Stai su una gamba, prima la sinistra e poi la destra. Io misuro quanto oscilli: meno oscilli, più sei stabile.',
+    'in-piedi': 'Resta fermo in piedi: trenta secondi a occhi aperti e trenta a occhi chiusi. Così vediamo quanto ti affidi alla vista.',
+    cmj: 'Mani sui fianchi e tre salti, uno a ogni segnale. Dal tempo che passi in aria calcolo quanto salti.',
+    drop: 'Scendi dal gradino e rimbalza subito in alto. Misuro quanto resti a terra e quanto salti: è la tua forza reattiva.',
+    hop: 'Tre salti sulla gamba sinistra e tre sulla destra. Così vediamo se le gambe sono equilibrate.',
+    ripetuti: 'Salta di continuo fino allo stop. Misuro la tua potenza e quanto cali con la fatica.',
+    corsa: 'Telefono nella cintura e corri alla tua andatura. Ti dico la cadenza, il contatto a terra e se la corsa è simmetrica.',
+    plank: 'Mettiti in plank e tieni più a lungo che puoi. Mi accorgo da solo quando il bacino cede.',
+    reazione: 'Quando lo schermo diventa verde, tocca più in fretta che puoi. Dieci prove: vediamo i tuoi riflessi.',
+    mobilita: 'Metti il telefono sul segmento da misurare: parti fermo, poi vai al massimo e tieni. Io misuro l\'angolo.',
+  };
   const placeBox = (icon, text) => '<div class="place">' + ICON[icon] + '<span>' + text + '</span></div>';
 
   /* ───────── I test ───────── */
@@ -409,6 +480,20 @@
     },
   };
 
+  // Misure mostrate nel confronto: [etichetta, valore, unità, decimali, meglio]
+  const COMPARE = {
+    'una-gamba': (r) => [['Area sinistra', r.sx.area, 'cm²', 1, 'low'], ['Area destra', r.dx.area, 'cm²', 1, 'low'], ['Simmetria', r.sym, '%', 0, 'high']],
+    'in-piedi': (r) => [['Area occhi aperti', r.open.area, 'cm²', 1, 'low'], ['Area occhi chiusi', r.closed.area, 'cm²', 1, 'low'], ['Romberg', r.romberg, '', 1, 'low']],
+    cmj: (r) => [['Salto migliore', r.best, 'cm', 1, 'high'], ['Media dei salti', r.avg, 'cm', 1, 'high'], ['Volo', r.tf * 1000, 'ms', 0, 'high']],
+    drop: (r) => [['RSI', r.best, '', 2, 'high'], ['Contatto', r.bestJump.tc * 1000, 'ms', 0, 'low'], ['Altezza', r.bestJump.h, 'cm', 0, 'high']],
+    hop: (r) => [['Simmetria', r.lsi, '%', 0, 'high'], ['Sinistra', r.sx.best, 'cm', 1, 'high'], ['Destra', r.dx.best, 'cm', 1, 'high']],
+    ripetuti: (r) => [['Potenza', r.power, 'W/kg', 1, 'high'], ['Altezza media', r.avgHeight, 'cm', 1, 'high'], ['Calo per fatica', r.fatigue, '%', 0, 'low']],
+    corsa: (r) => [['Cadenza', r.cadence, 'passi/min', 0, null], ['Contatto', r.contact && r.contact * 1000, 'ms', 0, 'low'], ['Oscillazione', r.oscillation, 'cm', 1, 'low'], ['Simmetria', r.symmetry, '%', 0, 'high'], ['Regolarità', r.regularity, '', 2, 'high']],
+    plank: (r) => [['Tenuta', r.held, 's', 0, 'high'], ['Tremore', r.shake, 'mm/s²', 0, 'low']],
+    reazione: (r) => [['Mediana', r.median, 'ms', 0, 'low'], ['Migliore', r.best, 'ms', 0, 'low'], ['Costanza (±)', r.sd, 'ms', 0, 'low']],
+    mobilita: (r) => (r.c != null ? [['Angolo', r.c, '°', 0, 'high']] : [['Sinistra', r.sx, '°', 0, 'high'], ['Destra', r.dx, '°', 0, 'high'], ['Simmetria', r.sym, '%', 0, 'high']]),
+  };
+
   const JOINTS = {
     caviglia: {
       label: 'Caviglia (affondo al muro)', sides: true, ref: 35, demo: [38, 33],
@@ -458,6 +543,25 @@
     return A.angleBetween(m(base), m(last)) > 12;
   }
 
+  /* ───────── Confronto senza / con Elvy ───────── */
+  // Protocollo Sport di Equistasi: 3 dispositivi, uno su C7 e uno su ogni polpaccio (soleo)
+  const PROTO = 'C7 e polpacci';
+  const cmpOpen = () => store.get('elvy-cmp', null); // confronto iniziato e non finito
+  // Confronti completi di un test (o di tutti): coppie senza / con della stessa sessione
+  function sessions(testId) {
+    const by = {};
+    results().forEach((r) => { if (r.session && (!testId || r.test === testId)) (by[r.session] = by[r.session] || {})[r.cond] = r; });
+    return Object.keys(by).map((sid) => ({ sid, s: by[sid].senza, c: by[sid].con })).filter((x) => x.s && x.c)
+      .map((x) => Object.assign(x, { t: x.c.t, test: x.c.test }, effect(TESTS[x.c.test], x.s.main, x.c.main))).sort((a, b) => a.t - b.t);
+  }
+  // Differenza con Elvy rispetto a senza: % e se è un miglioramento
+  function effect(t, sv, cv) {
+    const pct = sv ? (100 * (cv - sv)) / Math.abs(sv) : 0;
+    const good = t.metric.better === 'high' ? pct > 0 : t.metric.better === 'low' ? pct < 0 : null;
+    return { pct, good: Math.abs(pct) < 3 ? null : good, same: Math.abs(pct) < 3 };
+  }
+  const pctTxt = (p) => (p >= 0 ? '+' : '−') + fmt(Math.abs(p), Math.abs(p) < 10 ? 1 : 0) + '%';
+
   const GROUPS = ['Equilibrio', 'Salti', 'Corsa e core', 'Reazione e mobilità'];
   const ROTATION = ['una-gamba', 'cmj', 'drop', 'corsa', 'hop', 'plank', 'in-piedi', 'mobilita', 'ripetuti', 'reazione'];
 
@@ -500,7 +604,9 @@
           const ms = Math.min(sec, 3) * 1000; const t0 = performance.now();
           while (performance.now() - t0 < ms && !stopFlag) { const k = (performance.now() - t0) / ms; bar.style.width = (100 * k).toFixed(1) + '%'; show(sec * (1 - k)); await wait(80); }
           meter.hidden = true; stopBtn.hidden = true; S.beep(1300, 250);
-          return simFn();
+          // dati simulati: piccola variazione casuale (±4% sui tempi) perché due prove non siano mai identiche
+          const f = 0.96 + Math.random() * 0.08;
+          return simFn().map((q) => ({ t: q.t * f, x: q.x, y: q.y, z: q.z }));
         }
         const rec = S.recorder(); rec.start();
         const t0 = performance.now(); let lastCheck = t0;
@@ -565,7 +671,8 @@
     return { mode, times: times.map((t) => Math.round(t)), median: A.median(times), best: Math.min(...times), sd: A.std(times), falseStarts };
   }
 
-  async function startTest(id, opts) {
+  // ses: { sid, cond } quando il test fa parte di un confronto senza / con Elvy
+  async function startTest(id, opts, ses) {
     const test = TESTS[id];
     S.unlockAudio();
     let demo = false;
@@ -582,10 +689,12 @@
     try {
       const res = await test.run(ctx, opts);
       ctx.close();
-      const rec = { id: Date.now(), t: Date.now(), test: id, cond: device.on ? 'con' : 'senza', where: device.on ? device.where : null, variant: test.variant(opts), opts, demo, main: test.main(res), res };
+      const cond = ses ? ses.cond : device.on ? 'con' : 'senza';
+      const rec = { id: Date.now(), t: Date.now(), test: id, cond, where: cond === 'con' ? device.where || PROTO : null, variant: test.variant(opts), opts, demo, main: test.main(res), res, session: ses ? ses.sid : null };
       const all = results(); all.push(rec); saveResults(all);
-      S.say('Fatto! ' + spoken(test, rec));
-      location.hash = '#/r/' + rec.id;
+      if (ses && cond === 'con') store.set('elvy-cmp', null);
+      const to = ses ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
+      if (location.hash === to) route(); else location.hash = to; // il passo 3 parte dalla stessa pagina del confronto
     } catch (e) {
       ctx.close();
       if (e.message !== 'abort') { S.say('Non ci sono riuscito'); renderTest(id, e.message); }
@@ -609,13 +718,13 @@
   $sheet.addEventListener('click', (e) => { if (e.target === $sheet) closeSheet(); });
 
   // Elvy applicato: dove e da quanto
-  const WHERE = ['Polpaccio', 'Caviglia', 'Ginocchio', 'Coscia', 'Zona lombare', 'Spalla', 'Collo', 'Altro punto'];
+  const WHERE = [PROTO, 'Polpacci', 'C7 (base del collo)', 'Caviglia', 'Ginocchio', 'Coscia', 'Zona lombare', 'Spalla', 'Altro punto'];
   function elvySheet() {
-    let pick = device.where || null;
+    let pick = device.where || PROTO;
     const draw = () => openSheet('<div class="row" style="gap:14px"><img src="' + IMG.point + '" alt="" style="width:70px;border-radius:14px"><div><h2>Elvy applicato?</h2><p class="muted small" style="margin-top:4px">I test di adesso vengono segnati «con Elvy» o «senza Elvy».</p></div></div>' +
       (device.on ? '<div class="card" style="margin-top:16px;background:var(--teal-d)"><b style="color:var(--teal-l)">Applicato: ' + esc(device.where || '') + '</b><div class="small" style="color:#cfeeed;margin-top:4px">da ' + durText(minsSince(device.since)) + '</div></div>' : '') +
       '<h3 style="margin-top:18px">Dove l\'hai applicato?</h3><div class="chips">' + WHERE.map((w) => '<button type="button" data-w="' + w + '" aria-pressed="' + (pick === w) + '">' + w + '</button>').join('') + '</div>' +
-      '<p class="note" style="margin-top:12px">Con il dispositivo NFC il telefono lo riconoscerà da solo avvicinandolo. Per i punti di applicazione segui il protocollo Sport di Equistasi.</p>' +
+      '<p class="note" style="margin-top:12px">Protocollo Sport di Equistasi: un dispositivo sulla settima vertebra cervicale (C7) e uno su ogni polpaccio, sopra il tendine d\'Achille. Massimo 4 ore al giorno, 5 giorni a settimana.</p>' +
       '<div class="actions"><button class="btn" data-on' + (pick ? '' : ' disabled') + '>' + (device.on ? 'Aggiorna' : 'Ho applicato Elvy') + '</button>' +
       (device.on ? '<button class="btn ghost" data-off>Ho tolto Elvy</button>' : '<button class="btn ghost" data-close>Chiudi</button>') + '</div>');
     draw();
@@ -634,6 +743,7 @@
   function bindCommon() {
     $app.querySelectorAll('[data-elvy]').forEach((b) => { b.onclick = elvySheet; });
     $app.querySelectorAll('[data-back]').forEach((b) => { b.onclick = () => (history.length > 1 ? history.back() : (location.hash = '#/test')); });
+    bindTalks($app);
   }
   const backBtn = () => '<button class="back" type="button" data-back aria-label="Indietro">' + ICON.back + '</button>';
   const lastOf = (id) => results().filter((r) => r.test === id).slice(-1)[0];
@@ -670,21 +780,37 @@
     const sug = ROTATION.slice().sort((a, b) => lastT(a) - lastT(b))[0];
     const st = TESTS[sug];
     const recent = []; all.slice().reverse().forEach((r) => { if (!recent.find((x) => x.test === r.test) && TESTS[r.test]) recent.push(r); });
-    $app.innerHTML = BRAND + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div><img class="face" src="' + IMG.hi + '" alt="Elvy" /></div>' +
-      '<div class="row" style="margin-bottom:14px">' + elvyPill() + (device.on ? '<span class="small muted">' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) + '</span>' : '') + '</div>' +
+    // cosa dice Elvy oggi
+    const h = new Date().getHours();
+    const hi = (h < 12 ? 'Buongiorno' : h < 18 ? 'Ciao' : 'Buonasera') + (profile.name ? ' ' + esc(profile.name) : '') + '! ';
+    const open = cmpOpen(); const ot = open && TESTS[open.test];
+    const sess = sessions(); const lastS = sess[sess.length - 1];
+    const long = device.on && minsSince(device.since) > 240;
+    const line = long ? 'Hai Elvy addosso da più di 4 ore: il protocollo dice di toglierlo. Riposati e riprendiamo domani.'
+      : ot ? 'Abbiamo un confronto a metà: ' + ot.full.toLowerCase() + '. Applica Elvy e facciamo il test con Elvy.'
+      : !sess.length ? 'Facciamo il primo confronto? Lo stesso test prima senza Elvy e poi con Elvy: così vediamo se cambia qualcosa per te.'
+      : 'Oggi ti propongo ' + st.full.toLowerCase() + ', senza e con Elvy. Ogni confronto rende più chiara la tua tendenza.';
+    const autoSay = store.get('elvy-said', '') !== new Date().toDateString();
+    if (autoSay) store.set('elvy-said', new Date().toDateString());
+    $app.innerHTML = BRAND + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div></div>' +
+      talk(long ? IMG.point : IMG.hi, hi + line, autoSay) +
+      '<div class="row" style="margin:14px 0">' + elvyPill() + (device.on ? '<span class="small muted">' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) + '</span>' : '') + '</div>' +
+      (ot ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><h3 style="margin-top:6px">' + ot.full + '</h3><p class="small muted" style="margin-top:4px">Fatto senza Elvy. Ora applica Elvy e ripeti il test.</p><span class="btn small" style="margin-top:12px">Continua</span></a>' : '') +
+      (lastS ? '<a class="card cmp-last" href="#/confronto/' + lastS.sid + '"><div class="row between"><div><div class="k">Ultimo confronto</div><h3 style="margin-top:6px">' + TESTS[lastS.test].full + '</h3><p class="small muted" style="margin-top:4px">' + fmt(lastS.s.main, TESTS[lastS.test].metric.d) + ' senza · ' + fmt(lastS.c.main, TESTS[lastS.test].metric.d) + ' con Elvy ' + TESTS[lastS.test].metric.unit + '</p></div>' +
+        '<span class="delta ' + (lastS.good ? '' : lastS.good === false ? 'neg' : 'neu') + '">' + pctTxt(lastS.pct) + '</span></div></a>' : '') +
       card +
       '<div class="card hero" style="margin-top:14px;padding:0;padding-right:18px"><img src="' + IMG.point + '" alt="" style="width:34%;max-width:150px;border-radius:0;align-self:stretch" /><div style="padding:18px 0 18px 0"><div class="k p">Oggi ti consiglio</div><h3 style="margin-top:8px;font-size:20px;line-height:1.25">' + st.full + ', ' + st.sub + '</h3>' +
-      '<a class="btn small" style="margin-top:14px" href="#/test/' + sug + '">Inizia · ' + st.minutes + ' min</a></div></div>' +
+      '<a class="btn small" style="margin-top:14px" href="#/test/' + sug + '">Senza e con Elvy · ' + (st.minutes * 2 + 1) + ' min</a></div></div>' +
       '<div class="row between sec"><h2>Ultimi risultati</h2><a href="#/test" style="font-weight:700">Tutti i test</a></div>' +
       (recent.length ? '<div class="grid3">' + recent.slice(0, 3).map((r) => { const t = TESTS[r.test]; return '<a class="stat" href="#/r/' + r.id + '" style="color:#fff"><div class="l">' + t.name + '</div><div class="v">' + fmt(r.main, t.metric.d) + '</div><div class="s' + (r.cond === 'con' ? '' : ' p') + '">' + (t.metric.unit || t.metric.label) + ' · ' + (r.cond === 'con' ? 'con Elvy' : 'senza') + '</div></a>'; }).join('') + '</div>' :
-        say(IMG.hi, 'Ciao! Sono Elvy. Scegli un test: ti spiego cosa fare, conto il tempo e ti dico com\'è andata.'));
+        '<p class="muted">Ancora nessun test. Scegline uno: ti spiego cosa fare, conto il tempo e ti dico com\'è andata.</p>');
     bindCommon();
   }
 
   function renderWelcome() {
     document.body.classList.add('gated'); // niente barra in basso finché non si è presentati
     $app.innerHTML = '<div style="text-align:center;margin-top:10px"><img src="img/logo-elvy.png" alt="Elvy" style="width:150px" /></div>' +
-      '<div class="say" style="margin-top:18px"><img src="' + IMG.hi + '" alt="" style="width:110px" /><p>Ciao! Sono <b>Elvy</b>. Con i sensori del tuo telefono misuriamo equilibrio, salti, corsa, core, riflessi e mobilità. Poi confrontiamo i risultati <b>con e senza Elvy</b>.</p></div>' +
+      '<div style="margin-top:18px">' + talk(IMG.hi, 'Ciao! Sono <b>Elvy</b>, il tuo allenatore. Con i sensori del telefono misuriamo equilibrio, salti, corsa e riflessi. Ogni test lo facciamo <b>prima senza Elvy e poi con Elvy</b>, e nei progressi vediamo come cambi.', true) + '</div>' +
       '<div class="card" style="margin-top:18px"><h3>Come ti chiami?</h3>' +
       '<label class="field"><span>Nome</span><input id="w-name" autocomplete="given-name" maxlength="30" /></label>' +
       '<label class="field"><span>Sport</span><input id="w-sport" placeholder="es. calcio, corsa, tennis" maxlength="40" /></label>' +
@@ -693,6 +819,7 @@
       '<div class="actions"><button class="btn" id="w-go" disabled>Iniziamo</button></div></div>';
     const ok = document.getElementById('w-ok'); const go = document.getElementById('w-go');
     ok.onchange = () => { go.disabled = !ok.checked; };
+    bindTalks($app);
     go.onclick = () => {
       profile.name = document.getElementById('w-name').value.trim();
       profile.sport = document.getElementById('w-sport').value.trim();
@@ -723,19 +850,24 @@
     const place = t.place === 'belt' ? placeBox('belt', BELT_TEXT) : t.place === 'hand' ? placeBox('hand', 'Telefono <b>in mano</b>, davanti a te.') :
       placeBox(o.joint === 'tronco' ? 'chest' : o.joint === 'spalla' ? 'hand' : 'leg', JOINTS[o.joint].place.replace(' {lato}', '').replace('{lato}', ''));
     const prev = results().filter((r) => r.test === id);
+    const open = cmpOpen(); const mine = open && open.test === id;
     $app.innerHTML = '<div class="head">' + backBtn() + '<div><div class="k">' + t.group + '</div><h1>' + t.full + '</h1></div></div>' +
-      '<div class="stack">' +
+      '<div class="stack">' + talk(t.group === 'Salti' ? IMG.jump : IMG.point, INTRO[id] + (mine ? ' Il test senza Elvy l\'hai già fatto: ora applica Elvy e continua.' : ' Facciamolo prima senza Elvy e poi con Elvy.'), true) +
+      (mine ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><p class="small muted" style="margin-top:4px">Fatto senza Elvy alle ' + timeShort(open.t) + '.</p><span class="btn small" style="margin-top:12px">Continua il confronto</span></a>' : '') +
       (t.options.length ? '<div class="card stack">' + t.options.map((op) => '<div><div class="small muted" style="font-weight:700;margin-bottom:6px">' + op.label + '</div><div class="seg">' +
         Object.keys(op.values).map((v) => '<button type="button" data-opt="' + op.key + '" data-val="' + v + '" aria-pressed="' + (String(o[op.key]) === v) + '">' + op.values[v] + '</button>').join('') + '</div></div>').join('') + '</div>' : '') +
       place +
       '<div class="card"><h3 style="margin-bottom:12px">Come si fa</h3><ol class="steps">' + steps.map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
       '<p class="small muted">Dura circa ' + t.minutes + ' min. La voce ti guida: alza il volume.</p></div>' +
-      '<div class="row between card tight"><span class="small">' + (device.on ? '<span class="tag con">con Elvy</span> ' + esc(device.where) : '<span class="tag">senza Elvy</span>') + '</span>' + elvyPill() + '</div>' +
+      '<div class="card"><h3>Il confronto in 3 passi</h3>' + stepper(0) + '<p class="small muted">Stesso test, stesse condizioni: prima senza Elvy, poi applichi i dispositivi e lo ripeti. Alla fine vedi la differenza.</p></div>' +
       SAFE + '</div>' +
       (error ? '<p class="err" role="alert">' + esc(error) + '</p>' : '') +
-      '<div class="actions"><button class="btn" id="go">Inizia</button>' + (prev.length ? '<a class="btn ghost" href="#/progressi/' + id + '">I tuoi risultati (' + prev.length + ')</a>' : '') + '</div>';
+      '<div class="actions"><button class="btn" id="go-cmp">Inizia il confronto</button>' +
+      '<button class="btn ghost" id="go">Solo una prova ' + (device.on ? 'con Elvy' : 'senza Elvy') + '</button>' +
+      (prev.length ? '<a class="btn ghost" href="#/progressi/' + id + '">I tuoi progressi (' + prev.length + ')</a>' : '') + '</div>';
     $app.querySelectorAll('[data-opt]').forEach((b) => { b.onclick = () => { prefs[id] = Object.assign({}, prefs[id], { [b.dataset.opt]: b.dataset.val }); savePrefs(); renderTest(id); }; });
     document.getElementById('go').onclick = () => startTest(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
+    document.getElementById('go-cmp').onclick = () => beginCompare(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
     bindCommon();
   }
 
@@ -764,9 +896,82 @@
       '<div class="row" style="gap:8px;margin:-6px 0 12px">' + (r.cond === 'con' ? '<span class="tag con">con Elvy</span>' : '<span class="tag">senza Elvy</span>') + (r.demo ? '<span class="tag demo">dati simulati</span>' : '') + '<span class="small dim">' + esc(sub) + '</span></div>' +
       (['una-gamba', 'in-piedi', 'hop', 'mobilita'].includes(r.test) ? '' : hero + '<div style="height:12px"></div>') +
       t.render(r.res) +
-      '<div style="margin-top:18px">' + say(r.test === 'cmj' ? IMG.jump : IMG.ok, t.comment(r.res)) + '</div>' +
-      '<div class="actions"><button class="btn" id="again">' + (device.on ? 'Nuova prova con Elvy' : 'Ripeti con Elvy') + '</button><a class="btn ghost" href="#/progressi/' + r.test + '">Vedi i progressi</a></div>';
-    document.getElementById('again').onclick = () => { if (device.on) location.hash = '#/test/' + r.test; else elvySheet(); };
+      '<div style="margin-top:18px">' + talk(r.test === 'cmj' ? IMG.jump : IMG.ok, cap(spoken(t, r).trim()) + '. ' + t.comment(r.res), isToday(r.t) && Date.now() - r.t < 60000) + '</div>' +
+      '<div class="actions">' + (r.session ? '<a class="btn" href="#/confronto/' + r.session + '">Torna al confronto</a>' : '<button class="btn" id="again">Confronto senza e con Elvy</button>') +
+      '<a class="btn ghost" href="#/progressi/' + r.test + '">Vedi i progressi</a></div>';
+    const ag = document.getElementById('again'); if (ag) ag.onclick = () => { location.hash = '#/test/' + r.test; };
+    bindCommon();
+  }
+
+  // Passo 1: senza Elvy (se l'hai addosso, toglilo)
+  function beginCompare(id, opts) {
+    const t = TESTS[id];
+    openSheet(stepper(0) + talk(IMG.point, 'Passo uno: il test <b>senza Elvy</b>. ' + (device.on ? 'Prima togli i dispositivi Elvy che hai addosso. ' : 'Se hai addosso i dispositivi Elvy, toglili. ') + 'Poi tocca Inizia e segui la mia voce.', true) +
+      '<div class="actions"><button class="btn" data-go>Inizia senza Elvy</button><button class="btn ghost" data-close>Annulla</button></div>');
+    bindTalks($sheet);
+    $sheet.querySelector('[data-close]').onclick = closeSheet;
+    $sheet.querySelector('[data-go]').onclick = () => {
+      closeSheet();
+      if (device.on) { device.on = false; device.since = null; saveDevice(); }
+      const sid = 'c' + Date.now();
+      store.set('elvy-cmp', { sid, test: id, opts, t: Date.now() });
+      startTest(id, opts, { sid, cond: 'senza' });
+    };
+    void t;
+  }
+
+  function renderCompare(sid) {
+    const mine = results().filter((r) => r.session === sid);
+    const sr = mine.filter((r) => r.cond === 'senza').slice(-1)[0];
+    const cr = mine.filter((r) => r.cond === 'con').slice(-1)[0];
+    if (!sr) return renderTests();
+    const t = TESTS[sr.test]; const m = t.metric;
+    const val = (r) => fmt(r.main, m.d) + (m.unit ? ' ' + m.unit : '');
+    setTab('test');
+    const head = '<div class="head">' + backBtn() + '<div><div class="k">Confronto' + (sr.variant ? ' · ' + esc(sr.variant) : '') + '</div><h1>' + t.full + '</h1></div></div>';
+
+    if (!cr) {
+      // Passo 2: applica Elvy secondo il protocollo Sport, poi stesso test
+      const open = cmpOpen();
+      const opts = open && open.sid === sid ? open.opts : sr.opts;
+      $app.innerHTML = head + stepper(1) +
+        '<div class="card row between"><div><div class="small muted">Senza Elvy</div><div class="big" style="font-size:34px;margin-top:4px">' + fmt(sr.main, m.d) + '<small>' + m.unit + '</small></div></div><span class="tag">' + m.label + '</span></div>' +
+        '<div style="margin-top:14px">' + talk(IMG.point, 'Fatto! Senza Elvy: ' + val(sr) + '. Ora applica i tre dispositivi: uno sulla <b>settima vertebra cervicale</b>, alla base del collo, e uno su <b>ogni polpaccio</b>, sopra il tendine d\'Achille. Poi rifacciamo lo stesso test.', true) + '</div>' +
+        '<div class="card apply"><h3>Applica Elvy</h3><div class="apply-row">' + BODY_BACK + '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo quando pieghi la testa.</li><li><b>Polpacci</b>: parte bassa, sul muscolo soleo, sopra il tendine d\'Achille.</li><li>Pelle pulita e asciutta, fissa con il cerotto trasparente.</li></ol></div>' +
+        '<p class="note">Il protocollo Sport consiglia di indossare Elvy prima dell\'attività. Per un confronto corretto ripeti il test nelle stesse condizioni: stesso posto, stesse scarpe, stessa posizione del telefono.</p></div>' +
+        '<div class="actions"><button class="btn" id="cmp-on">Ho applicato Elvy · passo 3</button><a class="btn ghost" href="#/oggi">Lo faccio più tardi</a><a class="small" href="#/r/' + sr.id + '" style="text-align:center">Dettagli del test senza Elvy</a></div>';
+      document.getElementById('cmp-on').onclick = () => {
+        device.on = true; device.where = PROTO; device.since = device.since || Date.now(); saveDevice();
+        startTest(sr.test, opts, { sid, cond: 'con' });
+      };
+      return bindCommon();
+    }
+
+    // Passo 3 fatto: confronto
+    const ef = effect(t, sr.main, cr.main);
+    const col = ef.good ? 'good' : ef.good === false ? 'bad' : 'same';
+    const max = Math.max(sr.main, cr.main) || 1;
+    const rows = (COMPARE[sr.test] ? COMPARE[sr.test](sr.res).map((x, i) => [x, COMPARE[sr.test](cr.res)[i]]) : []).filter(([a, b]) => a[1] != null && b[1] != null && isFinite(a[1]) && isFinite(b[1]));
+    const verdict = m.better == null
+      ? 'Con Elvy la tua ' + m.label.toLowerCase() + ' è passata da ' + val(sr) + ' a ' + val(cr) + '. Guarda anche contatto a terra e simmetria qui sotto.'
+      : ef.same ? 'Risultato quasi uguale: ' + val(sr) + ' senza Elvy e ' + val(cr) + ' con Elvy. La risposta è personale: ripeti il confronto in altri giorni e guarda la tendenza.'
+      : ef.good ? 'Con Elvy è andata meglio! ' + m.label + ' da ' + val(sr) + ' a ' + val(cr) + ', ' + pctTxt(ef.pct).replace('−', 'meno ') + '. Ripeti il confronto nei prossimi giorni per confermarlo.'
+      : 'Questa volta con Elvy è andata un po\' peggio: da ' + val(sr) + ' a ' + val(cr) + '. Può dipendere dalla stanchezza o dal riscaldamento: ripeti il confronto un altro giorno.';
+    $app.innerHTML = head + stepper(3) +
+      '<div class="card vs ' + col + '"><div class="vs-cols">' +
+      '<div><div class="small muted">Senza Elvy</div><div class="big">' + fmt(sr.main, m.d) + '</div><div class="bar"><i style="width:' + (100 * sr.main / max).toFixed(1) + '%;background:#8d8d94"></i></div></div>' +
+      '<div class="vs-mid"><span class="delta ' + (col === 'good' ? '' : col === 'bad' ? 'neg' : 'neu') + '">' + pctTxt(ef.pct) + '</span></div>' +
+      '<div><div class="small" style="color:var(--teal-l)">Con Elvy</div><div class="big">' + fmt(cr.main, m.d) + '</div><div class="bar"><i class="t" style="width:' + (100 * cr.main / max).toFixed(1) + '%"></i></div></div>' +
+      '</div><p class="small muted" style="margin-top:12px">' + m.label + (m.unit ? ' (' + m.unit + ')' : '') + (m.better === 'low' ? ' · più basso è meglio' : m.better === 'high' ? ' · più alto è meglio' : '') + '</p></div>' +
+      '<div style="margin-top:14px">' + talk(ef.good ? IMG.jump : IMG.ok, verdict, Date.now() - cr.t < 120000) + '</div>' +
+      (rows.length > 1 ? '<div class="card" style="margin-top:14px"><h3>Nel dettaglio</h3><table class="cmp-table"><thead><tr><th></th><th>Senza</th><th>Con Elvy</th><th></th></tr></thead><tbody>' +
+        rows.map(([a, b]) => {
+          const e = a[4] ? effect({ metric: { better: a[4] } }, a[1], b[1]) : { pct: a[1] ? (100 * (b[1] - a[1])) / Math.abs(a[1]) : 0, good: null };
+          return '<tr><td>' + a[0] + '</td><td>' + fmt(a[1], a[3]) + ' <small>' + a[2] + '</small></td><td>' + fmt(b[1], b[3]) + ' <small>' + b[2] + '</small></td><td class="' + (e.good ? 'up' : e.good === false ? 'down' : '') + '">' + pctTxt(e.pct) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '') +
+      '<p class="note" style="margin-top:14px">Un solo confronto può dipendere da molte cose (stanchezza, riscaldamento, il fatto che il secondo test lo conosci già). Ripetilo in giorni diversi: nei Progressi vedi la tendenza. Sono stime per l\'allenamento, non misure cliniche.</p>' +
+      '<div class="actions"><a class="btn" href="#/progressi/' + sr.test + '">Vedi i progressi</a><a class="btn ghost" href="#/test/' + sr.test + '">Nuovo confronto</a>' +
+      '<div class="row" style="justify-content:center;gap:18px"><a class="small" href="#/r/' + sr.id + '">Dettagli senza Elvy</a><a class="small" href="#/r/' + cr.id + '">Dettagli con Elvy</a></div></div>';
     bindCommon();
   }
 
@@ -774,13 +979,19 @@
     setTab('progressi');
     const all = results();
     const ids = Object.keys(TESTS).filter((k) => all.some((r) => r.test === k));
-    $app.innerHTML = BRAND + '<div class="top"><h1>Progressi</h1></div>' +
-      (ids.length ? '<p class="muted" style="margin-bottom:14px">L\'andamento di ogni test nel tempo, con e senza Elvy.</p>' + ids.map((k) => {
+    const ses = sessions(); const better = ses.filter((x) => x.good).length; const worse = ses.filter((x) => x.good === false).length;
+    const sum = !ses.length ? 'Qui vedrai i tuoi progressi e l\'effetto di Elvy. Fai un confronto: lo stesso test senza e con Elvy.'
+      : 'Hai fatto ' + (ses.length === 1 ? 'un confronto' : ses.length + ' confronti') + ' senza e con Elvy. ' + (better ? 'Con Elvy sei andato meglio ' + (better === 1 ? 'una volta' : better + ' volte') + (worse ? ', peggio ' + (worse === 1 ? 'una volta' : worse + ' volte') : '') + '.' : 'Per ora nessuna differenza chiara: continua a confrontare.');
+    $app.innerHTML = BRAND + '<div class="top"><h1>Progressi</h1></div>' + talk(ses.length && better ? IMG.jump : IMG.point, sum, true) +
+      (ses.length ? '<div class="grid3" style="margin-top:14px">' + stat('Confronti', ses.length, '') + stat('Meglio con Elvy', better, '', '', false) + stat('Uguale o peggio', ses.length - better, '', '', true) + '</div>' : '') +
+      (ids.length ? '<h3 class="sec">I tuoi test</h3>' + ids.map((k) => {
         const t = TESTS[k]; const list = all.filter((r) => r.test === k);
         const c = list.filter((r) => r.cond === 'con'); const s = list.filter((r) => r.cond !== 'con');
+        const ks = sessions(k); const avg = ks.length ? A.mean(ks.map((x) => x.pct)) : null; const ae = avg != null ? effect(t, 100, 100 + avg) : null;
         return '<a class="card" href="#/progressi/' + k + '" style="display:block;color:#fff;margin-bottom:12px"><div class="row between"><div><div class="k' + (GROUPS.indexOf(t.group) === 3 ? ' p' : '') + '">' + t.group + '</div><h3 style="margin-top:4px">' + t.full + '</h3></div><div style="text-align:right"><div class="big" style="font-size:30px">' + fmt(list[list.length - 1].main, t.metric.d) + '</div><div class="small dim">' + t.metric.unit + '</div></div></div>' +
-          '<div class="small muted" style="margin-top:8px">' + list.length + ' prove · senza Elvy ' + (s.length ? fmt(A.mean(s.map((r) => r.main)), t.metric.d) : '—') + ' · con Elvy ' + (c.length ? fmt(A.mean(c.map((r) => r.main)), t.metric.d) : '—') + '</div></a>';
-      }).join('') : say(IMG.point, 'Qui vedrai come cambiano i tuoi risultati nel tempo, con e senza Elvy. Fai il primo test!') + '<div class="actions"><a class="btn" href="#/test">Scegli un test</a></div>');
+          '<div class="small muted" style="margin-top:8px">' + list.length + ' prove · senza Elvy ' + (s.length ? fmt(A.mean(s.map((r) => r.main)), t.metric.d) : '—') + ' · con Elvy ' + (c.length ? fmt(A.mean(c.map((r) => r.main)), t.metric.d) : '—') + '</div>' +
+          (ks.length ? '<div class="row between" style="margin-top:10px"><span class="small">' + ks.length + (ks.length === 1 ? ' confronto' : ' confronti') + ' · effetto medio di Elvy</span><span class="delta ' + (ae.good ? '' : ae.good === false ? 'neg' : 'neu') + '" style="margin-top:0">' + pctTxt(avg) + '</span></div>' : '') + '</a>';
+      }).join('') : '<div class="actions"><a class="btn" href="#/test">Scegli un test</a></div>');
     bindCommon();
   }
 
@@ -800,13 +1011,21 @@
       diff = '<p class="small" style="margin-top:12px;color:' + (good ? 'var(--teal-l)' : 'var(--muted)') + '">Con Elvy la media è ' + (pct >= 0 ? 'più alta' : 'più bassa') + ' del ' + fmt(Math.abs(pct), 0) + '% ' + (good ? '(meglio)' : '') + '. Servono più prove per un confronto affidabile.</p>';
     }
     const col = (lab, arr, on) => '<div class="stat"' + (on ? ' style="box-shadow:inset 0 0 0 2px var(--teal-d)"' : '') + '><div class="l">' + lab + '</div><div class="v">' + (arr.length ? fmt(A.mean(arr), t.metric.d) : '—') + '<small>' + t.metric.unit + '</small></div><div class="s' + (on ? '' : ' p') + '">' + (arr.length ? 'media di ' + arr.length + ' · migliore ' + fmt(t.metric.better === 'low' ? Math.min(...arr) : Math.max(...arr), t.metric.d) : 'nessuna prova') + '</div></div>';
+    const ks = sessions(id).filter((x) => x.s.variant === v);
+    const avg = ks.length ? A.mean(ks.map((x) => x.pct)) : null; const ae = avg != null ? effect(t, 100, 100 + avg) : null;
+    const tl = !ks.length ? 'Ancora nessun confronto per questo test. Fallo prima senza Elvy e poi con Elvy: qui vedrai la differenza ogni volta.'
+      : 'In ' + (ks.length === 1 ? 'un confronto' : ks.length + ' confronti') + ' l\'effetto medio di Elvy è ' + pctTxt(avg).replace('+', 'più ').replace('−', 'meno ') + (ae.good ? ': meglio con Elvy.' : ae.good === false ? ': per ora meglio senza.' : ': quasi nessuna differenza.') + (ks.length < 3 ? ' Con almeno tre confronti la tendenza è più affidabile.' : '');
     $app.innerHTML = '<div class="head">' + backBtn() + '<div><div class="k">Progressi</div><h1>' + t.full + '</h1></div></div>' +
+      talk(ae && ae.good ? IMG.jump : IMG.point, tl, true) +
+      '<div class="card" style="margin-top:14px"><div class="row between"><h3>Senza e con Elvy</h3>' + (ae ? '<span class="delta ' + (ae.good ? '' : ae.good === false ? 'neg' : 'neu') + '" style="margin-top:0">media ' + pctTxt(avg) + '</span>' : '') + '</div>' +
+      (ks.length ? '<div style="margin-top:12px">' + pairsChart(ks.slice(-8), t.metric) + '</div>' : '<p class="small muted" style="margin-top:8px">Nessun confronto ancora.</p>') + '</div>' +
+      '<div style="height:12px"></div>' +
       (variants.length > 1 ? '<div class="seg" style="margin-bottom:12px">' + variants.map((x) => '<button type="button" data-v="' + esc(x) + '" aria-pressed="' + (x === v) + '">' + esc(x || 'tutti') + '</button>').join('') + '</div>' : '') +
       '<div class="card"><div class="row between"><h3>' + t.metric.label + (t.metric.unit ? ' (' + t.metric.unit + ')' : '') + '</h3><span class="small dim">' + (t.metric.better === 'low' ? 'più basso = meglio' : t.metric.better === 'high' ? 'più alto = meglio' : '') + '</span></div><div style="margin-top:12px">' + trend(list.slice(-30), t.metric) + '</div></div>' +
       '<div class="grid2" style="margin-top:12px">' + col('Senza Elvy', s, false) + col('Con Elvy', c, true) + '</div>' + diff +
       '<h3 class="sec">Tutte le prove</h3><div class="card tight"><ul class="hist">' + list.slice().reverse().map((r) =>
         '<li><a href="#/r/' + r.id + '" style="color:#fff;flex:1"><span class="small muted">' + dateShort(r.t) + ' ' + timeShort(r.t) + '</span><br>' + (r.cond === 'con' ? '<span class="tag con">con Elvy</span>' : '<span class="tag">senza</span>') + (r.demo ? ' <span class="tag demo">prova</span>' : '') + '</a><b>' + fmt(r.main, t.metric.d) + ' ' + t.metric.unit + '</b><button type="button" data-del="' + r.id + '" aria-label="Elimina">✕</button></li>').join('') + '</ul></div>' +
-      '<div class="actions"><a class="btn" href="#/test/' + id + '">Nuova prova</a></div>';
+      '<div class="actions"><a class="btn" href="#/test/' + id + '">Nuovo confronto</a></div>';
     $app.querySelectorAll('[data-v]').forEach((b) => { b.onclick = () => { prefs['pv-' + id] = b.dataset.v; savePrefs(); renderProgressTest(id); }; });
     $app.querySelectorAll('[data-del]').forEach((b) => { b.onclick = () => { if (confirm('Eliminare questa prova?')) { saveResults(results().filter((r) => String(r.id) !== b.dataset.del)); renderProgressTest(id); } }; });
     bindCommon();
@@ -865,10 +1084,11 @@
     // prima di tutto il dispositivo: senza seriale abbinato si vede solo la schermata di attivazione
     if (!window.ElvyGate.paired()) { setTab(''); window.ElvyGate.show($app, () => { location.hash = '#/oggi'; route(); }); return; }
     const parts = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); S.stopVoice();
     switch (parts[0]) {
       case 'test': return parts[1] ? renderTest(parts[1]) : renderTests();
       case 'r': return renderResult(parts[1]);
+      case 'confronto': return renderCompare(parts[1]);
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
       case 'profilo': return renderProfile();
       default: return renderOggi();

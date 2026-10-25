@@ -20,6 +20,21 @@ Alla prima apertura c'è la schermata **Attiva Elvy** con il **retro** del dispo
 
 Codice: `js/gate.js`.
 
+## Confronto senza / con Elvy
+
+Ogni test si fa come **confronto in 3 passi** («Inizia il confronto»):
+1. **Senza Elvy**: misura di base (se i dispositivi sono applicati, l'app chiede di toglierli).
+2. **Applica Elvy** secondo il protocollo Sport di Equistasi: un dispositivo sulla settima vertebra cervicale (C7) e uno su ogni polpaccio (soleo, sopra il tendine d'Achille). La figura mostra i punti.
+3. **Con Elvy**: stesso test, stesse opzioni.
+
+Poi la schermata di confronto mostra senza / con Elvy, la differenza in % (verde se migliore, secondo il verso della misura), le misure di dettaglio e il commento di Elvy. Il confronto a metà si può riprendere più tardi da Oggi. Resta anche «Solo una prova», segnata con o senza Elvy secondo il pulsante «Elvy applicato».
+
+In **Progressi** ci sono il numero di confronti, quante volte è andata meglio con Elvy, l'effetto medio di Elvy per test e un grafico a coppie (grigio senza, verde con Elvy) per ogni confronto, oltre all'andamento nel tempo.
+
+## Elvy parla
+
+La mascotte parla con la voce del telefono e il testo compare a poco a poco nel fumetto mentre lo dice (onde animate e mascotte che si muove). Parla al benvenuto, in Oggi (una volta al giorno), quando spiega un test, nei passi del confronto, sui risultati e nei Progressi; toccandola ripete. La voce si spegne dal Profilo («Guida vocale»).
+
 ## I test
 
 | Gruppo | Test | Dove sta il telefono | Cosa misura |
