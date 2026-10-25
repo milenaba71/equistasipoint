@@ -1,0 +1,21 @@
+# Copia ogni notte da Airtable (EQUITUTTO) a Supabase i dispositivi che possono usare l'app,
+# con tipologia, noleggio prof e prossima calibrazione. Si può avviare anche a mano.
+# Secrets: AIRTABLE_TOKEN (sola lettura sulla base EQUITUTTO), SUPABASE_SECRET_KEY.
+name: "Supabase: copia dispositivi da Airtable"
+
+on:
+  schedule:
+    - cron: "17 1 * * *"   # ogni notte verso le 2–3 in Italia
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copia
+        env:
+          AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_URL: https://lxnntieqcumhjnvfbbgu.supabase.co
+        run: python3 .github/scripts/sync_supabase.py
