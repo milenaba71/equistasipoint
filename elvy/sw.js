@@ -1,8 +1,8 @@
 // Elvy: cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'elvy-v8';
+const VERSION = 'elvy-v9';
 const FILES = [
   './', 'index.html', 'css/elvy.css', 'css/pair.css', 'js/analysis.js', 'js/sim.js', 'js/sensors.js', 'js/app.js', 'js/gate.js', 'js/video.js', '../js/config.js', '../js/scan.js', '../js/pair.js', 'manifest.webmanifest',
-  'img/icon-192.png', 'img/icon-512.png', 'img/logo-elvy.png', 'img/logo-equistasi.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg', 'img/logo-e.png',
+  'img/icon-elvy-192.png', 'img/icon-elvy-512.png', 'img/apple-touch-icon.png', 'img/favicon-32.png', 'img/logo-elvy.png', 'img/logo-equistasi.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg', 'img/logo-e.png',
 ];
 
 self.addEventListener('install', (e) => {
