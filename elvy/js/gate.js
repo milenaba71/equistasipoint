@@ -227,15 +227,54 @@
     });
   }
 
+  // Nome registrato in Airtable per il kit di questo seriale (webhook nameUrl). Se manca, se la rete
+  // è lenta o se il kit è di un'azienda o di un evento, la mascotte saluta senza nome.
+  function cleanName(n) {
+    n = String(n || '').replace(/[^A-Za-zÀ-ÿ' .-]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (n.length < 2) return '';
+    // TUTTO MAIUSCOLO o minuscolo → Iniziali Maiuscole
+    if (n === n.toUpperCase() || n === n.toLowerCase()) n = n.toLowerCase().replace(/(^|[ '-])(\S)/g, (m, a, b) => a + b.toUpperCase());
+    return n;
+  }
+  async function ownerName(serial) {
+    const url = (window.APP_CONFIG || {}).nameUrl;
+    const saved = store.get('elvy-owner', null);
+    if (saved && saved.serial === serial) return saved.name || '';
+    if (!url) return '';
+    const ctrl = 'AbortController' in window ? new AbortController() : null;
+    const to = setTimeout(() => ctrl && ctrl.abort(), 5000);
+    try {
+      const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'serial=' + encodeURIComponent(serial), { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined });
+      const txt = await r.text();
+      let d = {}; try { d = JSON.parse(txt); } catch (e) { /* risposta non JSON */ }
+      const name = cleanName(d.nome || d.name);
+      store.set('elvy-owner', { serial, name });
+      return name;
+    } catch (e) { return ''; } finally { clearTimeout(to); }
+  }
+
   function showPaired($app, serial, onDone) {
     $app.innerHTML = '<div class="gate">' +
       '<img class="gate-mark" src="img/logo-elvy.png" alt="Elvy" />' +
       '<h1 style="margin-bottom:22px">Elvy è abbinato!</h1>' + deviceHtml(serial, 'flip') +
-      '<div class="say" style="margin-top:22px"><img src="img/pollice.jpg" alt="" /><p>Perfetto! Il tuo dispositivo <b>' + esc(serial) + '</b> è collegato all\'app. Ora ti preparo i test.</p></div>' +
+      '<div class="say" style="margin-top:22px"><img src="img/pollice.jpg" alt="" /><p id="g-hi">Perfetto! Il tuo dispositivo <b>' + esc(serial) + '</b> è collegato all\'app.</p></div>' +
       '<div class="actions"><button class="btn" id="g-go" type="button">Iniziamo</button></div></div>';
     flip(document.getElementById('dev'));
     if (navigator.vibrate) setTimeout(() => navigator.vibrate(30), 650);
-    document.getElementById('g-go').onclick = () => { document.body.classList.remove('gated'); onDone(serial); };
+    let gone = false;
+    document.getElementById('g-go').onclick = () => { gone = true; if (window.speechSynthesis) speechSynthesis.cancel(); document.body.classList.remove('gated'); onDone(serial); };
+    // la mascotte saluta per nome mentre il dispositivo si gira
+    const t0 = Date.now();
+    ownerName(serial).then((name) => {
+      setTimeout(() => {
+        const p = document.getElementById('g-hi');
+        if (gone || !p) return;
+        p.innerHTML = (name ? 'Ciao <b>' + esc(name) + '</b>! ' : 'Perfetto! ') + 'Il tuo dispositivo <b>' + esc(serial) + '</b> è collegato all\'app. Ora ti preparo i test.';
+        const prof = store.get('elvy-profile', {}) || {};
+        const S = window.ElvySensors;
+        if (prof.mascotVoice !== false && S && S.voiceOn()) S.say((name ? 'Ciao ' + name + '! ' : 'Perfetto! ') + 'Il tuo Elvy è collegato. Ora ti preparo i test.', { pitch: 1.15 });
+      }, Math.max(0, 1400 - (Date.now() - t0)));
+    });
   }
 
   // Controllo del telefono attivo: all'avvio e quando si torna nell'app (al massimo ogni 5 minuti).
@@ -254,5 +293,5 @@
   const paired = () => { const v = store.get(KEY, null); return v && v.serial ? v.serial : null; };
   function unpair() { try { localStorage.removeItem(KEY); } catch (e) { /* */ } }
 
-  window.ElvyGate = { show, paired, unpair, deviceHtml, flip, recheck, phoneId, _norm: norm };
+  window.ElvyGate = { show, paired, unpair, deviceHtml, flip, recheck, phoneId, owner: () => { const o = store.get('elvy-owner', null); return o && o.serial === paired() ? o.name || '' : ''; }, _norm: norm, _cleanName: cleanName };
 })();
