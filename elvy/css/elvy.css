@@ -192,7 +192,7 @@ body.gated .tabbar { display: none; }
 .gate-mark { width: 120px; margin: 4px auto 14px; display: block; }
 .gate h1 { font-size: 30px; }
 .gate-lead { color: var(--muted); margin: 10px auto 22px; max-width: 420px; }
-.gate-or { color: var(--dim); font-size: 14px; margin: 22px 0 10px; }
+.gate-fail { background: #4f4636; color: #F5DFAF; border-radius: 16px; padding: 12px 14px; font-size: 15px; line-height: 1.45; margin: 22px 0 14px; text-align: left; }
 .gate-bar { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
 
 /* Il dispositivo: etichetta con bordo rosso sottile, logo a sinistra e retro bianco a destra */

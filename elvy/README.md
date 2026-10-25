@@ -10,7 +10,7 @@ Alla prima apertura c'è la schermata **Attiva Elvy** con il dispositivo disegna
 
 - Toccando il codice a barre disegnato si apre la fotocamera **dentro il disegno** (`../js/scan.js`, lo stesso lettore di Equistasi Point): legge il codice a barre e, se è rovinato, i **caratteri stampati, lettere e numeri** (es. `EQX25001801`), oltre ai seriali di sole cifre (`20…`, 11 cifre). Un seriale letto vale solo quando esce uguale due volte; gli scambi tipici (O/0, I/1, S/5, B/8) vengono corretti e la sigla `EQX` viene riconosciuta anche con una lettera letta male.
 - L'abbinamento si apre **a tutto schermo, in stile Apple Watch** (`../js/pair.js` con i colori Elvy, `css/pair.css`): cerchio con la fotocamera, nuvola di particelle verde acqua e viola, anello che si chiude, seriale che si accende carattere per carattere, lampo, ✓ e suono di conferma. Con «riduci movimento» attivo sul telefono la lettura resta dentro il disegno.
-- In alternativa si scrive il seriale a mano.
+- Il **seriale a mano** non si vede all'inizio: compare solo se la fotocamera non riesce a leggere il codice, cioè fotocamera negata o non disponibile, nessuna lettura entro 25 secondi, oppure codice letto ma non riconosciuto (in quel caso il campo è già compilato da correggere). C'è anche «Riprova con la fotocamera».
 - La verifica usa lo stesso webhook Make di Equistasi Point (`../js/config.js` → `verifyUrl`), che cerca il seriale nella tabella Airtable **EQUITUTTO → Abbinamento Kit** (campo *Abbinamento seriali (testo)*). L'app riceve solo `{"valid": true/false}`: nessuna chiave Airtable nel codice.
 - Il seriale abbinato resta sul telefono (`elvy-serial`); dal Profilo si vede il dispositivo e lo si può scollegare.
 
