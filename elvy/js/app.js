@@ -38,6 +38,14 @@
 
   // logo Elvy in testa alle schermate principali
   const BRAND = '<img class="brand" src="img/logo-elvy.png" alt="Elvy" />';
+  const paceTxt = (secPerKm) => (secPerKm && isFinite(secPerKm) ? Math.floor(secPerKm / 60) + ':' + String(Math.round(secPerKm % 60)).padStart(2, '0') : '—');
+  const readyTxt = (sc) => (sc >= 70 ? 'Pronto per allenarti' : sc >= 45 ? 'Recupero nella media' : 'Oggi vai leggero');
+  // GPS acceso per tutta la durata di un test (nei dati simulati no)
+  function withGps(ctx, on) {
+    const g = on && !ctx.demo ? S.gps() : null;
+    if (g) g.start();
+    return { points: g ? g.points : [], stop: () => { if (g) g.stop(); } };
+  }
   const IMG = { hi: 'img/mascotte.jpg', ok: 'img/pollice.jpg', point: 'img/punta.jpg', jump: 'img/salta.jpg' };
   const ICON = {
     back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
@@ -45,6 +53,9 @@
     belt: '<svg viewBox="0 0 40 40"><path d="M6 15c4 2 9 3 14 3s10-1 14-3M6 25c4 2 9 3 14 3s10-1 14-3M6 15v10M34 15v10"/><rect x="13" y="17" width="14" height="9" rx="2"/></svg>',
     hand: '<svg viewBox="0 0 40 40"><rect x="13" y="6" width="14" height="24" rx="3"/><path d="M10 22c0 6 4 12 10 12s10-5 10-10"/></svg>',
     leg: '<svg viewBox="0 0 40 40"><path d="M18 4v16l-2 14h6M18 20h4"/><rect x="21" y="18" width="7" height="11" rx="1.5"/></svg>',
+    finger: '<svg viewBox="0 0 40 40"><rect x="9" y="4" width="22" height="32" rx="4"/><circle cx="16" cy="11" r="3"/><circle cx="24" cy="11" r="1.6"/><path d="M14 30V16c0-2 4-2 4 0v8"/></svg>',
+    gps: '<svg viewBox="0 0 40 40"><path d="M20 36s-11-11-11-19a11 11 0 0 1 22 0c0 8-11 19-11 19z"/><circle cx="20" cy="17" r="4"/></svg>',
+    watch: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6l1-4h4l1 4M9 18l1 4h4l1-4M10 12h1.5l1-2 1.5 4 1-2h1"/></svg>',
     chest: '<svg viewBox="0 0 40 40"><circle cx="20" cy="8" r="4"/><path d="M12 36V20c0-4 3-6 8-6s8 2 8 6v16"/><rect x="16" y="17" width="8" height="11" rx="1.5"/></svg>',
   };
 
@@ -178,6 +189,9 @@
     corsa: 'Telefono nella cintura e corri alla tua andatura. Ti dico la cadenza, il contatto a terra e se la corsa è simmetrica.',
     plank: 'Mettiti in plank e tieni più a lungo che puoi. Mi accorgo da solo quando il bacino cede.',
     reazione: 'Quando lo schermo diventa verde, tocca più in fretta che puoi. Dieci prove: vediamo i tuoi riflessi.',
+    hrv: 'Appoggia il dito sulla fotocamera e resta fermo un minuto. Dal battito misuro la variabilità del cuore: mi dice quanto hai recuperato.',
+    swing: 'Stringi bene il telefono e fai cinque swing, uno a ogni segnale. Col giroscopio misuro quanto veloce ruoti.',
+    cooper: 'Corri dodici minuti all\'aperto e fai più strada che puoi. Con il GPS misuro la distanza e stimo il tuo VO2max.',
     mobilita: 'Metti il telefono sul segmento da misurare: parti fermo, poi vai al massimo e tieni. Io misuro l\'angolo.',
   };
   const placeBox = (icon, text) => '<div class="place">' + ICON[icon] + '<span>' + text + '</span></div>';
@@ -372,18 +386,24 @@
     /* ── Corsa e core ── */
     corsa: {
       group: 'Corsa e core', name: 'Analisi della corsa', full: 'Analisi della corsa', sub: 'telefono in cintura', minutes: 5, place: 'belt',
-      options: [{ key: 'dur', label: 'Durata', values: { 60: '1 min', 180: '3 min', 300: '5 min' } }],
-      defaults: { dur: 180 },
+      options: [{ key: 'dur', label: 'Durata', values: { 60: '1 min', 180: '3 min', 300: '5 min' } }, { key: 'gps', label: 'GPS (distanza e passo)', values: { si: 'Sì, all\'aperto', no: 'No' } }],
+      defaults: { dur: 180, gps: 'si' },
       variant: () => '',
       steps: ['Telefono nella <b>cintura Elvy</b> sulla zona lombare, ben aderente.', 'Corri alla tua andatura abituale, possibilmente su un percorso piano e sempre lo stesso.', 'La voce ti avvisa ogni minuto e alla fine. Puoi fermare prima dal pulsante.'],
       metric: { label: 'Cadenza', unit: 'passi/min', d: 0, better: null },
       async run(ctx, o) {
         await ctx.prep(10, 'Preparati', 'Metti il telefono nella cintura e preparati a correre.');
         const cues = []; for (let m = 60; m < o.dur; m += 60) cues.push({ at: m, say: (m / 60) + (m === 60 ? ' minuto' : ' minuti') });
-        const s = await ctx.record(+o.dur, { phase: 'Corsa', msg: 'Corri alla tua andatura', go: 'Via!', voice: 'Via! Corri alla tua andatura', cues, clock: true },
-          () => SIM.runSignal(171, 0.238, 60, { tcRight: 0.233, tcLeft: 0.243, seed: 31, platformSign: S.platformSign }));
+        const g = withGps(ctx, o.gps !== 'no');
+        let s;
+        try {
+          s = await ctx.record(+o.dur, { phase: 'Corsa', msg: 'Corri alla tua andatura', go: 'Via!', voice: 'Via! Corri alla tua andatura', cues, clock: true },
+            () => SIM.runSignal(171, 0.238, 60, { tcRight: 0.233, tcLeft: 0.243, seed: 31, platformSign: S.platformSign }));
+        } finally { g.stop(); }
         const r = A.running(s, { flipSides: profile.flip, platformSign: S.platformSign });
         if (!r.ok) throw new Error('Non ho riconosciuto abbastanza passi: il telefono deve stare fermo in cintura mentre corri.');
+        const tr = o.gps !== 'no' ? A.track(ctx.demo ? SIM.gpsTrack(3.4, +o.dur, { seed: 7 }) : g.points) : null;
+        if (tr && tr.ok) r.gps = tr;
         return r;
       },
       main: (r) => r.cadence,
@@ -392,6 +412,7 @@
         const max = Math.max(r.contactLeft || 0, r.contactRight || 0) * 1.15 || 1;
         return '<div class="grid2">' + stat('Tempo di contatto', r.contact ? fmt(r.contact * 1000, 0) : '—', r.contact ? 'ms' : '', r.contact ? '' : 'nessuna fase di volo') + stat('Oscillazione verticale', fmt(r.oscillation, 1), 'cm') +
           stat('Simmetria del passo', fmt(r.symmetry, 0), '%') + stat('Regolarità', fmt(r.regularity, 2), 'su 1') + '</div>' +
+          (r.gps ? '<div class="grid3" style="margin-top:12px">' + stat('Distanza', fmt(r.gps.distance / 1000, 2), 'km', 'GPS') + stat('Passo', paceTxt(r.gps.pace), '/km') + stat('Vel. max', fmt(r.gps.maxSpeed * 3.6, 1), 'km/h', '', true) + '</div>' : '') +
           (r.contactLeft && r.contactRight ? '<div class="card" style="margin-top:12px"><h3>Contatto a terra, sinistra e destra</h3>' +
             [['Sinistra', r.contactLeft, 't', 'var(--teal-l)'], ['Destra', r.contactRight, 'p', 'var(--purple-l)']].map(([l, v, c, col]) => '<div class="lr"><span style="color:' + col + '">' + l + '</span><div class="bar"><i class="' + c + '" style="width:' + (100 * v / max).toFixed(1) + '%"></i></div><span class="n">' + fmt(v * 1000, 0) + ' ms</span></div>').join('') + '</div>' : '') +
           '<p class="note" style="margin-top:14px">Stime dal sensore di movimento in cintura: confronta corse fatte sullo stesso percorso e alla stessa andatura. Se destra e sinistra ti sembrano invertite, cambia l\'impostazione nel Profilo.</p>';
@@ -421,9 +442,30 @@
       comment: (r) => (r.broke ? 'Hai tenuto ' + fmt(r.held, 0) + ' secondi. Ripeti il test ogni settimana e confronta anche il tremore.' : 'Sei arrivato al massimo! La prossima volta prova un tempo più lungo.'),
     },
 
+    /* ── Recupero ── */
+    hrv: {
+      group: 'Recupero', name: 'Battito e HRV', full: 'Battito e HRV', sub: 'dito sulla fotocamera', minutes: 1, place: 'finger',
+      options: [{ key: 'src', label: 'Misura con', values: { camera: 'Fotocamera', fascia: 'Fascia o orologio' } }],
+      defaults: { src: 'camera' },
+      variant: (o) => (o.src === 'fascia' ? 'fascia/orologio' : ''),
+      steps: ['Meglio appena sveglio, seduto o sdraiato, sempre nella stessa posizione.', 'Appoggia il polpastrello dell\'indice sulla <b>fotocamera posteriore</b> coprendo anche il flash, senza premere.', 'Resta fermo e respira normalmente per un minuto. Su iPhone, dal browser il flash non si accende: mettiti vicino a una luce forte.'],
+      metric: { label: 'HRV (RMSSD)', unit: 'ms', d: 0, better: 'high' },
+      noMotion: true,
+      async run(ctx, o) { return hrvRun(ctx, o); },
+      main: (r) => r.rmssd,
+      hero: (r) => ({ k: 'Variabilità del battito (RMSSD)', v: fmt(r.rmssd, 0), unit: 'ms', sub: fmt(r.hr, 0) + ' battiti al minuto a riposo', img: IMG.ok }),
+      render(r) {
+        const rd = r.ready;
+        return '<div class="grid3">' + stat('Battito', fmt(r.hr, 0), 'bpm') + stat('SDNN', fmt(r.sdnn, 0), 'ms') + stat('Qualità', fmt(r.quality * 100, 0), '%', r.src === 'fascia' ? 'fascia/orologio' : r.torch ? 'con il flash' : 'senza flash', true) + '</div>' +
+          (rd ? '<div class="card" style="margin-top:12px"><div class="row" style="gap:18px">' + gauge(rd.score) + '<div><div class="k">Recupero di oggi</div><h3 style="margin-top:6px">' + readyTxt(rd.score) + '</h3><p class="small muted" style="margin-top:6px">Rispetto alla tua media delle ultime misure.</p></div></div></div>' : '') +
+          (r.wave ? '<div class="card" style="margin-top:12px"><h3>Il tuo polso</h3>' + sparkline(r.wave.slice(0, 220)) + '<p class="note" style="margin-top:6px">RMSSD = variabilità tra un battito e l\'altro: più è alta rispetto al tuo solito, più il corpo è recuperato.</p></div>' : '');
+      },
+      comment: (r) => (r.ready ? (r.ready.score >= 70 ? 'Il tuo corpo è recuperato: oggi puoi allenarti bene.' : r.ready.score >= 45 ? 'Recupero nella media: scalda bene e ascolta le sensazioni.' : 'Recupero basso rispetto al solito: oggi meglio un allenamento leggero.') : 'Misura salvata. Ripetila ogni mattina: dalla quarta misura ti dico come hai recuperato rispetto al solito.'),
+    },
+
     /* ── Reazione e mobilità ── */
     reazione: {
-      group: 'Reazione e mobilità', name: 'Tempo di reazione', full: 'Tempo di reazione', sub: 'tocco o movimento', minutes: 1, place: 'hand',
+      group: 'Riflessi, mobilità e swing', name: 'Tempo di reazione', full: 'Tempo di reazione', sub: 'tocco o movimento', minutes: 1, place: 'hand',
       options: [{ key: 'mode', label: 'Risposta', values: { tocco: 'Tocco', movimento: 'Movimento' } }],
       defaults: { mode: 'tocco' },
       variant: (o) => o.mode,
@@ -438,7 +480,7 @@
       comment: (r) => (r.falseStarts > 2 ? 'Hai anticipato ' + r.falseStarts + ' volte: aspetta il verde, la velocità arriva con la concentrazione.' : 'Riflessi pronti! Il tempo di reazione cala quando sei stanco: è un buon controllo prima dell\'allenamento.'),
     },
     mobilita: {
-      group: 'Reazione e mobilità', name: 'Mobilità', full: 'Mobilità articolare', sub: 'caviglia, anca, spalla', minutes: 2, place: 'segment',
+      group: 'Riflessi, mobilità e swing', name: 'Mobilità', full: 'Mobilità articolare', sub: 'caviglia, anca, spalla', minutes: 2, place: 'segment',
       options: [{ key: 'joint', label: 'Articolazione', values: { caviglia: 'Caviglia', anca: 'Anca', spalla: 'Spalla', tronco: 'Tronco' } }],
       defaults: { joint: 'caviglia' },
       variant: (o) => o.joint,
@@ -491,8 +533,63 @@
     corsa: (r) => [['Cadenza', r.cadence, 'passi/min', 0, null], ['Contatto', r.contact && r.contact * 1000, 'ms', 0, 'low'], ['Oscillazione', r.oscillation, 'cm', 1, 'low'], ['Simmetria', r.symmetry, '%', 0, 'high'], ['Regolarità', r.regularity, '', 2, 'high']],
     plank: (r) => [['Tenuta', r.held, 's', 0, 'high'], ['Tremore', r.shake, 'mm/s²', 0, 'low']],
     reazione: (r) => [['Mediana', r.median, 'ms', 0, 'low'], ['Migliore', r.best, 'ms', 0, 'low'], ['Costanza (±)', r.sd, 'ms', 0, 'low']],
+    hrv: (r) => [['RMSSD', r.rmssd, 'ms', 0, 'high'], ['Battito a riposo', r.hr, 'bpm', 0, 'low'], ['SDNN', r.sdnn, 'ms', 0, 'high']],
+    swing: (r) => [['Rotazione massima', r.best, '°/s', 0, 'high'], ['Velocità della punta', r.bestKmh, 'km/h', 0, 'high'], ['Media degli swing', r.avg, '°/s', 0, 'high']],
+    cooper: (r) => [['Distanza', r.distance, 'm', 0, 'high'], ['VO2max', r.vo2, '', 1, 'high'], ['Velocità media', r.gps.speed * 3.6, 'km/h', 1, 'high']],
     mobilita: (r) => (r.c != null ? [['Angolo', r.c, '°', 0, 'high']] : [['Sinistra', r.sx, '°', 0, 'high'], ['Destra', r.dx, '°', 0, 'high'], ['Simmetria', r.sym, '%', 0, 'high']]),
   };
+
+  const LEVER = { '0.7': 'braccio', '1': 'racchetta', '1.6': 'mazza da golf' };
+  Object.assign(TESTS, {
+    swing: {
+      group: 'Riflessi, mobilità e swing', name: 'Swing', full: 'Velocità dello swing', sub: 'racchetta, mazza, braccio', minutes: 1, place: 'hand',
+      options: [{ key: 'lever', label: 'Attrezzo', values: { 0.7: 'Braccio', 1: 'Racchetta', 1.6: 'Mazza da golf' } }],
+      defaults: { lever: 1 },
+      variant: (o) => LEVER[String(+o.lever)] || '',
+      steps: ['Stringi forte il telefono nella mano che colpisce, oppure mettilo in una fascia sul polso. <b>Attenzione a non farlo volare!</b>', 'Spazio libero intorno a te. A ogni segnale fai uno swing completo, veloce come in gara, senza colpire nulla.', 'Cinque swing: col giroscopio misuro la velocità di rotazione e stimo la velocità della punta.'],
+      metric: { label: 'Rotazione massima', unit: '°/s', d: 0, better: 'high' },
+      async run(ctx, o) {
+        await ctx.prep(6, 'Preparati', 'Stringi bene il telefono. Cinque swing, uno a ogni segnale.');
+        const s = await ctx.record(15, { phase: 'Cinque swing', msg: 'Swing!', go: 'Vai!', voice: 'Vai!', cues: [3, 6, 9, 12].map((at) => ({ at, say: 'Vai!', beep: true })) },
+          () => SIM.swingSignal([1080, 1240, 1170, 1300, 1210], { seed: Date.now() % 50 }));
+        const r = A.swings(s, { lever: +o.lever });
+        if (!r.ok) throw new Error(r.reason === 'nogyro' ? 'Il tuo telefono non invia i dati del giroscopio: questo test non si può fare.' : 'Non ho visto swing veloci: stringi il telefono e ruota con decisione.');
+        r.lever = +o.lever;
+        return r;
+      },
+      main: (r) => r.best,
+      hero: (r) => ({ k: 'Rotazione massima', v: fmt(r.best, 0), unit: '°/s', sub: '≈ ' + fmt(r.bestKmh, 0) + ' km/h alla punta (' + (LEVER[String(r.lever)] || '') + ')', img: IMG.point }),
+      render: (r) => '<div class="grid3">' + stat('Punta', fmt(r.bestKmh, 0), 'km/h', 'stima') + stat('Media', fmt(r.avg, 0), '°/s') + stat('Swing', r.swings.length, '', '', true) + '</div>' +
+        '<div class="card" style="margin-top:12px"><div class="row between"><h3>I tuoi swing</h3><span class="dim">°/s</span></div>' + bars(r.swings.map((x) => x.dps), { hi: r.swings.findIndex((x) => x.dps === r.best), fmt: (v) => fmt(v, 0), label: 'Velocità degli swing' }) + '</div>' +
+        '<p class="note" style="margin-top:14px">' + (r.saturated ? 'Lo swing più veloce ha raggiunto il limite del sensore del telefono (circa 2000 °/s): il valore vero può essere più alto. ' : '') + 'La velocità della punta è una stima: rotazione × lunghezza della leva.</p>',
+      comment: (r) => 'Il tuo swing più veloce: ' + fmt(r.best, 0) + ' gradi al secondo. Confronta senza e con Elvy: anche la regolarità tra gli swing conta.',
+    },
+    cooper: {
+      group: 'Corsa e core', name: 'Test di Cooper', full: 'Test di Cooper', sub: '12 minuti con il GPS', minutes: 13, place: 'gps',
+      options: [], variant: () => '',
+      steps: ['All\'aperto, su una pista o un percorso piano con il cielo libero per il GPS.', 'Corri per <b>12 minuti</b> facendo più strada possibile. La voce ti avvisa ogni 3 minuti.', 'Dalla distanza stimo il tuo VO2max (formula di Cooper).'],
+      metric: { label: 'Distanza', unit: 'm', d: 0, better: 'high' },
+      async run(ctx) {
+        await ctx.prep(10, 'Preparati', 'Sei all\'aperto? Attendo il GPS e partiamo.');
+        const g = withGps(ctx, true);
+        let s;
+        try {
+          s = await ctx.record(720, { phase: 'Test di Cooper', msg: 'Corri più strada che puoi', go: 'Via!', voice: 'Via! Dodici minuti', clock: true, cues: [180, 360, 540, 660].map((at) => ({ at, say: at === 660 ? 'Ultimo minuto, dai tutto' : (at / 60) + ' minuti' })) },
+            () => SIM.runSignal(168, 0.24, 60, { seed: 9, platformSign: S.platformSign }));
+        } finally { g.stop(); }
+        const tr = A.track(ctx.demo ? SIM.gpsTrack(3.6, 720, { seed: Date.now() % 40 }) : g.points);
+        if (!tr.ok) throw new Error('Il GPS non ha registrato il percorso: fai il test all\'aperto, con la posizione attiva per il browser.');
+        const run = A.running(s, { platformSign: S.platformSign });
+        return { gps: tr, distance: tr.distance, vo2: A.cooperVO2(tr.distance), cadence: run.ok ? run.cadence : null };
+      },
+      main: (r) => r.distance,
+      hero: (r) => ({ k: 'Distanza in 12 minuti', v: fmt(r.distance, 0), unit: 'm', sub: 'VO2max stimato ' + fmt(r.vo2, 1) + ' ml/kg/min', img: IMG.ok }),
+      render: (r) => '<div class="grid3">' + stat('Passo', paceTxt(r.gps.pace), '/km') + stat('Velocità', fmt(r.gps.speed * 3.6, 1), 'km/h') + stat('Cadenza', r.cadence ? fmt(r.cadence, 0) : '—', r.cadence ? 'p/min' : '', '', true) + '</div>' +
+        (r.gps.splits.length ? '<div class="card" style="margin-top:12px"><div class="row between"><h3>Parziali al km</h3><span class="dim">min</span></div>' + bars(r.gps.splits.map((x) => x / 60), { fmt: (v) => paceTxt(v * 60), label: 'Parziali' }) + '</div>' : '') +
+        '<p class="note" style="margin-top:14px">VO2max = (distanza − 504,9) ÷ 44,73. È una stima: dipende anche da percorso, vento e quanto ti sei spinto.</p>',
+      comment: (r) => 'Hai percorso ' + fmt(r.distance, 0) + ' metri: VO2max stimato ' + fmt(r.vo2, 1) + '. Rifallo ogni 4-6 settimane sullo stesso percorso.',
+    },
+  });
 
   const JOINTS = {
     caviglia: {
@@ -562,8 +659,9 @@
   }
   const pctTxt = (p) => (p >= 0 ? '+' : '−') + fmt(Math.abs(p), Math.abs(p) < 10 ? 1 : 0) + '%';
 
-  const GROUPS = ['Equilibrio', 'Salti', 'Corsa e core', 'Reazione e mobilità'];
-  const ROTATION = ['una-gamba', 'cmj', 'drop', 'corsa', 'hop', 'plank', 'in-piedi', 'mobilita', 'ripetuti', 'reazione'];
+  const GROUPS = ['Recupero', 'Equilibrio', 'Salti', 'Corsa e core', 'Riflessi, mobilità e swing'];
+  const PURPLE = ['Recupero', 'Riflessi, mobilità e swing']; // gruppi con il titolo viola
+  const ROTATION = ['una-gamba', 'cmj', 'drop', 'corsa', 'hop', 'swing', 'plank', 'in-piedi', 'mobilita', 'ripetuti', 'reazione', 'cooper'];
 
   /* ───────── Esecuzione dei test ───────── */
   function makeRunner(demo) {
@@ -606,7 +704,7 @@
           meter.hidden = true; stopBtn.hidden = true; S.beep(1300, 250);
           // dati simulati: piccola variazione casuale (±4% sui tempi) perché due prove non siano mai identiche
           const f = 0.96 + Math.random() * 0.08;
-          return simFn().map((q) => ({ t: q.t * f, x: q.x, y: q.y, z: q.z }));
+          return simFn().map((q) => Object.assign({}, q, { t: q.t * f }));
         }
         const rec = S.recorder(); rec.start();
         const t0 = performance.now(); let lastCheck = t0;
@@ -672,11 +770,76 @@
   }
 
   // ses: { sid, cond } quando il test fa parte di un confronto senza / con Elvy
+  async function hrvRun(ctx, o) {
+    const DUR = 60;
+    const remain = (t0) => Math.max(0, Math.ceil(DUR - (performance.now() - t0) / 1000));
+    if (o.src === 'fascia') {
+      const rr = []; const off = S.heart.on((x) => { if (x && x.rr) rr.push(...x.rr); });
+      try {
+        await ctx.prep(3, 'Battito e HRV', 'Resta fermo e respira normalmente per un minuto.');
+        const t0 = performance.now();
+        while (remain(t0) > 0) { ctx.set(null, remain(t0), S.heart.bpm ? '♥ ' + S.heart.bpm + ' battiti al minuto' : 'In attesa del battito…'); await ctx.wait(250); }
+      } finally { off(); }
+      const r = A.hrvFromRR(rr);
+      if (!r.ok) throw new Error('La fascia o l\'orologio non inviano gli intervalli tra i battiti (RR): per l\'HRV usa la fotocamera.');
+      return Object.assign(r, { src: 'fascia' });
+    }
+    if (ctx.demo) {
+      ctx.set('Battito e HRV', '♥', 'Dati simulati'); await ctx.wait(2500);
+      const r = A.ppg(SIM.ppgSignal(56 + Math.random() * 12, 35 + Math.random() * 30, 60, { seed: Date.now() % 97 }).frames);
+      return Object.assign(r, { src: 'camera', torch: true });
+    }
+    let cam;
+    try { cam = await S.ppgCamera(); } catch (e) { throw new Error(e && e.name === 'NotAllowedError' ? 'Serve il permesso alla fotocamera per misurare il battito.' : 'Non riesco ad aprire la fotocamera.'); }
+    const view = document.createElement('div'); view.className = 'ppg-view'; view.appendChild(cam.video);
+    ctx.el.insertBefore(view, ctx.el.querySelector('.count'));
+    try {
+      const tip = cam.torch ? 'Appoggia il polpastrello sulla fotocamera posteriore e sul flash.' : 'Appoggia il dito sulla fotocamera posteriore, vicino a una luce forte.';
+      ctx.set('Battito e HRV', '☝', tip); S.say(tip);
+      let tw = performance.now();
+      while (!cam.finger()) { await ctx.wait(200); if (performance.now() - tw > 30000) throw new Error('Non vedo il dito sulla fotocamera: coprila bene con il polpastrello' + (cam.torch ? ' e anche il flash.' : ', vicino a una luce forte.')); }
+      S.beep(880, 150); S.say('Bene. Resta fermo e respira normalmente.');
+      let start = cam.frames.length; let t0 = performance.now(); let lostAt = 0; let lastLive = 0;
+      while (remain(t0) > 0) {
+        await ctx.wait(200);
+        if (!cam.finger()) {
+          if (!lostAt) lostAt = performance.now();
+          ctx.set(null, '☝', 'Rimetti il dito sulla fotocamera');
+          if (performance.now() - lostAt > 2500) { // dito tolto: si ricomincia il minuto
+            while (!cam.finger()) await ctx.wait(200);
+            start = cam.frames.length; t0 = performance.now(); lostAt = 0; S.say('Ricominciamo');
+          }
+          continue;
+        }
+        lostAt = 0;
+        let live = '';
+        if (performance.now() - lastLive > 2000 && cam.frames.length - start > 300) {
+          lastLive = performance.now();
+          const q = A.ppg(cam.frames.slice(-450), { skip: 0 });
+          if (q.ok) live = '♥ ' + Math.round(q.hr) + ' battiti al minuto';
+          ctx.el.dataset.live = live || ctx.el.dataset.live || '';
+        }
+        ctx.set(null, remain(t0), ctx.el.dataset.live || 'Sto leggendo il battito…');
+      }
+      S.beep(1300, 300);
+      const r = A.ppg(cam.frames.slice(start));
+      if (!r.ok) throw new Error('Il segnale del battito non è chiaro: tieni il dito fermo, appoggiato senza premere troppo, e riprova.');
+      return Object.assign(r, { src: 'camera', torch: cam.torch });
+    } finally { cam.stop(); view.remove(); }
+  }
+
   async function startTest(id, opts, ses) {
     const test = TESTS[id];
     S.unlockAudio();
     let demo = false;
-    if (id !== 'reazione' || opts.mode === 'movimento') {
+    if (test.noMotion) {
+      if (opts.src === 'fascia') {
+        if (!S.heart.connected()) { renderTest(id, 'Collega prima la fascia cardio o l\'orologio dal Profilo (Orologio e fascia cardio).'); return; }
+      } else {
+        const cams = navigator.mediaDevices && navigator.mediaDevices.enumerateDevices ? (await navigator.mediaDevices.enumerateDevices().catch(() => [])).filter((d) => d.kind === 'videoinput') : [];
+        if (!cams.length) { demo = await askDemo(true, 'Non trovo la fotocamera. Usa l\'app dal telefono.'); if (!demo) return; }
+      }
+    } else if (id !== 'reazione' || opts.mode === 'movimento') {
       const perm = await S.permission();
       const p = perm ? await S.probe(900) : { ok: false };
       if (!p.ok) {
@@ -686,9 +849,20 @@
     }
     await S.keepAwake(true);
     const ctx = makeRunner(demo);
+    // battito dalla fascia o dall'orologio Bluetooth durante il test, se collegati
+    const hrs = []; const off = S.heart.connected() ? S.heart.on((x) => { if (x) hrs.push(x); }) : null;
     try {
       const res = await test.run(ctx, opts);
       ctx.close();
+      if (off) off();
+      if (hrs.length > 5 && id !== 'hrv') {
+        const b = hrs.map((x) => x.bpm).filter((v) => v > 30);
+        res.hrLive = { avg: A.mean(b), max: Math.max(...b), min: Math.min(...b), series: b.filter((_, i) => i % Math.max(1, Math.floor(b.length / 120)) === 0) };
+      }
+      if (id === 'hrv' && res.lnrmssd) {
+        const hist = results().filter((r) => r.test === 'hrv' && r.res && r.res.lnrmssd).slice(-14).map((r) => r.res.lnrmssd);
+        res.ready = A.readinessHRV(res.lnrmssd, hist);
+      }
       const cond = ses ? ses.cond : device.on ? 'con' : 'senza';
       const rec = { id: Date.now(), t: Date.now(), test: id, cond, where: cond === 'con' ? device.where || PROTO : null, variant: test.variant(opts), opts, demo, main: test.main(res), res, session: ses ? ses.sid : null };
       const all = results(); all.push(rec); saveResults(all);
@@ -696,15 +870,15 @@
       const to = ses ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
       if (location.hash === to) route(); else location.hash = to; // il passo 3 parte dalla stessa pagina del confronto
     } catch (e) {
-      ctx.close();
+      ctx.close(); if (off) off();
       if (e.message !== 'abort') { S.say('Non ci sono riuscito'); renderTest(id, e.message); }
     }
   }
   const spoken = (test, r) => test.metric.label + ' ' + fmt(r.main, test.metric.d).replace('.', '') + ' ' + (test.metric.unit === 'cm²' ? 'centimetri quadrati' : test.metric.unit === 'cm' ? 'centimetri' : test.metric.unit === 'ms' ? 'millisecondi' : test.metric.unit === 's' ? 'secondi' : test.metric.unit === '°' ? 'gradi' : test.metric.unit === '%' ? 'per cento' : '');
 
-  function askDemo(perm) {
+  function askDemo(perm, why) {
     return new Promise((resolve) => {
-      openSheet('<h2>Il sensore non risponde</h2><p class="muted" style="margin-top:10px">' + (perm ? 'Non arrivano dati dall\'accelerometro. Usa l\'app dal telefono (non dal computer).' : 'Serve il permesso ai sensori di movimento: consentilo quando il telefono lo chiede.') + '</p>' +
+      openSheet('<h2>Il sensore non risponde</h2><p class="muted" style="margin-top:10px">' + (why || (perm ? 'Non arrivano dati dall\'accelerometro. Usa l\'app dal telefono (non dal computer).' : 'Serve il permesso ai sensori di movimento: consentilo quando il telefono lo chiede.')) + '</p>' +
         '<p class="muted" style="margin-top:10px">Vuoi vedere come funziona il test con <b>dati simulati</b>? Il risultato viene segnato come prova.</p>' +
         '<div class="actions"><button class="btn" data-demo>Prova con dati simulati</button><button class="btn ghost" data-close>Annulla</button></div>');
       $sheet.querySelector('[data-demo]').onclick = () => { closeSheet(); resolve(true); };
@@ -775,6 +949,11 @@
         '<p class="muted" style="margin-top:6px">' + (rd && rd.first ? 'Fai il salto di controllo anche nei prossimi giorni: dal terzo ti dico come sei messo rispetto al solito.' : 'Tre salti appena sveglio o prima dell\'allenamento: confrontati con la tua media e scopri se sei fresco o affaticato.') + '</p>' +
         (rd && rd.first ? '' : '<a class="btn small" style="margin-top:14px" href="#/test/cmj">Salto di controllo · 1 min</a>') + '</div>';
     }
+    // recupero di oggi dall'HRV (fotocamera o fascia)
+    const hv = all.filter((r) => r.test === 'hrv' && isToday(r.t)).slice(-1)[0];
+    const rec = hv ? '<a class="card" href="#/r/' + hv.id + '" style="display:block;color:#fff;margin-bottom:14px"><div class="row between"><span class="k">Recupero di oggi</span><span class="small dim">misura delle ' + timeShort(hv.t) + '</span></div>' +
+      '<div class="row" style="margin-top:14px;gap:18px">' + (hv.res.ready ? gauge(hv.res.ready.score) : '') + '<div><h2 style="font-size:21px">' + (hv.res.ready ? readyTxt(hv.res.ready.score) : 'Prima misure salvate') + '</h2><p class="muted" style="margin-top:8px"><b style="color:#fff;font-size:19px">' + fmt(hv.res.rmssd, 0) + '</b> ms HRV · <b style="color:#fff;font-size:19px">' + fmt(hv.res.hr, 0) + '</b> bpm a riposo</p></div></div></a>'
+      : '<div class="card" style="margin-bottom:14px"><span class="k">Recupero di oggi</span><h2 style="margin-top:10px;font-size:21px">Come hai recuperato?</h2><p class="muted" style="margin-top:6px">Un minuto con il dito sulla fotocamera, appena sveglio: battito e HRV ti dicono se oggi sei pronto.</p><a class="btn small" style="margin-top:14px" href="#/test/hrv">Misura il recupero · 1 min</a></div>';
     // consiglio: il test fatto meno di recente
     const lastT = (id) => { const r = lastOf(id); return r ? r.t : 0; };
     const sug = ROTATION.slice().sort((a, b) => lastT(a) - lastT(b))[0];
@@ -798,7 +977,7 @@
       (ot ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><h3 style="margin-top:6px">' + ot.full + '</h3><p class="small muted" style="margin-top:4px">Fatto senza Elvy. Ora applica Elvy e ripeti il test.</p><span class="btn small" style="margin-top:12px">Continua</span></a>' : '') +
       (lastS ? '<a class="card cmp-last" href="#/confronto/' + lastS.sid + '"><div class="row between"><div><div class="k">Ultimo confronto</div><h3 style="margin-top:6px">' + TESTS[lastS.test].full + '</h3><p class="small muted" style="margin-top:4px">' + fmt(lastS.s.main, TESTS[lastS.test].metric.d) + ' senza · ' + fmt(lastS.c.main, TESTS[lastS.test].metric.d) + ' con Elvy ' + TESTS[lastS.test].metric.unit + '</p></div>' +
         '<span class="delta ' + (lastS.good ? '' : lastS.good === false ? 'neg' : 'neu') + '">' + pctTxt(lastS.pct) + '</span></div></a>' : '') +
-      card +
+      rec + card +
       '<div class="card hero" style="margin-top:14px;padding:0;padding-right:18px"><img src="' + IMG.point + '" alt="" style="width:34%;max-width:150px;border-radius:0;align-self:stretch" /><div style="padding:18px 0 18px 0"><div class="k p">Oggi ti consiglio</div><h3 style="margin-top:8px;font-size:20px;line-height:1.25">' + st.full + ', ' + st.sub + '</h3>' +
       '<a class="btn small" style="margin-top:14px" href="#/test/' + sug + '">Senza e con Elvy · ' + (st.minutes * 2 + 1) + ' min</a></div></div>' +
       '<div class="row between sec"><h2>Ultimi risultati</h2><a href="#/test" style="font-weight:700">Tutti i test</a></div>' +
@@ -832,12 +1011,14 @@
     setTab('test');
     $app.innerHTML = BRAND + '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
       '<p class="muted">' + (device.on ? 'I test di adesso vengono segnati in automatico «con Elvy».' : 'Applica Elvy e tocca il pulsante: i test verranno segnati «con Elvy».') + '</p>' +
-      GROUPS.map((g, gi) => '<div class="k' + (gi === 3 ? ' p' : '') + ' sec">' + g + '</div><div class="tiles">' +
+      GROUPS.map((g) => '<div class="k' + (PURPLE.includes(g) ? ' p' : '') + ' sec">' + g + '</div><div class="tiles">' +
         Object.keys(TESTS).filter((k) => TESTS[k].group === g).map((k) => {
           const t = TESTS[k]; const l = lastOf(k);
           return '<a class="tile" href="#/test/' + k + '"><b>' + t.name + '</b><span>' + t.sub + '</span>' + (l ? '<em>' + fmt(l.main, t.metric.d) + ' ' + t.metric.unit + ' · ' + dateShort(l.t) + '</em>' : '') + '</a>';
         }).join('') + '</div>').join('') +
-      '<p class="note" style="margin-top:22px">Tutti i test usano l\'accelerometro del telefono. Per equilibrio, salti, corsa e plank il telefono va nella cintura Elvy, vicino al baricentro: le misure sono più ripetibili.</p>';
+      '<div class="k p sec">Video</div><div class="tiles"><a class="tile" href="#/video"><b>Video analisi</b><span>rallentatore e riconoscimento del corpo</span></a>' +
+      '<a class="tile" href="#/profilo"><b>Orologio e fascia</b><span>' + (S.heart.connected() ? '♥ ' + esc(S.heart.name()) + ' collegato' : 'battito durante i test') + '</span></a></div>' +
+      '<p class="note" style="margin-top:22px">I test usano accelerometro, giroscopio, fotocamera e GPS del telefono. Per equilibrio, salti, corsa e plank il telefono va nella cintura Elvy, vicino al baricentro: le misure sono più ripetibili.</p>';
     bindCommon();
   }
 
@@ -847,7 +1028,9 @@
     setTab('test');
     const o = Object.assign({}, t.defaults || {}, prefs[id] || {});
     const steps = id === 'mobilita' ? JOINTS[o.joint].steps : t.steps;
-    const place = t.place === 'belt' ? placeBox('belt', BELT_TEXT) : t.place === 'hand' ? placeBox('hand', 'Telefono <b>in mano</b>, davanti a te.') :
+    const place = t.place === 'belt' ? placeBox('belt', BELT_TEXT) : t.place === 'hand' ? placeBox('hand', id === 'swing' ? 'Telefono <b>ben stretto nella mano</b> che colpisce, o in una fascia sul polso.' : 'Telefono <b>in mano</b>, davanti a te.') :
+      t.place === 'finger' ? placeBox('finger', o.src === 'fascia' ? 'Fascia cardio o orologio collegati via <b>Bluetooth</b> (dal Profilo).' : 'Polpastrello dell\'indice <b>sulla fotocamera posteriore</b> e sul flash, senza premere.') :
+      t.place === 'gps' ? placeBox('gps', '<b>All\'aperto</b>, con il GPS attivo. Telefono in cintura o in mano.') :
       placeBox(o.joint === 'tronco' ? 'chest' : o.joint === 'spalla' ? 'hand' : 'leg', JOINTS[o.joint].place.replace(' {lato}', '').replace('{lato}', ''));
     const prev = results().filter((r) => r.test === id);
     const open = cmpOpen(); const mine = open && open.test === id;
@@ -896,6 +1079,7 @@
       '<div class="row" style="gap:8px;margin:-6px 0 12px">' + (r.cond === 'con' ? '<span class="tag con">con Elvy</span>' : '<span class="tag">senza Elvy</span>') + (r.demo ? '<span class="tag demo">dati simulati</span>' : '') + '<span class="small dim">' + esc(sub) + '</span></div>' +
       (['una-gamba', 'in-piedi', 'hop', 'mobilita'].includes(r.test) ? '' : hero + '<div style="height:12px"></div>') +
       t.render(r.res) +
+      (r.res.hrLive ? '<div class="card" style="margin-top:12px"><div class="row between"><h3>Battito durante il test</h3><span class="dim">fascia/orologio</span></div><div class="grid3" style="margin-top:10px">' + stat('Media', fmt(r.res.hrLive.avg, 0), 'bpm') + stat('Massimo', fmt(r.res.hrLive.max, 0), 'bpm') + stat('Minimo', fmt(r.res.hrLive.min, 0), 'bpm', '', true) + '</div>' + sparkline(r.res.hrLive.series) + '</div>' : '') +
       '<div style="margin-top:18px">' + talk(r.test === 'cmj' ? IMG.jump : IMG.ok, cap(spoken(t, r).trim()) + '. ' + t.comment(r.res), isToday(r.t) && Date.now() - r.t < 60000) + '</div>' +
       '<div class="actions">' + (r.session ? '<a class="btn" href="#/confronto/' + r.session + '">Torna al confronto</a>' : '<button class="btn" id="again">Confronto senza e con Elvy</button>') +
       '<a class="btn ghost" href="#/progressi/' + r.test + '">Vedi i progressi</a></div>';
@@ -988,7 +1172,7 @@
         const t = TESTS[k]; const list = all.filter((r) => r.test === k);
         const c = list.filter((r) => r.cond === 'con'); const s = list.filter((r) => r.cond !== 'con');
         const ks = sessions(k); const avg = ks.length ? A.mean(ks.map((x) => x.pct)) : null; const ae = avg != null ? effect(t, 100, 100 + avg) : null;
-        return '<a class="card" href="#/progressi/' + k + '" style="display:block;color:#fff;margin-bottom:12px"><div class="row between"><div><div class="k' + (GROUPS.indexOf(t.group) === 3 ? ' p' : '') + '">' + t.group + '</div><h3 style="margin-top:4px">' + t.full + '</h3></div><div style="text-align:right"><div class="big" style="font-size:30px">' + fmt(list[list.length - 1].main, t.metric.d) + '</div><div class="small dim">' + t.metric.unit + '</div></div></div>' +
+        return '<a class="card" href="#/progressi/' + k + '" style="display:block;color:#fff;margin-bottom:12px"><div class="row between"><div><div class="k' + (PURPLE.includes(t.group) ? ' p' : '') + '">' + t.group + '</div><h3 style="margin-top:4px">' + t.full + '</h3></div><div style="text-align:right"><div class="big" style="font-size:30px">' + fmt(list[list.length - 1].main, t.metric.d) + '</div><div class="small dim">' + t.metric.unit + '</div></div></div>' +
           '<div class="small muted" style="margin-top:8px">' + list.length + ' prove · senza Elvy ' + (s.length ? fmt(A.mean(s.map((r) => r.main)), t.metric.d) : '—') + ' · con Elvy ' + (c.length ? fmt(A.mean(c.map((r) => r.main)), t.metric.d) : '—') + '</div>' +
           (ks.length ? '<div class="row between" style="margin-top:10px"><span class="small">' + ks.length + (ks.length === 1 ? ' confronto' : ' confronti') + ' · effetto medio di Elvy</span><span class="delta ' + (ae.good ? '' : ae.good === false ? 'neg' : 'neu') + '" style="margin-top:0">' + pctTxt(avg) + '</span></div>' : '') + '</a>';
       }).join('') : '<div class="actions"><a class="btn" href="#/test">Scegli un test</a></div>');
@@ -1045,6 +1229,12 @@
       '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired(), 'front') + '</div>' +
       '<div class="row between" style="margin-top:14px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div>' +
       '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
+      '<div class="card" style="margin-top:12px" id="watch"><div class="row" style="gap:10px"><span class="watch-ico">' + ICON.watch + '</span><h3>Orologio e fascia cardio</h3></div>' +
+      (S.heart.supported()
+        ? '<p class="small muted" style="margin-top:8px">' + (S.heart.connected() ? '<b style="color:var(--teal-l)">♥ ' + esc(S.heart.name()) + '</b> collegato' + (S.heart.bpm ? ' · <span id="hr-live">' + S.heart.bpm + '</span> bpm' : '') : 'Collega via Bluetooth una fascia cardio (Polar, Garmin, Wahoo…) o un orologio con la «trasmissione del battito» attiva (Garmin, Polar, Coros, Suunto, Amazfit). Durante i test registro il battito.') + '</p>' +
+          '<div class="actions"><button class="btn ' + (S.heart.connected() ? 'ghost' : '') + '" id="p-hr">' + (S.heart.connected() ? 'Scollega' : 'Collega via Bluetooth') + '</button></div><p class="err" id="p-hr-msg"></p>'
+        : '<p class="small muted" style="margin-top:8px">' + (S.isIOS ? 'Su iPhone il collegamento con <b>Apple Watch</b> (battito, HRV e GPS dell\'orologio da Apple Salute) arriva con l\'app Elvy per App Store.' : 'Per collegare una fascia o un orologio via Bluetooth apri Elvy con <b>Chrome</b>. Il collegamento con Wear OS e Health Connect arriva con l\'app Elvy per Google Play.') + '</p>') +
+      '</div>' +
       '<div class="card" style="margin-top:12px"><h3>I tuoi dati</h3><p class="small muted" style="margin-top:6px">' + n + ' prove salvate solo su questo telefono.</p>' +
       '<div class="actions"><button class="btn ghost" id="p-csv"' + (n ? '' : ' disabled') + '>Esporta in CSV (Excel)</button><button class="btn danger" id="p-del"' + (n ? '' : ' disabled') + '>Cancella tutti i risultati</button></div></div>' +
       '<p class="note" style="margin-top:18px">Elvy · by Equistasi. Le misure sono stime fatte con i sensori dello smartphone, utili per l\'allenamento: non hanno valore clinico e non sostituiscono la valutazione di medici, fisioterapisti o preparatori. L\'eventuale beneficio di Equistasi varia da persona a persona.</p>' +
@@ -1059,6 +1249,12 @@
       document.getElementById('p-msg').textContent = 'Salvato.';
     };
     document.getElementById('p-csv').onclick = exportCsv;
+    const hb = document.getElementById('p-hr');
+    if (hb) hb.onclick = async () => {
+      const msg = document.getElementById('p-hr-msg');
+      if (S.heart.connected()) { S.heart.disconnect(); renderProfile(); return; }
+      try { await S.heart.connect(); renderProfile(); } catch (e) { msg.textContent = e && e.name === 'NotFoundError' ? '' : 'Collegamento non riuscito: accendi il Bluetooth e la trasmissione del battito sull\'orologio, poi riprova.'; }
+    };
     // tocca il dispositivo per girarlo e vedere il retro
     const dv = document.getElementById('dev'); if (dv) dv.onclick = () => dv.classList.toggle('turned');
     document.getElementById('p-unpair').onclick = () => { if (confirm('Scollegare il dispositivo da questa app? Per usarla di nuovo dovrai abbinarlo ancora. I risultati restano salvati.')) { window.ElvyGate.unpair(); route(); } };
@@ -1089,6 +1285,7 @@
       case 'test': return parts[1] ? renderTest(parts[1]) : renderTests();
       case 'r': return renderResult(parts[1]);
       case 'confronto': return renderCompare(parts[1]);
+      case 'video': setTab('test'); return window.ElvyVideo ? window.ElvyVideo.render($app, { backBtn, talk, bindCommon, results, saveResults, device, PROTO, fmt }) : renderTests();
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
       case 'profilo': return renderProfile();
       default: return renderOggi();

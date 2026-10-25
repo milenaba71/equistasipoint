@@ -117,3 +117,49 @@ test('reazione: inizio del movimento dopo lo stimolo', () => {
   near(t - 3000, 250, 25, 'ms');
   assert.strictEqual(A.movedBefore(s, 2000, 3000), false);
 });
+
+test('battito dalla fotocamera: frequenza e RMSSD', () => {
+  for (const [hr, rmssd] of [[58, 60], [72, 35], [95, 15]]) {
+    const { frames, rr } = S.ppgSignal(hr, rmssd, 60, { seed: hr });
+    const r = A.ppg(frames);
+    assert.ok(r.ok, JSON.stringify(r).slice(0, 200));
+    const truth = A.hrvFromRR(rr.slice(3, -3));
+    near(r.hr, truth.hr, 2, 'battiti/min');
+    near(r.rmssd, truth.rmssd, Math.max(6, truth.rmssd * 0.25), 'RMSSD');
+    assert.ok(r.quality > 0.85, 'qualità ' + r.quality);
+  }
+});
+
+test('battito: nessun dito sulla fotocamera = nessun risultato', () => {
+  const r = S.rng(3); const frames = [];
+  for (let t = 0; t < 30000; t += 33) frames.push({ t, v: 120 + 6 * (r() - 0.5) });
+  assert.strictEqual(A.ppg(frames).ok, false);
+});
+
+test('recupero dall\'HRV rispetto alla media', () => {
+  const hist = [4.0, 4.1, 3.9, 4.05, 4.0];
+  assert.ok(A.readinessHRV(4.3, hist).score > 85);
+  assert.ok(A.readinessHRV(3.6, hist).score < 50);
+  assert.strictEqual(A.readinessHRV(4, [4]), null);
+});
+
+test('swing: velocità di rotazione di picco e velocità della punta', () => {
+  const r = A.swings(S.swingSignal([900, 1200, 1050]), { lever: 1 });
+  assert.ok(r.ok);
+  assert.strictEqual(r.swings.length, 3);
+  near(r.best, 1200 * Math.hypot(0.3, 0.2, 0.93), 40, '°/s');
+  near(r.bestKmh, (r.best * Math.PI / 180) * 3.6, 0.5, 'km/h');
+});
+
+test('giroscopio: senza dati restituisce null', () => {
+  assert.strictEqual(A.gyroRms([{ t: 0, x: 0, y: 0, z: 9.8 }]), null);
+});
+
+test('GPS: distanza, passo e salti scartati', () => {
+  const r = A.track(S.gpsTrack(3.5, 600, { seed: 4, jumps: true }));
+  assert.ok(r.ok);
+  near(r.distance, 3.5 * 600, 3.5 * 600 * 0.05, 'metri');
+  near(r.speed, 3.5, 0.2, 'm/s');
+  assert.ok(r.splits.length === 2, 'parziali ' + r.splits.length);
+  near(A.cooperVO2(2800), 51.3, 0.2, 'VO2max');
+});
