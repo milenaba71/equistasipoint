@@ -208,6 +208,10 @@
 
   // Salva (scarica il file) o condividi (WhatsApp, Mail, File… se il telefono lo permette)
   async function deliver(blob, name, how) {
+    // nell'app per iPhone e Android: foglio di condivisione nativo (anche per salvare)
+    if (window.ElvyNative && window.ElvyNative.sharePdf) {
+      try { if (await window.ElvyNative.sharePdf(blob, name)) return 'share'; } catch (e) { if (/cancel/i.test(String(e && e.message))) return null; }
+    }
     const file = typeof File === 'function' ? new File([blob], name, { type: 'application/pdf' }) : null;
     if (how === 'share' && file && navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], title: 'Report Elvy', text: 'Il mio report di allenamento Elvy' }); return 'share'; } catch (e) { if (e && e.name === 'AbortError') return null; }

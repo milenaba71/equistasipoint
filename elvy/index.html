@@ -39,12 +39,13 @@
   <script src="js/gate.js?v=8"></script>
   <script src="js/analysis.js?v=2"></script>
   <script src="js/sim.js?v=2"></script>
-  <script src="js/sensors.js?v=4"></script>
+  <script src="js/native.js?v=1"></script>
+  <script src="js/sensors.js?v=5"></script>
   <script src="js/video.js?v=1"></script>
-  <script src="js/report.js?v=1"></script>
+  <script src="js/report.js?v=2"></script>
   <script src="js/app.js?v=14"></script>
   <script>
-    if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js', { scope: './' });
+    if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.Capacitor) navigator.serviceWorker.register('sw.js', { scope: './' });
   </script>
 </body>
 </html>

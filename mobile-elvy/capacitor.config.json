@@ -1,0 +1,14 @@
+{
+  "appId": "com.equistasi.elvy",
+  "appName": "Elvy",
+  "webDir": "www",
+  "backgroundColor": "#424244",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#424244",
+      "showSpinner": false
+    }
+  }
+}
