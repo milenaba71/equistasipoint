@@ -18,8 +18,17 @@ SB_URL = os.environ["SUPABASE_URL"].rstrip("/")
 SB_KEY = os.environ["SUPABASE_SECRET_KEY"].strip()
 
 
+def text(v):
+    # i campi codice a barre (anche nei lookup) arrivano come {"text": "..."}
+    if isinstance(v, dict):
+        return str(v.get("text", ""))
+    if isinstance(v, list):
+        return ",".join(text(x) for x in v)
+    return str(v or "")
+
+
 def norm(s):
-    return re.sub(r"[^A-Z0-9-]", "", str(s or "").upper())
+    return re.sub(r"[^A-Z0-9-]", "", text(s).upper())
 
 
 def airtable(table, fields):
@@ -63,12 +72,10 @@ def supabase(method, path, body=None, prefer=None):
 # 1) seriali collegati ai kit
 valid = set()
 for r in airtable(T_KIT, ["Abbinamento seriali (testo)"]):
-    v = r.get("fields", {}).get("Abbinamento seriali (testo)")
-    for part in (v if isinstance(v, list) else [v or ""]):
-        for s in str(part).split(","):
-            s = norm(s)
-            if len(s) >= 5:
-                valid.add(s)
+    for s in text(r.get("fields", {}).get("Abbinamento seriali (testo)")).split(","):
+        s = norm(s)
+        if len(s) >= 5:
+            valid.add(s)
 print("Seriali collegati ai kit:", len(valid))
 
 # 2) tipologia di ogni seriale
@@ -102,7 +109,7 @@ for r in sorted(airtable(T_CAL, ["NOTE", "data calibrazione", "data prossima cal
     nxt = str(f.get("data prossima calibrazione", ""))[:10]
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", nxt):
         continue
-    for tok in re.split(r"[^A-Za-z0-9-]+", str(f.get("NOTE", "")).upper()):
+    for tok in re.split(r"[^A-Za-z0-9-]+", text(f.get("NOTE")).upper()):
         if len(tok) >= 8:
             cal[tok] = nxt  # ordinate per data: resta la più recente
 print("Seriali con calibrazione:", len(cal))
