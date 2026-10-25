@@ -1272,13 +1272,12 @@
       talk(IMG.point, 'Qui trovi come si applica Elvy con il cerotto, la mappa dei punti per lo sport e i protocolli. Guarda il video prima del primo confronto!', true) +
       '<h2 class="sec">Video tutorial</h2><div id="gd-videos"><div class="card"><p class="small muted">Caricamento dei video…</p></div></div>' +
       '<h2 class="sec">Come si applica</h2><div class="card guide-steps">' +
-      '<img src="img/cerotto.jpg" alt="Cerotto trasparente e dispositivi" class="guide-photo" />' +
-      '<ol class="steps" style="margin-top:14px"><li><b>Pelle pulita e asciutta</b>, senza creme né oli.</li>' +
-      '<li>Appoggia il dispositivo Elvy sul punto, <b>a contatto con la pelle</b>.</li>' +
-      '<li>Prendi il <b>cerotto trasparente</b> in dotazione, togli la pellicola centrale e mettilo sopra il dispositivo.</li>' +
-      '<li>Togli le linguette laterali e premi bene i bordi: il cerotto deve aderire senza pieghe.</li>' +
-      '<li>Per toglierlo solleva piano un bordo del cerotto, tenendo ferma la pelle.</li></ol>' +
-      '<img src="img/cerotto-dispositivo.jpg" alt="Dispositivo sul cerotto" class="guide-photo" style="margin-top:6px" /></div>' +
+      '<p class="small muted">Pelle <b style="color:#fff">pulita e asciutta</b>, senza creme né oli. Poi, per ogni punto:</p>' +
+      [['img/elvy-pelle.jpg', 'Appoggia Elvy', 'Metti il dispositivo Elvy sul punto, a contatto con la pelle.'],
+        ['img/elvy-cerotto.jpg', 'Copri con il cerotto', 'Togli la pellicola centrale del cerotto trasparente in dotazione e mettilo sopra Elvy.'],
+        ['img/elvy-premi.jpg', 'Premi i bordi', 'Togli le linguette laterali e premi bene i bordi, senza pieghe.']]
+        .map((x, i) => '<div class="g-step"><div class="g-img"><img src="' + x[0] + '" alt="" loading="lazy" /><i>' + (i + 1) + '</i></div><div><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>').join('') +
+      '<p class="small muted" style="margin-top:12px">Per toglierlo solleva piano un bordo del cerotto, tenendo ferma la pelle.</p></div>' +
       '<h2 class="sec">Mappatura Sport</h2><div class="card map-card"><div class="map-wrap"><img src="img/mappa-sport.png" alt="Punti di applicazione per lo sport: C7 e polpacci" /></div>' +
       '<ol class="map-legend"><li><i>1</i><div><b>C7 · settima vertebra cervicale</b><span>Alla base del collo: è la vertebra che sporge di più quando pieghi la testa in avanti.</span></div></li>' +
       '<li><i>2·3</i><div><b>Tricipite della sura · polpacci</b><span>Uno per gamba, nella parte bassa del polpaccio, sul soleo, sopra il tendine d\'Achille.</span></div></li></ol>' +

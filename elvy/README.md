@@ -67,7 +67,7 @@ Come Equistasi Point, un seriale funziona su **un solo telefono o computer alla 
 
 Nuova scheda **Guida** nella barra in basso:
 - **Video tutorial**: dalla tabella Airtable *Videos* (base Equistasi App), letti con il webhook Make di Equistasi Point (`videosUrl`); compaiono quelli con **«Elvy»** nel campo *Profili app* (va aggiunta l'opzione «Elvy» al campo). YouTube, Vimeo, Bunny Stream o file video.
-- **Come si applica** con il cerotto trasparente, con le foto.
+- **Come si applica** con il cerotto trasparente, in tre illustrazioni con il dispositivo Elvy (`img/elvy-pelle.jpg`, `elvy-cerotto.jpg`, `elvy-premi.jpg`).
 - **Mappatura Sport** (`img/mappa-sport.png`): C7 e tricipite della sura (polpacci, sul soleo sopra il tendine d'Achille), con i tempi del protocollo Sport (primo giorno 1–2 ore, massimo 4 ore al giorno, 5 giorni a settimana) e quando togliere i dispositivi.
 - **Protocolli**: i PDF della tabella *PDF_files* con «Elvy» in *Profili app*; finché non ci sono, «Protocollo Sport Elvy – in preparazione».
 
