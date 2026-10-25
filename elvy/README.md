@@ -10,7 +10,7 @@ Il logo **elvy** (e verde, lvy argento, come sulla scatola) è in `img/logo-elvy
 
 ## Accesso con il numero di serie
 
-Alla prima apertura c'è la schermata **Attiva Elvy** con il dispositivo disegnato come l'etichetta reale (logo Elvy a sinistra, codice a barre, seriale e CE a destra).
+Alla prima apertura c'è la schermata **Attiva Elvy** con il **retro** del dispositivo disegnato (codice a barre, seriale e CE). Quando il dispositivo è abbinato il disegno **gira in 3D** e mostra il fronte con il logo Elvy, con un riflesso che lo attraversa, e sotto compare il numero di serie. Nel Profilo si vede il fronte: toccandolo gira e mostra il retro.
 
 - Toccando il codice a barre disegnato si apre la fotocamera **dentro il disegno** (`../js/scan.js`, lo stesso lettore di Equistasi Point): legge il codice a barre e, se è rovinato, i **caratteri stampati, lettere e numeri** (es. `EQX25001801`), oltre ai seriali di sole cifre (`20…`, 11 cifre). Un seriale letto vale solo quando esce uguale due volte; gli scambi tipici (O/0, I/1, S/5, B/8) vengono corretti e la sigla `EQX` viene riconosciuta anche con una lettera letta male.
 - L'abbinamento si apre **a tutto schermo, in stile Apple Watch** (`../js/pair.js` con i colori Elvy, `css/pair.css`): cerchio con la fotocamera, nuvola di particelle verde acqua e viola, anello che si chiude, seriale che si accende carattere per carattere, lampo, ✓ e suono di conferma. Con «riduci movimento» attivo sul telefono la lettura resta dentro il disegno.

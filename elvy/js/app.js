@@ -823,7 +823,7 @@
       '<label class="check"><input type="checkbox" id="p-voice"' + (profile.voice ? ' checked' : '') + ' /><span>Guida vocale durante i test</span></label>' +
       '<label class="check"><input type="checkbox" id="p-flip"' + (profile.flip ? ' checked' : '') + ' /><span>Corsa: inverti destra e sinistra (se il telefono è girato al contrario in cintura)</span></label>' +
       '<div class="actions"><button class="btn" id="p-save">Salva</button></div><p class="small" id="p-msg" style="color:var(--teal-l);margin-top:8px"></p></div>' +
-      '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired()) + '</div>' +
+      '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired(), 'front') + '</div>' +
       '<div class="row between" style="margin-top:14px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div>' +
       '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
       '<div class="card" style="margin-top:12px"><h3>I tuoi dati</h3><p class="small muted" style="margin-top:6px">' + n + ' prove salvate solo su questo telefono.</p>' +
@@ -840,6 +840,8 @@
       document.getElementById('p-msg').textContent = 'Salvato.';
     };
     document.getElementById('p-csv').onclick = exportCsv;
+    // tocca il dispositivo per girarlo e vedere il retro
+    const dv = document.getElementById('dev'); if (dv) dv.onclick = () => dv.classList.toggle('turned');
     document.getElementById('p-unpair').onclick = () => { if (confirm('Scollegare il dispositivo da questa app? Per usarla di nuovo dovrai abbinarlo ancora. I risultati restano salvati.')) { window.ElvyGate.unpair(); route(); } };
     document.getElementById('p-del').onclick = () => { if (confirm('Cancellare tutti i risultati dei test? Non si può annullare.')) { saveResults([]); renderProfile(); } };
     bindCommon();

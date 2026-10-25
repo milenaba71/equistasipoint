@@ -35,17 +35,23 @@
   const READ_TIMEOUT = 25000;
   const DOTS = '• • • • • • • • • • •';
 
-  // Il dispositivo come l'etichetta reale: a sinistra il logo Elvy, a destra codice a barre, seriale e CE
-  function deviceHtml(sn) {
-    return '<div class="dev" id="dev">' +
-      '<div class="dev-front" aria-hidden="true"><div class="dev-logo"><svg class="dev-waves" viewBox="0 0 120 50" aria-hidden="true">' +
+  // Il dispositivo in 3D: si vede il retro (codice a barre, seriale, CE); quando è abbinato gira e mostra
+  // il fronte con il logo Elvy, con il numero di serie sotto.
+  // mode: 'back' = retro da toccare per leggere il codice · 'flip' = retro che gira sul fronte · 'front' = fronte
+  function deviceHtml(sn, mode) {
+    mode = mode || (sn ? 'front' : 'back');
+    const back = '<div class="dev-face dev-back">' +
+      (mode === 'back' ? '<button type="button" class="dev-win" id="g-scan" aria-label="Inquadra il codice a barre del dispositivo"><span class="dev-idle">' + BARS + '<span id="g-win">' + IDLE + '</span></span></button>'
+        : '<div class="dev-win done">' + BARS + '</div>') +
+      '<span class="dev-row"><span class="dev-sn" id="g-sn">' + (sn ? esc(sn) : DOTS) + '</span><span class="dev-ce" aria-hidden="true">CE</span></span></div>';
+    const front = '<div class="dev-face dev-front" aria-hidden="true"><div class="dev-logo"><svg class="dev-waves" viewBox="0 0 120 50" aria-hidden="true">' +
       Array.from({ length: 9 }, (_, i) => '<path d="M0 ' + (18 + i * 1.6) + ' C30 ' + (6 + i * 3) + ', 60 ' + (40 - i * 3) + ', 120 ' + (22 + i) + '" />').join('') +
-      '</svg><img src="img/logo-e.png" alt="" /><span>Elvy</span></div></div>' +
-      '<div class="dev-back">' +
-      (sn ? '<div class="dev-win done">' + BARS + '</div>' :
-        '<button type="button" class="dev-win" id="g-scan" aria-label="Inquadra il codice a barre del dispositivo"><span class="dev-idle">' + BARS + '<span id="g-win">' + IDLE + '</span></span></button>') +
-      '<span class="dev-row"><span class="dev-sn" id="g-sn">' + (sn ? esc(sn) : DOTS) + '</span><span class="dev-ce" aria-hidden="true">CE</span></span></div></div>';
+      '</svg><img src="img/logo-e.png" alt="" /><span>Elvy</span></div><i class="dev-shine"></i></div>';
+    return '<div class="dev3d is-' + mode + '" id="dev"><div class="dev-card">' + back + front + '</div></div>' +
+      (sn ? '<div class="dev-under"><span>Numero di serie</span><b>' + esc(sn) + '</b></div>' : '');
   }
+  // Fa girare il dispositivo disegnato (dopo che è comparso, così l'animazione parte)
+  function flip(el) { requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('go'))); }
 
   /* Schermata di attivazione. onDone(serial) quando il dispositivo è abbinato. */
   function show($app, onDone) {
@@ -160,14 +166,16 @@
   function showPaired($app, serial, onDone) {
     $app.innerHTML = '<div class="gate">' +
       '<img class="gate-mark" src="img/logo-elvy.png" alt="Elvy" />' +
-      '<h1 style="margin-bottom:20px">Elvy è abbinato!</h1>' + deviceHtml(serial) +
+      '<h1 style="margin-bottom:22px">Elvy è abbinato!</h1>' + deviceHtml(serial, 'flip') +
       '<div class="say" style="margin-top:22px"><img src="img/pollice.jpg" alt="" /><p>Perfetto! Il tuo dispositivo <b>' + esc(serial) + '</b> è collegato all\'app. Ora ti preparo i test.</p></div>' +
       '<div class="actions"><button class="btn" id="g-go" type="button">Iniziamo</button></div></div>';
+    flip(document.getElementById('dev'));
+    if (navigator.vibrate) setTimeout(() => navigator.vibrate(30), 650);
     document.getElementById('g-go').onclick = () => { document.body.classList.remove('gated'); onDone(serial); };
   }
 
   const paired = () => { const v = store.get(KEY, null); return v && v.serial ? v.serial : null; };
   function unpair() { try { localStorage.removeItem(KEY); } catch (e) { /* */ } }
 
-  window.ElvyGate = { show, paired, unpair, deviceHtml, _norm: norm };
+  window.ElvyGate = { show, paired, unpair, deviceHtml, flip, _norm: norm };
 })();
