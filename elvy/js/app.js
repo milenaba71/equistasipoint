@@ -129,10 +129,10 @@
     return '<ol class="stepper">' + st.map((x, i) => '<li class="' + (i < done ? 'done' : i === done ? 'now' : '') + '"><i>' + (i < done ? '✓' : i + 1) + '</i><b>' + x[0] + '</b><span>' + x[1] + '</span></li>').join('') + '</ol>';
   }
   // Figura vista da dietro con i 3 punti del protocollo Sport: C7 e i due polpacci
-  const BODY_BACK = '<svg class="bodyback" viewBox="0 0 120 230" role="img" aria-label="Punti di applicazione: settima vertebra cervicale e polpacci">' +
+  const BODY_BACK = '<svg class="bodyback" viewBox="0 0 132 230" role="img" aria-label="Punti di applicazione: settima vertebra cervicale e polpacci">' +
     '<g fill="#5b5b61" stroke="#6d6d74" stroke-width="1.5"><circle cx="60" cy="22" r="15"/><path d="M38 44c6-6 38-6 44 0l8 52c1 6-3 9-7 9H37c-4 0-8-3-7-9z"/>' +
     '<path d="M30 50l-12 46c-1 4 5 6 7 2l14-40zM90 50l12 46c1 4-5 6-7 2L81 58z"/><path d="M40 104h19l-2 112c0 5-12 5-12 0zM61 104h19l-5 112c0 5-12 5-12 0z"/></g>' +
-    '<g class="dots"><circle cx="60" cy="42" r="6"/><circle cx="51" cy="168" r="6"/><circle cx="69" cy="168" r="6"/></g>' +
+    '<g class="dots">' + [[60, 42], [51, 168], [69, 168]].map(([x, y]) => '<circle class="halo" cx="' + x + '" cy="' + y + '" r="6"/><rect x="' + (x - 3.5) + '" y="' + (y - 2.75) + '" width="7" height="5.5" rx="1.5"/>').join('') + '</g>' +
     '<g class="lbl"><text x="74" y="38">C7</text><text x="80" y="172">polpacci</text></g></svg>';
   // Barre a coppie: per ogni confronto grigio = senza Elvy, verde = con Elvy
   function pairsChart(list, metric) {

@@ -295,8 +295,9 @@ body.running .by { display: none; }
 .apply { margin-top: 14px; }
 .apply-row { display: flex; gap: 14px; align-items: center; margin: 12px 0; }
 .apply-row ol.steps { flex: 1; }
-.bodyback { width: 104px; flex: none; }
-.bodyback .dots circle { fill: var(--teal-l); stroke: #fff; stroke-width: 2; animation: dot-pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.bodyback { width: 114px; flex: none; }
+.bodyback .dots rect { fill: #8a8682; stroke: var(--teal-l); stroke-width: 1.2; }
+.bodyback .dots .halo { fill: none; stroke: var(--teal-l); stroke-width: 1.2; opacity: .55; animation: dot-pulse 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
 .bodyback .lbl text { fill: var(--teal-l); font-size: 11px; font-weight: 800; font-family: var(--font); }
 @keyframes dot-pulse { 50% { transform: scale(1.35); } }
 .vs { margin-top: 2px; }
@@ -313,7 +314,7 @@ body.running .by { display: none; }
 .cmp-table td.up { color: var(--teal-l); font-weight: 800; text-align: right; }
 .cmp-table td.down { color: #F5B3AD; font-weight: 800; text-align: right; }
 .cmp-table td:last-child { text-align: right; font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .talk.speaking .talk-face img, .talk.speaking .talk-wave b, .bodyback .dots circle { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .talk.speaking .talk-face img, .talk.speaking .talk-wave b, .bodyback .dots .halo { animation: none; } }
 
 /* ───────── Battito con la fotocamera ───────── */
 .ppg-view { width: 120px; height: 120px; border-radius: 50%; overflow: hidden; margin: 0 auto 6px; box-shadow: 0 0 0 4px rgba(242,139,130,.5), 0 0 30px rgba(242,139,130,.5); animation: ppg-beat 1s ease-in-out infinite; }
