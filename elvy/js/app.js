@@ -882,8 +882,8 @@
       const cond = ses ? ses.cond : device.on ? 'con' : 'senza';
       const rec = { id: Date.now(), t: Date.now(), test: id, cond, where: cond === 'con' ? device.where || PROTO : null, variant: test.variant(opts), opts, demo, main: test.main(res), res, session: ses ? ses.sid : null };
       const all = results(); all.push(rec); saveResults(all);
-      if (ses && cond === 'con') store.set('elvy-cmp', null);
-      const to = ses ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
+      if (ses && ses.sid && cond === 'con') store.set('elvy-cmp', null);
+      const to = ses && ses.sid ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
       if (location.hash === to) route(); else location.hash = to; // il passo 3 parte dalla stessa pagina del confronto
     } catch (e) {
       ctx.close(); if (off) off();
@@ -983,6 +983,7 @@
     const long = device.on && minsSince(device.since) > 240;
     const line = long ? 'Hai Elvy addosso da più di 4 ore: il protocollo dice di toglierlo. Riposati e riprendiamo domani.'
       : ot ? 'Abbiamo un confronto a metà: ' + ot.full.toLowerCase() + '. Applica Elvy e facciamo il test con Elvy.'
+      : device.on ? 'Hai Elvy addosso: oggi ti propongo ' + st.full.toLowerCase() + ' con Elvy.'
       : !sess.length ? 'Facciamo il primo confronto? Lo stesso test prima senza Elvy e poi con Elvy: così vediamo se cambia qualcosa per te.'
       : 'Oggi ti propongo ' + st.full.toLowerCase() + ', senza e con Elvy. Ogni confronto rende più chiara la tua tendenza.';
     const autoSay = store.get('elvy-said', '') !== new Date().toDateString();
@@ -1052,22 +1053,24 @@
     const prev = results().filter((r) => r.test === id);
     const open = cmpOpen(); const mine = open && open.test === id;
     $app.innerHTML = '<div class="head">' + backBtn() + '<div><div class="k">' + t.group + '</div><h1>' + t.full + '</h1></div></div>' +
-      '<div class="stack">' + talk(t.group === 'Salti' ? IMG.jump : IMG.point, INTRO[id] + (mine ? ' Il test senza Elvy l\'hai già fatto: ora applica Elvy e continua.' : ' Facciamolo prima senza Elvy e poi con Elvy.'), true) +
+      '<div class="stack">' + talk(t.group === 'Salti' ? IMG.jump : IMG.point, INTRO[id] + (mine ? ' Il test senza Elvy l\'hai già fatto: ora applica Elvy e continua.' : device.on ? ' Hai Elvy addosso: fai il test <b>con Elvy</b> tutte le volte che vuoi.' : ' Puoi ripeterlo <b>senza Elvy</b> tutte le volte che vuoi, oppure fare il confronto: prima senza e poi con Elvy.'), true) +
       (mine ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><p class="small muted" style="margin-top:4px">Fatto senza Elvy alle ' + timeShort(open.t) + '.</p><span class="btn small" style="margin-top:12px">Continua il confronto</span></a>' : '') +
       (t.options.length ? '<div class="card stack">' + t.options.map((op) => '<div><div class="small muted" style="font-weight:700;margin-bottom:6px">' + op.label + '</div><div class="seg">' +
         Object.keys(op.values).map((v) => '<button type="button" data-opt="' + op.key + '" data-val="' + v + '" aria-pressed="' + (String(o[op.key]) === v) + '">' + op.values[v] + '</button>').join('') + '</div></div>').join('') + '</div>' : '') +
       place +
       '<div class="card"><h3 style="margin-bottom:12px">Come si fa</h3><ol class="steps">' + steps.map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
       '<p class="small muted">Dura circa ' + t.minutes + ' min. La voce ti guida: alza il volume.</p></div>' +
-      '<div class="card"><h3>Il confronto in 3 passi</h3>' + stepper(0) + '<p class="small muted">Stesso test, stesse condizioni: prima senza Elvy, poi applichi i dispositivi e lo ripeti. Alla fine vedi la differenza.</p></div>' +
+      (device.on ? '' : '<div class="card"><h3>Il confronto in 3 passi</h3>' + stepper(0) + '<p class="small muted">Stesso test, stesse condizioni: prima senza Elvy, poi applichi i dispositivi e lo ripeti. Alla fine vedi la differenza.</p></div>') +
       SAFE + '</div>' +
       (error ? '<p class="err" role="alert">' + esc(error) + '</p>' : '') +
-      '<div class="actions"><button class="btn" id="go-cmp">Inizia il confronto</button>' +
-      '<button class="btn ghost" id="go">Solo una prova ' + (device.on ? 'con Elvy' : 'senza Elvy') + '</button>' +
+      '<div class="actions">' + (device.on
+        ? '<button class="btn" data-run="con">Test con Elvy</button><button class="btn ghost" data-run="senza">Test senza Elvy</button>'
+        : '<button class="btn" data-run="senza">Test senza Elvy</button><button class="btn ghost" id="go-cmp">Confronto senza e con Elvy</button><button class="btn ghost" data-run="con">Test con Elvy</button>') +
       (prev.length ? '<a class="btn ghost" href="#/progressi/' + id + '">I tuoi progressi (' + prev.length + ')</a>' : '') + '</div>';
     $app.querySelectorAll('[data-opt]').forEach((b) => { b.onclick = () => { prefs[id] = Object.assign({}, prefs[id], { [b.dataset.opt]: b.dataset.val }); savePrefs(); renderTest(id); }; });
-    document.getElementById('go').onclick = () => startTest(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
-    document.getElementById('go-cmp').onclick = () => beginCompare(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
+    $app.querySelectorAll('[data-run]').forEach((b) => { b.onclick = () => runAs(id, b.dataset.run, Object.assign({}, t.defaults || {}, prefs[id] || {})); });
+    const cmp = document.getElementById('go-cmp');
+    if (cmp) cmp.onclick = () => beginCompare(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
     bindCommon();
   }
 
@@ -1098,16 +1101,32 @@
       t.render(r.res) +
       (r.res.hrLive ? '<div class="card" style="margin-top:12px"><div class="row between"><h3>Battito durante il test</h3><span class="dim">fascia/orologio</span></div><div class="grid3" style="margin-top:10px">' + stat('Media', fmt(r.res.hrLive.avg, 0), 'bpm') + stat('Massimo', fmt(r.res.hrLive.max, 0), 'bpm') + stat('Minimo', fmt(r.res.hrLive.min, 0), 'bpm', '', true) + '</div>' + sparkline(r.res.hrLive.series) + '</div>' : '') +
       '<div style="margin-top:18px">' + talk(r.test === 'cmj' ? IMG.jump : IMG.ok, cap(spoken(t, r).trim()) + '. ' + t.comment(r.res), isToday(r.t) && Date.now() - r.t < 60000) + '</div>' +
-      '<div class="actions">' + (r.session ? '<a class="btn" href="#/confronto/' + r.session + '">Torna al confronto</a>' : '<button class="btn" id="again">Confronto senza e con Elvy</button>') +
+      '<div class="actions">' + (r.session ? '<a class="btn" href="#/confronto/' + r.session + '">Torna al confronto</a>' : '<button class="btn" id="again">Ripeti ' + (r.cond === 'con' ? 'con Elvy' : 'senza Elvy') + '</button><a class="btn ghost" href="#/test/' + r.test + '">Altre prove e confronto</a>') +
       '<a class="btn ghost" href="#/progressi/' + r.test + '">Vedi i progressi</a></div>';
-    const ag = document.getElementById('again'); if (ag) ag.onclick = () => { location.hash = '#/test/' + r.test; };
+    const ag = document.getElementById('again'); if (ag) ag.onclick = () => runAs(r.test, r.cond === 'con' ? 'con' : 'senza', Object.assign({}, t.defaults || {}, r.opts || {}));
     bindCommon();
   }
 
-  // Passo 1: senza Elvy (se l'hai addosso, toglilo)
+  // Test singolo, ripetibile quante volte si vuole, segnato «con» o «senza Elvy».
+  // Si chiede conferma solo se la scelta è diversa da come risulta Elvy adesso.
+  function runAs(id, cond, opts) {
+    const go = () => startTest(id, opts, { sid: null, cond });
+    if ((cond === 'con') === !!device.on) return go();
+    openSheet(talk(IMG.point, cond === 'con' ? 'Test <b>con Elvy</b>: applica i dispositivi (C7 e polpacci), poi tocca Inizia e segui la mia voce.' : 'Test <b>senza Elvy</b>: togli i dispositivi, poi tocca Inizia e segui la mia voce.', true) +
+      '<div class="actions"><button class="btn" data-go>' + (cond === 'con' ? 'Ho applicato Elvy · Inizia' : 'Ho tolto Elvy · Inizia') + '</button><button class="btn ghost" data-close>Annulla</button></div>');
+    bindTalks($sheet);
+    $sheet.querySelector('[data-close]').onclick = closeSheet;
+    $sheet.querySelector('[data-go]').onclick = () => {
+      closeSheet();
+      if (cond === 'con') { device.on = true; device.since = Date.now(); device.where = device.where || PROTO; } else { device.on = false; device.since = null; }
+      saveDevice(); go();
+    };
+  }
+
+  // Passo 1 del confronto: senza Elvy
   function beginCompare(id, opts) {
     const t = TESTS[id];
-    openSheet(stepper(0) + talk(IMG.point, 'Passo uno: il test <b>senza Elvy</b>. ' + (device.on ? 'Prima togli i dispositivi Elvy che hai addosso. ' : 'Se hai addosso i dispositivi Elvy, toglili. ') + 'Poi tocca Inizia e segui la mia voce.', true) +
+    openSheet(stepper(0) + talk(IMG.point, 'Passo uno: il test <b>senza Elvy</b>. Tocca Inizia e segui la mia voce.', true) +
       '<div class="actions"><button class="btn" data-go>Inizia senza Elvy</button><button class="btn ghost" data-close>Annulla</button></div>');
     bindTalks($sheet);
     $sheet.querySelector('[data-close]').onclick = closeSheet;
