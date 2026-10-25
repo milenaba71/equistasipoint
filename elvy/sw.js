@@ -1,8 +1,8 @@
 // Elvy: cache per l'uso offline. Aumenta VERSION a ogni rilascio.
-const VERSION = 'elvy-v1';
+const VERSION = 'elvy-v2';
 const FILES = [
-  './', 'index.html', 'css/elvy.css', 'js/analysis.js', 'js/sim.js', 'js/sensors.js', 'js/app.js', 'manifest.webmanifest',
-  'img/icon-192.png', 'img/icon-512.png', 'img/wordmark.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg',
+  './', 'index.html', 'css/elvy.css', 'js/analysis.js', 'js/sim.js', 'js/sensors.js', 'js/app.js', 'js/gate.js', '../js/config.js', '../js/scan.js', 'manifest.webmanifest',
+  'img/icon-192.png', 'img/icon-512.png', 'img/wordmark.png', 'img/mascotte.jpg', 'img/pollice.jpg', 'img/punta.jpg', 'img/salta.jpg', 'img/logo-e.png',
 ];
 
 self.addEventListener('install', (e) => {

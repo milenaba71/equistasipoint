@@ -820,7 +820,9 @@
       '<label class="check"><input type="checkbox" id="p-voice"' + (profile.voice ? ' checked' : '') + ' /><span>Guida vocale durante i test</span></label>' +
       '<label class="check"><input type="checkbox" id="p-flip"' + (profile.flip ? ' checked' : '') + ' /><span>Corsa: inverti destra e sinistra (se il telefono è girato al contrario in cintura)</span></label>' +
       '<div class="actions"><button class="btn" id="p-save">Salva</button></div><p class="small" id="p-msg" style="color:var(--teal-l);margin-top:8px"></p></div>' +
-      '<div class="card" style="margin-top:12px"><h3>Elvy</h3><div class="row between" style="margin-top:10px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div></div>' +
+      '<div class="card" style="margin-top:12px"><h3>Il tuo dispositivo</h3><div style="margin-top:14px">' + window.ElvyGate.deviceHtml(window.ElvyGate.paired()) + '</div>' +
+      '<div class="row between" style="margin-top:14px"><span class="small muted">' + (device.on ? 'Applicato: ' + esc(device.where) + ' · da ' + durText(minsSince(device.since)) : 'Non applicato') + '</span>' + elvyPill() + '</div>' +
+      '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
       '<div class="card" style="margin-top:12px"><h3>I tuoi dati</h3><p class="small muted" style="margin-top:6px">' + n + ' prove salvate solo su questo telefono.</p>' +
       '<div class="actions"><button class="btn ghost" id="p-csv"' + (n ? '' : ' disabled') + '>Esporta in CSV (Excel)</button><button class="btn danger" id="p-del"' + (n ? '' : ' disabled') + '>Cancella tutti i risultati</button></div></div>' +
       '<p class="note" style="margin-top:18px">Elvy · by Equistasi. Le misure sono stime fatte con i sensori dello smartphone, utili per l\'allenamento: non hanno valore clinico e non sostituiscono la valutazione di medici, fisioterapisti o preparatori. L\'eventuale beneficio di Equistasi varia da persona a persona.</p>' +
@@ -835,6 +837,7 @@
       document.getElementById('p-msg').textContent = 'Salvato.';
     };
     document.getElementById('p-csv').onclick = exportCsv;
+    document.getElementById('p-unpair').onclick = () => { if (confirm('Scollegare il dispositivo da questa app? Per usarla di nuovo dovrai abbinarlo ancora. I risultati restano salvati.')) { window.ElvyGate.unpair(); route(); } };
     document.getElementById('p-del').onclick = () => { if (confirm('Cancellare tutti i risultati dei test? Non si può annullare.')) { saveResults([]); renderProfile(); } };
     bindCommon();
   }
@@ -854,6 +857,8 @@
   /* ───────── Navigazione ───────── */
   function route() {
     if (document.body.classList.contains('running')) return;
+    // prima di tutto il dispositivo: senza seriale abbinato si vede solo la schermata di attivazione
+    if (!window.ElvyGate.paired()) { setTab(''); window.ElvyGate.show($app, () => { location.hash = '#/oggi'; route(); }); return; }
     const parts = (location.hash.replace(/^#\/?/, '') || 'oggi').split('/');
     window.scrollTo(0, 0);
     switch (parts[0]) {

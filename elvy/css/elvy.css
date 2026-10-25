@@ -182,3 +182,47 @@ ul.hist button { border: 0; background: none; color: var(--dim); cursor: pointer
   .grid3 { grid-template-columns: 1fr 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ───────── Attivazione con il numero di serie ───────── */
+body.gated { padding-bottom: 0; }
+body.gated .tabbar { display: none; }
+.gate { text-align: center; padding-top: 10px; }
+.gate .field, .gate .err, .gate .btn { text-align: left; }
+.gate .btn { text-align: center; }
+.gate-mark { width: 120px; margin: 4px auto 14px; display: block; }
+.gate h1 { font-size: 30px; }
+.gate-lead { color: var(--muted); margin: 10px auto 22px; max-width: 420px; }
+.gate-or { color: var(--dim); font-size: 14px; margin: 22px 0 10px; }
+.gate-bar { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+
+/* Il dispositivo: etichetta con bordo rosso sottile, logo a sinistra e retro bianco a destra */
+.dev { display: grid; grid-template-columns: 1fr 1.05fr; aspect-ratio: 2.55; width: 100%; max-width: 480px; margin: 0 auto; border-radius: 18px; border: 2px solid #d9534f; overflow: hidden; background: #fff; box-shadow: 0 18px 40px rgba(0,0,0,.35); text-align: center; }
+.dev-front { background: linear-gradient(90deg, #8cc63f 0%, #e9f3dc 45%, #f4f4f8 55%, #8e86b5 100%); padding: 9%; display: flex; }
+.dev-logo { position: relative; flex: 1; background: #8a8580; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.dev-logo img { width: 34%; position: relative; filter: brightness(1.25); }
+.dev-logo span { position: relative; font-family: var(--head); font-weight: 500; color: #fff; font-size: clamp(18px, 6vw, 30px); line-height: 1; margin-top: 4%; }
+.dev-waves { position: absolute; left: 6%; top: 8%; width: 88%; height: 50%; fill: none; stroke: rgba(255,255,255,.55); stroke-width: .5; }
+.dev-back { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6% 6% 4%; color: #24285e; }
+.dev-win { position: relative; width: 100%; flex: 1; min-height: 0; border: 0; border-radius: 10px; background: #fff; color: #24285e; cursor: pointer; overflow: hidden; padding: 0; box-shadow: 0 0 0 2.5px var(--teal), 0 0 18px rgba(75,166,163,.6); animation: dev-pulse 2.2s ease-in-out infinite; }
+.dev-win.done { box-shadow: none; animation: none; cursor: default; display: flex; align-items: center; justify-content: center; }
+.dev-win svg { width: 88%; height: auto; display: block; margin: 0 auto; }
+.dev-win.done svg { height: 100%; width: 92%; }
+.dev-idle { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 6px; }
+.dev-idle svg { width: 80%; max-height: 52%; }
+.dev-idle span { font-weight: 800; font-size: clamp(10.5px, 3vw, 14px); line-height: 1.2; color: var(--ink); background: #d9f2f0; border-radius: 8px; padding: 4px 8px; }
+.dev-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; margin-top: 5%; }
+.dev-sn { font-family: var(--head); font-weight: 500; font-size: clamp(11px, 3.6vw, 19px); letter-spacing: .03em; white-space: nowrap; overflow: hidden; }
+.dev-ce { font-family: var(--head); font-weight: 700; font-size: clamp(13px, 4.2vw, 21px); color: #111; flex: none; }
+.dev.scanning .dev-win { animation: none; box-shadow: 0 0 0 2.5px var(--purple-l); }
+.dev.scanning .dev-idle { display: none; }
+.dev.read .dev-idle span { background: var(--purple-l); }
+.dev.paired .dev-win, .dev.paired .dev-win.done { box-shadow: 0 0 0 3px var(--teal); animation: dev-pop .5s cubic-bezier(.2,.9,.3,1.2); }
+.dev.paired .dev-idle span { background: var(--teal); }
+@keyframes dev-pulse { 0%, 100% { box-shadow: 0 0 0 2.5px var(--teal), 0 0 6px rgba(75,166,163,.4); } 50% { box-shadow: 0 0 0 2.5px var(--teal-l), 0 0 22px rgba(127,214,209,.8); } }
+@keyframes dev-pop { 0% { transform: scale(.9); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.scan-inline { position: absolute; inset: 0; }
+.scan-inline video, .scan-inline .scan-freeze { width: 100%; height: 100%; object-fit: cover; display: block; filter: brightness(.75); }
+.scan-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.scan-inline .scan-line { position: absolute; left: 6%; right: 6%; top: 50%; height: 2px; background: var(--teal-l); box-shadow: 0 0 8px var(--teal-l); animation: scan-line 1.6s ease-in-out infinite; }
+@keyframes scan-line { 0%, 100% { transform: translateY(-20px); } 50% { transform: translateY(20px); } }
+@media (prefers-reduced-motion: reduce) { .dev-win, .scan-inline .scan-line { animation: none; } }

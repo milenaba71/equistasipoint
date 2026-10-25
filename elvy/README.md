@@ -4,6 +4,17 @@ Web app (PWA) per lo sport: i test che uno sportivo vuole fare, misurati con l'*
 
 Online: `https://app.equistasi.com/elvy/` (stesso sito di Equistasi Point).
 
+## Accesso con il numero di serie
+
+Alla prima apertura c'è la schermata **Attiva Elvy** con il dispositivo disegnato come l'etichetta reale (logo Elvy a sinistra, codice a barre, seriale e CE a destra).
+
+- Toccando il codice a barre disegnato si apre la fotocamera **dentro il disegno** (`../js/scan.js`, lo stesso lettore di Equistasi Point): legge il codice a barre e, se è rovinato, i **caratteri stampati, lettere e numeri** (es. `EQX25001801`), oltre ai seriali di sole cifre (`20…`, 11 cifre). Un seriale letto vale solo quando esce uguale due volte; gli scambi tipici (O/0, I/1, S/5, B/8) vengono corretti e la sigla `EQX` viene riconosciuta anche con una lettera letta male.
+- In alternativa si scrive il seriale a mano.
+- La verifica usa lo stesso webhook Make di Equistasi Point (`../js/config.js` → `verifyUrl`), che cerca il seriale nella tabella Airtable **EQUITUTTO → Abbinamento Kit** (campo *Abbinamento seriali (testo)*). L'app riceve solo `{"valid": true/false}`: nessuna chiave Airtable nel codice.
+- Il seriale abbinato resta sul telefono (`elvy-serial`); dal Profilo si vede il dispositivo e lo si può scollegare.
+
+Codice: `js/gate.js`.
+
 ## I test
 
 | Gruppo | Test | Dove sta il telefono | Cosa misura |
@@ -45,6 +56,7 @@ Sono **stime per l'allenamento**, non misure cliniche: vanno confrontate sempre 
 | `js/analysis.js` | algoritmi sui segnali dell'accelerometro |
 | `js/sim.js` | simulatore di segnali (test automatici e modalità prova) |
 | `js/sensors.js` | accelerometro, voce, bip, schermo acceso |
+| `js/gate.js` | attivazione con il numero di serie e disegno del dispositivo |
 | `js/app.js` | test, schermate, salvataggio dei risultati (localStorage) |
 | `test/analysis.test.js` | test degli algoritmi su segnali simulati |
 | `sw.js`, `manifest.webmanifest` | installazione e uso offline |
@@ -60,7 +72,8 @@ I sensori di movimento funzionano solo in **https** (o su localhost) e su iPhone
 
 ## Prossimi passi
 
-- lettura NFC del dispositivo Elvy (app nativa con Capacitor, come `mobile/`) e del codice a barre (`js/scan.js` di Equistasi Point);
+- lettura NFC del dispositivo Elvy (app nativa con Capacitor, come `mobile/`);
+- distinguere in Airtable i dispositivi Elvy dagli altri Equistasi, se l'app deve accettare solo quelli;
 - HRV del mattino con il dito sulla fotocamera e postura con foto (già in Equistasi Point);
 - smartwatch come telecomando dei test;
 - validazione delle misure sul campo (es. pedana di forza, optojump) per tarare soglie e filtri.
