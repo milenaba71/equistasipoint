@@ -16,6 +16,11 @@
   const profile = Object.assign({ name: '', sport: '', mass: null, height: null, voice: true, mascotVoice: true, flip: false, welcomed: false }, store.get('elvy-profile', {}));
   const device = Object.assign({ on: false, since: null, where: null }, store.get('elvy-device', {}));
   const saveProfile = () => store.set('elvy-profile', profile);
+  // Bluetooth nel browser: c'è in Chrome/Edge su Android e computer, non su iPhone (limite di Apple per tutte le app web)
+  const BLUEFY = 'https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055';
+  const heartHelp = () => (S.isIOS
+    ? 'Su iPhone Safari e Chrome non possono usare il Bluetooth (è un limite di Apple per le app web). Per collegare una fascia cardio apri Elvy con l\'app gratuita <a href="' + BLUEFY + '" rel="noopener">Bluefy</a>, oppure misura il battito con la fotocamera.'
+    : 'Questo browser non può usare il Bluetooth: apri Elvy con <b>Chrome</b> (o Edge), oppure misura il battito con la fotocamera.');
   const saveDevice = () => store.set('elvy-device', device);
   const results = () => store.get('elvy-results', []);
   const saveResults = (all) => store.set('elvy-results', all.slice(-500));
@@ -850,6 +855,7 @@
     let demo = false;
     if (test.noMotion) {
       if (opts.src === 'fascia') {
+        if (!S.heart.supported()) { renderTest(id, heartHelp().replace(/<[^>]+>/g, '')); return; }
         if (!S.heart.connected()) { renderTest(id, 'Collega prima la fascia cardio o l\'orologio dal Profilo (Orologio e fascia cardio).'); return; }
       } else {
         const cams = navigator.mediaDevices && navigator.mediaDevices.enumerateDevices ? (await navigator.mediaDevices.enumerateDevices().catch(() => [])).filter((d) => d.kind === 'videoinput') : [];
@@ -1047,7 +1053,7 @@
     const o = Object.assign({}, t.defaults || {}, prefs[id] || {});
     const steps = id === 'mobilita' ? JOINTS[o.joint].steps : t.steps;
     const place = t.place === 'belt' ? placeBox('belt', BELT_TEXT) : t.place === 'hand' ? placeBox('hand', id === 'swing' ? 'Telefono <b>ben stretto nella mano</b> che colpisce, o in una fascia sul polso.' : 'Telefono <b>in mano</b>, davanti a te.') :
-      t.place === 'finger' ? placeBox('finger', o.src === 'fascia' ? 'Fascia cardio o orologio collegati via <b>Bluetooth</b> (dal Profilo).' : 'Polpastrello dell\'indice <b>sulla fotocamera posteriore</b> e sul flash, senza premere.') :
+      t.place === 'finger' ? placeBox('finger', o.src === 'fascia' ? (S.heart.supported() ? 'Fascia cardio o orologio collegati via <b>Bluetooth</b> (dal Profilo).' : heartHelp()) : 'Polpastrello dell\'indice <b>sulla fotocamera posteriore</b> e sul flash, senza premere.') :
       t.place === 'gps' ? placeBox('gps', '<b>All\'aperto</b>, con il GPS attivo. Telefono in cintura o in mano.') :
       placeBox(o.joint === 'tronco' ? 'chest' : o.joint === 'spalla' ? 'hand' : 'leg', JOINTS[o.joint].place.replace(' {lato}', '').replace('{lato}', ''));
     const prev = results().filter((r) => r.test === id);
@@ -1393,9 +1399,10 @@
       '<button class="btn danger small" id="p-unpair" style="margin-top:14px">Scollega il dispositivo</button></div>' +
       '<div class="card" style="margin-top:12px" id="watch"><div class="row" style="gap:10px"><span class="watch-ico">' + ICON.watch + '</span><h3>Orologio e fascia cardio</h3></div>' +
       (S.heart.supported()
-        ? '<p class="small muted" style="margin-top:8px">' + (S.heart.connected() ? '<b style="color:var(--teal-l)">♥ ' + esc(S.heart.name()) + '</b> collegato' + (S.heart.bpm ? ' · <span id="hr-live">' + S.heart.bpm + '</span> bpm' : '') : 'Collega via Bluetooth una fascia cardio (Polar, Garmin, Wahoo…) o un orologio con la «trasmissione del battito» attiva (Garmin, Polar, Coros, Suunto, Amazfit). Durante i test registro il battito.') + '</p>' +
+        ? '<p class="small muted" style="margin-top:8px">' + (S.heart.connected() ? '<b style="color:var(--teal-l)">♥ ' + esc(S.heart.name()) + '</b> collegato' + (S.heart.bpm ? ' · <span id="hr-live">' + S.heart.bpm + '</span> bpm' : '') : 'Collega via Bluetooth una fascia cardio (Polar, Garmin, Wahoo…) o un orologio con la «trasmissione del battito» attiva (Garmin, Polar, Coros, Suunto, Amazfit). Durante i test registro il battito. Apple Watch e la maggior parte degli smartwatch Wear OS non trasmettono il battito ad altre app.') + '</p>' +
           '<div class="actions"><button class="btn ' + (S.heart.connected() ? 'ghost' : '') + '" id="p-hr">' + (S.heart.connected() ? 'Scollega' : 'Collega via Bluetooth') + '</button></div><p class="err" id="p-hr-msg"></p>'
-        : '<p class="small muted" style="margin-top:8px">' + (S.isIOS ? 'Su iPhone il collegamento con <b>Apple Watch</b> (battito, HRV e GPS dell\'orologio da Apple Salute) arriva con l\'app Elvy per App Store.' : 'Per collegare una fascia o un orologio via Bluetooth apri Elvy con <b>Chrome</b>. Il collegamento con Wear OS e Health Connect arriva con l\'app Elvy per Google Play.') + '</p>') +
+        : '<p class="small muted" style="margin-top:8px">' + heartHelp() + '</p>' +
+          '<p class="note" style="margin-top:8px">' + (S.isIOS ? 'Apple Watch non trasmette il battito via Bluetooth ad altre app: il collegamento (battito, HRV e GPS da Apple Salute) arriverà con l\'app Elvy per App Store.' : 'Il collegamento con Wear OS e Health Connect arriverà con l\'app Elvy per Google Play.') + '</p>') +
       '</div>' +
       '<div class="card" style="margin-top:12px"><h3>I tuoi dati</h3><p class="small muted" style="margin-top:6px">' + n + ' prove salvate solo su questo telefono.</p>' +
       '<div class="actions"><a class="btn" href="#/report">Report in PDF</a><button class="btn ghost" id="p-csv"' + (n ? '' : ' disabled') + '>Esporta in CSV (Excel)</button><button class="btn danger" id="p-del"' + (n ? '' : ' disabled') + '>Cancella tutti i risultati</button></div></div>' +
@@ -1416,7 +1423,17 @@
     if (hb) hb.onclick = async () => {
       const msg = document.getElementById('p-hr-msg');
       if (S.heart.connected()) { S.heart.disconnect(); renderProfile(); return; }
-      try { await S.heart.connect(); renderProfile(); } catch (e) { msg.textContent = e && e.name === 'NotFoundError' ? '' : 'Collegamento non riuscito: accendi il Bluetooth e la trasmissione del battito sull\'orologio, poi riprova.'; }
+      hb.disabled = true; msg.textContent = '';
+      try { await S.heart.connect(); renderProfile(); } catch (e) {
+        hb.disabled = false;
+        const m = String((e && e.message) || '');
+        msg.textContent = e && e.name === 'NotFoundError' && /cancel/i.test(m) ? '' // finestra chiusa senza scegliere
+          : e && e.name === 'NotFoundError' ? 'Nessuna fascia trovata: accendi il Bluetooth del telefono, indossa la fascia (si attiva a contatto con la pelle) o avvia la «trasmissione del battito» sull\'orologio, poi riprova.'
+          : e && e.name === 'SecurityError' ? 'Il browser ha bloccato il Bluetooth: consenti l\'accesso a Bluetooth e Posizione per questo sito nelle impostazioni di Chrome.'
+          : e && e.name === 'NetworkError' && /spento/.test(m) ? 'Il Bluetooth del telefono è spento: accendilo e riprova.'
+          : e && e.name === 'NotSupportedError' ? 'Questo sensore non usa il servizio battito standard Bluetooth: non posso leggerlo.'
+          : 'Collegamento non riuscito (' + (m || (e && e.name) || 'errore') + '). Spegni e riaccendi il Bluetooth, allontana la fascia da altre app collegate (es. l\'app dell\'orologio) e riprova.';
+      }
     };
     // tocca il dispositivo per girarlo e vedere il retro
     const dv = document.getElementById('dev'); if (dv) dv.onclick = () => dv.classList.toggle('turned');

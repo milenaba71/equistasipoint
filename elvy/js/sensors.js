@@ -142,13 +142,16 @@
   }
 
   /* ───────── Fascia cardio o orologio via Bluetooth (servizio standard Heart Rate) ───────── */
-  // Funziona nel browser Chrome su Android e computer; su iPhone serve l'app nativa.
+  // Funziona in Chrome/Edge su Android e computer e nel browser Bluefy su iPhone (Safari non ha il Bluetooth web).
   const heart = {
     device: null, bpm: null, at: 0, subs: [],
     supported: () => !!(navigator.bluetooth && navigator.bluetooth.requestDevice),
     name() { return this.device ? this.device.name || 'Sensore cardio' : null; },
     connected() { return !!(this.device && this.device.gatt && this.device.gatt.connected); },
     async connect() {
+      if (navigator.bluetooth.getAvailability && !(await navigator.bluetooth.getAvailability().catch(() => true))) {
+        const e = new Error('Bluetooth spento o non disponibile su questo dispositivo'); e.name = 'NetworkError'; throw e;
+      }
       const dev = await navigator.bluetooth.requestDevice({ filters: [{ services: ['heart_rate'] }] });
       this.device = dev;
       dev.addEventListener('gattserverdisconnected', () => { this.bpm = null; this.emit(null); });
