@@ -37,9 +37,8 @@ jobs:
 
       - name: Compila l'APK di prova
         working-directory: mobile/android
-        env:
-          VERSION_CODE: ${{ github.run_number }}
         run: |
+          export VERSION_CODE=$(( ($(date +%s) - 1767225600) / 600 ))
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
@@ -56,8 +55,9 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          VERSION_CODE: ${{ github.run_number }}
         run: |
+          # numero di versione: decine di minuti dal 1° gennaio 2026, sempre crescente (uguale a «Google Play: carica»)
+          export VERSION_CODE=$(( ($(date +%s) - 1767225600) / 600 ))
           echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/equistasi.jks"
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/equistasi.jks"
           # controllo: impronta del file (da confrontare con Get-FileHash sul PC) e prova della password
