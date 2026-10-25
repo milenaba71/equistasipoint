@@ -1,0 +1,3 @@
+# Progetto Supabase dell'app (equistasi-app, Francoforte). Le tabelle sono in supabase/migrations:
+# collegato con l'integrazione GitHub di Supabase, le migrazioni partono a ogni aggiornamento di main.
+project_id = "equistasi-app"
