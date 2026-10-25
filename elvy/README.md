@@ -28,7 +28,7 @@ Ogni test si fa come **confronto in 3 passi** («Inizia il confronto»):
 2. **Applica Elvy** secondo il protocollo Sport di Equistasi: un dispositivo sulla settima vertebra cervicale (C7) e uno su ogni polpaccio (soleo, sopra il tendine d'Achille). La figura mostra i punti.
 3. **Con Elvy**: stesso test, stesse opzioni.
 
-Poi la schermata di confronto mostra senza / con Elvy, la differenza in % (verde se migliore, secondo il verso della misura), le misure di dettaglio e il commento di Elvy. Il confronto a metà si può riprendere più tardi da Oggi. Resta anche «Solo una prova», segnata con o senza Elvy secondo il pulsante «Elvy applicato».
+Poi la schermata di confronto mostra senza / con Elvy, la differenza in % (verde se migliore, secondo il verso della misura), le misure di dettaglio e il commento di Elvy. Il confronto a metà si può riprendere più tardi da Oggi. Ogni test si può anche ripetere da solo, quante volte si vuole, con i pulsanti «Test senza Elvy» e «Test con Elvy»: se la scelta è diversa da come risulta Elvy in quel momento, la mascotte chiede di toglierlo o applicarlo. Se Elvy è applicato, la mascotte propone il test con Elvy e non chiede di toglierlo; il confronto guidato (che parte senza Elvy) compare quando Elvy non è addosso.
 
 In **Progressi** ci sono il numero di confronti, quante volte è andata meglio con Elvy, l'effetto medio di Elvy per test e un grafico a coppie (grigio senza, verde con Elvy) per ogni confronto, oltre all'andamento nel tempo.
 
