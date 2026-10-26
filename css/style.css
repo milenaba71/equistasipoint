@@ -1062,6 +1062,13 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .belt-fig p { margin: 0; }
 
 /* Strumenti per il professionista (noleggio prof) */
+/* Goniometro: disegni di dove mettere il telefono (js/pro.js) */
+.gn-figs { display: flex; gap: 10px; margin: 6px 0 8px; }
+.gn-fig { flex: 1; margin: 0; background: #F6F5FA; border-radius: 16px; padding: 8px 8px 10px; }
+.gn-fig svg { display: block; width: 100%; height: auto; max-height: 200px; }
+.gn-fig figcaption { font-size: 13px; line-height: 1.35; color: var(--muted, #555); margin-top: 4px; }
+.gn-key { margin: 0 0 8px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .gn-fig { background: #2c2660; } }
 .pro-live { text-align: center; padding: 14px 10px; margin: 6px 0 10px; border-radius: 18px; background: var(--chip, #eef1fb); }
 .pro-big { font-size: 56px; font-weight: 800; line-height: 1.05; color: var(--indigo); font-variant-numeric: tabular-nums; }
 .pro-ico { display: grid; place-items: center; color: var(--indigo); background: var(--chip, #eef1fb); }
