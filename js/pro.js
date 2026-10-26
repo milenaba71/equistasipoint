@@ -63,6 +63,37 @@
   const planeOk = (v) => Math.hypot(v.x, v.y) / Math.max(0.1, Math.hypot(v.x, v.y, v.z)) > 0.6;
 
   /* ───────── Goniometro ───────── */
+  /* Disegni del goniometro: dove appoggiare il telefono (giallo, schermo verso chi guarda, tacca = parte alta) */
+  const PHONE = (cx, cy, rot, w, h) => '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + rot + ')">' +
+    '<rect x="' + (-w / 2) + '" y="' + (-h / 2) + '" width="' + w + '" height="' + h + '" rx="5" fill="#FADC00" stroke="#1F1A4E" stroke-width="2.5"/>' +
+    '<rect x="' + (-w / 2 + 4) + '" y="' + (-h / 2 + 7) + '" width="' + (w - 8) + '" height="' + (h - 14) + '" rx="2" fill="#2E2873"/>' +
+    '<rect x="-5" y="' + (-h / 2 + 2) + '" width="10" height="3" rx="1.5" fill="#1F1A4E"/></g>';
+  const LIMB = (x1, y1, x2, y2, dash) => '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + (dash ? '#8E89C9' : '#C9C5E8') + '" stroke-width="14" stroke-linecap="round"' + (dash ? ' stroke-dasharray="2 20"' : '') + '/>';
+  const HEADC = (x, y) => '<circle cx="' + x + '" cy="' + y + '" r="14" fill="#C9C5E8"/>';
+  const ARC = (d) => '<path d="' + d + '" fill="none" stroke="#5A54A8" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#gn-a)"/>';
+  const DEFS = '<defs><marker id="gn-a" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5A54A8"/></marker></defs>';
+  const svgBox = (body, label, alt) => '<figure class="gn-fig"><svg viewBox="0 0 220 200" role="img" aria-label="' + alt + '">' + DEFS + body + '</svg><figcaption>' + label + '</figcaption></figure>';
+  function gonioFigures(knee, mv) {
+    if (knee) {
+      // persona seduta vista di lato: anca, ginocchio, caviglia
+      const leg = HEADC(40, 22) + LIMB(40, 40, 40, 110) + LIMB(40, 110, 140, 110);
+      const one = leg + LIMB(140, 110, 140, 185) + PHONE(92, 110, 90, 22, 50);
+      const two = leg + (mv === 'flessione' ? LIMB(140, 110, 95, 180) + PHONE(118, 145, 213, 22, 50) + ARC('M150 158 A48 48 0 0 1 112 166') : LIMB(140, 110, 210, 110) + PHONE(176, 110, 90, 22, 50));
+      return '<div class="gn-figs">' + svgBox(one, T('<b>1</b> Telefono sulla <b>coscia</b>, lato esterno. Parte alta verso il ginocchio'), T('Telefono appoggiato sul lato esterno della coscia')) +
+        svgBox(two, mv === 'flessione' ? T('<b>2</b> Telefono sulla <b>tibia</b>, ginocchio piegato al massimo. Parte alta verso il piede') : T('<b>2</b> Telefono sulla <b>tibia</b>, gamba distesa al massimo. Parte alta verso il piede'), T('Telefono appoggiato sul lato esterno della tibia')) + '</div>';
+    }
+    if (mv === 'flessione') {
+      // vista di lato: braccio in basso, poi alzato in avanti
+      const body = HEADC(140, 24) + LIMB(140, 44, 140, 140) + LIMB(140, 140, 132, 192) + LIMB(132, 58, 124, 132) + PHONE(129, 86, 186, 20, 44) +
+        LIMB(132, 58, 60, 46, true) + ARC('M108 140 A80 80 0 0 1 58 70');
+      return '<div class="gn-figs">' + svgBox(body, T('Vista di lato: telefono sul braccio, sopra il gomito. Parte alta verso la mano. Zero con il braccio giù, poi alza <b>in avanti</b>'), T('Telefono sul braccio, braccio alzato in avanti')) + '</div>';
+    }
+    // vista di fronte: braccio lungo il fianco, poi alzato di lato
+    const body = HEADC(80, 24) + LIMB(80, 44, 80, 140) + LIMB(80, 140, 66, 192) + LIMB(80, 140, 94, 192) + LIMB(80, 56, 60, 128) +
+      LIMB(80, 56, 104, 128) + PHONE(96, 84, 162, 20, 44) + LIMB(80, 56, 160, 20, true) + ARC('M118 130 A70 70 0 0 0 150 40');
+    return '<div class="gn-figs">' + svgBox(body, T('Vista di fronte: telefono sul braccio, sopra il gomito, schermo in avanti. Parte alta verso la mano. Zero con il braccio giù, poi alza <b>di lato</b>'), T('Telefono sul braccio, braccio alzato di lato')) + '</div>';
+  }
+
   function renderGonio(app) {
     const knee = prefs.joint === 'ginocchio';
     const mv = knee ? prefs.kmv : prefs.smv;
@@ -80,6 +111,8 @@
       '<div class="toolbar">' + seg(knee ? 'kmv' : 'smv', moves, mv, T('Movimento')) + '</div>' +
       '<div class="toolbar">' + seg('side', SIDES(), prefs.side, T('Lato')) + '</div>' +
       '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
+      gonioFigures(knee, mv) +
+      '<p class="small muted gn-key">' + T('Nel disegno il telefono è giallo: appoggia il <b>dorso</b> del telefono sul corpo, con lo <b>schermo verso di te</b> che guardi. La tacca indica la <b>parte alta</b> del telefono. Tienilo fermo con la mano, ben aderente.') + '</p>' +
       '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
       '<div class="pro-live" id="pro-live"><div class="pro-big" id="pro-big">–</div><div class="small" id="pro-sub">' + T('Tocca «Inizia» per accendere i sensori') + '</div></div>' +
       '<p class="gate-msg" id="pro-msg" role="status"></p>' +
