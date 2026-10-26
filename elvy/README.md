@@ -4,6 +4,8 @@ Web app (PWA) per lo sport: i test che uno sportivo vuole fare, misurati con l'*
 
 Online: `https://app.equistasi.com/elvy/` (stesso sito di Equistasi Point).
 
+**Mappa trigger point per il dolore** (Guida e Test → `#/dolore`), come in Equistasi Point: tocca dove senti dolore, scegli il muscolo e vedi la X dove applicare Elvy con le zone di dolore riferito. Usa gli stessi dati (`../js/data.js`) e le stesse tavole anatomiche (`../img/anatomy`) di Equistasi Point; codice in `js/pain.js`.
+
 App per **App Store e Google Play**: cartella `mobile-elvy/` (Capacitor), costruita da questi stessi file; le funzioni native (Bluetooth anche su iPhone, condivisione del PDF) sono in `js/native.js`. Vedi `mobile-elvy/README.md`.
 
 ## Marchi

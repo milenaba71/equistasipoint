@@ -1042,6 +1042,7 @@
         }).join('') + '</div>').join('') +
       '<div class="k p sec">Video</div><div class="tiles"><a class="tile" href="#/video"><b>Video analisi</b><span>rallentatore e riconoscimento del corpo</span></a>' +
       '<a class="tile" href="#/profilo"><b>Orologio e fascia</b><span>' + (S.heart.connected() ? '♥ ' + esc(S.heart.name()) + ' collegato' : 'battito durante i test') + '</span></a></div>' +
+      (window.ElvyPain && window.ElvyPain.available() ? '<div class="k p sec">Dolore muscolare</div>' + PAIN_CARD : '') +
       '<p class="note" style="margin-top:22px">I test usano accelerometro, giroscopio, fotocamera e GPS del telefono. Per equilibrio, salti, corsa e plank il telefono va nella cintura Elvy, vicino al baricentro: le misure sono più ripetibili.</p>';
     bindCommon();
   }
@@ -1292,10 +1293,14 @@
     const src = /\.(mp4|webm|mov|m3u8)(\?|$)/i.test(u) ? u : v.file;
     return src ? '<video src="' + esc(src) + '" controls playsinline preload="metadata"' + (v.thumb ? ' poster="' + esc(v.thumb) + '"' : '') + '></video>' : '';
   }
+  // accesso alla mappa dei trigger point per il dolore (js/pain.js, dati di Equistasi Point)
+  const PAIN_CARD = '<a class="card pain-link" href="#/dolore"><span class="pain-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.6"/><path d="M12 8v7M8 10.5l4-1 4 1M10 21l2-6 2 6"/><path d="M17.5 13.5l2.5 2.5M20 13.5l-2.5 2.5"/></svg></span>' +
+    '<span><b>Mappa trigger point per il dolore</b><span>Tocca dove senti dolore: ti mostro dove applicare Elvy</span></span><span class="chev" aria-hidden="true">›</span></a>';
   function renderGuide() {
     setTab('guida');
     $app.innerHTML = brand() + '<div class="top"><h1>Guida</h1></div>' +
-      talk(IMG.point, 'Qui trovi come si applica Elvy con il cerotto, la mappa dei punti per lo sport e i protocolli. Guarda il video prima del primo confronto!', true) +
+      talk(IMG.point, 'Qui trovi come si applica Elvy con il cerotto, la mappa dei punti per lo sport, la mappa per il dolore e i protocolli. Guarda il video prima del primo confronto!', true) +
+      PAIN_CARD +
       '<h2 class="sec">Video tutorial</h2><div id="gd-videos"><div class="card"><p class="small muted">Caricamento dei video…</p></div></div>' +
       '<h2 class="sec">Come si applica</h2><div class="card guide-steps">' +
       '<p class="small muted">Pelle <b style="color:#fff">pulita e asciutta</b>, senza creme né oli. Poi, per ogni punto:</p>' +
@@ -1470,6 +1475,11 @@
       case 'profilo': return renderProfile();
       case 'report': return renderReport();
       case 'guida': return renderGuide();
+      case 'dolore': {
+        if (!window.ElvyPain || !window.ElvyPain.available()) return renderGuide();
+        const c = { $app, backBtn, talk, bindCommon, setTab, IMG };
+        return parts[1] === 'area' ? window.ElvyPain.area(c, parts[2]) : parts[1] === 'm' ? window.ElvyPain.muscle(c, parts[2]) : window.ElvyPain.home(c);
+      }
       default: return renderOggi();
     }
   }
