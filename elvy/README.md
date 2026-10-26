@@ -4,6 +4,8 @@ Web app (PWA) per lo sport: i test che uno sportivo vuole fare, misurati con l'*
 
 Online: `https://app.equistasi.com/elvy/` (stesso sito di Equistasi Point).
 
+**Esercizio corretto o scorretto** (Test → Video → «Esercizio corretto?», `#/esercizio`, `js/exercise.js`): si filma o si carica uno squat, un affondo, dei piegamenti o un plank; il riconoscimento del corpo (MediaPipe, sul telefono) conta le ripetizioni e per ognuna controlla la tecnica (profondità, busto, talloni, ginocchia verso l'interno di fronte, linea del corpo e bacino). Risultato «Corretto» o «Da correggere», errori più frequenti, fotogramma di ogni ripetizione con le articolazioni da correggere in rosso e disegni dell'esercizio corretto e scorretto. Soglie indicative, per l'allenamento.
+
 **Mappa trigger point per il dolore** (Guida e Test → `#/dolore`), come in Equistasi Point: tocca dove senti dolore, scegli il muscolo e vedi la X dove applicare Elvy con le zone di dolore riferito. Usa gli stessi dati (`../js/data.js`) e le stesse tavole anatomiche (`../img/anatomy`) di Equistasi Point; codice in `js/pain.js`.
 
 App per **App Store e Google Play**: cartella `mobile-elvy/` (Capacitor), costruita da questi stessi file; le funzioni native (Bluetooth anche su iPhone, condivisione del PDF) sono in `js/native.js`. Vedi `mobile-elvy/README.md`.

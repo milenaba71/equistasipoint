@@ -1040,7 +1040,8 @@
           const t = TESTS[k]; const l = lastOf(k);
           return '<a class="tile" href="#/test/' + k + '"><b>' + t.name + '</b><span>' + t.sub + '</span>' + (l ? '<em>' + fmt(l.main, t.metric.d) + ' ' + t.metric.unit + ' · ' + dateShort(l.t) + '</em>' : '') + '</a>';
         }).join('') + '</div>').join('') +
-      '<div class="k p sec">Video</div><div class="tiles"><a class="tile" href="#/video"><b>Video analisi</b><span>rallentatore e riconoscimento del corpo</span></a>' +
+      '<div class="k p sec">Video</div><div class="tiles"><a class="tile" href="#/esercizio"><b>Esercizio corretto?</b><span>squat, affondo, piegamenti e plank dal video</span></a>' +
+      '<a class="tile" href="#/video"><b>Video analisi</b><span>rallentatore e riconoscimento del corpo</span></a>' +
       '<a class="tile" href="#/profilo"><b>Orologio e fascia</b><span>' + (S.heart.connected() ? '♥ ' + esc(S.heart.name()) + ' collegato' : 'battito durante i test') + '</span></a></div>' +
       (window.ElvyPain && window.ElvyPain.available() ? '<div class="k p sec">Dolore muscolare</div>' + PAIN_CARD : '') +
       '<p class="note" style="margin-top:22px">I test usano accelerometro, giroscopio, fotocamera e GPS del telefono. Per equilibrio, salti, corsa e plank il telefono va nella cintura Elvy, vicino al baricentro: le misure sono più ripetibili.</p>';
@@ -1471,6 +1472,7 @@
       case 'r': return renderResult(parts[1]);
       case 'confronto': return renderCompare(parts[1]);
       case 'video': setTab('test'); return window.ElvyVideo ? window.ElvyVideo.render($app, { backBtn, talk, bindCommon, results, saveResults, device, PROTO, fmt }) : renderTests();
+      case 'esercizio': setTab('test'); return window.ElvyExercise ? window.ElvyExercise.render($app, { backBtn, talk, bindCommon }) : renderTests();
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
       case 'profilo': return renderProfile();
       case 'report': return renderReport();
