@@ -823,7 +823,8 @@
 
   function editor(app, work, p) {
     const draw = () => {
-      work.innerHTML = '<div class="pz-photo-box edit" style="aspect-ratio:' + p.w + '/' + p.h + '"><img src="' + p.thumb + '" alt="">' + overlaySvg(p, true) + '</div>' +
+      // larghezza limitata: la foto verticale non deve riempire lo schermo, il pulsante Salva resta raggiungibile
+      work.innerHTML = '<div class="pz-photo-box edit" style="aspect-ratio:' + p.w + '/' + p.h + ';width:min(100%,420px,calc(56vh * ' + (p.w / p.h).toFixed(4) + '))"><img src="' + p.thumb + '" alt="">' + overlaySvg(p, true) + '</div>' +
         '<div id="pz-ms">' + metricsList(photoMetrics(kindOf(p.view), p.pts, p.w, p.h)) + '</div>' +
         '<div class="btn-col"><button class="btn primary" type="button" id="pz-save">' + T('Salva la foto e le misure') + '</button><button class="btn" type="button" id="pz-cancel">' + T('Annulla') + '</button></div>';
       bindDrag();
@@ -848,6 +849,8 @@
         const c = ev.target.closest('[data-k]'); if (!c) return;
         cur = c.dataset.k; svg.setPointerCapture(ev.pointerId); ev.preventDefault();
       });
+      // su iPhone blocca lo scorrimento solo quando si tocca un punto, non sul resto della foto
+      svg.addEventListener('touchstart', (ev) => { if (ev.target.closest('[data-k]')) ev.preventDefault(); }, { passive: false });
       svg.addEventListener('pointermove', (ev) => { if (!cur) return; p.pts[cur] = toPt(ev); refresh(); });
       const end = () => { cur = null; };
       svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);

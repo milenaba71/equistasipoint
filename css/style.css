@@ -685,9 +685,9 @@ main { padding-top: 0; padding-bottom: 12px; }
 .pz-photo-box { position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #CFCADF; }
 .pz-photo-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; }
 .pz-ov { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pz-ov.edit { touch-action: none; }
-.pz-ov.edit circle { cursor: grab; }
-.pz-photo-box.edit { margin: 12px 0; max-width: 420px; }
+.pz-ov.edit { touch-action: pan-y; }
+.pz-ov.edit circle { cursor: grab; touch-action: none; }
+.pz-photo-box.edit { margin: 12px auto; max-width: 420px; }
 .pz-photo figcaption { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .pz-photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 @media (min-width: 760px) { .pz-photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
