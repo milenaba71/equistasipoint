@@ -162,23 +162,23 @@
   const videoPromo = '<a class="card vpromo" href="#/video"><span class="vpromo-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26"><path d="M8 5v14l11-7z" fill="#fff"/></svg></span>' +
       T('<span><b>Video tutorial</b><br><span class="small muted">Guarda come applicare il dispositivo</span></span><span class="chev" aria-hidden="true">›</span></a>');
 
-  // Come applicare, passo passo: dispositivo, cerotto applicatore, dispositivo sul cerotto, sulla pelle
+  // Come applicare, passo passo: dispositivo (gel: prima nella custodia usa e getta), cerotto applicatore, dispositivo sul cerotto, sulla pelle
   function applySteps(onMap) {
-    const dev = state.devType === 'gel' ? 'img/gel-kit.jpg' : 'img/dispositivo.jpg';
+    const gel = state.devType === 'gel';
     const step = (n, src, alt, txt) => '<li><figure><span class="ap-n">' + n + '</span><img src="' + src + '" alt="' + alt + '" loading="lazy" /></figure><p>' + txt + '</p></li>';
     return '<ol class="apply-steps">' +
-      step(1, dev, T('Dispositivo Equistasi'), T('Prendi il <b>dispositivo</b> Equistasi')) +
+      (gel ? step(1, 'img/gel-custodie.jpg', T('Dispositivi Equistasi gel inseriti nelle custodie usa e getta'), T('Inserisci il dispositivo nella <b>custodia usa e getta</b>'))
+        : step(1, 'img/dispositivo.jpg', T('Dispositivo Equistasi'), T('Prendi il <b>dispositivo</b> Equistasi'))) +
       step(2, 'img/cerotto.jpg', T('Cerotto applicatore Equistasi'), T('Prendi il <b>cerotto applicatore</b>')) +
-      step(3, 'img/cerotto-dispositivo.jpg', T('Dispositivo appoggiato al centro del cerotto'), T('Appoggia il dispositivo <b>al centro del cerotto</b>')) +
+      step(3, 'img/cerotto-dispositivo.jpg', T('Dispositivo appoggiato al centro del cerotto'), gel ? T('Appoggia la custodia con il dispositivo <b>al centro del cerotto</b>') : T('Appoggia il dispositivo <b>al centro del cerotto</b>')) +
       step(4, 'img/applicazione.jpg', T('Dispositivo fissato sulla pelle con il cerotto'), (onMap ? T('Applicalo sulla pelle con il <b>centro del dispositivo sulla X</b>') : T('Applicalo sulla pelle <b>nel punto indicato</b>'))) +
       '</ol>';
   }
 
-  // Foto delle custodie usa e getta, mostrate solo per Equistasi gel
+  // Busta delle custodie usa e getta, mostrata solo per Equistasi gel (la custodia è già il primo passo)
   function gelPhotos() {
     if (state.devType !== 'gel') return '';
-    return T('<div class="howto gel"><figure><img src="img/gel-custodie.jpg" alt="Dispositivi Equistasi gel inseriti nelle custodie usa e getta" loading="lazy" width="640" height="506" /><figcaption>Inserisci il dispositivo nella custodia usa e getta</figcaption></figure>') +
-      T('<figure><img src="img/gel-busta.jpg" alt="Busta da 120 custodie di protezione per dispositivo Equistasi" loading="lazy" width="610" height="640" /><figcaption>Custodie di protezione (busta da 120 pezzi)</figcaption></figure></div>');
+    return T('<div class="howto gel"><figure><img src="img/gel-busta.jpg" alt="Busta da 120 custodie di protezione per dispositivo Equistasi" loading="lazy" width="610" height="640" /><figcaption>Custodie di protezione (busta da 120 pezzi): usane una nuova a ogni applicazione</figcaption></figure></div>');
   }
 
   function renderNeuroHome() {
