@@ -1,6 +1,7 @@
 // Copia la web app Elvy (cartella elvy/) in mobile-elvy/www, la cartella che Capacitor
 // impacchetta nell'app per iPhone e Android. I file condivisi con Equistasi Point
-// (config, lettura del seriale, abbinamento e librerie in js/vendor) finiscono in www/js.
+// (config, lettura del seriale, abbinamento, dati dei trigger point e librerie in js/vendor)
+// finiscono in www/js, le tavole anatomiche in www/img/anatomy.
 import { cpSync, rmSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,9 +14,11 @@ mkdirSync(www, { recursive: true });
 for (const f of ['index.html', 'manifest.webmanifest', 'css', 'js', 'img']) {
   cpSync(join(elvy, f), join(www, f), { recursive: true });
 }
-for (const f of ['config.js', 'scan.js', 'pair.js', 'vendor']) {
+for (const f of ['config.js', 'scan.js', 'pair.js', 'data.js', 'vendor']) {
   cpSync(join(root, 'js', f), join(www, 'js', f), { recursive: true });
 }
+// tavole anatomiche della mappa dei trigger point (js/pain.js le cerca in img/anatomy accanto a js/)
+cpSync(join(root, 'img', 'anatomy'), join(www, 'img', 'anatomy'), { recursive: true });
 // nella web app i file condivisi sono in ../js/; nell'app sono accanto agli altri
 const index = join(www, 'index.html');
 writeFileSync(index, readFileSync(index, 'utf8').replaceAll('src="../js/', 'src="js/'));

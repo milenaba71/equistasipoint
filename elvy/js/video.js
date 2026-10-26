@@ -94,7 +94,8 @@
   }
 
   /* ───────── Registrazione ───────── */
-  async function record($app, H) {
+  // o.max = secondi massimi, o.onVideo(url, fps) = cosa fare con il video (di base: apre il lettore)
+  async function record($app, H, o = {}) {
     if (!window.MediaRecorder || !navigator.mediaDevices) { alert('Questo browser non registra video: carica un video girato con la fotocamera.'); return; }
     let stream;
     try {
@@ -119,12 +120,12 @@
       const type = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].find((t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
       const mr = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 8e6 } : undefined);
       const chunks = []; mr.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-      mr.onstop = () => { close(); openVideo($app, H, URL.createObjectURL(new Blob(chunks, { type: type || 'video/webm' })), fps); };
+      mr.onstop = () => { close(); const u = URL.createObjectURL(new Blob(chunks, { type: type || 'video/webm' })); if (o.onVideo) o.onVideo(u, fps); else openVideo($app, H, u, fps); };
       mr.start(250);
       go.disabled = false; go.textContent = 'Stop';
       const stop = () => { if (mr.state !== 'inactive') mr.stop(); };
       go.onclick = stop;
-      setTimeout(stop, 8000); // al massimo 8 secondi
+      setTimeout(stop, (o.max || 8) * 1000); // di base al massimo 8 secondi
     };
   }
 
@@ -269,5 +270,5 @@
     }
   }
 
-  window.ElvyVideo = { render, _metrics: metrics, _fppa: fppa, _inner: inner };
+  window.ElvyVideo = { render, record, loadPose, metrics, inner, BONES, _metrics: metrics, _fppa: fppa, _inner: inner };
 })();
