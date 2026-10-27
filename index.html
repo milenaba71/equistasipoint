@@ -23,7 +23,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="css/style.css?v=112" />
+  <link rel="stylesheet" href="css/style.css?v=113" />
 </head>
 <body>
   <!-- Definizioni condivise dalle figure (pattern della zona secondaria) -->
@@ -82,9 +82,9 @@
       <div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it">Italiano</button><button type="button" data-lang="en">English</button></div>
       <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
       <h1 data-t>Attiva l’app</h1>
-      <p data-t>Prendi il dispositivo e inquadra il <b>numero di serie</b> sul retro: il dispositivo si abbina all’app.</p>
+      <p data-t>Prendi il dispositivo e inquadra il <b>codice</b> sul retro: il dispositivo si abbina all’app.</p>
       <div class="gate-dev">
-        <button type="button" class="gate-win" id="gate-scan" aria-label="Inquadra il numero di serie">
+        <button type="button" class="gate-win" id="gate-scan" aria-label="Inquadra il codice del dispositivo">
           <span class="gate-idle"><svg viewBox="0 0 64 28" aria-hidden="true"><path d="M3 2v24M7 2v24M10 2v24M15 2v24M18 2v24M23 2v24M27 2v24M30 2v24M35 2v24M39 2v24M42 2v24M47 2v24M50 2v24M55 2v24M58 2v24M61 2v24" stroke="currentColor" stroke-width="2"/></svg><span data-t>Clicca qui e abbina il dispositivo</span></span>
         </button>
         <span class="gate-sn" id="gate-sn" aria-hidden="true">• • • • • • • • • • •</span>
@@ -94,11 +94,13 @@
         <button type="button" class="btn" id="gate-torch" hidden data-t>Luce</button>
         <button type="button" class="btn" id="gate-cancel" data-t>Annulla</button>
       </div>
-      <p class="gate-or" data-t>oppure digita il seriale</p>
-      <label for="serial" class="gate-label" data-t>Numero di serie</label>
-      <input id="serial" class="search gate-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Scrivi qui il numero di serie" required />
       <p class="gate-msg" id="gate-msg" role="alert"></p>
-      <button class="btn" id="gate-btn" type="submit" data-t>Accedi</button>
+      <!-- il codice a mano compare solo se la fotocamera non riesce a leggerlo -->
+      <div id="gate-manual" hidden>
+        <label for="serial" class="gate-label" data-t>Codice del dispositivo</label>
+        <input id="serial" class="search gate-input" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Scrivi qui il codice" required />
+        <button class="btn" id="gate-btn" type="submit" data-t>Abbina</button>
+      </div>
       <p class="gate-help" data-t>Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.</p>
     </form>
   </section>
@@ -109,7 +111,7 @@
       <img src="img/logo.png" alt="Equistasi" class="gate-logo" />
       <h1 id="paired-title" data-t>Dispositivo abbinato</h1>
       <div class="dev-mini dev-mini-lg" aria-hidden="true"><span class="dev-mini-win">✓</span><span class="dev-mini-sn" id="paired-mini"></span><span class="dev-mini-ce">CE</span></div>
-      <p class="paired-sn"><span data-t>Numero di serie</span>: <b id="paired-sn"></b></p>
+      <p class="paired-sn"><span data-t>Codice del dispositivo</span>: <b id="paired-sn"></b></p>
       <p class="dev-ok paired-ok-txt" data-t>✓ Abbinato all’app</p>
       <p class="paired-note" data-t>Lo ritrovi quando vuoi in <b>Info</b> → <b>Il tuo dispositivo</b>.</p>
       <button class="btn primary" id="paired-ok" type="button" data-t>Chiudi</button>
@@ -160,30 +162,30 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=112"></script>
-  <script src="js/i18n.js?v=112"></script>
-  <script src="js/en-app.js?v=112"></script>
-  <script src="js/en-modules.js?v=112"></script>
-  <script src="js/en-postura.js?v=112"></script>
-  <script src="js/body.js?v=112"></script>
-  <script src="js/data.js?v=112"></script>
-  <script src="js/data-en.js?v=112"></script>
-  <script src="js/timer.js?v=112"></script>
-  <script src="js/tests.js?v=112"></script>
-  <script src="js/metameri.js?v=112"></script>
-  <script src="js/report-pdf.js?v=112"></script>
-  <script src="js/postura.js?v=112"></script>
-  <script src="js/en-sedia.js?v=112"></script>
-  <script src="js/en-pro.js?v=112"></script>
-  <script src="js/sedia.js?v=112"></script>
-  <script src="js/scan.js?v=112"></script>
-  <script src="js/pair.js?v=112"></script>
-  <script src="js/tutorial.js?v=112"></script>
-  <script src="js/calib.js?v=112"></script>
-  <script src="js/pro.js?v=112"></script>
-  <script src="js/users.js?v=112"></script>
-  <script src="js/app.js?v=112"></script>
-  <script src="js/native.js?v=112"></script>
-  <script src="js/remote.js?v=112"></script>
+  <script src="js/config.js?v=113"></script>
+  <script src="js/i18n.js?v=113"></script>
+  <script src="js/en-app.js?v=113"></script>
+  <script src="js/en-modules.js?v=113"></script>
+  <script src="js/en-postura.js?v=113"></script>
+  <script src="js/body.js?v=113"></script>
+  <script src="js/data.js?v=113"></script>
+  <script src="js/data-en.js?v=113"></script>
+  <script src="js/timer.js?v=113"></script>
+  <script src="js/tests.js?v=113"></script>
+  <script src="js/metameri.js?v=113"></script>
+  <script src="js/report-pdf.js?v=113"></script>
+  <script src="js/postura.js?v=113"></script>
+  <script src="js/en-sedia.js?v=113"></script>
+  <script src="js/en-pro.js?v=113"></script>
+  <script src="js/sedia.js?v=113"></script>
+  <script src="js/scan.js?v=113"></script>
+  <script src="js/pair.js?v=113"></script>
+  <script src="js/tutorial.js?v=113"></script>
+  <script src="js/calib.js?v=113"></script>
+  <script src="js/pro.js?v=113"></script>
+  <script src="js/users.js?v=113"></script>
+  <script src="js/app.js?v=113"></script>
+  <script src="js/native.js?v=113"></script>
+  <script src="js/remote.js?v=113"></script>
 </body>
 </html>
