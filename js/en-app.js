@@ -147,7 +147,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Conferma di aver letto l’informativa privacy.": "Please confirm that you have read the privacy notice.",
   "Inserisci il numero di serie completo.": "Enter the full serial number.",
   "Verifica in corso…": "Checking…",
-  "Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.": "Serial number not recognised. Check that you typed it correctly.",
+  "Numero di serie non riconosciuto. Controlla di averlo scritto correttamente: se è giusto, il tuo dispositivo è una versione precedente che non consente l’abbinamento all’app.": "Serial number not recognised. Check that you typed it correctly: if it is right, your device is an older version that cannot be paired with the app.",
   "Servizio di verifica non configurato.": "Verification service not configured.",
   "Impossibile verificare ora. Controlla la connessione e riprova.": "Unable to verify now. Check your connection and try again.",
   "Accedi": "Sign in",

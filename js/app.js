@@ -1065,7 +1065,7 @@
           gateInput.value = r.serial;
           gateMsg.textContent = r.error === 'net'
             ? T('Impossibile verificare ora. Controlla la connessione e riprova.')
-            : T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
+            : T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente: se è giusto, il tuo dispositivo è una versione precedente che non consente l’abbinamento all’app.');
         }
       } catch (e) {
         gateMsg.textContent = e.message === 'denied'
@@ -1127,7 +1127,7 @@
         if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
         setTimeout(() => { gate.hidden = true; showPaired(serial); }, 900);
       } else {
-        gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente.');
+        gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente: se è giusto, il tuo dispositivo è una versione precedente che non consente l’abbinamento all’app.');
         gateWin(T('Clicca qui e abbina il dispositivo'));
       }
     } catch (e) {
