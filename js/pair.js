@@ -2,6 +2,7 @@
    che "legge" il dispositivo, anello che si chiude, seriale che si accende cifra per cifra, poi le particelle
    convergono, lampo, ✓ verde e suono di conferma. Suoni creati al momento con Web Audio (nessun file).
    Uso: EqPair.run({ accept, norm, verify }) → Promise<{ serial, ok }> oppure null se annullato.
+   timeout: ms di ricerca senza lettura, poi { ok: false, error: 'timeout' } · koText: titolo se il codice non vale.
    - verify(serial) → Promise<boolean>: controllo del seriale, parte appena il codice è letto.
    Facoltativi, per le app con un'altra grafica (es. Elvy): theme (classe CSS in più), colors (4 colori [r, g, b]
    delle particelle), ring (2 colori dell'anello), ok ([r, g, b] del successo), hint (testo sotto il titolo), hold (ms in cui resta visibile il ✓ finale),
@@ -185,7 +186,7 @@
           setTimeout(() => close({ serial: SER.text, ok: true }), opts.hold || 700);
         } else {
           sfx('error');
-          $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : T('Seriale non riconosciuto'); $('.pair-s').textContent = SER.text;
+          $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : (opts.koText || T('Seriale non riconosciuto')); $('.pair-s').textContent = SER.text;
           setTimeout(() => close({ serial: SER.text, ok: false, error: verified === 'err' ? 'net' : 'invalid' }), 1800);
         }
       }
@@ -197,6 +198,7 @@
         if (err) reject(err); else resolve(result);
       }
       $('.pair-x').addEventListener('click', () => close(null));
+      if (opts.timeout) setTimeout(() => { if (phase === 'scan') close({ serial: '', ok: false, error: 'timeout' }); }, opts.timeout);
 
       window.EqScan.open(Object.assign({}, opts.scan, { container: $('.pair-feed'), guide: $('.pair-guide'), fx: false, freeze: true, torch: $('.pair-torch'), accept: opts.accept })).then((text) => {
         if (!text || finished) { if (!finished) close(null); return; }

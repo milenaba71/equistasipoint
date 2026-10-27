@@ -153,7 +153,7 @@
     const sn = store.get('tp-serial', '');
     return '<div class="card dev-card"><div class="dev-mini" aria-hidden="true"><span class="dev-mini-win">✓</span><span class="dev-mini-sn">' + esc(sn || '—') + '</span><span class="dev-mini-ce">CE</span></div>' +
       '<div class="dev-card-txt"><h3>' + T('Il tuo dispositivo') + '</h3>' +
-      '<p class="small">' + T('Numero di serie') + ': <b>' + esc(sn || '—') + '</b></p>' +
+      '<p class="small">' + T('Codice del dispositivo') + ': <b>' + esc(sn || '—') + '</b></p>' +
       (sn ? '<p class="small dev-ok">✓ ' + T('Abbinato all’app') + '</p>' : '') +
       '<button class="btn" onclick="tpLogout()">' + T('Cambia dispositivo') + '</button></div></div>';
   };
@@ -1047,6 +1047,24 @@
   // testo nella finestra del dispositivo: in attesa, in abbinamento, abbinato
   const gateWin = (label, cls) => { gateWinLabel.textContent = label; gateDev.classList.remove('read', 'paired'); if (cls) gateDev.classList.add(cls); };
   document.getElementById('gate-cancel').addEventListener('click', () => window.EqScan.stop());
+  // Come in Elvy: prima si inquadra; il codice a mano compare solo se la fotocamera non ci riesce.
+  // I messaggi non parlano di seriali né di elenchi.
+  const SCAN_MS = 25000;
+  const MSG_TYPE = () => T('Prova a digitare il codice a mano qui sotto: magari la fotocamera l’ha letto male.');
+  const MSG_NO = () => T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.');
+  const MSG_NET = () => T('Impossibile verificare ora. Controlla la connessione e riprova.');
+  const gateManual = document.getElementById('gate-manual');
+  let fromScan = false;
+  function showManual(msg, prefill) {
+    gateManual.hidden = false;
+    if (prefill) gateInput.value = prefill;
+    gateMsg.className = 'gate-msg'; gateMsg.textContent = msg;
+    gateWin(T('Clicca qui e abbina il dispositivo')); gateSn.textContent = gateSnIdle;
+    setTimeout(() => gateInput.focus(), 50);
+  }
+  const camError = (e) => showManual(e.message === 'denied'
+    ? T('Per inquadrare il codice consenti l’uso della fotocamera, oppure digitalo a mano qui sotto.')
+    : T('Non riesco ad aprire la fotocamera. Digita il codice a mano qui sotto.'));
   gateScan.addEventListener('click', async () => {
     if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
@@ -1056,43 +1074,37 @@
     if (window.EqPair && !window.EqPair.reduced()) {
       gateDev.classList.add('scanning');
       try {
-        const r = await window.EqPair.run({ accept, norm: normSerial, verify: verifySerial });
+        const r = await window.EqPair.run({ accept, norm: normSerial, verify: verifySerial, timeout: SCAN_MS, koText: T('Codice non letto') });
         if (!r) return;
         if (r.ok) {
           store.set('tp-serial', r.serial);
           gate.hidden = true; showPaired(r.serial);
-        } else {
-          gateInput.value = r.serial;
-          gateMsg.textContent = r.error === 'net'
-            ? T('Impossibile verificare ora. Controlla la connessione e riprova.')
-            : T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente: se è giusto, il tuo dispositivo è una versione precedente che non consente l’abbinamento all’app.');
-        }
+        } else showManual(r.error === 'net' ? MSG_NET() : MSG_TYPE(), r.serial);
       } catch (e) {
-        gateMsg.textContent = e.message === 'denied'
-          ? T('Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.')
-          : T('Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.');
+        camError(e);
       } finally {
         gateDev.classList.remove('scanning');
       }
       return;
     }
     gateDev.classList.add('scanning'); gateScanBar.hidden = false;
+    let timedOut = false;
+    const timer = setTimeout(() => { timedOut = true; window.EqScan.stop(); }, SCAN_MS);
     try {
       const text = await window.EqScan.open({
         container: gateScan,
         torch: document.getElementById('gate-torch'),
         accept,
       });
-      if (!text) return;
+      if (!text) { if (timedOut) showManual(MSG_TYPE()); return; }
       const serial = normSerial(text);
       gateSn.textContent = serial; gateWin(T('Abbinamento in corso…'), 'read');
-      gateInput.value = serial;
+      gateInput.value = serial; fromScan = true;
       if (gateForm.requestSubmit) gateForm.requestSubmit(); else gateForm.dispatchEvent(new Event('submit', { cancelable: true }));
     } catch (e) {
-      gateMsg.textContent = e.message === 'denied'
-        ? T('Per inquadrare il seriale consenti l’uso della fotocamera, oppure scrivilo qui sotto.')
-        : T('Non riesco ad aprire la fotocamera. Scrivi il numero di serie qui sotto.');
+      camError(e);
     } finally {
+      clearTimeout(timer);
       gateDev.classList.remove('scanning'); gateScanBar.hidden = true;
     }
   });
@@ -1118,7 +1130,8 @@
     ev.preventDefault();
     const serial = normSerial(gateInput.value);
     gateMsg.className = 'gate-msg';
-    if (serial.length < 5) { gateMsg.textContent = T('Inserisci il numero di serie completo.'); gateInput.focus(); return; }
+    const scanned = fromScan; fromScan = false;
+    if (serial.length < 5) { gateMsg.textContent = T('Inserisci il codice completo.'); gateInput.focus(); return; }
     gateBtn.disabled = true; gateBtn.textContent = T('Verifica in corso…'); gateMsg.textContent = '';
     try {
       if (await verifySerial(serial)) {
@@ -1127,16 +1140,16 @@
         if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
         setTimeout(() => { gate.hidden = true; showPaired(serial); }, 900);
       } else {
-        gateMsg.textContent = T('Numero di serie non riconosciuto. Controlla di averlo scritto correttamente: se è giusto, il tuo dispositivo è una versione precedente che non consente l’abbinamento all’app.');
-        gateWin(T('Clicca qui e abbina il dispositivo'));
+        // letto dalla fotocamera: prima si prova a mano; scritto a mano: il dispositivo non si abbina
+        if (scanned) showManual(MSG_TYPE(), serial);
+        else { gateMsg.textContent = MSG_NO(); gateWin(T('Clicca qui e abbina il dispositivo')); }
       }
     } catch (e) {
-      gateMsg.textContent = e.message === 'config'
-        ? T('Servizio di verifica non configurato.')
-        : T('Impossibile verificare ora. Controlla la connessione e riprova.');
+      gateMsg.textContent = e.message === 'config' ? T('Servizio di verifica non configurato.') : MSG_NET();
+      gateManual.hidden = false;
       gateWin(T('Clicca qui e abbina il dispositivo'));
     } finally {
-      gateBtn.disabled = false; gateBtn.textContent = T('Accedi');
+      gateBtn.disabled = false; gateBtn.textContent = T('Abbina');
     }
   });
 
@@ -1152,7 +1165,7 @@
       '<div class="acct-row"><span class="acct-ico" aria-hidden="true"><span class="dev-mini acct-dev"><span class="dev-mini-win">✓</span></span></span><span><span class="small muted">' + T('Il tuo dispositivo') + '</span><br><b>' + esc(sn || '—') + '</b></span></div>' +
       '<button type="button" class="btn" data-acct-device>' + T('Cambia dispositivo') + '</button>' +
       (window.EqCalib ? window.EqCalib.cardHtml(true) : '') +
-      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il nuovo numero di serie. I tuoi test e le misure restano salvati.') + '</p>' +
+      '<p class="small muted acct-note">' + T('Cambia dispositivo se usi un altro Equistasi: dovrai inquadrare o scrivere il codice del nuovo dispositivo. I tuoi test e le misure restano salvati.') + '</p>' +
       (window.EqPro && window.EqPro.isPro() ? '<a class="btn" href="#/pro" data-acct-close>' + T('Strumenti per il professionista') + '</a>' : '') +
       '<button type="button" class="btn acct-danger" data-acct-wipe>' + T('Cancella i dati e ricomincia') + '</button>' +
       '<div class="acct-wipe" hidden>' +
