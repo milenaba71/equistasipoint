@@ -1221,7 +1221,7 @@
   const SINGLE = ['hrv']; // misura del recupero di ogni giorno, senza confronto con e senza Elvy
   // Test che stancano: finito il T0 si applica subito Elvy e si riposa più a lungo (intanto Elvy agisce),
   // così al T1 non si è affaticati. Nel percorso si fanno sempre per ultimi, per non stancare gli altri test.
-  const REST = { cooper: 60, corsa: 30, ripetuti: 30, plank: 30 };
+  const REST = { cooper: 50, corsa: 50, ripetuti: 50, plank: 50 };
   const restOf = (p) => Math.max(0, ...p.tests.map((id) => REST[id] || 0));
   // minuti con Elvy addosso prima dei test: 30, o il riposo più lungo al T1 dopo un test faticoso
   const waitOf = (p, P) => (P.k === 'T1' ? Math.max(P.wait, restOf(p)) : P.wait);
@@ -1286,8 +1286,8 @@
           talk(IMG.point, 'Misuriamo come cambi con Elvy. Prima il <b>T0</b>, senza niente: è il tuo punto di partenza. Poi applichi Elvy e dopo <b>30 minuti</b> rifai gli stessi test (T1). Usi Elvy per 15 giorni e li rifai (T2), poi ancora a <b>30 giorni</b> (T3).', true) +
           '<div class="card" style="margin-top:14px">' + timeline(null) + '</div>' +
           '<div class="card" style="margin-top:14px"><h3>Quali test?</h3><p class="small muted" style="margin-top:4px">Scegline da 1 a 4: li rifarai uguali a ogni tappa.</p><div class="chips" style="margin-top:10px">' +
-          PATH_TESTS.map((id) => '<button type="button" data-pt="' + id + '" aria-pressed="' + pick.includes(id) + '">' + TESTS[id].name + (REST[id] ? ' · riposo ' + (REST[id] >= 60 ? '1 ora' : REST[id] + ' min') : '') + '</button>').join('') + '</div>' +
-          '<p class="note" style="margin-top:10px">Corsa, Cooper, salti ripetuti e plank stancano: li facciamo per ultimi. Finito il T0 applichi subito Elvy e riposi (1 ora se c\'è il Cooper): intanto Elvy agisce, poi rifai i test.</p></div>' +
+          PATH_TESTS.map((id) => '<button type="button" data-pt="' + id + '" aria-pressed="' + pick.includes(id) + '">' + TESTS[id].name + (REST[id] ? ' · riposo ' + REST[id] + ' min' : '') + '</button>').join('') + '</div>' +
+          '<p class="note" style="margin-top:10px">Corsa, Cooper, salti ripetuti e plank stancano: li facciamo per ultimi. Finito il T0 applichi subito Elvy e riposi 50 minuti con Elvy addosso: intanto Elvy agisce, poi rifai i test.</p></div>' +
           '<div class="card" style="margin-top:14px"><h3>Il T0 si fa senza niente</h3><p class="small muted" style="margin-top:6px">Elvy stimola il sistema propriocettivo e il suo effetto dura anche dopo averlo tolto. Per questo il T0 va fatto <b style="color:#fff">prima di usare Elvy</b>, mai dopo una prova con Elvy.</p>' +
           (used ? '<div class="warn" style="margin-top:10px">Risulta che hai già usato Elvy su questo telefono: il T0 potrebbe non essere neutro. Fallo solo se non lo usi da tempo.</div>' : '') +
           '<label class="check" style="margin-top:12px"><input type="checkbox" id="pt-ok" /><span>Non ho Elvy addosso e non l\'ho usato prima del T0</span></label></div>' +
