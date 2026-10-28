@@ -1,0 +1,18 @@
+# Legge su Google Play lo stato di tutti i canali (produzione, test) senza modificare nulla.
+# Si avvia a mano: GitHub → Actions → "Google Play: stato" → Run workflow.
+name: "Google Play: stato"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stato dei canali
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          pip install -q google-auth requests
+          python .github/scripts/play_status.py
