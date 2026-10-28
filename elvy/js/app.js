@@ -887,9 +887,16 @@
       }
       const cond = ses ? ses.cond : device.on ? 'con' : 'senza';
       const rec = { id: Date.now(), t: Date.now(), test: id, cond, where: cond === 'con' ? device.where || PROTO : null, variant: test.variant(opts), opts, demo, main: test.main(res), res, session: ses ? ses.sid : null };
+      if (ses && ses.path) { rec.path = ses.path; rec.phase = ses.phase; }
       const all = results(); all.push(rec); saveResults(all);
+      const pa = ses && ses.path ? getPath() : null;
+      if (pa && pa.id === ses.path) {
+        pa.done[ses.phase][id] = rec.id;
+        if (ses.phase === 'T0' && phaseDone(pa, 'T0')) pa.t0At = rec.t;
+        savePath(pa);
+      }
       if (ses && ses.sid && cond === 'con') store.set('elvy-cmp', null);
-      const to = ses && ses.sid ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
+      const to = ses && ses.to ? ses.to : ses && ses.sid ? '#/confronto/' + ses.sid : '#/r/' + rec.id;
       if (location.hash === to) route(); else location.hash = to; // il passo 3 parte dalla stessa pagina del confronto
     } catch (e) {
       ctx.close(); if (off) off();
@@ -987,11 +994,13 @@
     const open = cmpOpen(); const ot = open && TESTS[open.test];
     const sess = sessions(); const lastS = sess[sess.length - 1];
     const long = device.on && minsSince(device.since) > 240;
+    const path = getPath();
     const line = long ? 'Hai Elvy addosso da più di 4 ore: il protocollo dice di toglierlo. Riposati e riprendiamo domani.'
       : ot ? 'Abbiamo un confronto a metà: ' + ot.full.toLowerCase() + '. Applica Elvy e facciamo il test con Elvy.'
+      : path ? pathLine(path)
+      : !usedElvy() ? 'Iniziamo il Percorso Elvy? Prima il T0, senza niente: è il tuo punto di partenza. Poi vediamo cosa cambia con Elvy dopo 30 minuti, 15 e 30 giorni.'
       : device.on ? 'Hai Elvy addosso: oggi ti propongo ' + st.full.toLowerCase() + ' con Elvy.'
-      : !sess.length ? 'Facciamo il primo confronto? Lo stesso test prima senza Elvy e poi con Elvy: così vediamo se cambia qualcosa per te.'
-      : 'Oggi ti propongo ' + st.full.toLowerCase() + ', senza e con Elvy. Ogni confronto rende più chiara la tua tendenza.';
+      : 'Oggi ti propongo ' + st.full.toLowerCase() + '. Ripeti i test nel tempo e guarda i progressi.';
     const autoSay = store.get('elvy-said', '') !== new Date().toDateString();
     if (autoSay) store.set('elvy-said', new Date().toDateString());
     $app.innerHTML = brand() + '<div class="top"><div><div class="date">' + cap(dateLong(Date.now())) + '</div><h1>Ciao' + (profile.name ? ', ' + esc(profile.name) : '') + '</h1></div></div>' +
@@ -1000,6 +1009,7 @@
       (ot ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><h3 style="margin-top:6px">' + ot.full + '</h3><p class="small muted" style="margin-top:4px">Fatto senza Elvy. Ora applica Elvy e ripeti il test.</p><span class="btn small" style="margin-top:12px">Continua</span></a>' : '') +
       (lastS ? '<a class="card cmp-last" href="#/confronto/' + lastS.sid + '"><div class="row between"><div><div class="k">Ultimo confronto</div><h3 style="margin-top:6px">' + TESTS[lastS.test].full + '</h3><p class="small muted" style="margin-top:4px">' + fmt(lastS.s.main, TESTS[lastS.test].metric.d) + ' senza · ' + fmt(lastS.c.main, TESTS[lastS.test].metric.d) + ' con Elvy ' + TESTS[lastS.test].metric.unit + '</p></div>' +
         '<span class="delta ' + (lastS.good ? '' : lastS.good === false ? 'neg' : 'neu') + '">' + pctTxt(lastS.pct) + '</span></div></a>' : '') +
+      (path ? pathCard(path) : !usedElvy() ? '<a class="card path-card" href="#/percorso"><div class="k p">Percorso Elvy</div>' + timeline(null) + '<p class="small muted" style="margin-top:10px">Inizia dal T0, senza niente.</p><span class="btn small" style="margin-top:12px">Inizia il percorso</span></a>' : '') +
       rec + card +
       '<div class="card hero" style="margin-top:14px;padding:0;padding-right:18px"><img src="' + IMG.point + '" alt="" style="width:34%;max-width:150px;border-radius:0;align-self:stretch" /><div style="padding:18px 0 18px 0"><div class="k p">Oggi ti consiglio</div><h3 style="margin-top:8px;font-size:20px;line-height:1.25">' + st.full + ', ' + st.sub + '</h3>' +
       '<a class="btn small" style="margin-top:14px" href="#/test/' + sug + '">Senza e con Elvy · ' + (st.minutes * 2 + 1) + ' min</a></div></div>' +
@@ -1013,7 +1023,7 @@
     document.body.classList.add('gated'); // niente barra in basso finché non si è presentati
     const owner = (window.ElvyGate && ElvyGate.owner && ElvyGate.owner()) || ''; // nome registrato in Airtable
     $app.innerHTML = '<div style="text-align:center;margin-top:10px"><img src="img/logo-elvy.png" alt="Elvy" style="width:150px" /></div>' +
-      '<div style="margin-top:18px">' + talk(IMG.hi, 'Ciao' + (owner ? ' <b>' + esc(owner) + '</b>' : '') + '! Sono <b>Elvy</b>, il tuo allenatore. Con i sensori del telefono misuriamo equilibrio, salti, corsa e riflessi. Ogni test lo facciamo <b>prima senza Elvy e poi con Elvy</b>, e nei progressi vediamo come cambi.', true) + '</div>' +
+      '<div style="margin-top:18px">' + talk(IMG.hi, 'Ciao' + (owner ? ' <b>' + esc(owner) + '</b>' : '') + '! Sono <b>Elvy</b>, il tuo allenatore. Con i sensori del telefono misuriamo equilibrio, salti, corsa e riflessi. Partiamo da un <b>T0 senza niente</b>, poi misuriamo con Elvy dopo 30 minuti, a 15 e a 30 giorni, e vediamo come cambi.', true) + '</div>' +
       '<div class="card" style="margin-top:18px"><h3>Come ti chiami?</h3>' +
       '<label class="field"><span>Nome</span><input id="w-name" autocomplete="given-name" maxlength="40" value="' + esc(owner) + '" /></label>' +
       '<label class="field"><span>Sport</span><input id="w-sport" placeholder="es. calcio, corsa, tennis" maxlength="40" /></label>' +
@@ -1035,6 +1045,7 @@
     setTab('test');
     $app.innerHTML = brand() + '<div class="top" style="align-items:center"><h1>Test</h1>' + elvyPill() + '</div>' +
       '<p class="muted">' + (device.on ? 'I test di adesso vengono segnati in automatico «con Elvy».' : 'Applica Elvy e tocca il pulsante: i test verranno segnati «con Elvy».') + '</p>' +
+      '<div style="margin-top:14px">' + (getPath() ? pathCard(getPath()) : '<a class="card path-card" href="#/percorso"><div class="k p">Percorso Elvy</div>' + timeline(null) + '<p class="small muted" style="margin-top:10px">T0 senza niente, T1 dopo 30 minuti con Elvy, poi a 15 e a 30 giorni.</p></a>') + '</div>' +
       GROUPS.map((g) => '<div class="k' + (PURPLE.includes(g) ? ' p' : '') + ' sec">' + g + '</div><div class="tiles">' +
         Object.keys(TESTS).filter((k) => TESTS[k].group === g).map((k) => {
           const t = TESTS[k]; const l = lastOf(k);
@@ -1061,24 +1072,24 @@
     const prev = results().filter((r) => r.test === id);
     const open = cmpOpen(); const mine = open && open.test === id;
     $app.innerHTML = '<div class="head">' + backBtn() + '<div><div class="k">' + t.group + '</div><h1>' + t.full + '</h1></div></div>' +
-      '<div class="stack">' + talk(t.group === 'Salti' ? IMG.jump : IMG.point, INTRO[id] + (mine ? ' Il test senza Elvy l\'hai già fatto: ora applica Elvy e continua.' : device.on ? ' Hai Elvy addosso: fai il test <b>con Elvy</b> tutte le volte che vuoi.' : ' Puoi ripeterlo <b>senza Elvy</b> tutte le volte che vuoi, oppure fare il confronto: prima senza e poi con Elvy.'), true) +
+      '<div class="stack">' + talk(t.group === 'Salti' ? IMG.jump : IMG.point, INTRO[id] + (mine ? ' Il test senza Elvy l\'hai già fatto: ora applica Elvy e continua.' : SINGLE.includes(id) ? '' : PATH_TESTS.includes(id) ? ' Puoi ripeterlo quando vuoi. Per vedere cosa cambia con Elvy usa il <b>Percorso Elvy</b>: T0 senza niente, poi con Elvy dopo 30 minuti, a 15 e a 30 giorni.' : ''), true) +
       (mine ? '<a class="card cmp-open" href="#/confronto/' + open.sid + '"><div class="k p">Confronto in corso · passo 2 di 3</div><p class="small muted" style="margin-top:4px">Fatto senza Elvy alle ' + timeShort(open.t) + '.</p><span class="btn small" style="margin-top:12px">Continua il confronto</span></a>' : '') +
       (t.options.length ? '<div class="card stack">' + t.options.map((op) => '<div><div class="small muted" style="font-weight:700;margin-bottom:6px">' + op.label + '</div><div class="seg">' +
         Object.keys(op.values).map((v) => '<button type="button" data-opt="' + op.key + '" data-val="' + v + '" aria-pressed="' + (String(o[op.key]) === v) + '">' + op.values[v] + '</button>').join('') + '</div></div>').join('') + '</div>' : '') +
       place +
       '<div class="card"><h3 style="margin-bottom:12px">Come si fa</h3><ol class="steps">' + steps.map((s) => '<li>' + s + '</li>').join('') + '</ol>' +
       '<p class="small muted">Dura circa ' + t.minutes + ' min. La voce ti guida: alza il volume.</p></div>' +
-      (device.on ? '' : '<div class="card"><h3>Il confronto in 3 passi</h3>' + stepper(0) + '<p class="small muted">Stesso test, stesse condizioni: prima senza Elvy, poi applichi i dispositivi e lo ripeti. Alla fine vedi la differenza.</p></div>') +
+      (PATH_TESTS.includes(id) ? (getPath() ? pathCard(getPath()) : '<a class="card path-card" href="#/percorso"><div class="k p">Percorso Elvy</div>' + timeline(null) + '<p class="small muted" style="margin-top:10px">T0 senza niente, T1 dopo 30 minuti con Elvy, poi a 15 e a 30 giorni: vedi cosa migliora.</p></a>') : '') +
       SAFE + '</div>' +
       (error ? '<p class="err" role="alert">' + esc(error) + '</p>' : '') +
-      '<div class="actions">' + (device.on
-        ? '<button class="btn" data-run="con">Test con Elvy</button><button class="btn ghost" data-run="senza">Test senza Elvy</button>'
-        : '<button class="btn" data-run="senza">Test senza Elvy</button><button class="btn ghost" id="go-cmp">Confronto senza e con Elvy</button><button class="btn ghost" data-run="con">Test con Elvy</button>') +
+      '<div class="actions">' + (SINGLE.includes(id) ? '<button class="btn" id="go-one">Inizia la misura</button>'
+        : device.on ? '<button class="btn" data-run="con">Test con Elvy</button><button class="btn ghost" data-run="senza">Test senza Elvy</button>'
+        : '<button class="btn" data-run="senza">Test senza Elvy</button><a class="btn ghost" href="#/percorso">Percorso Elvy</a><button class="btn ghost" data-run="con">Test con Elvy</button>') +
       (prev.length ? '<a class="btn ghost" href="#/progressi/' + id + '">I tuoi progressi (' + prev.length + ')</a>' : '') + '</div>';
     $app.querySelectorAll('[data-opt]').forEach((b) => { b.onclick = () => { prefs[id] = Object.assign({}, prefs[id], { [b.dataset.opt]: b.dataset.val }); savePrefs(); renderTest(id); }; });
     $app.querySelectorAll('[data-run]').forEach((b) => { b.onclick = () => runAs(id, b.dataset.run, Object.assign({}, t.defaults || {}, prefs[id] || {})); });
-    const cmp = document.getElementById('go-cmp');
-    if (cmp) cmp.onclick = () => beginCompare(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
+    const one = document.getElementById('go-one');
+    if (one) one.onclick = () => startTest(id, Object.assign({}, t.defaults || {}, prefs[id] || {}));
     bindCommon();
   }
 
@@ -1203,14 +1214,156 @@
     bindCommon();
   }
 
+  /* ───────── Percorso Elvy: T0 senza niente → T1 dopo 30 minuti con Elvy → T2 a 15 giorni → T3 a 30 giorni ─────────
+     Elvy stimola il sistema propriocettivo e lascia un effetto che dura anche dopo averlo tolto: per questo il T0
+     si fa sempre senza niente, prima di usare Elvy, e mai dopo una prova con Elvy. */
+  const PATH_TESTS = ['una-gamba', 'in-piedi', 'cmj', 'drop', 'hop', 'corsa', 'plank', 'mobilita', 'reazione', 'swing'];
+  const SINGLE = ['hrv', 'cooper']; // misure senza confronto con e senza Elvy (recupero, prova massimale)
+  const PHASES = [
+    { k: 'T0', name: 'T0', sub: 'senza niente', day: 0, cond: 'senza' },
+    { k: 'T1', name: 'T1', sub: '30 minuti con Elvy', day: 0, cond: 'con', wait: 30 },
+    { k: 'T2', name: 'T2', sub: 'dopo 15 giorni', day: 15, cond: 'con', wait: 30 },
+    { k: 'T3', name: 'T3', sub: 'dopo 30 giorni', day: 30, cond: 'con', wait: 30 },
+  ];
+  const DAY = 86400000;
+  const getPath = () => store.get('elvy-path', null);
+  const savePath = (p) => store.set('elvy-path', p);
+  const pathRec = (p, ph, id) => (p && p.done[ph] && p.done[ph][id] ? results().find((r) => r.id === p.done[ph][id]) || null : null);
+  const phaseDone = (p, ph) => p.tests.every((id) => pathRec(p, ph, id));
+  // fase da fare adesso: { P, ready, opensAt, apply, left } oppure null se il percorso è finito
+  function phaseNow(p) {
+    for (const P of PHASES) {
+      if (phaseDone(p, P.k)) continue;
+      const opensAt = P.day ? p.t0At + (P.day - 1) * DAY : 0; // si può fare da un giorno prima
+      if (Date.now() < opensAt) return { P, ready: false, opensAt };
+      if (P.wait && !(p.applied && p.applied[P.k])) return { P, ready: true, apply: true };
+      const left = P.wait ? p.applied[P.k] + P.wait * 60000 - Date.now() : 0;
+      return { P, ready: left <= 0, left };
+    }
+    return null;
+  }
+  const usedElvy = () => results().some((r) => r.cond === 'con') || !!device.since;
+  const daysTxt = (ms) => { const d = Math.ceil(ms / DAY); return d <= 1 ? 'domani' : 'tra ' + d + ' giorni'; };
+  // riga breve per Oggi e per la scheda del test
+  function pathLine(p) {
+    const n = phaseNow(p);
+    if (!n) return 'Percorso Elvy completato: guarda cosa è migliorato dal T0.';
+    if (!n.ready && n.opensAt) return 'Percorso Elvy: il ' + n.P.name + ' (' + n.P.sub + ') si fa ' + daysTxt(n.opensAt - Date.now()) + ', il ' + dateShort(n.opensAt) + '. Intanto usa Elvy come da protocollo.';
+    if (n.apply) return 'Percorso Elvy: è il momento del ' + n.P.name + '. Applica Elvy e dopo 30 minuti rifai i test.';
+    if (!n.ready) return 'Percorso Elvy: Elvy è applicato, tra ' + Math.ceil(n.left / 60000) + ' minuti facciamo il ' + n.P.name + '.';
+    return 'Percorso Elvy: è il momento del ' + n.P.name + ' (' + n.P.sub + ').';
+  }
+  const pathCard = (p) => '<a class="card path-card" href="#/percorso"><div class="k p">Percorso Elvy</div>' + timeline(p) +
+    '<p class="small muted" style="margin-top:10px">' + esc(pathLine(p).replace(/^Percorso Elvy: /, '')) + '</p></a>';
+  function timeline(p) {
+    const n = p ? phaseNow(p) : null;
+    return '<ol class="path-tl">' + PHASES.map((P) => {
+      const done = p && phaseDone(p, P.k); const now = n && n.P.k === P.k;
+      const when = done ? dateShort(Math.max(...p.tests.map((id) => (pathRec(p, P.k, id) || {}).t || 0))) : p && p.t0At && P.day ? dateShort(p.t0At + P.day * DAY) : P.sub;
+      return '<li class="' + (done ? 'done' : now ? 'now' : '') + '"><i>' + (done ? '✓' : P.name) + '</i><b>' + P.name + '</b><span>' + when + '</span></li>';
+    }).join('') + '</ol>';
+  }
+
+  function renderPath() {
+    setTab('test');
+    clearInterval(renderPath.iv);
+    const p = getPath();
+    const head = '<div class="head">' + backBtn() + '<div><div class="k p">T0 · T1 · 15 giorni · 30 giorni</div><h1>Percorso Elvy</h1></div></div>';
+    if (!p) {
+      // nuovo percorso: scelta dei test e conferma del T0 neutro
+      let pick = ['una-gamba', 'cmj'];
+      const used = usedElvy();
+      const draw = () => {
+        $app.innerHTML = head +
+          talk(IMG.point, 'Misuriamo come cambi con Elvy. Prima il <b>T0</b>, senza niente: è il tuo punto di partenza. Poi applichi Elvy e dopo <b>30 minuti</b> rifai gli stessi test (T1). Usi Elvy per 15 giorni e li rifai (T2), poi ancora a <b>30 giorni</b> (T3).', true) +
+          '<div class="card" style="margin-top:14px">' + timeline(null) + '</div>' +
+          '<div class="card" style="margin-top:14px"><h3>Quali test?</h3><p class="small muted" style="margin-top:4px">Scegline da 1 a 4: li rifarai uguali a ogni tappa.</p><div class="chips" style="margin-top:10px">' +
+          PATH_TESTS.map((id) => '<button type="button" data-pt="' + id + '" aria-pressed="' + pick.includes(id) + '">' + TESTS[id].name + '</button>').join('') + '</div></div>' +
+          '<div class="card" style="margin-top:14px"><h3>Il T0 si fa senza niente</h3><p class="small muted" style="margin-top:6px">Elvy stimola il sistema propriocettivo e il suo effetto dura anche dopo averlo tolto. Per questo il T0 va fatto <b style="color:#fff">prima di usare Elvy</b>, mai dopo una prova con Elvy.</p>' +
+          (used ? '<div class="warn" style="margin-top:10px">Risulta che hai già usato Elvy su questo telefono: il T0 potrebbe non essere neutro. Fallo solo se non lo usi da tempo.</div>' : '') +
+          '<label class="check" style="margin-top:12px"><input type="checkbox" id="pt-ok" /><span>Non ho Elvy addosso e non l\'ho usato prima del T0</span></label></div>' +
+          '<div class="actions"><button class="btn" id="pt-go" disabled>Inizia il T0</button></div>';
+        $app.querySelectorAll('[data-pt]').forEach((b) => {
+          b.onclick = () => { const id = b.dataset.pt; pick = pick.includes(id) ? pick.filter((x) => x !== id) : pick.length < 4 ? pick.concat(id) : pick; draw(); };
+        });
+        const ok = document.getElementById('pt-ok'); const go = document.getElementById('pt-go');
+        ok.onchange = () => { go.disabled = !ok.checked || !pick.length; };
+        go.onclick = () => {
+          const opts = {}; pick.forEach((id) => { opts[id] = Object.assign({}, TESTS[id].defaults || {}, prefs[id] || {}); });
+          if (device.on) { device.on = false; device.since = null; saveDevice(); }
+          savePath({ id: 'p' + Date.now(), start: Date.now(), tests: pick, opts, done: { T0: {}, T1: {}, T2: {}, T3: {} }, applied: {}, t0At: null });
+          renderPath();
+        };
+        bindCommon();
+      };
+      return draw();
+    }
+
+    const n = phaseNow(p);
+    const run = (id) => startTest(id, p.opts[id] || {}, { sid: null, cond: n.P.cond, path: p.id, phase: n.P.k, to: '#/percorso' });
+    let now = '';
+    if (n && n.ready && !n.apply) {
+      now = '<div class="card" style="margin-top:14px"><div class="k">' + n.P.name + ' · ' + n.P.sub + '</div><h3 style="margin-top:6px">' + (n.P.cond === 'senza' ? 'Test senza niente' : 'Test con Elvy applicato') + '</h3>' +
+        '<div class="path-tests">' + p.tests.map((id) => { const r = pathRec(p, n.P.k, id); const t = TESTS[id];
+          return '<div class="path-test"><div><b>' + t.name + '</b><span>' + (r ? fmt(r.main, t.metric.d) + ' ' + t.metric.unit + ' ✓' : t.sub) + '</span></div>' +
+            (r ? '<button class="btn small ghost" data-run="' + id + '">Rifai</button>' : '<button class="btn small" data-run="' + id + '">Fai il test</button>') + '</div>'; }).join('') + '</div>' +
+        '<p class="note" style="margin-top:10px">Stesse condizioni a ogni tappa: stesso posto, stesse scarpe, stessa posizione del telefono, possibilmente alla stessa ora.</p></div>';
+    } else if (n && n.apply) {
+      now = '<div class="card apply" style="margin-top:14px"><div class="k">' + n.P.name + ' · ' + n.P.sub + '</div><h3 style="margin-top:6px">Applica Elvy</h3><div class="apply-row">' + BODY_BACK +
+        '<ol class="steps"><li><b>C7</b>: la vertebra che sporge alla base del collo.</li><li><b>Polpacci</b>: parte bassa, sopra il tendine d\'Achille.</li><li>Metti Elvy sulla parte adesiva del cerotto, poi tutto sulla pelle.</li></ol></div>' +
+        '<p class="small muted">Dopo 30 minuti con Elvy addosso rifai gli stessi test.</p><div class="actions"><button class="btn" id="pt-on">Ho applicato Elvy</button></div></div>';
+    } else if (n && !n.ready && n.left > 0) {
+      now = '<div class="card path-wait" style="margin-top:14px"><div class="k">' + n.P.name + ' · ' + n.P.sub + '</div><div class="big" id="pt-left" style="margin-top:8px">' + Math.ceil(n.left / 60000) + '<small>min</small></div>' +
+        '<p class="small muted">Elvy è applicato dalle ' + timeShort(p.applied[n.P.k]) + '. Tienilo addosso: tra poco rifacciamo i test. Puoi chiudere l\'app, ti aspetto qui.</p></div>';
+      renderPath.iv = setInterval(() => { if (location.hash !== '#/percorso') return clearInterval(renderPath.iv); const l = p.applied[n.P.k] + n.P.wait * 60000 - Date.now(); if (l <= 0) renderPath(); else { const el = document.getElementById('pt-left'); if (el) el.innerHTML = Math.ceil(l / 60000) + '<small>min</small>'; } }, 20000);
+    } else if (n) {
+      now = '<div class="card" style="margin-top:14px"><div class="k">Prossima tappa · ' + n.P.name + '</div><h3 style="margin-top:6px">' + cap(daysTxt(n.opensAt - Date.now())) + ', ' + dateLong(n.opensAt) + '</h3>' +
+        '<p class="small muted" style="margin-top:6px">Intanto usa Elvy come da protocollo: al massimo 4 ore al giorno, 5 giorni a settimana. Quel giorno lo applichi, aspetti 30 minuti e rifai i test.</p></div>';
+    }
+
+    // risultati: ogni tappa rispetto al T0
+    const any = p.tests.some((id) => pathRec(p, 'T1', id));
+    const table = !pathRec(p, 'T0', p.tests[0]) ? '' : '<div class="card" style="margin-top:14px"><h3>Cosa cambia rispetto al T0</h3><div class="path-table-wrap"><table class="cmp-table path-table"><thead><tr><th></th>' +
+      PHASES.map((P) => '<th>' + P.name + '</th>').join('') + '</tr></thead><tbody>' +
+      p.tests.map((id) => { const t = TESTS[id]; const r0 = pathRec(p, 'T0', id);
+        return '<tr><td>' + t.name + '<small>' + t.metric.unit + '</small></td>' + PHASES.map((P) => { const r = pathRec(p, P.k, id);
+          if (!r) return '<td class="dim">—</td>';
+          if (P.k === 'T0' || !r0) return '<td><b>' + fmt(r.main, t.metric.d) + '</b></td>';
+          const e = effect(t, r0.main, r.main);
+          return '<td><b>' + fmt(r.main, t.metric.d) + '</b><span class="' + (e.same ? '' : e.good ? 'up' : e.good === false ? 'down' : '') + '">' + pctTxt(e.pct) + '</span></td>'; }).join('') + '</tr>'; }).join('') +
+      '</tbody></table></div><p class="note" style="margin-top:10px">Percentuale rispetto al T0. Verde = meglio, secondo il verso della misura. Sono stime per l\'allenamento, non misure cliniche.</p></div>';
+    // commento della mascotte
+    let say = pathLine(p);
+    if (any) {
+      const last = PHASES.slice().reverse().find((P) => p.tests.some((id) => pathRec(p, P.k, id)));
+      const ef = p.tests.map((id) => { const a = pathRec(p, 'T0', id); const b = pathRec(p, last.k, id); return a && b ? effect(TESTS[id], a.main, b.main) : null; }).filter(Boolean);
+      const up = ef.filter((e) => e.good && !e.same).length;
+      say = (up ? 'Al ' + last.name + ' sei migliorato in ' + up + ' test su ' + ef.length + ' rispetto al T0. ' : 'Al ' + last.name + ' i risultati sono simili al T0. ') + (n ? pathLine(p).replace(/^Percorso Elvy: /, '') : 'Percorso completato!');
+    }
+    $app.innerHTML = head + talk(n && n.apply ? IMG.point : any ? IMG.ok : IMG.point, say, true) +
+      '<div class="card" style="margin-top:14px">' + timeline(p) + '</div>' + now + table +
+      '<div class="actions">' + (!n ? '<a class="btn" href="#/report">Condividi il report in PDF</a>' : '') +
+      '<button class="btn ghost small" id="pt-reset">' + (n ? 'Annulla il percorso' : 'Nuovo percorso') + '</button></div>';
+    $app.querySelectorAll('[data-run]').forEach((b) => { b.onclick = () => run(b.dataset.run); });
+    const on = document.getElementById('pt-on');
+    if (on) on.onclick = () => { p.applied[n.P.k] = Date.now(); savePath(p); device.on = true; device.where = PROTO; device.since = device.since || Date.now(); saveDevice(); renderPath(); };
+    document.getElementById('pt-reset').onclick = () => {
+      if (!confirm(n ? 'Annullare il percorso? Le misure fatte restano nei progressi.' : 'Iniziare un nuovo percorso? Ricorda: il nuovo T0 va fatto senza niente e senza aver usato Elvy prima.')) return;
+      store.set('elvy-path-old', (store.get('elvy-path-old', []) || []).concat([p])); savePath(null); renderPath();
+    };
+    bindCommon();
+  }
+
   function renderProgress() {
     setTab('progressi');
     const all = results();
     const ids = Object.keys(TESTS).filter((k) => all.some((r) => r.test === k));
     const ses = sessions(); const better = ses.filter((x) => x.good).length; const worse = ses.filter((x) => x.good === false).length;
-    const sum = !ses.length ? 'Qui vedrai i tuoi progressi e l\'effetto di Elvy. Fai un confronto: lo stesso test senza e con Elvy.'
+    const pth = getPath();
+    const sum = pth ? pathLine(pth) : !ses.length ? 'Qui vedrai i tuoi progressi e l\'effetto di Elvy. Inizia il Percorso Elvy: T0 senza niente, poi con Elvy dopo 30 minuti, a 15 e a 30 giorni.'
       : 'Hai fatto ' + (ses.length === 1 ? 'un confronto' : ses.length + ' confronti') + ' senza e con Elvy. ' + (better ? 'Con Elvy sei andato meglio ' + (better === 1 ? 'una volta' : better + ' volte') + (worse ? ', peggio ' + (worse === 1 ? 'una volta' : worse + ' volte') : '') + '.' : 'Per ora nessuna differenza chiara: continua a confrontare.');
     $app.innerHTML = brand() + '<div class="top"><h1>Progressi</h1></div>' + talk(ses.length && better ? IMG.jump : IMG.point, sum, true) +
+      '<div style="margin-top:14px">' + (pth ? pathCard(pth) : '<a class="card path-card" href="#/percorso"><div class="k p">Percorso Elvy</div>' + timeline(null) + '<p class="small muted" style="margin-top:10px">Misura dove parti (T0) e cosa cambia con Elvy.</p></a>') + '</div>' +
       '<a class="card rep-link" href="#/report"><span class="rep-ico">PDF</span><span><b>Report da salvare o condividere</b><br><span class="small muted">test, confronti senza e con Elvy, recupero</span></span><span class="chev">›</span></a>' +
       (ses.length ? '<div class="grid3" style="margin-top:14px">' + stat('Confronti', ses.length, '') + stat('Meglio con Elvy', better, '', '', false) + stat('Uguale o peggio', ses.length - better, '', '', true) + '</div>' : '') +
       (ids.length ? '<h3 class="sec">I tuoi test</h3>' + ids.map((k) => {
@@ -1471,6 +1624,7 @@
       case 'test': return parts[1] ? renderTest(parts[1]) : renderTests();
       case 'r': return renderResult(parts[1]);
       case 'confronto': return renderCompare(parts[1]);
+      case 'percorso': return renderPath();
       case 'video': setTab('test'); return window.ElvyVideo ? window.ElvyVideo.render($app, { backBtn, talk, bindCommon, results, saveResults, device, PROTO, fmt }) : renderTests();
       case 'esercizio': setTab('test'); return window.ElvyExercise ? window.ElvyExercise.render($app, { backBtn, talk, bindCommon }) : renderTests();
       case 'progressi': return parts[1] ? renderProgressTest(parts[1]) : renderProgress();
