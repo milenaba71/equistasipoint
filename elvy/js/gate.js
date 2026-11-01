@@ -83,9 +83,8 @@
       (mode === 'back' ? '<button type="button" class="dev-win" id="g-scan" aria-label="Inquadra il codice a barre del dispositivo"><span class="dev-idle">' + BARS + '<span id="g-win">' + IDLE + '</span></span></button>'
         : '<div class="dev-win done">' + BARS + '</div>') +
       '<span class="dev-row"><span class="dev-sn" id="g-sn">' + (sn ? esc(sn) : DOTS) + '</span><span class="dev-ce" aria-hidden="true">CE</span></span></div>';
-    const front = '<div class="dev-face dev-front" aria-hidden="true"><div class="dev-logo"><svg class="dev-waves" viewBox="0 0 120 50" aria-hidden="true">' +
-      Array.from({ length: 9 }, (_, i) => '<path d="M0 ' + (18 + i * 1.6) + ' C30 ' + (6 + i * 3) + ', 60 ' + (40 - i * 3) + ', 120 ' + (22 + i) + '" />').join('') +
-      '</svg><img src="img/logo-e.png" alt="" /><span>Elvy</span></div><i class="dev-shine"></i></div>';
+    // fronte del dispositivo Elvy: il disegno ufficiale (img/elvy-fronte.png)
+    const front = '<div class="dev-face dev-front dev-img" aria-hidden="true"><img src="img/elvy-fronte.png" alt="" /><i class="dev-shine"></i></div>';
     return '<div class="dev3d is-' + mode + '" id="dev"><div class="dev-card">' + back + front + '</div></div>' +
       (sn ? '<div class="dev-under"><span>Numero di serie</span><b>' + esc(sn) + '</b></div>' : '');
   }
