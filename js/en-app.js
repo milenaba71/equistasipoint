@@ -151,6 +151,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Servizio di verifica non configurato.": "Verification service not configured.",
   "Impossibile verificare ora. Controlla la connessione e riprova.": "Unable to verify now. Check your connection and try again.",
   "Accedi": "Sign in",
+  "Non riusciamo a leggere il dispositivo. Prova a digitare qui il codice del tuo dispositivo.": "We can’t read the device. Try typing your device code here.",
   "Il noleggio di questo dispositivo è terminato. Per informazioni scrivi a info@equistasi.com": "The rental of this device has ended. For information write to info@equistasi.com",
   "Questo dispositivo è già stato spostato 3 volte negli ultimi 30 giorni. Per spostarlo ancora scrivi a info@equistasi.com": "This device has already been moved 3 times in the last 30 days. To move it again write to info@equistasi.com",
   "Già attivo su un altro telefono": "Already active on another phone",

@@ -1101,7 +1101,8 @@
   document.getElementById('gate-cancel').addEventListener('click', () => window.EqScan.stop());
   // Come in Elvy: prima si inquadra; il codice a mano compare solo se la fotocamera non ci riesce.
   // I messaggi non parlano di seriali né di elenchi.
-  const SCAN_MS = 25000;
+  const SCAN_MS = 5000; // dopo 5 secondi senza lettura compare il codice da scrivere a mano
+  const MSG_TIMEOUT = () => T('Non riusciamo a leggere il dispositivo. Prova a digitare qui il codice del tuo dispositivo.');
   const MSG_TYPE = () => T('Prova a digitare il codice a mano qui sotto: magari la fotocamera l’ha letto male.');
   const MSG_NO = () => T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.');
   const MSG_NET = () => T('Impossibile verificare ora. Controlla la connessione e riprova.');
@@ -1156,7 +1157,8 @@
         if (r.ok) {
           store.set('tp-serial', r.serial);
           gate.hidden = true; showPaired(r.serial);
-        } else if (r.error === 'net') showManual(MSG_NET(), r.serial);
+        } else if (r.error === 'timeout') showManual(MSG_TIMEOUT());
+        else if (r.error === 'net') showManual(MSG_NET(), r.serial);
         else afterFail(r.serial, true);
       } catch (e) {
         camError(e);
@@ -1174,7 +1176,7 @@
         torch: document.getElementById('gate-torch'),
         accept,
       });
-      if (!text) { if (timedOut) showManual(MSG_TYPE()); return; }
+      if (!text) { if (timedOut) showManual(MSG_TIMEOUT()); return; }
       const serial = normSerial(text);
       gateSn.textContent = serial; gateWin(T('Abbinamento in corso…'), 'read');
       gateInput.value = serial; fromScan = true;
