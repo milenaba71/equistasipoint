@@ -489,16 +489,16 @@ main { padding-top: 0; padding-bottom: 12px; }
 /* Barra di navigazione in basso (indaco, voce attiva gialla) */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   height: calc(var(--tab-h) + env(safe-area-inset-bottom)); padding: 6px 8px env(safe-area-inset-bottom);
   background: var(--indigo);
 }
 .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: rgba(255, 255, 255, .7); font-size: 11.5px; font-weight: 700; }
 .tabbar a svg { width: 24px; height: 24px; }
-.tabbar a .tb-ic { display: grid; place-items: center; width: 48px; height: 30px; border-radius: 999px; }
+.tabbar a .tb-ic { display: grid; place-items: center; width: 44px; height: 30px; border-radius: 999px; }
 .tabbar a.on { color: #fff; }
 .tabbar a.on .tb-ic { background: var(--yellow); color: var(--indigo); }
-@media (min-width: 820px) { .tabbar { left: 50%; right: auto; transform: translateX(-50%); bottom: 14px; width: 420px; border-radius: 22px; height: var(--tab-h); padding: 6px 8px; box-shadow: 0 12px 30px rgba(41, 35, 92, .3); } }
+@media (min-width: 820px) { .tabbar { left: 50%; right: auto; transform: translateX(-50%); bottom: 14px; width: 500px; border-radius: 22px; height: var(--tab-h); padding: 6px 8px; box-shadow: 0 12px 30px rgba(41, 35, 92, .3); } }
 .foot { padding-bottom: calc(var(--tab-h) + 24px + env(safe-area-inset-bottom)); }
 .tests-promo .vpromo-ico { overflow: hidden; padding: 0; }
 .tests-promo .vpromo-ico img { width: 100%; height: 100%; object-fit: cover; display: block; }
