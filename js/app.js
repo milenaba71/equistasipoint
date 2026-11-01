@@ -1066,7 +1066,7 @@
   const reasonMsg = (r) => ({
     ended: T('Il noleggio di questo dispositivo è terminato. Per informazioni scrivi a info@equistasi.com'),
     limit: T('Questo dispositivo è già stato spostato 3 volte negli ultimi 30 giorni. Per spostarlo ancora scrivi a info@equistasi.com'),
-  }[r] || T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.'));
+  }[r] || T('Il tuo dispositivo è di tipo vecchio e non può essere abbinato all’app.'));
 
   async function verifySerial(serial, move) {
     if (pairV2()) return (await pairDevice(serial, move)).ok;
@@ -1104,7 +1104,7 @@
   const SCAN_MS = 10000; // dopo 10 secondi senza lettura compare il codice da scrivere a mano
   const MSG_TIMEOUT = () => T('Non riusciamo a leggere il dispositivo. Prova a digitare qui il codice del tuo dispositivo.');
   const MSG_TYPE = () => T('Prova a digitare il codice a mano qui sotto: magari la fotocamera l’ha letto male.');
-  const MSG_NO = () => T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.');
+  const MSG_NO = () => T('Il tuo dispositivo è di tipo vecchio e non può essere abbinato all’app.');
   const MSG_NET = () => T('Impossibile verificare ora. Controlla la connessione e riprova.');
   const gateManual = document.getElementById('gate-manual');
   let fromScan = false;
@@ -1142,6 +1142,23 @@
     }
     if (why === 'invalid' && scanned) { showManual(MSG_TYPE(), serial); return; }
     gateMsg.className = 'gate-msg'; gateMsg.textContent = why === 'invalid' ? MSG_NO() : reasonMsg(why);
+    if (why === 'invalid' || why === 'noaccess') noPairPopup();
+  }
+  // Riquadro grande sopra la schermata di abbinamento: dispositivo vecchio o senza app
+  function noPairPopup() {
+    let m = document.getElementById('nopair');
+    if (!m) {
+      m = document.createElement('div');
+      m.className = 'modal'; m.id = 'nopair';
+      m.innerHTML = '<div class="modal-box nopair-box" role="alertdialog" aria-modal="true" aria-labelledby="nopair-t" aria-describedby="nopair-d">' +
+        '<div class="nopair-ic" aria-hidden="true">!</div><h2 id="nopair-t">' + T('Dispositivo non abbinabile') + '</h2>' +
+        '<p id="nopair-d">' + MSG_NO() + '</p><p class="small muted">' + T('Per informazioni scrivi a info@equistasi.com') + '</p>' +
+        '<button type="button" class="btn primary" id="nopair-ok">' + T('Ho capito') + '</button></div>';
+      document.body.appendChild(m);
+      m.querySelector('#nopair-ok').addEventListener('click', () => { m.hidden = true; gateInput.focus(); });
+    }
+    m.hidden = false;
+    setTimeout(() => m.querySelector('#nopair-ok').focus(), 50);
   }
   gateScan.addEventListener('click', async () => {
     if (gateDev.classList.contains('scanning')) return;

@@ -1104,3 +1104,11 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .lock-page { text-align: center; padding: 28px 20px; }
 .lock-page .lock-ic { display: block; font-size: 44px; margin-bottom: 8px; }
 .lock-page .btn { margin-top: 10px; }
+
+/* Riquadro grande: dispositivo non abbinabile */
+.nopair-box { text-align: center; padding: 30px 24px; }
+.nopair-ic { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center;
+  background: #FDE8E8; color: #C62828; font-size: 44px; font-weight: 800; }
+.nopair-box h2 { font-size: 26px !important; }
+.nopair-box #nopair-d { font-size: 20px !important; line-height: 1.4; font-weight: 700; }
+.nopair-box .btn { width: 100%; }
