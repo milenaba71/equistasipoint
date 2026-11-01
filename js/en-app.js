@@ -151,6 +151,8 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Servizio di verifica non configurato.": "Verification service not configured.",
   "Impossibile verificare ora. Controlla la connessione e riprova.": "Unable to verify now. Check your connection and try again.",
   "Accedi": "Sign in",
+  "Con <b>un solo dispositivo</b> le {n} X sono punti alternativi: scegli il più doloroso.": "With <b>one device</b> the {n} X marks are alternative points: choose the most painful one.",
+  "<b>Se hai più dispositivi</b>, puoi provare ad applicarli tutti insieme, sui punti più dolorosi.": "<b>If you have more than one device</b>, you can try applying them all together, on the most painful points.",
   "Le X sono alternative": "The X marks are alternatives",
   "Hai <b>un solo dispositivo</b>: le {n} X sono punti possibili, non vanno usati tutti insieme.": "You have <b>one device</b>: the {n} X marks are possible points, not to be used all together.",
   "Premi con il dito su ogni X, dove senti più dolore applica il dispositivo": "Press each X with your finger, apply the device where it hurts most",

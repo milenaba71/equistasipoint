@@ -1154,3 +1154,4 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 @keyframes txPain { 0%, 37% { opacity: 0; } 40% { opacity: 1; } 55%, 100% { opacity: 0; } }
 @keyframes txDev { 0%, 60% { opacity: 0; transform: translateY(-30px); } 68%, 92% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; } }
 @keyframes txFade { 0%, 60% { opacity: 1; } 66%, 92% { opacity: .25; } 100% { opacity: 1; } }
+.twox-more { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: #F1F0F8; font-size: 14.5px; }

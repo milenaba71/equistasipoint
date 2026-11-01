@@ -357,7 +357,7 @@
   function twoXCard(n) {
     const xs = (cx) => '<g class="tx-x" transform="translate(' + cx + ' 62)">' + xMark(0, 0, 9, false) + '</g>';
     return '<div class="card twox" role="note"><h3>' + T('Le X sono alternative') + '</h3>' +
-      '<p class="twox-lead">' + T('Hai <b>un solo dispositivo</b>: le {n} X sono punti possibili, non vanno usati tutti insieme.', { n }) + '</p>' +
+      '<p class="twox-lead">' + T('Con <b>un solo dispositivo</b> le {n} X sono punti alternativi: scegli il più doloroso.', { n }) + '</p>' +
       '<svg class="twox-anim" viewBox="0 0 260 130" role="img" aria-label="' + esc(T('Premi con il dito su ogni X, dove senti più dolore applica il dispositivo')) + '">' +
       '<rect x="6" y="14" width="248" height="96" rx="40" class="tx-skin"/>' +
       '<g class="tx-xa">' + xs(80) + '</g><g class="tx-xb">' + xs(180) + '</g>' +
@@ -367,7 +367,8 @@
       '</svg>' +
       '<ol class="twox-steps"><li><b>' + T('Premi con il dito') + '</b> ' + T('su ogni X, una alla volta.') + '</li>' +
       '<li><b>' + T('Scegli la X dove senti più dolore') + '</b> ' + T('(quella che riproduce meglio il tuo dolore).') + '</li>' +
-      '<li><b>' + T('Applica lì il dispositivo') + '</b>, ' + T('con il centro esattamente sulla X.') + '</li></ol></div>';
+      '<li><b>' + T('Applica lì il dispositivo') + '</b>, ' + T('con il centro esattamente sulla X.') + '</li></ol>' +
+      '<p class="twox-more">' + T('<b>Se hai più dispositivi</b>, puoi provare ad applicarli tutti insieme, sui punti più dolorosi.') + '</p></div>';
   }
 
   function renderMuscle(id) {
