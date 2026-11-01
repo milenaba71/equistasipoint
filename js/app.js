@@ -1019,7 +1019,58 @@
 
   const normSerial = (s) => s.toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
-  async function verifySerial(serial) {
+  /* Abbinamento con Supabase (pair_device): un telefono alla volta e tipo di dispositivo.
+     Attivo con APP_CONFIG.pointLive, oppure sui telefoni di prova aperti una volta con ?prova=1. */
+  const cfg = window.APP_CONFIG || {};
+  try {
+    const q = new URLSearchParams(location.search).get('prova');
+    if (q === '1') store.set('tp-v2', '1'); else if (q === '0') { store.set('tp-v2', ''); store.set('tp-kind', ''); }
+  } catch (e) { /* URLSearchParams non disponibile */ }
+  const pairV2 = () => !!(cfg.supabaseUrl && cfg.pointKey) && (cfg.pointLive || store.get('tp-v2', '') === '1');
+  // Codice casuale del telefono, creato al primo avvio (stessa chiave di Elvy: sullo stesso telefono conta come uno)
+  function phoneId() {
+    let id = store.get('eq-phone-id', '');
+    if (!id) {
+      id = window.crypto && crypto.randomUUID ? crypto.randomUUID() : Array.from({ length: 4 }, () => Math.random().toString(36).slice(2, 10)).join('-');
+      store.set('eq-phone-id', id);
+    }
+    return id;
+  }
+  // esito dell'ultima verifica: { ok, reason: invalid | noaccess | ended | other | limit }
+  let lastCheck = { ok: false };
+  async function pairDevice(serial, move) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 15000);
+    try {
+      const r = await fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/pair_device', {
+        method: 'POST', headers: { apikey: cfg.pointKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ p_serial: serial, p_phone: phoneId(), p_move: !!move }), cache: 'no-store', signal: ctrl.signal,
+      });
+      if (!r.ok) throw new Error('net');
+      const d = await r.json();
+      if (!d || !d.valid) return (lastCheck = { ok: false, reason: 'invalid' });
+      if (d.status === 'ended') return (lastCheck = { ok: false, reason: 'ended' });
+      if (d.access === false) return (lastCheck = { ok: false, reason: 'noaccess' });
+      if (d.status === 'other_phone') return (lastCheck = { ok: false, reason: 'other' });
+      if (d.status === 'limit') return (lastCheck = { ok: false, reason: 'limit' });
+      // tipo di dispositivo: sezioni aperte, strumenti prof, passaggi di applicazione (gel o silicone)
+      const kind = window.EqAccess ? window.EqAccess.kindOf(d.tipo, d.pro) : '';
+      store.set('tp-kind', kind);
+      store.set('tp-pro', kind === 'prof' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
+      if (kind === 'gel' || state.devType === 'gel') { state.devType = kind === 'gel' ? 'gel' : 'silicone'; store.set('tp-devtype', state.devType); }
+      if (window.EqCalib) window.EqCalib.update(serial, d.cal); // calibrazione annuale
+      return (lastCheck = { ok: true, moved: d.status === 'moved' });
+    } finally { clearTimeout(t); }
+  }
+  // messaggio per ogni esito negativo (mai seriali o elenchi)
+  const reasonMsg = (r) => ({
+    ended: T('Il noleggio di questo dispositivo è terminato. Per informazioni scrivi a info@equistasi.com'),
+    limit: T('Questo dispositivo è già stato spostato 3 volte negli ultimi 30 giorni. Per spostarlo ancora scrivi a info@equistasi.com'),
+  }[r] || T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.'));
+
+  async function verifySerial(serial, move) {
+    if (pairV2()) return (await pairDevice(serial, move)).ok;
+    lastCheck = { ok: false, reason: 'invalid' };
     const url = (window.APP_CONFIG || {}).verifyUrl;
     if (!url) throw new Error('config');
     const ctrl = new AbortController();
@@ -1033,6 +1084,7 @@
         store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
         if (window.EqCalib) window.EqCalib.update(serial, data.cal); // calibrazione annuale
       }
+      lastCheck = { ok, reason: ok ? '' : 'invalid' };
       return ok;
     } finally { clearTimeout(t); }
   }
@@ -1065,6 +1117,31 @@
   const camError = (e) => showManual(e.message === 'denied'
     ? T('Per inquadrare il codice consenti l’uso della fotocamera, oppure digitalo a mano qui sotto.')
     : T('Non riesco ad aprire la fotocamera. Digita il codice a mano qui sotto.'));
+  // titolo dell'animazione quando il dispositivo non si abbina
+  const koTitle = () => ({ other: T('Già attivo su un altro telefono'), ended: T('Noleggio terminato'), limit: T('Limite raggiunto'),
+    noaccess: T('Dispositivo non supportato') }[lastCheck.reason] || T('Codice non letto'));
+  function pairedOk(serial) {
+    store.set('tp-serial', serial);
+    gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Il dispositivo si è abbinato all’app. Benvenuto!');
+    if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
+    setTimeout(() => { gate.hidden = true; showPaired(serial); }, 900);
+  }
+  // esito negativo: spostamento da un altro telefono (con conferma), codice letto male, oppure il messaggio dell'esito
+  async function afterFail(serial, scanned) {
+    gateWin(T('Clicca qui e abbina il dispositivo')); gateSn.textContent = gateSnIdle;
+    const why = lastCheck.reason;
+    if (why === 'other') {
+      if (!confirm(T('Questo dispositivo è attivo su un altro telefono. Vuoi spostarlo su questo telefono? L’altro telefono verrà scollegato.'))) {
+        gateMsg.className = 'gate-msg'; gateMsg.textContent = T('Il dispositivo resta sull’altro telefono.'); return;
+      }
+      try {
+        if (await verifySerial(serial, true)) { pairedOk(serial); return; }
+      } catch (e) { gateMsg.className = 'gate-msg'; gateMsg.textContent = MSG_NET(); return; }
+      gateMsg.className = 'gate-msg'; gateMsg.textContent = reasonMsg(lastCheck.reason); return;
+    }
+    if (why === 'invalid' && scanned) { showManual(MSG_TYPE(), serial); return; }
+    gateMsg.className = 'gate-msg'; gateMsg.textContent = why === 'invalid' ? MSG_NO() : reasonMsg(why);
+  }
   gateScan.addEventListener('click', async () => {
     if (gateDev.classList.contains('scanning')) return;
     gateMsg.className = 'gate-msg'; gateMsg.textContent = '';
@@ -1074,12 +1151,13 @@
     if (window.EqPair && !window.EqPair.reduced()) {
       gateDev.classList.add('scanning');
       try {
-        const r = await window.EqPair.run({ accept, norm: normSerial, verify: verifySerial, timeout: SCAN_MS, koText: T('Codice non letto') });
+        const r = await window.EqPair.run({ accept, norm: normSerial, verify: verifySerial, timeout: SCAN_MS, koText: koTitle });
         if (!r) return;
         if (r.ok) {
           store.set('tp-serial', r.serial);
           gate.hidden = true; showPaired(r.serial);
-        } else showManual(r.error === 'net' ? MSG_NET() : MSG_TYPE(), r.serial);
+        } else if (r.error === 'net') showManual(MSG_NET(), r.serial);
+        else afterFail(r.serial, true);
       } catch (e) {
         camError(e);
       } finally {
@@ -1134,15 +1212,9 @@
     if (serial.length < 5) { gateMsg.textContent = T('Inserisci il codice completo.'); gateInput.focus(); return; }
     gateBtn.disabled = true; gateBtn.textContent = T('Verifica in corso…'); gateMsg.textContent = '';
     try {
-      if (await verifySerial(serial)) {
-        store.set('tp-serial', serial);
-        gateMsg.className = 'gate-msg ok'; gateMsg.textContent = T('Il dispositivo si è abbinato all’app. Benvenuto!');
-        if (gateDev.classList.contains('read')) gateWin('✓ ' + T('Abbinato all’app'), 'paired');
-        setTimeout(() => { gate.hidden = true; showPaired(serial); }, 900);
-      } else {
-        // letto dalla fotocamera: prima si prova a mano; scritto a mano: il dispositivo non si abbina
-        if (scanned) showManual(MSG_TYPE(), serial);
-        else { gateMsg.textContent = MSG_NO(); gateWin(T('Clicca qui e abbina il dispositivo')); }
+      if (await verifySerial(serial)) pairedOk(serial);
+      else {
+        afterFail(serial, scanned);
       }
     } catch (e) {
       gateMsg.textContent = e.message === 'config' ? T('Servizio di verifica non configurato.') : MSG_NET();
@@ -1232,16 +1304,28 @@
   }
 
   window.tpLogout = function () {
-    try { localStorage.removeItem('tp-serial'); } catch (e) { /* storage non disponibile */ }
+    try { localStorage.removeItem('tp-serial'); localStorage.removeItem('tp-kind'); } catch (e) { /* storage non disponibile */ }
     location.hash = '#/'; location.reload();
   };
 
   if (store.get('tp-serial', '')) {
     start();
     // una volta al giorno ricontrolla se il dispositivo è a noleggio professionale (senza bloccare l'app)
-    if (Date.now() - Number(store.get('tp-pro-at', '0')) > 864e5) verifySerial(store.get('tp-serial', '')).then(() => { if (/^#\/(pro|test|info)?$/.test(location.hash) || location.hash === '') route(); }).catch(() => {});
+    if (Date.now() - Number(store.get('tp-pro-at', '0')) > 864e5) verifySerial(store.get('tp-serial', '')).then((ok) => {
+      const why = lastCheck.reason;
+      if (!ok && pairV2() && (why === 'other' || why === 'ended' || why === 'noaccess')) {
+        // i dati (test, misure, profilo) restano sul telefono: si scollega solo il dispositivo
+        store.set('tp-gate-msg', why === 'other' ? T('Il dispositivo è stato spostato su un altro telefono. Per usarlo di nuovo qui, abbinalo ancora.') : reasonMsg(why));
+        window.tpLogout(); return;
+      }
+      if (/^#\/(pro|test|info|postura)?$/.test(location.hash) || location.hash === '') route();
+    }).catch(() => {});
   }
-  else { gate.hidden = false; setTimeout(() => gateInput.focus(), 50); }
+  else {
+    gate.hidden = false; setTimeout(() => gateInput.focus(), 50);
+    const gm = store.get('tp-gate-msg', '');
+    if (gm) { gateMsg.className = 'gate-msg'; gateMsg.textContent = gm; store.set('tp-gate-msg', ''); }
+  }
 
   /* Offline */
   // nell'app per iPhone/Android i file sono già nel pacchetto: niente service worker

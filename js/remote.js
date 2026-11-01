@@ -114,6 +114,7 @@
     if (!c || !c.cmd) return;
     if (c.cmd === 'hello') { send({}); return; }
     if (c.cmd === 'sprint') {
+      if (window.EqAccess && window.EqAccess.locked('sprint')) { send({ phase: 'error', error: window.EqAccess.lockNote() }); return; }
       const time = Number(c.time), dist = Number(c.dist) || 20;
       if (time > 0.5 && time < 120) {
         const res = window.EqTests.addSprint(time, dist, c.cond === 'con' ? 'con' : 'senza');

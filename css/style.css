@@ -1097,3 +1097,10 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .cal-card.due .cal-bar i { width: 0 !important; }
 .cal-card .btn { margin-top: 10px; }
 .acct-panel .cal-card { margin: 4px 0 0; box-shadow: none; }
+
+/* Sezioni chiuse per il tipo di dispositivo (Gel): visibili con il lucchetto */
+.locked { opacity: .78; }
+.lock-ic { font-size: 1em; }
+.lock-page { text-align: center; padding: 28px 20px; }
+.lock-page .lock-ic { display: block; font-size: 44px; margin-bottom: 8px; }
+.lock-page .btn { margin-top: 10px; }

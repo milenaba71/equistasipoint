@@ -188,6 +188,10 @@
       '<p class="small muted" style="margin:6px 0 0">' + T('Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.') + '</p></div>' +
       '<img class="ts-hero" src="' + IMG.hero + '" alt="" loading="lazy" />' + SAFETY + (window.EqRemote ? window.EqRemote.cardHtml() : '') + '<div class="list">' + Object.keys(TESTS).map((k) => {
         const tt = TESTS[k]; const n = results().filter((r) => r.type === k).length;
+        // con il Gel lo sprint resta visibile con il lucchetto
+        if (window.EqAccess && window.EqAccess.locked(k)) {
+          return '<a class="m-item locked" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + window.EqAccess.LOCK + ' ' + tt.name + '</b><br><span class="small muted">' + window.EqAccess.lockNote() + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+        }
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
           (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
@@ -201,6 +205,7 @@
   function renderTest(app, type) {
     const tt = TESTS[type];
     if (!tt) return renderList(app);
+    if (window.EqAccess && window.EqAccess.locked(type)) { app.innerHTML = window.EqAccess.lockedPage(tt.name); return; }
     let setup = '';
     let how = '';
     if (type === 'ortostasi') {
