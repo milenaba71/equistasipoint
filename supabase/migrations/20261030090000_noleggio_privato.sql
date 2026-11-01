@@ -5,7 +5,7 @@
 -- - il telefono del cliente precedente riceve status 'ended' e non può riprenderlo.
 
 alter table public.phone_links add column if not exists customer_id text;  -- cliente del noleggio al momento dell'abbinamento
-alter table public.link_log add column if not exists customer_id text;     -- per «fine_noleggio»: il cliente il cui noleggio è finito
+alter table public.link_log add column if not exists customer_id text;     -- noleggio privato: il cliente che usava quel telefono
 
 create or replace function public.pair_device(p_serial text, p_phone text, p_move boolean default false)
 returns jsonb
@@ -51,9 +51,11 @@ begin
     if coalesce(reso, false) then
       return base || jsonb_build_object('access', false, 'status', 'ended');
     end if;
-    -- telefono di un cliente precedente: il noleggio per lui è finito (se lo stesso cliente noleggia di nuovo, torna valido)
-    if cust is not null and exists (select 1 from public.link_log g where g.serial = s and g.phone_id = ph
-                                      and g.action = 'fine_noleggio' and g.customer_id is distinct from cust) then
+    -- telefono di un cliente precedente: il noleggio per lui è finito
+    -- (ogni telefono usato da un altro cliente con questo seriale; se lo stesso cliente noleggia di nuovo, torna valido)
+    if cust is not null
+       and exists (select 1 from public.link_log g where g.serial = s and g.phone_id = ph and g.customer_id <> cust)
+       and not exists (select 1 from public.link_log g where g.serial = s and g.phone_id = ph and g.customer_id = cust) then
       return base || jsonb_build_object('access', false, 'status', 'ended');
     end if;
   end if;
@@ -61,7 +63,7 @@ begin
   select * into l from public.phone_links where serial = s for update;
   if not found then
     insert into public.phone_links (serial, phone_id, customer_id) values (s, ph, cust);
-    insert into public.link_log (serial, phone_id, action) values (s, ph, 'abbinato');
+    insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'abbinato', cust);
     return base || jsonb_build_object('status', 'ok');
   end if;
 
@@ -69,6 +71,7 @@ begin
     if l.customer_id is null then
       -- abbinato prima che la Rubrica arrivasse su Supabase: il cliente è quello in corso
       update public.phone_links set customer_id = cust where serial = s;
+      update public.link_log set customer_id = cust where serial = s and customer_id is null;
       l.customer_id := cust;
     elsif l.customer_id <> cust then
       -- il dispositivo è passato a un nuovo cliente: il telefono precedente è chiuso
@@ -79,7 +82,7 @@ begin
       update public.phone_links
          set phone_id = ph, customer_id = cust, linked_at = now(), moves = 0, moves_since = now()
        where serial = s;
-      insert into public.link_log (serial, phone_id, action) values (s, ph, 'abbinato');
+      insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'abbinato', cust);
       return base || jsonb_build_object('status', 'ok');
     end if;
   end if;
@@ -95,13 +98,13 @@ begin
     l.moves := 0; l.moves_since := now();
   end if;
   if l.blocked or l.moves >= 3 then
-    insert into public.link_log (serial, phone_id, action) values (s, ph, 'limite');
+    insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'limite', cust);
     return base || jsonb_build_object('status', 'limit');
   end if;
   update public.phone_links
      set phone_id = ph, linked_at = now(), moves = l.moves + 1, moves_since = l.moves_since
    where serial = s;
-  insert into public.link_log (serial, phone_id, action) values (s, ph, 'spostato');
+  insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'spostato', cust);
   return base || jsonb_build_object('status', 'moved');
 end;
 $$;
