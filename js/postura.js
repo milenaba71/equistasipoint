@@ -206,6 +206,10 @@
 
   /* ───────── Pagina principale ───────── */
   function cardHtml() {
+    if (window.EqAccess && window.EqAccess.locked('postura')) {
+      return '<a class="card vpromo pz-promo locked" href="#/postura"><span class="vpromo-ico pz-ico" aria-hidden="true">' + ICON.stabilita + '</span>' +
+        '<span><b>' + window.EqAccess.LOCK + ' ' + T('Misura la postura') + '</b><br><span class="small muted">' + window.EqAccess.lockNote() + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+    }
     const st = records().filter((r) => r.test === 'stabilita').pop();
     return '<a class="card vpromo pz-promo" href="#/postura"><span class="vpromo-ico pz-ico" aria-hidden="true">' + ICON.stabilita + '</span>' +
       '<span><b>' + T('Misura la postura') + '</b><br><span class="small muted">' +
@@ -906,6 +910,7 @@
   function render(app, arg, arg2, arg3) {
     if (stopRec) stopRec();
     if (window.speechSynthesis) try { window.speechSynthesis.cancel(); } catch (e) { /* */ }
+    if (window.EqAccess && window.EqAccess.locked('postura')) { app.innerHTML = window.EqAccess.lockedPage(T('Misura la postura')); return; }
     if (arg === 'stabilita') renderStability(app);
     else if (arg === 'tronco' || arg === 'testa' || arg === 'schiena') renderStatic(app, arg);
     else if (arg === 'risultato') renderResult(app, arg2);

@@ -23,6 +23,11 @@ window.APP_CONFIG = {
   // supabaseKey = chiave «publishable» (sb_publishable_…). Vuota: verifica con verifyUrl, senza telefono unico.
   supabaseUrl: 'https://lxnntieqcumhjnvfbbgu.supabase.co',
   supabaseKey: '',
+  // Equistasi Point: abbinamento con pair_device di Supabase (un telefono alla volta, tipo di dispositivo).
+  // pointKey = chiave «publishable» (pubblica). pointLive: false = ancora con verifyUrl di Make,
+  // salvo i telefoni di prova aperti una volta con ?prova=1 (?prova=0 per tornare indietro).
+  pointKey: 'sb_publishable_TYFg4ICPgE_FSTCCYPf4Zg_AyvuPXrO',
+  pointLive: false,
   // Elvy: webhook Make «Elvy – Nome del titolare» (nameUrl?serial=… → {"nome": "…"}),
   // la mascotte saluta con il nome registrato in Airtable per il kit.
   nameUrl: 'https://hook.eu2.make.com/06btuoglenzkyfk3t811ygejdbbvfhvt',

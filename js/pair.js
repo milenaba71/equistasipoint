@@ -186,7 +186,7 @@
           setTimeout(() => close({ serial: SER.text, ok: true }), opts.hold || 700);
         } else {
           sfx('error');
-          $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : (opts.koText || T('Seriale non riconosciuto')); $('.pair-s').textContent = SER.text;
+          $('.pair-t').textContent = verified === 'err' ? T('Nessuna connessione') : ((typeof opts.koText === 'function' ? opts.koText() : opts.koText) || T('Seriale non riconosciuto')); $('.pair-s').textContent = SER.text;
           setTimeout(() => close({ serial: SER.text, ok: false, error: verified === 'err' ? 'net' : 'invalid' }), 1800);
         }
       }
