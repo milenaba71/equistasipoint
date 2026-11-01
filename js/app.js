@@ -1101,7 +1101,7 @@
   document.getElementById('gate-cancel').addEventListener('click', () => window.EqScan.stop());
   // Come in Elvy: prima si inquadra; il codice a mano compare solo se la fotocamera non ci riesce.
   // I messaggi non parlano di seriali né di elenchi.
-  const SCAN_MS = 5000; // dopo 5 secondi senza lettura compare il codice da scrivere a mano
+  const SCAN_MS = 10000; // dopo 10 secondi senza lettura compare il codice da scrivere a mano
   const MSG_TIMEOUT = () => T('Non riusciamo a leggere il dispositivo. Prova a digitare qui il codice del tuo dispositivo.');
   const MSG_TYPE = () => T('Prova a digitare il codice a mano qui sotto: magari la fotocamera l’ha letto male.');
   const MSG_NO = () => T('Il tuo dispositivo non può essere abbinato: è un modello precedente o non supportato dall’app.');
