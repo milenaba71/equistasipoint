@@ -184,7 +184,8 @@
   }
 
   function renderList(app) {
-    app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Sport') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
+    const locked = (k) => window.EqAccess && window.EqAccess.locked(k);
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Misura') + '</div><h1>' + T('Misura i tuoi <span class="hl">progressi</span>') + '</h1>' +
       '<p class="small muted" style="margin:6px 0 0">' + T('Ripeti i test nel tempo, senza e con Equistasi, e confronta i tuoi risultati.') + '</p></div>' +
       '<img class="ts-hero" src="' + IMG.hero + '" alt="" loading="lazy" />' + SAFETY + (window.EqRemote ? window.EqRemote.cardHtml() : '') + '<div class="list">' + Object.keys(TESTS).map((k) => {
         const tt = TESTS[k]; const n = results().filter((r) => r.type === k).length;
@@ -195,10 +196,11 @@
         return '<a class="m-item" href="#/test/' + k + '"><span class="ts-ico" aria-hidden="true"><img src="' + IMG[k] + '" alt="" loading="lazy" /></span><span><b>' + tt.name + '</b><br><span class="small muted">' + tt.desc +
           (n ? ' · ' + T('{n} prove', { n }) : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
       }).join('') + '</div>' +
+      (window.EqPosture ? window.EqPosture.cardHtml() : '') + (window.EqChair ? window.EqChair.cardHtml() : '') +
       (window.EqPro ? window.EqPro.cardHtml() : '') +
       '<h2 class="sec-title">' + T('Report') + '</h2>' +
-      '<a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></span>' +
-      '<span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Test, postura e foto senza e con Equistasi, da inviare al fisioterapista o all’allenatore') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' +
+      '<a class="card vpromo ts-report' + (locked('postura') ? ' locked' : '') + '" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/></svg></span>' +
+      '<span><b>' + (locked('postura') ? window.EqAccess.LOCK + ' ' : '') + T('Report in PDF') + '</b><br><span class="small muted">' + (locked('postura') ? window.EqAccess.lockNote() : T('Test, postura e foto senza e con Equistasi, da inviare al fisioterapista o all’allenatore')) + '</span></span><span class="chev" aria-hidden="true">›</span></a>' +
       '<p class="small muted" style="margin-top:14px">' + T('I risultati sono stime fatte con i sensori del telefono e restano salvati solo sul tuo dispositivo.') + '</p>';
   }
 

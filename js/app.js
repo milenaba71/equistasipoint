@@ -821,18 +821,13 @@
   function setBack(on) { btnBack.hidden = !on; }
   btnBack.addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
 
-  // Barra in basso: la quarta voce è "Progressi" per lo sport, "Info" per gli altri profili
-  const PROGRESS_ICON = '<svg viewBox="0 0 24 24"><path d="M4 19h16M6 15l4-4 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const INFO_ICON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="7.6" r="1.3" fill="currentColor"/></svg>';
+  // Barra in basso: Mappa, Promemoria, Misura (tutti i test e la postura), Video, Info
   function updateTabs(page) {
     const extra = document.getElementById('tab-extra');
     if (!extra) return;
-    const sport = (getProfile() || {}).type === 'sport';
-    extra.href = sport ? '#/test' : '#/info';
-    extra.innerHTML = '<span class="tb-ic">' + (sport ? PROGRESS_ICON : INFO_ICON) + '</span>' + (sport ? T('Progressi') : T('Info'));
     const homeTab = document.querySelector('#tabbar [data-tab="home"]');
     if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? T('Home') : T('Mappa');
-    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', postura: 'home', promemoria: 'promemoria', video: 'video', test: 'extra', info: 'extra' }[page || ''];
+    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', postura: 'misura', sedia: 'misura', pro: 'misura', promemoria: 'promemoria', video: 'video', test: 'misura', info: 'extra' }[page || ''];
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
 
