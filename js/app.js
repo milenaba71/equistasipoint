@@ -352,6 +352,24 @@
       T('<div class="warn"><b>Toglilo prima se senti fastidio.</b> ') + esc(sc.removeEarly) + '<br><br>' + esc(sc.reassure) + ' ' + esc(sc.persist) + '</div></div>';
   }
 
+  /* Più X sullo stesso muscolo: sono alternative, il dispositivo è uno solo.
+     Animazione breve (si ripete): il dito preme ogni X, dove fa più male si mette il dispositivo. */
+  function twoXCard(n) {
+    const xs = (cx) => '<g class="tx-x" transform="translate(' + cx + ' 62)">' + xMark(0, 0, 9, false) + '</g>';
+    return '<div class="card twox" role="note"><h3>' + T('Le X sono alternative') + '</h3>' +
+      '<p class="twox-lead">' + T('Hai <b>un solo dispositivo</b>: le {n} X sono punti possibili, non vanno usati tutti insieme.', { n }) + '</p>' +
+      '<svg class="twox-anim" viewBox="0 0 260 130" role="img" aria-label="' + esc(T('Premi con il dito su ogni X, dove senti più dolore applica il dispositivo')) + '">' +
+      '<rect x="6" y="14" width="248" height="96" rx="40" class="tx-skin"/>' +
+      '<g class="tx-xa">' + xs(80) + '</g><g class="tx-xb">' + xs(180) + '</g>' +
+      '<g class="tx-pain"><circle cx="180" cy="62" r="16"/><circle cx="180" cy="62" r="26"/><text x="180" y="24" text-anchor="middle">' + esc(T('Ahi!')) + '</text></g>' +
+      '<g class="tx-dev"><rect x="152" y="40" width="56" height="44" rx="12"/><rect x="164" y="52" width="32" height="20" rx="6" class="tx-dev-in"/></g>' +
+      '<g class="tx-finger"><rect x="-17" y="26" width="38" height="36" rx="13"/><rect x="-7" y="0" width="14" height="40" rx="7"/><path d="M-5 6h10" class="tx-nail"/></g>' +
+      '</svg>' +
+      '<ol class="twox-steps"><li><b>' + T('Premi con il dito') + '</b> ' + T('su ogni X, una alla volta.') + '</li>' +
+      '<li><b>' + T('Scegli la X dove senti più dolore') + '</b> ' + T('(quella che riproduce meglio il tuo dolore).') + '</li>' +
+      '<li><b>' + T('Applica lì il dispositivo') + '</b>, ' + T('con il centro esattamente sulla X.') + '</li></ol></div>';
+  }
+
   function renderMuscle(id) {
     const m = byId(id);
     const EQ = window.EQUISTASI;
@@ -376,6 +394,7 @@
       '<div class="toolbar">' + sideToggle() +
       '<div class="seg" role="group" aria-label="Zoom"><button data-zoom="1" aria-pressed="' + state.zoom + T('">Dettaglio</button><button data-zoom="0" aria-pressed="') + !state.zoom + T('">Corpo intero</button></div></div>') +
       '<div class="figures' + (views.length > 1 ? ' two' : '') + '">' + figs + '</div>' + legend() + '</div>' +
+      (nX > 1 ? twoXCard(nX) : '') +
       '<div class="card" id="mvideos" hidden></div>' +
       '</div><div>' +
       (m.warning ? T('<div class="card warn"><b>Attenzione.</b> ') + esc(m.warning) + '</div>' : '') +
@@ -387,7 +406,6 @@
       Object.keys(EQ.types).map((t) => '<button data-devtype="' + t + '" aria-pressed="' + (state.devType === t) + '">' + EQ.types[t] + '</button>').join('') +
       '</div></div>' + gelPhotos() + '<ol class="steps">' +
       [].concat(EQ.steps.start, EQ.steps[state.devType] || EQ.steps.silicone, EQ.steps.end).map((s) => '<li>' + esc(s) + '</li>').join('') + '</ol>' +
-      (nX > 1 ? T('<p class="small" style="margin:0 0 10px">Su questo muscolo ci sono <b>') + nX + T(' punti</b> tipici: scegli quello più dolente alla pressione, che riproduce meglio il tuo dolore.</p>') : '') +
       '<div class="callout">' + esc(window.EQUISTASI.blue) + '</div></div>' +
       window.EqTimer.cardHtml() + scheduleCard() +
       T('<div class="card"><h3>Come trovare il punto esatto</h3><p class="small" style="margin:0">') + esc(window.EQUISTASI.find) + '</p>' +
