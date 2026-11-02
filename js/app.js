@@ -543,6 +543,27 @@
   const loadAllVideos = () => loadContent().then((c) => (c ? c.videos : null));
   const loadProtocols = () => loadContent().then((c) => (c ? c.protocols.filter((x) => visibleFor(x, 'protocol')) : null));
 
+  /* Strumenti per il professionista → Protocolli: tutti i protocolli, per ogni profilo (app e PDF) */
+  function renderProProtocols() {
+    setBack(true);
+    if (!(window.EqPro && window.EqPro.isPro())) { location.hash = '#/pro'; return; }
+    const appPs = window.APP_PROTOCOLS || [];
+    app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Professionista') + '</div><h1>' + T('Protocolli') + '</h1>' +
+      '<p class="small muted" style="margin:6px 0 0">' + T('Tutti i protocolli Equistasi, per ogni tipo di paziente.') + '</p></div>' +
+      (appPs.length ? '<h2 class="sec-title">' + T('Protocolli nell’app') + '</h2>' + appPs.map((x) => '<a class="card pcard" href="#/protocollo/' + x.id + '">' +
+        '<img src="' + esc(x.thumb || x.img) + '" alt="" loading="lazy" />' + T('<span><span class="eyebrow">Protocollo</span><b>') + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + '</span></span>' +
+        '<span class="chev" aria-hidden="true">›</span></a>').join('') : '') +
+      '<div class="card"><h3>' + T('Protocolli in PDF') + '</h3><div id="pro-protos"><p class="muted small" style="margin:0">' + T('Caricamento…') + '</p></div></div>';
+    loadContent().then((c) => {
+      const box = document.getElementById('pro-protos'); if (!box) return;
+      if (!c) { box.innerHTML = T('<p class="muted small" style="margin:0">I protocolli non sono disponibili in questo momento. Controlla la connessione.</p>'); return; }
+      const ps = c.protocols;
+      box.innerHTML = ps.length ? ps.map((x) => '<a class="proto" href="#/pdf" data-pdf="' + esc(x.url) + '" data-title="' + esc(x.title) + T('"><span class="pdf" aria-hidden="true">PDF</span>') +
+        '<span><b>' + esc(x.title) + '</b>' + (x.subtitle ? '<span class="small muted">' + esc(x.subtitle) + '</span>' : '') + '</span><span class="chev" aria-hidden="true">›</span></a>').join('')
+        : '<p class="muted small" style="margin:0">' + T('Nessun protocollo in PDF.') + '</p>';
+    });
+  }
+
   function protocolsCard(title) {
     setTimeout(() => {
       const box = document.getElementById('protos');
@@ -855,6 +876,7 @@
     else if (page === 'promemoria') renderTimer();
     else if (page === 'pdf') renderPdf();
     else if (page === 'test') { setBack(true); window.EqTests.render(app, arg); }
+    else if (page === 'pro' && arg === 'protocolli') renderProProtocols();
     else if (page === 'pro') { setBack(true); window.EqPro.render(app, arg); }
     else if (page === 'postura') { setBack(true); window.EqPosture.render(app, arg, arg2, arg3); }
     else if (page === 'sedia' || page === 'beta') { setBack(true); window.EqChair.render(app, page === 'beta' ? 'beta' : arg); }

@@ -449,6 +449,7 @@
     app.innerHTML = head(T('Strumenti per il professionista'), T('Riservati ai dispositivi Equistasi a noleggio professionale.')) +
       (window.EqRemote ? window.EqRemote.cardHtml() : '') +
       '<div class="list">' +
+      tile('#/pro/protocolli', T('Protocolli'), T('Tutti i protocolli Equistasi, in app e in PDF'), svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>')) +
       tile('#/pro/gonio', T('Goniometro'), T('Gradi di movimento di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
       tile('#/pro/tug', T('Timed Up and Go'), T('Alzarsi, camminare 3 metri, tornare e sedersi'), svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')) +
