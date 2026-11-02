@@ -4,25 +4,25 @@
   // Didascalie: [secondo di inizio nel video in italiano, nel video in inglese, testo]
   const STEPS = [
     [0, 0, 'Questa è la tua Home'],
-    [5.17, 4.47, 'In alto il tuo dispositivo abbinato: cambi dispositivo, aggiungi una persona o cancelli i dati'],
-    [15.02, 12.37, 'Tocca «Ho applicato il dispositivo» e segna il dolore: dopo 2 ore ti ricordiamo di toglierlo'],
-    [24.87, 20.67, 'Tocca sul corpo la zona dove senti dolore e scegli il disturbo'],
-    [30.38, 25.77, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
-    [36.94, 31.62, 'Metodo alternativo: tocca «dermatomero e metamero»'],
-    [41.33, 35.47, 'In Promemoria vedi quanto manca, i giorni di fila e il dolore prima e dopo'],
-    [48.2, 41.62, 'Una volta all’anno il dispositivo va calibrato: la barra ti dice quanto manca'],
-    [56.69, 49.22, 'Nei Video impari ad applicarlo nel modo giusto'],
-    [60.3, 52.28, 'Misura la postura con i sensori e la fotocamera, senza e con Equistasi'],
-    [66.93, 58.93, 'Crea il report in PDF per il medico o il fisioterapista'],
-    [72.52, 63.68, 'Se fai sport, in Progressi misuri equilibrio, salto e sprint: sempre con una persona vicino'],
-    [81.4, 72.63, 'Su iPhone avvii i test dall’Apple Watch'],
-    [86.28, 76.93, 'In Info trovi il tuo dispositivo e come leggere la mappa'],
+    [5.3, 3.47, 'In alto il tuo dispositivo abbinato: cambi dispositivo, aggiungi una persona o cancelli i dati'],
+    [15.56, 11.17, 'Tocca «Ho applicato il dispositivo» e segna il dolore: dopo 2 ore ti ricordiamo di toglierlo'],
+    [25.74, 19.34, 'Tocca sul corpo la zona dove senti dolore e scegli il disturbo'],
+    [31.04, 24.56, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
+    [37.85, 29.78, 'Metodo alternativo: tocca «dermatomero e metamero»'],
+    [43.88, 35.08, 'In Promemoria vedi quanto manca, i giorni di fila e il dolore prima e dopo'],
+    [51.66, 41.5, 'Una volta all’anno il dispositivo va calibrato: la barra ti dice quanto manca'],
+    [60.72, 49.2, 'Nei Video impari ad applicarlo nel modo giusto'],
+    [64.35, 52.49, 'In Misura trovi tutti i test: equilibrio, salto e sprint, sempre con una persona vicino'],
+    [73.8, 61.47, 'Misura la postura con i sensori e la fotocamera, senza e con Equistasi'],
+    [80.69, 68.04, 'Crea il report in PDF per il medico o il fisioterapista'],
+    [86.3, 72.79, 'Su iPhone avvii i test dall’Apple Watch'],
+    [91.44, 77.36, 'In Info trovi il tuo dispositivo e come leggere la mappa'],
   ];
   // video registrati dall'app, con la voce maschile dei tutorial Equistasi (Higgsfield), in italiano e in inglese
   const CF = 'https://d2ol7oe51mr4n9.cloudfront.net/user_3DOukuRyFd7f2J84gGwrmduEdRX/';
-  const SRC = { it: CF + '1779e668-1992-40ad-84c9-39b509cc48e0.mp4', en: CF + '2d6ca29b-cf22-4273-ae1a-bb018e77f464.mp4' };
-  const POSTER = { it: CF + 'c214674c-7c1e-44bc-83fe-c4cf7acc7faa.jpg', en: CF + 'adeadd83-c728-4bf0-83b9-4eeef9c02834.jpg' };
-  const DUR = { it: 93, en: 82.6 };
+  const SRC = { it: CF + '5d4f47b0-1abd-4f9b-b4d1-1f362a14abfc.mp4', en: CF + 'd1022c30-22b1-4242-9ce1-8913074b88fd.mp4' };
+  const POSTER = { it: CF + '231d7601-f9b5-4bc5-9eae-334d3283e6d8.jpg', en: CF + '389f340f-c0a0-4065-952b-8a08b81b6240.jpg' };
+  const DUR = { it: 97.9, en: 82.4 };
 
   function show() {
     return new Promise((resolve) => {
