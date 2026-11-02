@@ -1155,3 +1155,18 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 @keyframes txDev { 0%, 60% { opacity: 0; transform: translateY(-30px); } 68%, 92% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; } }
 @keyframes txFade { 0%, 60% { opacity: 1; } 66%, 92% { opacity: .25; } 100% { opacity: 1; } }
 .twox-more { margin: 10px 0 0; padding: 10px 12px; border-radius: 12px; background: #F1F0F8; font-size: 14.5px; }
+
+/* Programma di esercizi posturali (professionista) */
+.ex-find { margin: 0; padding-left: 20px; }
+.ex-find li { margin: 6px 0; }
+.ex-list { display: grid; gap: 10px; }
+.ex-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); }
+.ex-item input { width: 22px; height: 22px; margin-top: 2px; accent-color: var(--indigo); flex: none; }
+.ex-dose { display: inline-block; margin-top: 4px; font-size: 13.5px; font-weight: 700; color: var(--indigo); }
+.ex-area { display: inline-block; margin-top: 4px; }
+.ex-more { margin-top: 12px; }
+.ex-more summary { cursor: pointer; font-weight: 700; padding: 6px 0; }
+@media print {
+  .ex-item:has(input:not(:checked)) { display: none; }
+  .ex-more summary { display: none; }
+}
