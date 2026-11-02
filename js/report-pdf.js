@@ -241,16 +241,17 @@
   }
   // App iPhone/Android: file nella cache e foglio di condivisione (Salva su File, Mail, WhatsApp…).
   // Web: condivisione del file se il browser la permette, altrimenti download.
-  async function deliver(blob, name, preferDownload) {
+  async function deliver(blob, name, preferDownload, title) {
+    const ttl = title || T('Report postura Equistasi');
     const C = window.Capacitor; const P = (C && C.Plugins) || {};
     if (C && C.isNativePlatform && C.isNativePlatform() && P.Filesystem && P.Share) {
       const w = await P.Filesystem.writeFile({ path: name, data: await blobToBase64(blob), directory: 'CACHE' });
-      try { await P.Share.share({ title: T('Report postura Equistasi'), files: [w.uri], dialogTitle: T('Condividi il report') }); } catch (e) { /* annullato */ }
+      try { await P.Share.share({ title: ttl, files: [w.uri], dialogTitle: T('Condividi il report') }); } catch (e) { /* annullato */ }
       return 'share';
     }
     const file = typeof File === 'function' ? new File([blob], name, { type: 'application/pdf' }) : null;
     if (!preferDownload && file && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: T('Report postura Equistasi') }); return 'share'; } catch (e) { if (e && e.name === 'AbortError') return null; }
+      try { await navigator.share({ files: [file], title: ttl }); return 'share'; } catch (e) { if (e && e.name === 'AbortError') return null; }
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
