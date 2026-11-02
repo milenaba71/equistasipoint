@@ -8,7 +8,7 @@
     [15.02, 12.37, 'Tocca «Ho applicato il dispositivo» e segna il dolore: dopo 2 ore ti ricordiamo di toglierlo'],
     [24.87, 20.67, 'Tocca sul corpo la zona dove senti dolore e scegli il disturbo'],
     [30.38, 25.77, 'La X indica dove applicare il dispositivo, la zona blu è dove si estende il dolore'],
-    [36.94, 31.62, 'Metodo alternativo: tocca «metamero»'],
+    [36.94, 31.62, 'Metodo alternativo: tocca «dermatomero e metamero»'],
     [41.33, 35.47, 'In Promemoria vedi quanto manca, i giorni di fila e il dolore prima e dopo'],
     [48.2, 41.62, 'Una volta all’anno il dispositivo va calibrato: la barra ti dice quanto manca'],
     [56.69, 49.22, 'Nei Video impari ad applicarlo nel modo giusto'],

@@ -23,7 +23,7 @@
   // pagina mostrata al posto di una sezione chiusa
   function lockedPage(title) {
     return '<div class="card lock-page">' + LOCK + '<h2>' + title + '</h2><p>' + lockNote() +
-      '.</p><p class="small muted">' + T('Il tuo dispositivo Equistasi Gel apre la mappa, i metameri, i promemoria, i video, l’equilibrio e il salto.') +
+      '.</p><p class="small muted">' + T('Il tuo dispositivo Equistasi Gel apre la mappa, dermatomeri e metameri, i promemoria, i video, l’equilibrio e il salto.') +
       '</p><a class="btn primary" href="#/">' + T('Torna alla home') + '</a></div>';
   }
   window.EqAccess = { kindOf, kind, locked, lockedPage, lockNote, LOCK };
