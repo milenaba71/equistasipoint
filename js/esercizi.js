@@ -314,5 +314,16 @@
     return { title: T('Programma di esercizi posturali'), rows: list.map((e) => ({ label: e.name, val: e.dose })) };
   }
 
-  window.EqExercises = { render, reportGroup, makePdf, _findings: findings, _readings: readings, _poses: POSES };
+  // scheda per arrivare al programma da Misura e dalla Postura (solo noleggio prof)
+  function cardHtml() {
+    const pro = window.EqPro && window.EqPro.isPro();
+    if (!pro) return '';
+    const n = chosenIds().length;
+    return '<a class="card vpromo ex-card" href="#/pro/esercizi"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v7M7 9l5 2 5-2M12 14l-3 6M12 14l3 6"/></svg></span>' +
+      '<span><b>' + T('Programma di esercizi posturali') + '</b><br><span class="small muted">' +
+      (n ? T('{n} esercizi scelti per il paziente · PDF da condividere', { n }) : T('Dalle misure della postura: scegli gli esercizi e crea il PDF per il paziente')) +
+      '</span></span><span class="chev" aria-hidden="true">›</span></a>';
+  }
+
+  window.EqExercises = { cardHtml, render, reportGroup, makePdf, _findings: findings, _readings: readings, _poses: POSES };
 })();

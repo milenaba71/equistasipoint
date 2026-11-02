@@ -1183,3 +1183,4 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .ex-item > span { grid-column: 1 / -1; }
 .ex-fig { width: 128px; height: 96px; }
 @media (min-width: 700px) { .ex-item { grid-template-columns: auto auto 1fr; } .ex-item > span { grid-column: auto; } }
+.ex-card { border: 2px solid var(--yellow); }

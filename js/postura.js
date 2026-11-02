@@ -242,6 +242,7 @@
       '<h2 class="sec-title">' + T('Risultati') + '</h2><div class="pz-tiles">' +
       tile('confronto', '#/postura/confronto', T('Con e senza Equistasi'), T('Stabilità a confronto')) +
       tile('progressi', '#/postura/progressi', T('Progressi e report'), T('Grafico e report per il fisioterapista')) + '</div>' +
+      (window.EqExercises ? window.EqExercises.cardHtml() : '') +
       '<div class="card"><h3>' + T('La tua altezza') + '</h3><p class="small muted" style="margin:0 0 8px">' + T('Serve a trasformare le inclinazioni in centimetri di oscillazione.') + '</p>' +
       '<label class="pz-height"><input id="pz-h" type="number" inputmode="numeric" min="100" max="220" value="' + prefs.height + '" aria-label="' + esc(T('Altezza in centimetri')) + '"> cm</label></div>' + NOTE;
     const h = document.getElementById('pz-h');
