@@ -166,12 +166,13 @@
     });
   }
 
-  function exHtml(id, ex, checked, why) {
+  // sug: consigliato dalle misure (why = per cosa) o esercizio di base consigliato; gli altri senza etichetta
+  function exHtml(id, ex, checked, why, sug) {
     const a = window.AREAS && window.AREAS.find((x) => x.id === ex.area);
-    return '<label class="ex-item"><input type="checkbox" data-ex="' + id + '"' + (checked ? ' checked' : '') + ' class="pz-noprint">' + figSvg(id) +
-      '<span><b>' + ex.name + '</b><br><span class="small">' + ex.how + '</span><br>' +
+    return '<label class="ex-item' + (checked ? ' on' : '') + '"><input type="checkbox" data-ex="' + id + '"' + (checked ? ' checked' : '') + ' aria-label="' + esc(T('Da dare al paziente')) + '">' + figSvg(id) +
+      '<span>' + (sug ? '<span class="ex-tag">' + T('Consigliato') + '</span><br>' : '') + '<b>' + ex.name + '</b><br><span class="small">' + ex.how + '</span><br>' +
       '<span class="ex-dose">' + ex.dose + '</span>' +
-      (why.length ? '<br><span class="small muted">' + T('Per: {w}', { w: why.join(' · ') }) + '</span>' : '<br><span class="small muted">' + T('Esercizio di base') + '</span>') +
+      (why.length ? '<br><span class="small muted">' + T('Per: {w}', { w: why.join(' · ') }) + '</span>' : (sug ? '<br><span class="small muted">' + T('Esercizio di base') + '</span>' : '')) +
       (a ? '<br><a class="small ex-area pz-noprint" href="#/area/' + a.id + '">' + T('Dove applicare Equistasi: {z}', { z: esc(a.name) }) + ' ›</a>' : '') +
       '</span></label>';
   }
@@ -180,7 +181,7 @@
     const R = readings(); const F = findings(R); const E = EX();
     const saved = store.get(PROG, null);
     const ids = proposed(F);
-    const chosen = saved && saved.ids ? saved.ids : ids;
+    const chosen = saved && saved.ids ? saved.ids : []; // il professionista spunta quelli da dare al paziente
     const whyOf = (id) => F.filter((f) => f.ex.includes(id)).map((f) => f.text);
     const none = !R.side && !R.front && !R.testa && !R.tronco && !R.schiena && !R.stab;
     app.innerHTML = '<div class="detail-head"><div class="eyebrow">' + T('Professionista') + '</div><h1>' + T('Programma di esercizi posturali') + '</h1>' +
@@ -193,10 +194,11 @@
         : '<div class="card"><h3>' + T('Cosa risulta dalle misure') + '</h3>' +
           (F.length ? '<ul class="ex-find">' + F.map((f) => '<li>' + f.text + '<br><span class="small muted">' + f.src + '</span></li>').join('') + '</ul>'
             : '<p class="small" style="margin:0">' + T('Le ultime misure non mostrano aspetti da correggere: il programma propone esercizi di mantenimento.') + '</p>') + '</div>' +
-          '<div class="card"><h3>' + T('Esercizi') + '</h3><p class="small muted pz-noprint" style="margin-top:0">' + T('Togli o aggiungi gli esercizi: la scelta resta salvata e va nel report PDF.') + '</p>' +
-          '<div class="ex-list">' + ids.map((id) => exHtml(id, E[id], chosen.includes(id), whyOf(id))).join('') + '</div>' +
-          '<details class="pz-noprint ex-more"><summary>' + T('Altri esercizi') + '</summary><div class="ex-list">' +
-          Object.keys(E).filter((id) => !ids.includes(id)).map((id) => exHtml(id, E[id], chosen.includes(id), [])).join('') + '</div></details></div>' +
+          '<div class="card"><h3>' + T('Esercizi da dare al paziente') + '</h3><p class="small" style="margin-top:0">' + T('<b>Spunta gli esercizi da suggerire al paziente</b>: solo quelli spuntati vanno nel PDF. In alto i consigliati dalle misure.') + '</p>' +
+          '<div class="ex-bar"><span id="ex-count" class="ex-count"></span><button type="button" class="btn" id="ex-sug">' + T('Spunta i consigliati') + '</button><button type="button" class="btn" id="ex-none">' + T('Togli tutte') + '</button></div>' +
+          '<div class="ex-list">' + ids.map((id) => exHtml(id, E[id], chosen.includes(id), whyOf(id), true)).join('') + '</div>' +
+          '<h3 class="ex-others">' + T('Altri esercizi') + '</h3><div class="ex-list">' +
+          Object.keys(E).filter((id) => !ids.includes(id)).map((id) => exHtml(id, E[id], chosen.includes(id), [], false)).join('') + '</div></div>' +
           '<div class="card"><h3>' + T('Come abbinarli a Equistasi') + '</h3><ol class="steps">' +
           '<li>' + T('Applica Equistasi come indicato nella mappa per la zona di ogni esercizio, oppure secondo il protocollo che usi con il paziente.') + '</li>' +
           '<li>' + T('Esegui gli esercizi con il dispositivo applicato, <b>1 volta al giorno, 5 giorni a settimana</b>, per 4 settimane.') + '</li>' +
@@ -210,14 +212,23 @@
           '<button class="btn" type="button" id="ex-pdf-dl">' + T('Scarica il PDF') + '</button>' +
           '<a class="btn" href="#/postura/report">' + T('Report in PDF completo') + '</a></div></div>');
     if (none) return;
-    app.querySelectorAll('[data-ex]').forEach((c) => c.addEventListener('change', () => {
-      const sel = Array.from(app.querySelectorAll('[data-ex]:checked')).map((x) => x.dataset.ex);
+    const boxes = Array.from(app.querySelectorAll('[data-ex]'));
+    const sync = () => {
+      const sel = boxes.filter((x) => x.checked).map((x) => x.dataset.ex);
       store.set(PROG, { t: Date.now(), ids: sel });
-    }));
+      boxes.forEach((x) => x.closest('.ex-item').classList.toggle('on', x.checked));
+      document.getElementById('ex-count').textContent = sel.length ? T('{n} nel PDF', { n: sel.length }) : T('Nessun esercizio spuntato');
+      app.querySelectorAll('#ex-pdf, #ex-pdf-dl').forEach((b) => { b.disabled = !sel.length; });
+    };
+    boxes.forEach((c) => c.addEventListener('change', sync));
+    document.getElementById('ex-sug').addEventListener('click', () => { boxes.forEach((x) => { if (ids.includes(x.dataset.ex)) x.checked = true; }); sync(); });
+    document.getElementById('ex-none').addEventListener('click', () => { boxes.forEach((x) => { x.checked = false; }); sync(); });
+    sync();
     const nameIn = document.getElementById('ex-name');
     nameIn.addEventListener('change', () => store.set('tp-prog-name', nameIn.value.trim()));
     const msg = document.getElementById('ex-msg');
     const go = async (dl) => {
+      if (!chosenIds().length) { msg.className = 'gate-msg'; msg.textContent = T('Spunta almeno un esercizio da dare al paziente.'); return; }
       const btns = app.querySelectorAll('#ex-pdf, #ex-pdf-dl'); btns.forEach((b) => { b.disabled = true; });
       msg.className = 'gate-msg'; msg.textContent = T('Preparo il PDF…');
       try {
@@ -227,7 +238,7 @@
       } catch (e) {
         msg.className = 'gate-msg'; msg.textContent = T('Non è stato possibile creare il PDF. Riprova; se il problema continua, aggiorna l’app.');
       }
-      btns.forEach((b) => { b.disabled = false; });
+      btns.forEach((b) => { b.disabled = !chosenIds().length; });
     };
     document.getElementById('ex-pdf').addEventListener('click', () => go(false));
     document.getElementById('ex-pdf-dl').addEventListener('click', () => go(true));
@@ -291,11 +302,10 @@
     return doc.output('blob');
   }
 
-  // esercizi scelti (o proposti, se il professionista non ha ancora cambiato nulla)
+  // esercizi spuntati dal professionista (solo questi vanno nel PDF e nel report)
   function chosenIds() {
     const E = EX(); const saved = store.get(PROG, null);
-    const ids = saved && saved.ids ? saved.ids : proposed(findings(readings()));
-    return ids.filter((id) => E[id]);
+    return (saved && saved.ids ? saved.ids : []).filter((id) => E[id]);
   }
   // righe per il report PDF del professionista
   function reportGroup() {

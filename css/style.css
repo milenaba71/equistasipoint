@@ -1172,3 +1172,14 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 }
 .ex-fig { flex: none; width: 96px; height: 72px; border-radius: 10px; background: #F3F5FA; }
 @media (max-width: 380px) { .ex-fig { width: 76px; height: 57px; } }
+.ex-item.on { border-color: var(--indigo); box-shadow: 0 0 0 2px rgba(41, 35, 92, .15); background: #FBFAFF; }
+.ex-tag { display: inline-block; font-size: 11.5px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: #8A5A00; background: #FFF3C4; border-radius: 999px; padding: 2px 8px; margin-bottom: 2px; }
+.ex-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 12px; }
+.ex-bar .btn { padding: 8px 12px; font-size: 14px; margin: 0; }
+.ex-count { font-weight: 800; color: var(--indigo); margin-right: auto; }
+.ex-others { margin: 18px 0 8px; }
+/* su telefono: casella e disegno in alto, testo sotto a tutta larghezza */
+.ex-item { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; row-gap: 8px; }
+.ex-item > span { grid-column: 1 / -1; }
+.ex-fig { width: 128px; height: 96px; }
+@media (min-width: 700px) { .ex-item { grid-template-columns: auto auto 1fr; } .ex-item > span { grid-column: auto; } }

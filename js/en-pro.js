@@ -260,4 +260,13 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Regole": "Rules",
   "Dove applicare Equistasi: {z}": "Where to apply Equistasi: {z}",
   "Dove applicare Equistasi: {z} (mappa dell’app)": "Where to apply Equistasi: {z} (app map)",
+  "Da dare al paziente": "Give to the patient",
+  "Consigliato": "Suggested",
+  "Esercizi da dare al paziente": "Exercises for the patient",
+  "<b>Spunta gli esercizi da suggerire al paziente</b>: solo quelli spuntati vanno nel PDF. In alto i consigliati dalle misure.": "<b>Tick the exercises to suggest to the patient</b>: only the ticked ones go into the PDF. Suggested ones from the measurements are at the top.",
+  "Spunta i consigliati": "Tick the suggested ones",
+  "Togli tutte": "Untick all",
+  "{n} nel PDF": "{n} in the PDF",
+  "Nessun esercizio spuntato": "No exercise ticked",
+  "Spunta almeno un esercizio da dare al paziente.": "Tick at least one exercise for the patient.",
 });
