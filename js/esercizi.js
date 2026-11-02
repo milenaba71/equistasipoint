@@ -15,51 +15,55 @@
   const PROG = 'tp-prog'; // { t, ids: [...] } programma scelto dal professionista
   const DISCLAIMER = () => T('Stima indicativa, non è un’analisi medica. Il programma è una proposta: il professionista lo adatta al paziente e lo sospende in caso di dolore.');
 
-  /* Esercizi: come si fa e quanto. area = zona della mappa dove applicare Equistasi durante gli esercizi. */
+  /* Esercizi: come si fa e quanto.
+     Equistasi attiva il muscolo: per la postura non si usano i trigger point della mappa,
+     ma il protocollo «Propriocezione e controllo motorio» (C7 e soleo destro e sinistro). */
+  const PROTO = 'propriocezione';
+  const proto = () => (window.APP_PROTOCOLS || []).find((p) => p.id === PROTO);
   const EX = () => ({
-    mento: { name: T('Retrazione del mento'), area: 'collo',
+    mento: { name: T('Retrazione del mento'),
       how: T('Seduto o in piedi con la schiena dritta, porta il mento indietro come a fare un «doppio mento», senza abbassare la testa. Tieni e rilassa.'),
       dose: T('10 ripetizioni, tieni 5 secondi · 2 serie') },
-    pettorali: { name: T('Allungamento dei pettorali alla porta'), area: 'torace',
+    pettorali: { name: T('Allungamento dei pettorali alla porta'),
       how: T('Avambracci appoggiati ai lati di una porta, gomiti all’altezza delle spalle. Porta il busto in avanti finché senti allungare il petto.'),
       dose: T('Tieni 30 secondi · 3 volte') },
-    angeli: { name: T('Angeli al muro'), area: 'schiena_alta',
+    angeli: { name: T('Angeli al muro'),
       how: T('Schiena, testa e glutei appoggiati al muro, braccia a «W». Fai scivolare le braccia in alto e torna giù senza staccarle dal muro.'),
       dose: T('10 ripetizioni lente · 2 serie') },
-    toracica: { name: T('Estensione dorsale sull’asciugamano'), area: 'schiena_alta',
+    toracica: { name: T('Estensione dorsale sull’asciugamano'),
       how: T('Sdraiato con un asciugamano arrotolato di traverso sotto le scapole, mani dietro la testa. Lascia andare indietro le spalle e respira.'),
       dose: T('5 respiri lenti · 3 volte, spostando l’asciugamano poco più in basso') },
-    scapole: { name: T('Avvicinamento delle scapole'), area: 'schiena_alta',
+    scapole: { name: T('Avvicinamento delle scapole'),
       how: T('Braccia lungo i fianchi, spalle basse. Avvicina le scapole tra loro e verso il basso, senza alzare le spalle.'),
       dose: T('12 ripetizioni, tieni 3 secondi · 2 serie') },
-    collo_lat: { name: T('Allungamento laterale del collo'), area: 'collo',
+    collo_lat: { name: T('Allungamento laterale del collo'),
       how: T('Seduto, una mano sotto la coscia dallo stesso lato. Inclina lentamente l’orecchio opposto verso la spalla, senza ruotare la testa.'),
       dose: T('Tieni 30 secondi per lato, più a lungo dal lato più rigido · 2 volte') },
-    tronco_lat: { name: T('Allungamento laterale del tronco'), area: 'lombare',
+    tronco_lat: { name: T('Allungamento laterale del tronco'),
       how: T('In piedi, piedi alla larghezza delle anche. Porta un braccio sopra la testa e piegati dal lato opposto, senza ruotare il busto.'),
       dose: T('Tieni 20 secondi per lato · 3 volte') },
-    birddog: { name: T('Quadrupedia braccio–gamba'), area: 'lombare',
+    birddog: { name: T('Quadrupedia braccio–gamba'),
       how: T('Carponi, schiena neutra. Allunga un braccio in avanti e la gamba opposta indietro, tieni senza far ruotare il bacino, torna e cambia.'),
       dose: T('8 per lato, tieni 5 secondi · 2 serie') },
-    ponte: { name: T('Ponte glutei'), area: 'anca_gluteo',
+    ponte: { name: T('Ponte glutei'),
       how: T('Sdraiato a pancia in su, ginocchia piegate e piedi a terra. Solleva il bacino stringendo i glutei fino ad allineare spalle, anche e ginocchia.'),
       dose: T('12 ripetizioni, tieni 3 secondi · 2 serie') },
-    conchiglia: { name: T('Apertura a conchiglia'), area: 'anca_gluteo',
+    conchiglia: { name: T('Apertura a conchiglia'),
       how: T('Sdraiato su un fianco, ginocchia piegate e talloni uniti. Apri il ginocchio di sopra senza muovere il bacino, poi chiudi.'),
       dose: T('15 per lato · 2 serie, di più dal lato del bacino più basso') },
-    flessori: { name: T('Allungamento dei flessori dell’anca'), area: 'anca_gluteo',
+    flessori: { name: T('Allungamento dei flessori dell’anca'),
       how: T('In affondo con il ginocchio dietro appoggiato su un cuscino. Spingi in avanti il bacino tenendo il busto dritto.'),
       dose: T('Tieni 30 secondi per lato · 2 volte') },
-    ischio: { name: T('Allungamento dei muscoli dietro la coscia'), area: 'coscia',
+    ischio: { name: T('Allungamento dei muscoli dietro la coscia'),
       how: T('Seduto sul bordo della sedia, una gamba tesa con il tallone a terra. Porta avanti il busto con la schiena dritta finché senti allungare.'),
       dose: T('Tieni 30 secondi per lato · 2 volte') },
-    squat_muro: { name: T('Mini squat al muro'), area: 'ginocchio',
+    squat_muro: { name: T('Mini squat al muro'),
       how: T('Schiena al muro, piedi un passo avanti. Piega poco le ginocchia, tieni le ginocchia in linea con i piedi e risali senza bloccarle tese.'),
       dose: T('10 ripetizioni lente · 2 serie') },
-    monopodalico: { name: T('Equilibrio su una gamba'), area: 'piede',
+    monopodalico: { name: T('Equilibrio su una gamba'),
       how: T('Vicino a un muro o a una sedia per sicurezza. Stai su una gamba con il ginocchio morbido; quando è facile, prova a occhi chiusi.'),
       dose: T('30 secondi per gamba · 3 volte') },
-    tandem: { name: T('Cammino tallone–punta'), area: 'piede',
+    tandem: { name: T('Cammino tallone–punta'),
       how: T('Lungo un corridoio, vicino al muro. Cammina mettendo il tallone di un piede subito davanti alla punta dell’altro, sguardo avanti.'),
       dose: T('10 passi avanti e indietro · 3 volte') },
   });
@@ -168,12 +172,10 @@
 
   // sug: consigliato dalle misure (why = per cosa) o esercizio di base consigliato; gli altri senza etichetta
   function exHtml(id, ex, checked, why, sug) {
-    const a = window.AREAS && window.AREAS.find((x) => x.id === ex.area);
     return '<label class="ex-item' + (checked ? ' on' : '') + '"><input type="checkbox" data-ex="' + id + '"' + (checked ? ' checked' : '') + ' aria-label="' + esc(T('Da dare al paziente')) + '">' + figSvg(id) +
       '<span>' + (sug ? '<span class="ex-tag">' + T('Consigliato') + '</span><br>' : '') + '<b>' + ex.name + '</b><br><span class="small">' + ex.how + '</span><br>' +
       '<span class="ex-dose">' + ex.dose + '</span>' +
       (why.length ? '<br><span class="small muted">' + T('Per: {w}', { w: why.join(' · ') }) + '</span>' : (sug ? '<br><span class="small muted">' + T('Esercizio di base') + '</span>' : '')) +
-      (a ? '<br><a class="small ex-area pz-noprint" href="#/area/' + a.id + '">' + T('Dove applicare Equistasi: {z}', { z: esc(a.name) }) + ' ›</a>' : '') +
       '</span></label>';
   }
 
@@ -200,7 +202,8 @@
           '<h3 class="ex-others">' + T('Altri esercizi') + '</h3><div class="ex-list">' +
           Object.keys(E).filter((id) => !ids.includes(id)).map((id) => exHtml(id, E[id], chosen.includes(id), [], false)).join('') + '</div></div>' +
           '<div class="card"><h3>' + T('Come abbinarli a Equistasi') + '</h3><ol class="steps">' +
-          '<li>' + T('Applica Equistasi come indicato nella mappa per la zona di ogni esercizio, oppure secondo il protocollo che usi con il paziente.') + '</li>' +
+          '<li>' + T('Applica Equistasi secondo il protocollo <b>Propriocezione e controllo motorio</b>: C7 e soleo destro e sinistro (3 dispositivi). Per la postura non si usano i trigger point della mappa.') +
+          (proto() ? ' <a href="#/protocollo/' + PROTO + '">' + T('Vedi il protocollo') + ' ›</a>' : '') + '</li>' +
           '<li>' + T('Esegui gli esercizi con il dispositivo applicato, <b>1 volta al giorno, 5 giorni a settimana</b>, per 4 settimane.') + '</li>' +
           '<li>' + T('Movimenti lenti e senza dolore. Se compare dolore, interrompi.') + '</li>' +
           '<li>' + T('Dopo 4 settimane <b>ripeti le misure della postura</b> e confronta senza e con Equistasi.') + '</li></ol></div>' +
@@ -271,12 +274,30 @@
     doc.text(plain(name ? T('Per: {n}', { n: name }) : T('Esercizi da fare a casa')), M + 7, y + 18.5);
     doc.text(plain(T('1 volta al giorno, 5 giorni a settimana, per 4 settimane, con Equistasi applicato.')), M + 7, y + 25);
     y += 38;
+    // dove applicare Equistasi: protocollo Propriocezione e controllo motorio, con la sua immagine
+    const P = proto();
+    if (P) {
+      const pimg = await fetch(P.img).then((r) => r.blob()).then((b) => new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = () => ok(null); fr.readAsDataURL(b); })).catch(() => null);
+      let iw = 0, ih = 0;
+      if (pimg) { const ip = doc.getImageProperties(pimg); ih = 46; iw = Math.min(60, ih * ip.width / ip.height); ih = iw * ip.height / ip.width; }
+      font(10, false);
+      const tx = M + (iw ? iw + 8 : 4);
+      const lines = [];
+      P.points.forEach(([hh, tt]) => { lines.push({ b: true, t: plain(hh) }); doc.splitTextToSize(plain(tt), W - M - tx - 4).forEach((l) => lines.push({ b: false, t: l })); });
+      const bh = Math.max(ih + 8, 14 + lines.length * 4.6);
+      doc.setFillColor(...rgb('#FFF8D6')); doc.roundedRect(M, y, CW, bh, 3, 3, 'F');
+      if (pimg) doc.addImage(pimg, 'JPEG', M + 4, y + 4, iw, ih);
+      font(12, true); ink('#29235C'); doc.text(plain(T('Dove applicare Equistasi')), tx, y + 8);
+      font(9, false); ink('#5D6480'); doc.text(plain(T('Protocollo {p} · {s}', { p: P.title, s: P.subtitle })), tx, y + 13);
+      let ly = y + 19;
+      lines.forEach((l) => { font(10, l.b); ink(l.b ? '#29235C' : '#161A33'); doc.text(l.t, tx, ly); ly += 4.6; });
+      y += bh + 6;
+    }
     list.forEach((id, i) => {
       const e = E[id];
-      const area = window.AREAS && window.AREAS.find((x) => x.id === e.area);
       font(10, false);
       const how = doc.splitTextToSize(plain(e.how), CW - 58);
-      const h = Math.max(36, 16 + how.length * 4.6 + (area ? 5 : 0));
+      const h = Math.max(36, 16 + how.length * 4.6);
       if (y + h > H - 24) { doc.addPage(); head(); }
       doc.setDrawColor(...rgb('#E1E5EF')); doc.setLineWidth(0.3); doc.roundedRect(M, y, CW, h, 3, 3, 'S');
       if (figs[i]) doc.addImage(figs[i], 'JPEG', M + 3, y + 3, 44, 33);
@@ -284,7 +305,6 @@
       font(12, true); ink('#29235C'); doc.text((i + 1) + '. ' + plain(e.name), x, y + 8);
       font(10, true); ink('#B26E00'); doc.text(plain(e.dose), x, y + 14);
       font(10, false); ink('#161A33'); doc.text(how, x, y + 20);
-      if (area) { font(9, false); ink('#5D6480'); doc.text(plain(T('Dove applicare Equistasi: {z} (mappa dell’app)', { z: area.name })), x, y + 20 + how.length * 4.6 + 1.5); }
       y += h + 5;
     });
     if (y + 26 > H - 24) { doc.addPage(); head(); }
