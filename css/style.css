@@ -1184,3 +1184,4 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .ex-fig { width: 128px; height: 96px; }
 @media (min-width: 700px) { .ex-item { grid-template-columns: auto auto 1fr; } .ex-item > span { grid-column: auto; } }
 .ex-card { border: 2px solid var(--yellow); }
+.gn-why { margin: 12px 0; padding: 12px 14px; border-radius: 12px; background: #FFF8D6; border: 1px solid #F0DC7A; font-size: 15px; line-height: 1.45; }

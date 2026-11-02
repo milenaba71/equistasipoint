@@ -112,6 +112,7 @@
       '<div class="toolbar">' + seg('side', SIDES(), prefs.side, T('Lato')) + '</div>' +
       '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
       gonioFigures(knee, mv) +
+      (knee ? '<div class="gn-why"><b>' + T('Perché due appoggi?') + '</b> ' + T('Il telefono misura solo la propria inclinazione. Sulla <b>coscia</b> segna la direzione del femore, che fa da riferimento; sulla <b>tibia</b> segna la direzione della tibia. L’angolo del ginocchio è la <b>differenza tra le due</b>: così la misura è giusta anche se la coscia non è perfettamente dritta. Non si calibra nulla e il dispositivo Equistasi non serve: si usa solo il telefono.') + '</div>' : '') +
       '<p class="small muted gn-key">' + T('Nel disegno il telefono è giallo: appoggia il <b>dorso</b> del telefono sul corpo, con lo <b>schermo verso di te</b> che guardi. La tacca indica la <b>parte alta</b> del telefono. Tienilo fermo con la mano, ben aderente.') + '</p>' +
       '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
       '<div class="pro-live" id="pro-live"><div class="pro-big" id="pro-big">–</div><div class="small" id="pro-sub">' + T('Tocca «Inizia» per accendere i sensori') + '</div></div>' +
