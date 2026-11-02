@@ -282,4 +282,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Nessun protocollo in PDF.": "No PDF protocols.",
   "Procedure per il professionista": "Procedures for professionals",
   "in italiano": "in Italian",
+  "Perché due appoggi?": "Why two placements?",
+  "Il telefono misura solo la propria inclinazione. Sulla <b>coscia</b> segna la direzione del femore, che fa da riferimento; sulla <b>tibia</b> segna la direzione della tibia. L’angolo del ginocchio è la <b>differenza tra le due</b>: così la misura è giusta anche se la coscia non è perfettamente dritta. Non si calibra nulla e il dispositivo Equistasi non serve: si usa solo il telefono.": "The phone only measures its own tilt. On the <b>thigh</b> it records the direction of the femur, which is the reference; on the <b>shin</b> it records the direction of the tibia. The knee angle is the <b>difference between the two</b>, so the measurement is right even if the thigh is not perfectly straight. Nothing is calibrated and the Equistasi device is not needed: only the phone is used.",
 });
