@@ -543,6 +543,10 @@
   const loadAllVideos = () => loadContent().then((c) => (c ? c.videos : null));
   const loadProtocols = () => loadContent().then((c) => (c ? c.protocols.filter((x) => visibleFor(x, 'protocol')) : null));
 
+  /* Procedure per il professionista: PDF dentro l'app (cartella docs/) */
+  const PRO_DOCS = [
+    { url: 'docs/Equistasi_Procedura_Neurologica_IT.pdf', title: 'Procedura di applicazione · Pazienti neurologici', subtitle: 'Checklist operativa per il medico · Parkinson, sclerosi multipla, atassie · v1.0 11/2026', lang: 'it' },
+  ];
   /* Strumenti per il professionista → Protocolli: tutti i protocolli, per ogni profilo (app e PDF) */
   function renderProProtocols() {
     setBack(true);
@@ -553,6 +557,8 @@
       (appPs.length ? '<h2 class="sec-title">' + T('Protocolli nell’app') + '</h2>' + appPs.map((x) => '<a class="card pcard" href="#/protocollo/' + x.id + '">' +
         '<img src="' + esc(x.thumb || x.img) + '" alt="" loading="lazy" />' + T('<span><span class="eyebrow">Protocollo</span><b>') + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + '</span></span>' +
         '<span class="chev" aria-hidden="true">›</span></a>').join('') : '') +
+      '<div class="card"><h3>' + T('Procedure per il professionista') + '</h3>' + PRO_DOCS.map((x) => '<a class="proto" href="#/pdf" data-pdf="' + esc(x.url) + '" data-title="' + esc(x.title) + T('"><span class="pdf" aria-hidden="true">PDF</span>') +
+        '<span><b>' + esc(x.title) + '</b><span class="small muted">' + esc(x.subtitle) + (window.LANG === 'en' && x.lang === 'it' ? ' · ' + T('in italiano') : '') + '</span></span><span class="chev" aria-hidden="true">›</span></a>').join('') + '</div>' +
       '<div class="card"><h3>' + T('Protocolli in PDF') + '</h3><div id="pro-protos"><p class="muted small" style="margin:0">' + T('Caricamento…') + '</p></div></div>';
     loadContent().then((c) => {
       const box = document.getElementById('pro-protos'); if (!box) return;

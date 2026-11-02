@@ -280,4 +280,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Tutti i protocolli Equistasi, per ogni tipo di paziente.": "All Equistasi protocols, for every type of patient.",
   "Protocolli nell’app": "Protocols in the app",
   "Nessun protocollo in PDF.": "No PDF protocols.",
+  "Procedure per il professionista": "Procedures for professionals",
+  "in italiano": "in Italian",
 });
