@@ -94,7 +94,7 @@
   function cardHtml() {
     return '<a class="card pcard" href="#/metameri">' +
       (IMG.s2 ? '<img src="' + IMG.s2 + '" alt="" loading="lazy" />' : '') +
-      '<span><span class="eyebrow">' + L('Metodo alternativo', 'Alternative method') + '</span><b>' + L('Metamero e dermatomero', 'Metamere and dermatome') + '</b>' +
+      '<span><span class="eyebrow">' + L('Metodo alternativo', 'Alternative method') + '</span><b>' + L('Dermatomeri e metameri', 'Dermatomes and metameres') + '</b>' +
       '<span class="small muted">' + L('Applica anche sulla vertebra della zona del dolore', 'Also apply on the vertebra linked to the painful area') + '</span></span>' +
       '<span class="chev" aria-hidden="true">›</span></a>';
   }
@@ -103,18 +103,18 @@
     const r = byArea(id);
     if (!r) return '';
     return '<a class="card meta-link" href="#/metameri/' + id + '"><span class="meta-ico" aria-hidden="true">🦴</span><span><b>' +
-      L('Metodo alternativo: metamero ', 'Alternative method: metamere ') + esc(r.seg) + '</b><span class="small muted">' +
+      L('Metodo alternativo: dermatomero e metamero ', 'Alternative method: dermatome and metamere ') + esc(r.seg) + '</b><span class="small muted">' +
       L('Applica anche sulla vertebra collegata a questa zona', 'Also apply on the vertebra linked to this area') + '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
-  // Barra in alto nelle pagine dei trigger point: «Trigger point» (qui) | «Metodo alternativo: metamero» (clicca)
+  // Barra in alto nelle pagine dei trigger point: «Trigger point» (qui) | «Metodo alternativo: dermatomero e metamero» (clicca)
   function switchBar(ids) {
     const id = (ids || []).find((x) => byArea(x));
     if (!id) return '';
     const r = byArea(id);
     return '<div class="meta-switch" role="navigation" aria-label="' + esc(L('Metodo di applicazione', 'Application method')) + '">' +
       '<span class="ms-on" aria-current="page"><span aria-hidden="true">✕</span> ' + L('Trigger point', 'Trigger point') + '</span>' +
-      '<a class="ms-alt" href="#/metameri/' + id + '"><span aria-hidden="true">🦴</span><span><b>' + L('Metodo alternativo: metamero', 'Alternative method: metamere') + '</b>' +
+      '<a class="ms-alt" href="#/metameri/' + id + '"><span aria-hidden="true">🦴</span><span><b>' + L('Metodo alternativo: dermatomero e metamero', 'Alternative method: dermatome and metamere') + '</b>' +
       '<small>' + esc(r.seg) + ' · ' + L('clicca qui', 'tap here') + '</small></span><span class="chev" aria-hidden="true">›</span></a></div>';
   }
 
@@ -135,7 +135,7 @@
     const steps = STEPS();
     app.innerHTML =
       '<div class="detail-head"><div class="eyebrow">' + L('Dolore · metodo alternativo', 'Pain · alternative method') + '</div><h1>' +
-      L('Applicazione con metamero e dermatomero', 'Application by metamere and dermatome') + '</h1>' +
+      L('Applicazione con dermatomeri e metameri', 'Application by dermatomes and metameres') + '</h1>' +
       '<p class="muted small" style="margin:4px 0 12px">' + L(
         'Ogni zona del corpo riceve i nervi da un segmento del midollo spinale, il <b>metamero</b>, che esce dalla colonna all’altezza di una vertebra. La zona di pelle servita da quel segmento è il <b>dermatomero</b>. Con questo metodo il dispositivo si applica sia dove fa male sia sulla vertebra collegata a quella zona.',
         'Each area of the body receives its nerves from a segment of the spinal cord, the <b>metamere</b>, which leaves the spine at the level of a vertebra. The area of skin supplied by that segment is the <b>dermatome</b>. With this method the device is applied both where it hurts and on the vertebra linked to that area.') + '</p></div>' +
