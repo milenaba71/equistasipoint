@@ -269,4 +269,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "{n} nel PDF": "{n} in the PDF",
   "Nessun esercizio spuntato": "No exercise ticked",
   "Spunta almeno un esercizio da dare al paziente.": "Tick at least one exercise for the patient.",
+  "{n} esercizi scelti per il paziente · PDF da condividere": "{n} exercises chosen for the patient · PDF to share",
+  "Dalle misure della postura: scegli gli esercizi e crea il PDF per il paziente": "From the posture measurements: choose the exercises and create the patient PDF",
 });
