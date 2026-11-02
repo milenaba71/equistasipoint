@@ -151,6 +151,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Servizio di verifica non configurato.": "Verification service not configured.",
   "Impossibile verificare ora. Controlla la connessione e riprova.": "Unable to verify now. Check your connection and try again.",
   "Accedi": "Sign in",
+  "In Misura trovi tutti i test: equilibrio, salto e sprint, sempre con una persona vicino": "In Measure you find all the tests: balance, jump and sprint, always with someone close by",
   "Caricamento…": "Loading…",
   "Misura": "Measure",
   "Con <b>un solo dispositivo</b> le {n} X sono punti alternativi: scegli il più doloroso.": "With <b>one device</b> the {n} X marks are alternative points: choose the most painful one.",
