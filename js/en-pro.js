@@ -271,4 +271,8 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Spunta almeno un esercizio da dare al paziente.": "Tick at least one exercise for the patient.",
   "{n} esercizi scelti per il paziente · PDF da condividere": "{n} exercises chosen for the patient · PDF to share",
   "Dalle misure della postura: scegli gli esercizi e crea il PDF per il paziente": "From the posture measurements: choose the exercises and create the patient PDF",
+  "Applica Equistasi secondo il protocollo <b>Propriocezione e controllo motorio</b>: C7 e soleo destro e sinistro (3 dispositivi). Per la postura non si usano i trigger point della mappa.": "Apply Equistasi following the <b>Proprioception and motor control</b> protocol: C7 and right and left soleus (3 devices). For posture, the trigger points on the map are not used.",
+  "Vedi il protocollo": "See the protocol",
+  "Dove applicare Equistasi": "Where to apply Equistasi",
+  "Protocollo {p} · {s}": "Protocol {p} · {s}",
 });
