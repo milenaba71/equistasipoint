@@ -1170,3 +1170,5 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
   .ex-item:has(input:not(:checked)) { display: none; }
   .ex-more summary { display: none; }
 }
+.ex-fig { flex: none; width: 96px; height: 72px; border-radius: 10px; background: #F3F5FA; }
+@media (max-width: 380px) { .ex-fig { width: 76px; height: 57px; } }

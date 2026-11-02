@@ -116,17 +116,63 @@
     return out;
   }
 
-  // esercizi proposti, senza doppioni, nell'ordine in cui compaiono
-  // al massimo 8, per un programma che si riesce a fare ogni giorno: gli altri restano in «Altri esercizi»
-  const proposed = (F) => F.reduce((a, f) => a.concat(f.ex.filter((e) => !a.includes(e))), []).slice(0, 8);
+  // Esercizi proposti: prima quelli per ciò che risulta dalle misure, poi gli esercizi di base fino ad almeno 6.
+  // Al massimo 8, per un programma che si riesce a fare ogni giorno: gli altri restano in «Altri esercizi».
+  const BASE = ['scapole', 'mento', 'birddog', 'ponte', 'angeli', 'monopodalico'];
+  function proposed(F) {
+    const ids = F.reduce((a, f) => a.concat(f.ex.filter((e) => !a.includes(e))), []).slice(0, 8);
+    BASE.forEach((id) => { if (ids.length < 6 && !ids.includes(id)) ids.push(id); });
+    return ids;
+  }
+
+  /* ───── Disegni degli esercizi (omino stilizzato, 120 × 90) ───── */
+  const BODY = '#29235C', PROP = '#B9B5D3', ARROW = '#E08A00';
+  const pl = (pts) => '<polyline points="' + pts.map((p) => p.join(',')).join(' ') + '" fill="none" stroke="' + BODY + '" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>';
+  const headC = (x, y) => '<circle cx="' + x + '" cy="' + y + '" r="6.2" fill="#fff" stroke="' + BODY + '" stroke-width="3.4"/>';
+  const prop = (d) => '<path d="' + d + '" fill="none" stroke="' + PROP + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+  const arrow = (x1, y1, x2, y2) => {
+    const a = Math.atan2(y2 - y1, x2 - x1); const h = 5;
+    const p1 = [x2 - h * Math.cos(a - 0.5), y2 - h * Math.sin(a - 0.5)]; const p2 = [x2 - h * Math.cos(a + 0.5), y2 - h * Math.sin(a + 0.5)];
+    return '<path d="M' + x1 + ' ' + y1 + 'L' + x2 + ' ' + y2 + 'M' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + 'L' + x2 + ' ' + y2 + 'L' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1) + '" fill="none" stroke="' + ARROW + '" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>';
+  };
+  const FLOOR = prop('M6 85H114');
+  const CHAIR = (x) => prop('M' + x + ' 30V85M' + x + ' 58H' + (x + 24) + 'M' + (x + 22) + ' 58V85');
+  const POSES = {
+    mento: CHAIR(40) + pl([[60, 31], [57, 57], [80, 58], [80, 84]]) + pl([[59, 36], [66, 48], [74, 54]]) + headC(62, 22) + arrow(80, 24, 71, 24),
+    pettorali: prop('M86 6V85') + FLOOR + pl([[74, 84], [66, 57], [57, 84]]) + pl([[66, 57], [76, 28]]) + pl([[75, 32], [86, 32], [86, 20]]) + headC(80, 19) + arrow(54, 36, 64, 36),
+    angeli: prop('M20 6H100V85') + FLOOR + pl([[54, 84], [60, 55], [66, 84]]) + pl([[60, 55], [60, 25]]) + pl([[42, 14], [46, 30], [60, 28], [74, 30], [78, 14]]) + headC(60, 16) + arrow(38, 26, 38, 10) + arrow(82, 26, 82, 10),
+    toracica: FLOOR + '<circle cx="40" cy="80" r="4.5" fill="' + PROP + '"/>' + pl([[32, 75], [66, 77], [82, 62], [94, 82]]) + pl([[34, 74], [26, 64], [20, 68]]) + headC(24, 74) + arrow(46, 62, 38, 62),
+    scapole: FLOOR + pl([[54, 84], [60, 55], [66, 84]]) + pl([[60, 55], [60, 24]]) + pl([[46, 54], [49, 28], [71, 28], [74, 54]]) + headC(60, 15) + arrow(44, 38, 54, 38) + arrow(76, 38, 66, 38),
+    collo_lat: CHAIR(36) + pl([[60, 57], [60, 28], [55, 22]]) + pl([[60, 57], [82, 58], [82, 84]]) + pl([[60, 31], [50, 46], [62, 58]]) + headC(51, 17) + '<path d="M40 12q-4 10 4 18" fill="none" stroke="' + ARROW + '" stroke-width="2.6" stroke-linecap="round"/>',
+    tronco_lat: FLOOR + pl([[52, 84], [60, 56], [68, 84]]) + pl([[60, 56], [52, 28]]) + pl([[56, 31], [50, 14], [38, 10]]) + pl([[54, 33], [64, 50]]) + headC(48, 21) + '<path d="M78 40q-8-22-26-30" fill="none" stroke="' + ARROW + '" stroke-width="2.6" stroke-linecap="round"/>',
+    birddog: FLOOR + pl([[38, 84], [38, 54], [72, 56], [74, 84]]) + pl([[38, 54], [12, 48]]) + pl([[72, 56], [104, 52]]) + headC(29, 48),
+    ponte: FLOOR + pl([[26, 78], [56, 60], [76, 58], [82, 84]]) + pl([[28, 80], [48, 82]]) + headC(18, 76) + arrow(56, 82, 56, 66),
+    conchiglia: FLOOR + pl([[24, 72], [60, 74], [78, 66], [96, 78]]) + pl([[60, 72], [74, 50], [96, 76]]) + pl([[26, 76], [16, 82]]) + headC(17, 68) + '<path d="M84 64q4-14-8-20" fill="none" stroke="' + ARROW + '" stroke-width="2.6" stroke-linecap="round"/>',
+    flessori: FLOOR + prop('M30 84h16') + pl([[84, 84], [80, 60], [57, 60], [40, 81], [20, 84]]) + pl([[57, 60], [59, 31]]) + pl([[58, 36], [64, 52]]) + headC(60, 22) + arrow(48, 70, 60, 70),
+    ischio: CHAIR(30) + pl([[54, 58], [70, 33]]) + pl([[54, 58], [98, 82]]) + pl([[54, 58], [70, 60], [70, 84]]) + pl([[66, 39], [84, 62]]) + headC(74, 25) + arrow(56, 24, 66, 30),
+    squat_muro: prop('M30 6V85') + FLOOR + pl([[36, 28], [36, 55], [55, 62], [53, 84]]) + pl([[36, 32], [44, 50]]) + headC(37, 19) + arrow(70, 44, 70, 58),
+    monopodalico: prop('M96 40V85M96 52H112M110 52V85') + FLOOR + pl([[60, 84], [60, 52], [60, 24]]) + pl([[60, 52], [70, 66], [62, 74]]) + pl([[44, 40], [60, 28], [76, 40]]) + headC(60, 15),
+    tandem: FLOOR + prop('M20 88H100') + pl([[52, 84], [58, 54], [66, 84]]) + pl([[58, 54], [60, 24]]) + pl([[48, 42], [60, 28], [72, 42]]) + headC(61, 15) + arrow(78, 70, 98, 70),
+  };
+  const figSvg = (id) => '<svg class="ex-fig" viewBox="0 0 120 90" aria-hidden="true">' + (POSES[id] || '') + '</svg>';
+  // disegno in JPEG per il PDF (più leggero del PNG)
+  function figPng(id) {
+    return new Promise((res) => {
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 120 90"><rect width="120" height="90" rx="8" fill="#F3F5FA"/>' + (POSES[id] || '') + '</svg>';
+      const img = new Image();
+      img.onload = () => { try { const c = document.createElement('canvas'); c.width = 480; c.height = 360; c.getContext('2d').drawImage(img, 0, 0); res(c.toDataURL('image/jpeg', 0.85)); } catch (e) { res(null); } };
+      img.onerror = () => res(null);
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    });
+  }
 
   function exHtml(id, ex, checked, why) {
     const a = window.AREAS && window.AREAS.find((x) => x.id === ex.area);
-    return '<label class="ex-item"><input type="checkbox" data-ex="' + id + '"' + (checked ? ' checked' : '') + ' class="pz-noprint">' +
+    return '<label class="ex-item"><input type="checkbox" data-ex="' + id + '"' + (checked ? ' checked' : '') + ' class="pz-noprint">' + figSvg(id) +
       '<span><b>' + ex.name + '</b><br><span class="small">' + ex.how + '</span><br>' +
       '<span class="ex-dose">' + ex.dose + '</span>' +
-      (why.length ? '<br><span class="small muted">' + T('Per: {w}', { w: why.join(' · ') }) + '</span>' : '') +
-      (a ? '<br><a class="small ex-area pz-noprint" href="#/area/' + a.id + '">' + T('Equistasi: zona {z} sulla mappa', { z: esc(a.name) }) + ' ›</a>' : '') +
+      (why.length ? '<br><span class="small muted">' + T('Per: {w}', { w: why.join(' · ') }) + '</span>' : '<br><span class="small muted">' + T('Esercizio di base') + '</span>') +
+      (a ? '<br><a class="small ex-area pz-noprint" href="#/area/' + a.id + '">' + T('Dove applicare Equistasi: {z}', { z: esc(a.name) }) + ' ›</a>' : '') +
       '</span></label>';
   }
 
@@ -148,45 +194,115 @@
           (F.length ? '<ul class="ex-find">' + F.map((f) => '<li>' + f.text + '<br><span class="small muted">' + f.src + '</span></li>').join('') + '</ul>'
             : '<p class="small" style="margin:0">' + T('Le ultime misure non mostrano aspetti da correggere: il programma propone esercizi di mantenimento.') + '</p>') + '</div>' +
           '<div class="card"><h3>' + T('Esercizi') + '</h3><p class="small muted pz-noprint" style="margin-top:0">' + T('Togli o aggiungi gli esercizi: la scelta resta salvata e va nel report PDF.') + '</p>' +
-          '<div class="ex-list">' + (ids.length ? ids : ['scapole', 'birddog', 'monopodalico']).map((id) => exHtml(id, E[id], chosen.includes(id) || (!saved && !ids.length), whyOf(id))).join('') + '</div>' +
+          '<div class="ex-list">' + ids.map((id) => exHtml(id, E[id], chosen.includes(id), whyOf(id))).join('') + '</div>' +
           '<details class="pz-noprint ex-more"><summary>' + T('Altri esercizi') + '</summary><div class="ex-list">' +
-          Object.keys(E).filter((id) => !ids.includes(id) && (ids.length || !['scapole', 'birddog', 'monopodalico'].includes(id))).map((id) => exHtml(id, E[id], chosen.includes(id), [])).join('') + '</div></details></div>' +
+          Object.keys(E).filter((id) => !ids.includes(id)).map((id) => exHtml(id, E[id], chosen.includes(id), [])).join('') + '</div></details></div>' +
           '<div class="card"><h3>' + T('Come abbinarli a Equistasi') + '</h3><ol class="steps">' +
           '<li>' + T('Applica Equistasi come indicato nella mappa per la zona di ogni esercizio, oppure secondo il protocollo che usi con il paziente.') + '</li>' +
           '<li>' + T('Esegui gli esercizi con il dispositivo applicato, <b>1 volta al giorno, 5 giorni a settimana</b>, per 4 settimane.') + '</li>' +
           '<li>' + T('Movimenti lenti e senza dolore. Se compare dolore, interrompi.') + '</li>' +
           '<li>' + T('Dopo 4 settimane <b>ripeti le misure della postura</b> e confronta senza e con Equistasi.') + '</li></ol></div>' +
-          '<div class="btn-col pz-noprint"><button class="btn primary" type="button" id="ex-print">' + T('Stampa o salva in PDF') + '</button>' +
-          (navigator.share ? '<button class="btn" type="button" id="ex-share">' + T('Condividi con il paziente') + '</button>' : '') +
-          '<a class="btn" href="#/postura/report">' + T('Report in PDF completo') + '</a></div>');
+          '<div class="card pz-noprint"><h3>' + T('Scheda per il paziente') + '</h3>' +
+          '<label class="gate-label" for="ex-name">' + T('Nome del paziente (facoltativo)') + '</label>' +
+          '<input id="ex-name" class="search" autocomplete="off" value="' + esc(store.get('tp-prog-name', '')) + '" placeholder="' + esc(T('Es. Mario Rossi')) + '">' +
+          '<p class="gate-msg" id="ex-msg" role="status"></p>' +
+          '<div class="btn-col"><button class="btn primary" type="button" id="ex-pdf">' + T('PDF per il paziente: condividi') + '</button>' +
+          '<button class="btn" type="button" id="ex-pdf-dl">' + T('Scarica il PDF') + '</button>' +
+          '<a class="btn" href="#/postura/report">' + T('Report in PDF completo') + '</a></div></div>');
     if (none) return;
     app.querySelectorAll('[data-ex]').forEach((c) => c.addEventListener('change', () => {
       const sel = Array.from(app.querySelectorAll('[data-ex]:checked')).map((x) => x.dataset.ex);
       store.set(PROG, { t: Date.now(), ids: sel });
     }));
-    // in stampa vanno solo gli esercizi scelti, anche quelli presi da «Altri esercizi»
-    document.getElementById('ex-print').addEventListener('click', () => { const d = app.querySelector('.ex-more'); if (d) d.open = true; window.print(); });
-    const sh = document.getElementById('ex-share');
-    if (sh) sh.addEventListener('click', () => { navigator.share({ title: T('Programma di esercizi posturali'), text: shareText() }).catch(() => {}); });
+    const nameIn = document.getElementById('ex-name');
+    nameIn.addEventListener('change', () => store.set('tp-prog-name', nameIn.value.trim()));
+    const msg = document.getElementById('ex-msg');
+    const go = async (dl) => {
+      const btns = app.querySelectorAll('#ex-pdf, #ex-pdf-dl'); btns.forEach((b) => { b.disabled = true; });
+      msg.className = 'gate-msg'; msg.textContent = T('Preparo il PDF…');
+      try {
+        const blob = await makePdf(nameIn.value.trim());
+        const how = await window.EqReportPdf.deliver(blob, 'Equistasi-esercizi-' + new Date().toISOString().slice(0, 10) + '.pdf', dl, T('Programma di esercizi'));
+        msg.className = 'ts-done'; msg.textContent = how === 'download' ? T('PDF scaricato: lo trovi nella cartella dei download.') : how === 'share' ? T('PDF pronto.') : '';
+      } catch (e) {
+        msg.className = 'gate-msg'; msg.textContent = T('Non è stato possibile creare il PDF. Riprova; se il problema continua, aggiorna l’app.');
+      }
+      btns.forEach((b) => { b.disabled = false; });
+    };
+    document.getElementById('ex-pdf').addEventListener('click', () => go(false));
+    document.getElementById('ex-pdf-dl').addEventListener('click', () => go(true));
   }
 
-  // programma in testo semplice (condivisione e report)
-  function chosenList() {
+  /* ───── Scheda PDF per il paziente: disegno, come si fa, quanto, zona di Equistasi ───── */
+  async function makePdf(name) {
+    const { jsPDF } = await window.EqReportPdf.load();
+    const list = chosenIds();
+    const E = EX();
+    const figs = await Promise.all(list.map(figPng));
+    const logo = await fetch('img/logo.png').then((r) => r.blob()).then((b) => new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = () => ok(null); fr.readAsDataURL(b); })).catch(() => null);
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, H = 297, M = 16, CW = W - 2 * M;
+    const rgb = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+    const font = (size, bold) => { doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(size); };
+    const ink = (c) => doc.setTextColor(...rgb(c));
+    const plain = (s) => String(s).replace(/<[^>]+>/g, '').replace(/[–—]/g, '-').replace(/[«»]/g, '"').replace(/’/g, "'");
+    const today = dateStr(Date.now());
+    let y = 0;
+    const head = () => {
+      if (logo) doc.addImage(logo, 'PNG', M, 10, 34, 34 * 107 / 471);
+      font(9, false); ink('#5D6480'); doc.text(plain(T('Programma di esercizi')) + ' · ' + today, W - M, 15, { align: 'right' });
+      y = 24;
+    };
+    head();
+    doc.setFillColor(...rgb('#29235C')); doc.roundedRect(M, y, CW, 30, 4, 4, 'F');
+    font(17, true); ink('#FFFFFF'); doc.text(plain(T('Programma di esercizi posturali con Equistasi')), M + 7, y + 11);
+    font(10, false); ink('#D9D7EE');
+    doc.text(plain(name ? T('Per: {n}', { n: name }) : T('Esercizi da fare a casa')), M + 7, y + 18.5);
+    doc.text(plain(T('1 volta al giorno, 5 giorni a settimana, per 4 settimane, con Equistasi applicato.')), M + 7, y + 25);
+    y += 38;
+    list.forEach((id, i) => {
+      const e = E[id];
+      const area = window.AREAS && window.AREAS.find((x) => x.id === e.area);
+      font(10, false);
+      const how = doc.splitTextToSize(plain(e.how), CW - 58);
+      const h = Math.max(36, 16 + how.length * 4.6 + (area ? 5 : 0));
+      if (y + h > H - 24) { doc.addPage(); head(); }
+      doc.setDrawColor(...rgb('#E1E5EF')); doc.setLineWidth(0.3); doc.roundedRect(M, y, CW, h, 3, 3, 'S');
+      if (figs[i]) doc.addImage(figs[i], 'JPEG', M + 3, y + 3, 44, 33);
+      const x = M + 52;
+      font(12, true); ink('#29235C'); doc.text((i + 1) + '. ' + plain(e.name), x, y + 8);
+      font(10, true); ink('#B26E00'); doc.text(plain(e.dose), x, y + 14);
+      font(10, false); ink('#161A33'); doc.text(how, x, y + 20);
+      if (area) { font(9, false); ink('#5D6480'); doc.text(plain(T('Dove applicare Equistasi: {z} (mappa dell’app)', { z: area.name })), x, y + 20 + how.length * 4.6 + 1.5); }
+      y += h + 5;
+    });
+    if (y + 26 > H - 24) { doc.addPage(); head(); }
+    font(10, true); ink('#29235C'); doc.text(plain(T('Regole')), M, y + 4);
+    font(9.5, false); ink('#161A33');
+    const rules = [T('Movimenti lenti e senza dolore. Se compare dolore, interrompi.'), T('Dopo 4 settimane <b>ripeti le misure della postura</b> e confronta senza e con Equistasi.')];
+    let ry = y + 10;
+    rules.forEach((r) => { const t = doc.splitTextToSize('• ' + plain(r), CW); doc.text(t, M, ry); ry += t.length * 4.4 + 1; });
+    const tot = doc.getNumberOfPages();
+    for (let n = 1; n <= tot; n++) {
+      doc.setPage(n); font(7.5, false); ink('#5D6480');
+      doc.text(doc.splitTextToSize(plain(DISCLAIMER()), CW - 20), M, H - 13);
+      doc.text(n + ' / ' + tot, W - M, H - 13, { align: 'right' });
+    }
+    return doc.output('blob');
+  }
+
+  // esercizi scelti (o proposti, se il professionista non ha ancora cambiato nulla)
+  function chosenIds() {
     const E = EX(); const saved = store.get(PROG, null);
     const ids = saved && saved.ids ? saved.ids : proposed(findings(readings()));
-    return ids.filter((id) => E[id]).map((id) => E[id]);
-  }
-  function shareText() {
-    return T('Programma di esercizi posturali con Equistasi') + '\n\n' +
-      chosenList().map((e, i) => (i + 1) + '. ' + e.name + ' — ' + e.dose + '\n' + e.how).join('\n\n') +
-      '\n\n' + T('1 volta al giorno, 5 giorni a settimana, per 4 settimane, con Equistasi applicato.') + '\n' + DISCLAIMER();
+    return ids.filter((id) => E[id]);
   }
   // righe per il report PDF del professionista
   function reportGroup() {
-    const list = chosenList();
+    const E = EX(); const list = chosenIds().map((id) => E[id]);
     if (!list.length) return null;
     return { title: T('Programma di esercizi posturali'), rows: list.map((e) => ({ label: e.name, val: e.dose })) };
   }
 
-  window.EqExercises = { render, reportGroup, _findings: findings, _readings: readings };
+  window.EqExercises = { render, reportGroup, makePdf, _findings: findings, _readings: readings, _poses: POSES };
 })();
