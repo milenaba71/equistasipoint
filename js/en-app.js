@@ -179,7 +179,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Questo dispositivo è attivo su un altro telefono. Vuoi spostarlo su questo telefono? L’altro telefono verrà scollegato.": "This device is active on another phone. Do you want to move it to this phone? The other phone will be disconnected.",
   "Il dispositivo resta sull’altro telefono.": "The device stays on the other phone.",
   "Il dispositivo è stato spostato su un altro telefono. Per usarlo di nuovo qui, abbinalo ancora.": "The device has been moved to another phone. To use it here again, pair it again.",
-  "Disponibile con Equistasi Silicon": "Available with Equistasi Silicon",
+  "Riservato ai dispositivi di tipologia superiore: Silicon o altro": "Reserved for higher-tier devices: Silicon or other",
   "Il tuo dispositivo Equistasi Gel apre la mappa, dermatomeri e metameri, i promemoria, i video, l’equilibrio e il salto.": "Your Equistasi Gel device opens the map, dermatomes and metameres, reminders, videos, balance and jump.",
   "Torna alla home": "Back to home",
   "Inquadra il codice del dispositivo": "Scan the device code",

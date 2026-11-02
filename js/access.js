@@ -1,7 +1,7 @@
 /* Sezioni aperte in base al tipo di dispositivo (tipologia di Airtable, letta da Supabase all'abbinamento).
    - Noleggio Prof: tutto, anche gli strumenti per il professionista (js/pro.js, tp-pro).
    - Silicon, noleggio privato e gli altri tipi: tutto tranne gli strumenti per il professionista.
-   - Gel: Sprint e Postura (con il report PDF) restano visibili con il lucchetto: «disponibile con Equistasi Silicon».
+   - Gel: Sprint e Postura (con il report PDF) restano visibili con il lucchetto: «riservato ai dispositivi di tipologia superiore».
    Il tipo è in localStorage 'tp-kind' (prof | silicon | gel | rent); vuoto = non ancora noto, tutto aperto. */
 (function () {
   const T = window.T || ((s) => s);
@@ -19,7 +19,7 @@
   const kind = () => raw('tp-kind');
   const locked = (feature) => kind() === 'gel' && !!GEL_LOCK[feature];
   const LOCK = '<span class="lock-ic" aria-hidden="true">🔒</span>';
-  const lockNote = () => T('Disponibile con Equistasi Silicon');
+  const lockNote = () => T('Riservato ai dispositivi di tipologia superiore: Silicon o altro');
   // pagina mostrata al posto di una sezione chiusa
   function lockedPage(title) {
     return '<div class="card lock-page">' + LOCK + '<h2>' + title + '</h2><p>' + lockNote() +
