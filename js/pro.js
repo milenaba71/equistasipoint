@@ -100,8 +100,10 @@
     const moves = knee ? { flessione: MOVES().flessione, estensione: MOVES().estensione } : { flessione: MOVES().flessione, abduzione: MOVES().abduzione };
     const how = knee
       ? [T('Persona sdraiata o seduta. Appoggia il telefono <b>sul lato esterno della coscia</b>, lungo l’osso, <b>schermo verso l’esterno</b> e parte alta del telefono verso il ginocchio.'),
-        T('Tocca <b>Segna coscia</b>. Poi appoggia il telefono <b>sul lato esterno della tibia</b>, sempre schermo verso l’esterno e parte alta verso il piede.'),
-        mv === 'flessione' ? T('Fai piegare il ginocchio al massimo e tocca <b>Segna tibia</b>.') : T('Fai distendere il ginocchio al massimo e tocca <b>Segna tibia</b>: 0° = gamba dritta.')]
+        T('Tocca <b>Segna coscia</b>: il telefono registra la direzione del femore, che fa da <b>riferimento</b>. Non si calibra nulla e il dispositivo Equistasi non serve: si usa solo il telefono.'),
+        T('Poi appoggia il telefono <b>sul lato esterno della tibia</b>, sempre schermo verso l’esterno e parte alta verso il piede.'),
+        (mv === 'flessione' ? T('Fai piegare il ginocchio al massimo e tocca <b>Segna tibia</b>.') : T('Fai distendere il ginocchio al massimo e tocca <b>Segna tibia</b>: 0° = gamba dritta.')) + ' ' +
+        T('L’app calcola la <b>differenza tra coscia e tibia</b>: è l’angolo del ginocchio, giusto anche se la coscia non è perfettamente dritta.')]
       : [T('Persona in piedi, braccio lungo il fianco. Appoggia il telefono <b>sul braccio</b>, sopra il gomito, con la parte alta verso la mano.') + ' ' +
         (mv === 'flessione' ? T('Schermo <b>verso l’esterno</b> (di lato).') : T('Schermo <b>in avanti</b> (davanti al braccio).')),
         T('Tocca <b>Zero</b> con il braccio lungo il fianco.'),
@@ -112,7 +114,6 @@
       '<div class="toolbar">' + seg('side', SIDES(), prefs.side, T('Lato')) + '</div>' +
       '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
       gonioFigures(knee, mv) +
-      (knee ? '<div class="gn-why"><b>' + T('Perché due appoggi?') + '</b> ' + T('Il telefono misura solo la propria inclinazione. Sulla <b>coscia</b> segna la direzione del femore, che fa da riferimento; sulla <b>tibia</b> segna la direzione della tibia. L’angolo del ginocchio è la <b>differenza tra le due</b>: così la misura è giusta anche se la coscia non è perfettamente dritta. Non si calibra nulla e il dispositivo Equistasi non serve: si usa solo il telefono.') + '</div>' : '') +
       '<p class="small muted gn-key">' + T('Nel disegno il telefono è giallo: appoggia il <b>dorso</b> del telefono sul corpo, con lo <b>schermo verso di te</b> che guardi. La tacca indica la <b>parte alta</b> del telefono. Tienilo fermo con la mano, ben aderente.') + '</p>' +
       '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
       '<div class="pro-live" id="pro-live"><div class="pro-big" id="pro-big">–</div><div class="small" id="pro-sub">' + T('Tocca «Inizia» per accendere i sensori') + '</div></div>' +
