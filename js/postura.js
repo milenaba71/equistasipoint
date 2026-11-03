@@ -535,6 +535,46 @@
     };
   }
 
+  /* ───────── Interpretazione con l'IA (prova) ─────────
+     Solo nella versione sito e solo con il dispositivo di prova DEMO2026. Al servizio va solo il riepilogo
+     dei numeri del report (niente nome, niente foto); la risposta resta una stima indicativa. */
+  const AI_DEMO = 'DEMO2026';
+  function aiAllowed() {
+    const native = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    let sn = ''; try { sn = (localStorage.getItem('tp-serial') || '').trim().toUpperCase(); } catch (e) { /* storage non disponibile */ }
+    const cfg = window.APP_CONFIG || {};
+    return !native && sn === AI_DEMO && !!cfg.supabaseUrl;
+  }
+  function aiSummary(data) {
+    const out = [];
+    let prof = null; try { prof = JSON.parse(localStorage.getItem('tp-profile') || 'null'); } catch (e) { prof = null; }
+    if (prof && window.PROFILES && window.PROFILES[prof.type]) out.push('Profilo: ' + (window.PROFILES[prof.type].title || prof.type) + (prof.eta ? ' · fascia d’età ' + prof.eta : ''));
+    const s = data.stability;
+    if (s) out.push('Indice di stabilità (ultima misura, ' + s.eyes + ', ' + s.cond + '): ' + s.value + '/100 · area ' + s.area + ' cm² · velocità ' + s.vel + ' mm/s' + (s.diff != null ? ' · variazione rispetto alla misura precedente ' + (s.diff >= 0 ? '+' : '') + s.diff : ''));
+    const pair = (r) => '- ' + r.label + ': senza ' + (r.s ? r.s.v + ' ' + r.unit + ' (' + r.s.n + ' prove)' : '—') + ' · con ' + (r.c ? r.c.v + ' ' + r.unit + ' (' + r.c.n + ' prove)' : '—') + (r.better ? ' · migliore se più ' + (r.better === 'low' ? 'basso' : 'alto') : '');
+    const rows = data.rows.filter((r) => r.s || r.c);
+    if (rows.length) out.push('Postura con i sensori, senza e con Equistasi (medie):\n' + rows.map(pair).join('\n'));
+    if (data.sport.length) out.push('Test sportivi (medie):\n' + data.sport.map(pair).join('\n'));
+    if (data.chair.length) out.push('Alzate dalla sedia:\n' + data.chair.map((c) => '- ' + c.date + ' · ' + c.cond + ': ' + c.val).join('\n'));
+    if (data.photos.length) out.push('Postura da foto (angoli stimati):\n' + data.photos.map((p) => '- ' + p.title + ': ' + p.metrics.map((m) => m.lab + ' ' + m.val + (m.note ? ' (' + m.note + ')' : '')).join(', ')).join('\n'));
+    data.pro.forEach((g) => { if (g.rows.length) out.push(g.title + ':\n' + g.rows.map((r) => '- ' + r.label + (r.val ? ': ' + r.val : '')).join('\n')); });
+    return out.join('\n\n').replace(/<[^>]+>/g, '');
+  }
+  function aiHtml(text) {
+    return esc(text).split(/\n{2,}/).map((b) => {
+      const lines = b.split('\n');
+      if (lines.every((l) => /^\s*[-•*]\s+/.test(l))) return '<ul>' + lines.map((l) => '<li>' + l.replace(/^\s*[-•*]\s+/, '') + '</li>').join('') + '</ul>';
+      if (/^#{1,4}\s/.test(b)) return '<h4>' + b.replace(/^#{1,4}\s*/, '') + '</h4>';
+      return '<p>' + lines.join('<br>') + '</p>';
+    }).join('').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  }
+  const AI_ERR = {
+    nokey: T('Il servizio di IA non è ancora attivo: manca la chiave del servizio.'),
+    notallowed: T('L’interpretazione con l’IA è disponibile solo con il dispositivo di prova.'),
+    nodata: T('Non ci sono ancora abbastanza misure da interpretare.'),
+    busy: T('Il servizio è occupato: riprova tra un minuto.'),
+  };
+
   function renderReport(app) {
     const data = reportData();
     const cell = (x, unit) => x ? '<b>' + x.v + ' ' + unit + '</b> <small class="muted">(' + x.n + ')</small>' : '<span class="muted">—</span>';
@@ -551,6 +591,9 @@
       '<div class="btn-col"><button class="btn primary" type="button" id="pz-pdf">' + (native ? T('Condividi o salva il PDF') : T('Condividi il PDF')) + '</button>' +
       (native ? '' : '<button class="btn" type="button" id="pz-pdf-dl">' + T('Scarica il PDF') + '</button>') + '</div>' +
       '<p class="gate-msg" id="pz-pdf-msg" role="status"></p></div>' +
+      (aiAllowed() ? '<div class="card ai-card"><div><b>' + T('Interpretazione con l’IA') + '</b> <span class="beta-tag">' + T('prova') + '</span><br><span class="small muted">' + T('Una lettura delle misure di questo report, scritta dall’IA per il professionista. Al servizio va solo il riepilogo dei numeri, senza nome e senza foto.') + '</span></div>' +
+        '<div class="btn-col"><button class="btn primary" type="button" id="ai-go">' + T('Interpreta i dati con l’IA') + '</button></div><p class="gate-msg" id="ai-msg" role="status"></p><div id="ai-out" class="ai-out" hidden></div>' +
+        '<p class="small muted" style="margin:10px 0 0">' + T('Stima indicativa, non un’analisi medica: la valutazione resta del professionista.') + '</p></div>' : '') +
       (s ? '<div class="card pz-hero"><div class="pz-hero-top"><span>' + T('INDICE DI STABILITÀ') + '</span><span>' + s.date + '</span></div><div class="pz-hero-row"><b class="pz-rep-big">' + s.value + '<small>/100</small></b><div><b>' + s.eyes + ' · ' + s.cond + '</b><br><span>' + T('Area {a} cm² · velocità {v} mm/s', { a: s.area, v: s.vel }) + '</span>' +
         (s.diff != null ? '<span class="pz-pill">' + (s.diff >= 0 ? '+' : '') + s.diff + ' ' + T('rispetto alla misura precedente') + '</span>' : '') + '</div></div></div>' : '') +
       '<div class="card"><h3>' + T('Senza e con Equistasi') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
@@ -576,6 +619,26 @@
       }
       btns.forEach((b) => { b.disabled = false; });
     };
+    const aiGo = document.getElementById('ai-go');
+    if (aiGo) aiGo.addEventListener('click', async () => {
+      const am = document.getElementById('ai-msg'); const ao = document.getElementById('ai-out');
+      const summary = aiSummary(data);
+      if (summary.length < 20) { am.className = 'gate-msg'; am.textContent = AI_ERR.nodata; return; }
+      aiGo.disabled = true; am.className = 'gate-msg'; am.textContent = T('L’IA sta leggendo le misure…'); ao.hidden = true;
+      try {
+        const cfg = window.APP_CONFIG || {};
+        const r = await fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/functions/v1/interpreta', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', apikey: cfg.pointKey || '' },
+          body: JSON.stringify({ serial: AI_DEMO, summary }),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.text) throw new Error(j.error || 'other');
+        ao.innerHTML = aiHtml(j.text); ao.hidden = false; am.className = 'ts-done'; am.textContent = '';
+      } catch (e) {
+        am.className = 'gate-msg'; am.textContent = AI_ERR[e.message] || T('Non è stato possibile avere l’interpretazione. Riprova più tardi.');
+      }
+      aiGo.disabled = false;
+    });
     document.getElementById('pz-pdf').addEventListener('click', () => go(false));
     const dl = document.getElementById('pz-pdf-dl'); if (dl) dl.addEventListener('click', () => go(true));
   }
