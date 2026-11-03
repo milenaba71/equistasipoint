@@ -295,4 +295,5 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   'Stima indicativa, non un’analisi medica: la valutazione resta del professionista.': 'An indicative estimate, not a medical analysis: the assessment remains the professional’s.',
   'L’IA sta leggendo le misure…': 'The AI is reading the measurements…',
   'Non è stato possibile avere l’interpretazione. Riprova più tardi.': 'The interpretation could not be obtained. Try again later.',
+  'Dolore, equilibrio e salto senza e con Equistasi, da inviare al fisioterapista o all’allenatore': 'Pain, balance and jump without and with Equistasi, to send to the physiotherapist or coach',
 });

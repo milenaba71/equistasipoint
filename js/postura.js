@@ -473,7 +473,9 @@
   }
   // Dati del report: stessi valori della pagina e del PDF
   function reportData() {
-    const recs = records();
+    // Gel: il report contiene solo dolore, uso, equilibrio e salto (postura e sprint sono chiusi)
+    const gel = !!(window.EqAccess && window.EqAccess.locked('postura'));
+    const recs = gel ? [] : records();
     const pick = (test, cond, f) => recs.filter((r) => r.test === test && r.cond === cond && (!f || f(r)));
     const R = (label, test, f, get, unit, d, better) => {
       const one = (cond) => { const l = pick(test, cond, f); if (!l.length) return null; const raw = mean(l.map(get)); return { raw, v: fmt(raw, d), n: l.length }; };
@@ -493,7 +495,7 @@
     const condTxt = (c) => (c === 'con' ? T('con Equistasi') : T('senza Equistasi'));
     const label = (r) => r.test === 'stabilita' ? TESTS.stabilita.name + ' · ' + (r.eyes === 'chiusi' ? T('occhi chiusi') : T('occhi aperti')) : TESTS[r.test].name;
     const val = (r) => r.test === 'stabilita' ? T('indice {i} · {a} cm²', { i: index(r.m.area), a: fmt(r.m.area, 1) }) : r.test === 'schiena' ? fmt(r.k, 0) + '°' : fmt(r.ap, 1) + '° / ' + fmt(r.ml, 1) + '°';
-    const photos = store.get(PHOTO_KEY, []).slice(-6).map((p) => {
+    const photos = (gel ? [] : store.get(PHOTO_KEY, [])).slice(-6).map((p) => {
       const kind = kindOf(p.view);
       const ref = kind === 'lato' ? p.pts.ank[0] : (p.pts.ankL[0] + p.pts.ankR[0]) / 2;
       const ms = (p.metrics && p.metrics.length ? p.metrics : photoMetrics(kind, p.pts, p.w, p.h)).slice(0, 4);
@@ -522,9 +524,9 @@
       S(T('Sprint 10 m'), 'sprint', 's', 2, 'low', (r) => /^10 m/.test(r.note || '')),
       S(T('Sprint 20 m'), 'sprint', 's', 2, 'low', (r) => /^20 m/.test(r.note || '')),
       S(T('Sprint 30 m'), 'sprint', 's', 2, 'low', (r) => /^30 m/.test(r.note || '')),
-    ].filter((r) => r.s || r.c);
+    ].filter((r) => (r.s || r.c) && !(gel && /sprint/i.test(r.label)));
     return {
-      sport,
+      gel, sport,
       name, date: dateStr(Date.now()) + ' ' + new Date().getFullYear(),
       stability: last ? { value: index(last.m.area), area: fmt(last.m.area, 1), vel: fmt(last.m.vel, 1), eyes: EYES[last.eyes] + ' · ' + MOUNT[last.mount], cond: condTxt(last.cond),
         date: dateStr(last.t) + ' ' + timeStr(last.t), diff: prev ? index(last.m.area) - index(prev.m.area) : null } : null,
@@ -596,9 +598,9 @@
         '<p class="small muted" style="margin:10px 0 0">' + T('Stima indicativa, non un’analisi medica: la valutazione resta del professionista.') + '</p></div>' : '') +
       (s ? '<div class="card pz-hero"><div class="pz-hero-top"><span>' + T('INDICE DI STABILITÀ') + '</span><span>' + s.date + '</span></div><div class="pz-hero-row"><b class="pz-rep-big">' + s.value + '<small>/100</small></b><div><b>' + s.eyes + ' · ' + s.cond + '</b><br><span>' + T('Area {a} cm² · velocità {v} mm/s', { a: s.area, v: s.vel }) + '</span>' +
         (s.diff != null ? '<span class="pz-pill">' + (s.diff >= 0 ? '+' : '') + s.diff + ' ' + T('rispetto alla misura precedente') + '</span>' : '') + '</div></div></div>' : '') +
-      '<div class="card"><h3>' + T('Senza e con Equistasi') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
+      (data.gel ? '' : '<div class="card"><h3>' + T('Senza e con Equistasi') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
       data.rows.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') +
-      '</tbody></table></div><p class="small muted" style="margin:8px 0 0">' + T('Media delle prove (numero tra parentesi). Verde: valore migliorato con Equistasi; per l’oscillazione un valore più basso indica più stabilità.') + '</p></div>' +
+      '</tbody></table></div><p class="small muted" style="margin:8px 0 0">' + T('Media delle prove (numero tra parentesi). Verde: valore migliorato con Equistasi; per l’oscillazione un valore più basso indica più stabilità.') + '</p></div>') +
       (data.sport.length ? '<div class="card"><h3>' + T('Test di progressi (sport)') + '</h3><div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Misura') + '</th><th>' + T('Senza') + '</th><th>' + T('Con') + '</th><th>' + T('Variazione') + '</th></tr></thead><tbody>' +
         data.sport.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') + '</tbody></table></div></div>' : '') +
       data.pro.map((gr) => '<div class="card"><h3>' + gr.title + '</h3><div class="pz-table-wrap"><table class="pz-table"><tbody>' +
@@ -974,7 +976,7 @@
   function render(app, arg, arg2, arg3) {
     if (stopRec) stopRec();
     if (window.speechSynthesis) try { window.speechSynthesis.cancel(); } catch (e) { /* */ }
-    if (window.EqAccess && window.EqAccess.locked('postura')) { app.innerHTML = window.EqAccess.lockedPage(T('Misura la postura')); return; }
+    if (window.EqAccess && window.EqAccess.locked('postura') && arg !== 'report') { app.innerHTML = window.EqAccess.lockedPage(T('Misura la postura')); return; }
     if (arg === 'stabilita') renderStability(app);
     else if (arg === 'tronco' || arg === 'testa' || arg === 'schiena') renderStatic(app, arg);
     else if (arg === 'risultato') renderResult(app, arg2);
