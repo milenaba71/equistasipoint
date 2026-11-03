@@ -164,7 +164,7 @@
     return new Promise((res) => {
       const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360" viewBox="0 0 120 90"><rect width="120" height="90" rx="8" fill="#F3F5FA"/>' + (POSES[id] || '') + '</svg>';
       const img = new Image();
-      img.onload = () => { try { const c = document.createElement('canvas'); c.width = 480; c.height = 360; c.getContext('2d').drawImage(img, 0, 0); res(c.toDataURL('image/jpeg', 0.85)); } catch (e) { res(null); } };
+      img.onload = () => { try { const c = document.createElement('canvas'); c.width = 480; c.height = 360; const g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, 480, 360); g.drawImage(img, 0, 0); res(c.toDataURL('image/jpeg', 0.85)); } catch (e) { res(null); } };
       img.onerror = () => res(null);
       img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
     });
@@ -331,7 +331,7 @@
   function reportGroup() {
     const E = EX(); const list = chosenIds().map((id) => E[id]);
     if (!list.length) return null;
-    return { title: T('Programma di esercizi posturali'), rows: list.map((e) => ({ label: e.name, val: e.dose })) };
+    return { title: T('Programma di esercizi posturali'), ex: true, rows: chosenIds().map((id) => ({ label: E[id].name, val: E[id].dose, fig: id, how: E[id].how })) };
   }
 
   // scheda per arrivare al programma da Misura e dalla Postura (solo noleggio prof)
@@ -345,5 +345,5 @@
       '</span></span><span class="chev" aria-hidden="true">›</span></a>';
   }
 
-  window.EqExercises = { cardHtml, render, reportGroup, makePdf, _findings: findings, _readings: readings, _poses: POSES };
+  window.EqExercises = { cardHtml, render, reportGroup, makePdf, figPng, figSvg, _findings: findings, _readings: readings, _poses: POSES };
 })();
