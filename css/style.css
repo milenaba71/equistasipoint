@@ -1191,3 +1191,5 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .ai-card .ai-out h4 { margin: 10px 0 4px; font-size: 15px; }
 .ai-card .ai-out p { margin: 6px 0; }
 .ai-card .ai-out ul { margin: 6px 0; padding-left: 20px; }
+.ex-rep { display: flex; gap: 12px; align-items: flex-start; }
+.ex-rep .ex-fig { width: 112px; height: 84px; }

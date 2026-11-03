@@ -185,9 +185,33 @@
     }
 
     // strumenti per il professionista (noleggio prof): dolore, uso, goniometro, scoliometro
+    // disegni degli esercizi (programma di esercizi posturali)
+    const figs = {};
+    if (window.EqExercises && window.EqExercises.figPng) {
+      const ids = []; (data.pro || []).forEach((gr) => gr.rows.forEach((r) => { if (r.fig) ids.push(r.fig); }));
+      await Promise.all(ids.map(async (id) => { figs[id] = await window.EqExercises.figPng(id); }));
+    }
     (data.pro || []).forEach((gr) => {
       section(gr.title);
       gr.rows.forEach((r) => {
+        if (r.fig) {
+          // esercizio: disegno a sinistra, nome, come si fa e dose a destra
+          const fw = 40, fh = 30, tx = M + fw + 6, tw = CW - fw - 8;
+          font(10.5, true); const nm = doc.splitTextToSize(String(r.label), tw);
+          font(8.8, false); const hw = r.how ? doc.splitTextToSize(String(r.how).replace(/<[^>]+>/g, '').replace(/[«»]/g, '"').replace(/[–—]/g, '-'), tw) : [];
+          const th = nm.length * 4.6 + hw.length * 3.9 + (r.val ? 6 : 0);
+          const h = Math.max(fh, th) + 4;
+          need(h + 2);
+          if (figs[r.fig]) { try { doc.addImage(figs[r.fig], 'JPEG', M, y, fw, fh); } catch (e) { fill(SOFT); doc.roundedRect(M, y, fw, fh, 2, 2, 'F'); } }
+          let ty = y + 4.5;
+          font(10.5, true); ink(INK); doc.text(nm, tx, ty); ty += nm.length * 4.6;
+          if (hw.length) { font(8.8, false); ink(MUTED); doc.text(hw, tx, ty, { lineHeightFactor: 1.25 }); ty += hw.length * 3.9; }
+          if (r.val) { font(9.5, true); ink(INDIGO); text(r.val, tx, ty + 1.5); }
+          y += h;
+          draw(LINE); doc.setLineWidth(0.2); doc.line(M, y, W - M, y);
+          y += 3;
+          return;
+        }
         font(9, false); ink(INK);
         const lines = doc.splitTextToSize(r.label, CW - (r.val ? 30 : 4));
         need(lines.length * 4.2 + 5);
