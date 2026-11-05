@@ -223,6 +223,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Inserisci il <b>numero di serie</b> del tuo dispositivo Equistasi. Lo trovi stampato sul <b>retro del dispositivo</b>.": "Enter the <b>serial number</b> of your Equistasi device. You will find it printed on the <b>back of the device</b>.",
   "Numero di serie": "Serial number",
   "Problemi con il codice? Chiedi al tuo farmacista o scrivi a Equistasi.": "Trouble with the code? Ask your pharmacist or contact Equistasi.",
+  "Non hai ancora Equistasi? Scopri e acquista i prodotti nello shop": "Don’t have Equistasi yet? Discover and buy the products in the shop",
   "Per cosa usi Equistasi?": "What do you use Equistasi for?",
   "Così ti mostriamo solo i protocolli e i video adatti a te. Puoi cambiare scelta quando vuoi.": "So we only show you the protocols and videos that suit you. You can change this at any time.",
   "Quale patologia?": "Which condition?",
