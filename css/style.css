@@ -1193,3 +1193,9 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .ai-card .ai-out ul { margin: 6px 0; padding-left: 20px; }
 .ex-rep { display: flex; gap: 12px; align-items: flex-start; }
 .ex-rep .ex-fig { width: 112px; height: 84px; }
+
+/* Shop anche senza dispositivo abbinato (schermata di attivazione) */
+.gate-cart { position: absolute; top: 14px; right: 14px; width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--grey, #F4F6F8); color: var(--indigo, #29235C); z-index: 2; }
+.gate-cart:hover { background: #e7e9f4; }
+.gate-shop { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid #E2E0EF; color: var(--indigo, #29235C); font-weight: 700; font-size: 14px; text-decoration: none; text-align: left; }
+.gate-shop svg { flex: none; }
