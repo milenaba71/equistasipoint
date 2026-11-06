@@ -23,7 +23,8 @@ def main(bundle_id, version):
     # questionario dell'età: Apple ha aggiunto domande nuove (es. «socialMedia»). Equistasi Point non ha
     # funzioni social: si risponde «no» solo alle domande nuove ancora vuote elencate qui sotto.
     NEW_ANSWERS = {"socialMedia": False}
-    age = call("GET", "/appStoreVersions/%s/ageRatingDeclaration" % ver["id"], allow_fail=True)
+    # il questionario ha lo stesso id della versione (così lo indica Apple negli errori)
+    age = call("GET", "/ageRatingDeclarations/%s" % ver["id"], allow_fail=True)
     if age and age.get("data"):
         attrs = age["data"]["attributes"]
         empty = sorted(k for k, v in attrs.items() if v is None)
