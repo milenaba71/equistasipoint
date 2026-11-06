@@ -16,7 +16,7 @@ on:
       notes:
         description: "Note per i revisori Apple"
         required: true
-        default: "L'app richiede il numero di serie del dispositivo Equistasi. Numero di serie di prova: DEMO2026. Nella prima schermata scrivilo nel campo «Scrivi qui il numero di serie» e tocca «Accedi» (la fotocamera serve solo per leggere il codice a barre sul dispositivo fisico). Dopo l'abbinamento parte un breve video tutorial con il pulsante «Salta»; poi scegli un profilo (es. Dolore), spunta «Accetto ed entro» e tocca «Continua». Video e attivazione richiedono la connessione a internet. Il link Shop apre il negozio online dei dispositivi fisici Equistasi (shop.equistasi.com). / The app requires the serial number of the Equistasi device. Demo serial number: DEMO2026. On the first screen type it in the serial field and tap «Accedi» (the camera is only used to read the barcode on the physical device). A short tutorial video with a «Skip» button follows; then choose a profile, tick «Accetto ed entro» and tap «Continua». Videos and activation need an internet connection."
+        default: "L’app richiede il codice del dispositivo Equistasi. Codice di prova: DEMO2026. Nella prima schermata tocca il riquadro «Clicca qui e abbina il dispositivo»: la fotocamera serve solo per leggere il codice sul dispositivo fisico. Se non legge nessun codice (o se neghi la fotocamera), dopo 10 secondi compare il campo «Scrivi qui il codice»: scrivi DEMO2026 e tocca «Abbina». Dopo l’abbinamento parte un breve video tutorial con il pulsante «Salta»; poi scegli un profilo (es. Dolore), spunta «Accetto ed entro» e tocca «Continua». Video e attivazione richiedono internet. Il link Shop apre il negozio online dei dispositivi fisici Equistasi (shop.equistasi.com). / The app requires the code of the Equistasi device. Demo code: DEMO2026. On the first screen tap the box «Clicca qui e abbina il dispositivo» (the camera is only used to read the code on the physical device). If no code is read (or camera access is denied), after 10 seconds the field «Scrivi qui il codice» appears: type DEMO2026 and tap «Abbina». A short tutorial with a «Skip» button follows; then choose a profile, tick «Accetto ed entro» and tap «Continua». Videos and activation need an internet connection."
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -43,8 +43,8 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Nuovo video «Come usare l’app», in italiano e in inglese, con tutte le novità: dispositivo abbinato, promemoria e dolore, metamero, calibrazione, postura, report PDF, test e Apple Watch\n• Piccoli miglioramenti e correzioni"
-          WHATS_NEW_EN: "• New “How to use the app” video, in Italian and English, covering all the new features: paired device, reminder and pain, metamere, calibration, posture, PDF report, tests and Apple Watch\n• Minor improvements and fixes"
+          WHATS_NEW_IT: "• Le sezioni dell’app si aprono in base al tipo di dispositivo Equistasi abbinato\n• Abbinamento del dispositivo più semplice\n• Programma di esercizi posturali con i disegni e report PDF più completo\n• Shop sempre a portata di mano, anche prima dell’abbinamento\n• Piccoli miglioramenti e correzioni"
+          WHATS_NEW_EN: "• App sections open according to the type of paired Equistasi device\n• Simpler device pairing\n• Postural exercise programme with drawings and a more complete PDF report\n• Shop always at hand, even before pairing\n• Minor improvements and fixes"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')

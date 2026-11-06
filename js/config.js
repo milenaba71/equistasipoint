@@ -27,7 +27,7 @@ window.APP_CONFIG = {
   // pointKey = chiave «publishable» (pubblica). pointLive: false = ancora con verifyUrl di Make,
   // salvo i telefoni di prova aperti una volta con ?prova=1 (?prova=0 per tornare indietro).
   pointKey: 'sb_publishable_TYFg4ICPgE_FSTCCYPf4Zg_AyvuPXrO',
-  pointLive: false,
+  pointLive: true,
   // Elvy: webhook Make «Elvy – Nome del titolare» (nameUrl?serial=… → {"nome": "…"}),
   // la mascotte saluta con il nome registrato in Airtable per il kit.
   nameUrl: 'https://hook.eu2.make.com/06btuoglenzkyfk3t811ygejdbbvfhvt',
