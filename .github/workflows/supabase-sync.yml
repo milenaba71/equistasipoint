@@ -1,4 +1,4 @@
-# Copia ogni notte da Airtable (EQUITUTTO) a Supabase i dispositivi che possono usare l'app,
+# Copia da Airtable (EQUITUTTO) a Supabase i dispositivi che possono usare l'app,
 # con tipologia, noleggio prof e prossima calibrazione. Si può avviare anche a mano.
 # Secrets: AIRTABLE_TOKEN (sola lettura sulla base EQUITUTTO), SUPABASE_SECRET_KEY.
 name: "Supabase: copia dispositivi da Airtable"
@@ -6,6 +6,7 @@ name: "Supabase: copia dispositivi da Airtable"
 on:
   schedule:
     - cron: "17 1 * * *"   # ogni notte verso le 2–3 in Italia
+    - cron: "7 6-19 * * 1-6"   # ogni ora dalle 7 alle 20/21 (ora italiana), da lunedì a sabato: i dispositivi nuovi si abbinano in giornata
   workflow_dispatch:
 
 jobs:
