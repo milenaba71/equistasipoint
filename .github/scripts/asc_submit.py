@@ -21,11 +21,22 @@ def main(bundle_id, version):
     print("Build collegata: %s (crittografia non esente: %s)" % (b["attributes"]["version"], b["attributes"].get("usesNonExemptEncryption")))
 
     # questionario dell'età: Apple ha aggiunto la domanda «socialMedia» (obbligatoria per inviare).
-    # Equistasi Point non ha funzioni social: risposta «no». Apple permette solo di aggiornare il
-    # questionario (non di leggerlo); il suo id è quello della versione, come indica Apple negli errori.
-    if call("PATCH", "/ageRatingDeclarations/" + ver["id"], {"data": {"type": "ageRatingDeclarations",
-            "id": ver["id"], "attributes": {"socialMedia": False}}}, allow_fail=True) is not None:
-        print("Questionario età: «social media» = no")
+    # Equistasi Point non ha funzioni social: risposta «no». Il questionario sta nelle informazioni
+    # dell'app (appInfos) ancora modificabili, non nella versione.
+    infos = call("GET", "/apps/%s/appInfos" % app["id"], allow_fail=True) or {"data": []}
+    for info in infos["data"]:
+        st = info["attributes"].get("appStoreState") or info["attributes"].get("state")
+        if st in ("READY_FOR_SALE", "READY_FOR_DISTRIBUTION"):
+            continue
+        age = call("GET", "/appInfos/%s/ageRatingDeclaration" % info["id"], allow_fail=True)
+        if not age or not age.get("data"):
+            continue
+        attrs = age["data"].get("attributes") or {}
+        empty = sorted(k for k, v in attrs.items() if v is None)
+        print("Questionario età (%s): domande senza risposta: %s" % (st, ", ".join(empty) or "nessuna"))
+        if call("PATCH", "/ageRatingDeclarations/" + age["data"]["id"], {"data": {"type": "ageRatingDeclarations",
+                "id": age["data"]["id"], "attributes": {"socialMedia": False}}}, allow_fail=True) is not None:
+            print("Questionario età: «social media» = no")
 
     # riusa un invio ancora aperto, altrimenti ne crea uno
     open_subs = call("GET", "/reviewSubmissions?filter[app]=%s&filter[platform]=IOS&filter[state]=READY_FOR_REVIEW" % app["id"])["data"]
