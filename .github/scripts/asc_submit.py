@@ -20,6 +20,20 @@ def main(bundle_id, version):
         print("::error::Nessuna build collegata: avvia prima «App Store: prepara revisione»"); sys.exit(1)
     print("Build collegata: %s (crittografia non esente: %s)" % (b["attributes"]["version"], b["attributes"].get("usesNonExemptEncryption")))
 
+    # questionario dell'età: Apple ha aggiunto domande nuove (es. «socialMedia»). Equistasi Point non ha
+    # funzioni social: si risponde «no» solo alle domande nuove ancora vuote elencate qui sotto.
+    NEW_ANSWERS = {"socialMedia": False}
+    age = call("GET", "/appStoreVersions/%s/ageRatingDeclaration" % ver["id"], allow_fail=True)
+    if age and age.get("data"):
+        attrs = age["data"]["attributes"]
+        empty = sorted(k for k, v in attrs.items() if v is None)
+        print("Questionario età: domande senza risposta: %s" % (", ".join(empty) or "nessuna"))
+        fix = {k: v for k, v in NEW_ANSWERS.items() if k in attrs and attrs[k] is None}
+        if fix:
+            call("PATCH", "/ageRatingDeclarations/" + age["data"]["id"], {"data": {"type": "ageRatingDeclarations",
+                 "id": age["data"]["id"], "attributes": fix}})
+            print("Questionario età: risposto %s" % fix)
+
     # riusa un invio ancora aperto, altrimenti ne crea uno
     open_subs = call("GET", "/reviewSubmissions?filter[app]=%s&filter[platform]=IOS&filter[state]=READY_FOR_REVIEW" % app["id"])["data"]
     sub = open_subs[0] if open_subs else call("POST", "/reviewSubmissions", {"data": {"type": "reviewSubmissions",
