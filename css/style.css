@@ -1199,3 +1199,17 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .gate-cart:hover { background: #e7e9f4; }
 .gate-shop { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 14px; border: 1px solid #E2E0EF; color: var(--indigo, #29235C); font-weight: 700; font-size: 14px; text-decoration: none; text-align: left; }
 .gate-shop svg { flex: none; }
+
+/* Analisi del movimento (js/pro.js) */
+.mv-est { margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; background: #FFF7CC; color: #4A4170; font-size: 13px; font-weight: 700; text-align: center; }
+.mv-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 6px; }
+.mv-num { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted, #6E6A8C); }
+.mv-num input { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 10px; border: 1px solid #E2E0EF; font: inherit; font-size: 16px; color: var(--indigo, #29235C); }
+.mv-num small { font-size: 11px; }
+.mv-res { margin: 12px 0 0; padding: 12px; border-radius: 14px; background: #F6F5FA; }
+.mv-chart { width: 100%; height: auto; display: block; background: #fff; border-radius: 10px; }
+.mv-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.mv-grid > div { background: #fff; border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; }
+.mv-grid span { font-size: 12px; color: var(--muted, #6E6A8C); }
+.mv-grid b { font-size: 20px; color: var(--indigo, #29235C); }
+.mv-grid small { font-size: 11px; color: var(--muted, #6E6A8C); }

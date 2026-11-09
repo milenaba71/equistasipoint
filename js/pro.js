@@ -1,5 +1,6 @@
 /* Strumenti per il professionista sanitario: solo con un dispositivo a «noleggio prof».
-   - Goniometro con il telefono: ginocchio (due letture, coscia e tibia) e spalla (zero a braccio lungo il fianco).
+   - Analisi del movimento (al posto del goniometro): ginocchio e spalla, da fermo o in movimento, con ripetizioni,
+     velocità, fluidità e forza stimata. Sempre stima indicativa, non analisi medica.
    - Scoliometro: rotazione del tronco nel test di Adams, telefono di traverso sulla schiena.
    - Dolore 0–10 prima dell'applicazione e dopo le 2 ore, e uso del dispositivo preso dal promemoria.
    Il dispositivo è «noleggio prof» se la verifica del seriale (Make + Airtable) risponde pro: true.
@@ -62,8 +63,8 @@
   const planeAngle = (v) => deg(Math.atan2(v.x, v.y));
   const planeOk = (v) => Math.hypot(v.x, v.y) / Math.max(0.1, Math.hypot(v.x, v.y, v.z)) > 0.6;
 
-  /* ───────── Goniometro ───────── */
-  /* Disegni del goniometro: dove appoggiare il telefono (giallo, schermo verso chi guarda, tacca = parte alta) */
+  /* ───────── Disegni di dove mettere il telefono ───────── */
+  /* dove appoggiare il telefono (giallo, schermo verso chi guarda, tacca = parte alta) */
   const PHONE = (cx, cy, rot, w, h) => '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + rot + ')">' +
     '<rect x="' + (-w / 2) + '" y="' + (-h / 2) + '" width="' + w + '" height="' + h + '" rx="5" fill="#FADC00" stroke="#1F1A4E" stroke-width="2.5"/>' +
     '<rect x="' + (-w / 2 + 4) + '" y="' + (-h / 2 + 7) + '" width="' + (w - 8) + '" height="' + (h - 14) + '" rx="2" fill="#2E2873"/>' +
@@ -94,54 +95,152 @@
     return '<div class="gn-figs">' + svgBox(body, T('Vista di fronte: telefono sul braccio, sopra il gomito, schermo in avanti. Parte alta verso la mano. Zero con il braccio giù, poi alza <b>di lato</b>'), T('Telefono sul braccio, braccio alzato di lato')) + '</div>';
   }
 
+  /* ───────── Analisi del movimento (al posto del goniometro) ─────────
+     Due modi: «Da fermo» (un angolo, come il vecchio goniometro) e «Movimento» (il telefono resta sul segmento
+     mentre la persona ripete il movimento: escursione lungo tutto il gesto, ripetizioni, velocità, fluidità).
+     Forza stimata dal peso del segmento (tabelle antropometriche di Winter, da peso e altezza) più il carico
+     opzionale (cavigliera o peso in mano): momento massimo di gravità in N·m e forza equivalente in N.
+     Tutto è una STIMA INDICATIVA, non un'analisi medica. */
+  const ESTIMATE = () => T('Stima indicativa, non è un’analisi medica');
+  const MODES = () => ({ fermo: T('Da fermo'), movimento: T('Movimento') });
+  // segmento che si muove: massa (frazione del peso), lunghezza (frazione dell'altezza), centro di massa, punto del carico
+  const SEG = { ginocchio: { m: 0.061, L: 0.246, com: 0.606, load: 1 }, spalla: { m: 0.050, L: 0.332, com: 0.530, load: 1.16 } };
+  const forceOf = (joint, sinMax) => {
+    const kg = Number(prefs.kg) || 0, cm = Number(prefs.cm) || 0; if (!kg || !cm || !(sinMax > 0)) return null;
+    const s = SEG[joint]; const H = cm / 100; const L = s.L * H; const extra = Number(prefs.load) || 0;
+    const torque = 9.81 * (s.m * kg * s.com * L + extra * s.load * L) * sinMax;
+    return { nm: torque, n: torque / (s.load * L) };
+  };
+  // ripetizioni, velocità e fluidità dalla curva angolo-tempo
+  function analyse(samples) {
+    if (samples.length < 10) return null;
+    const a = samples.map((s) => s.a); const t = samples.map((s) => s.t);
+    const sm = a.map((_, i) => { let x = 0, n = 0; for (let k = Math.max(0, i - 3); k <= Math.min(a.length - 1, i + 3); k++) { x += a[k]; n++; } return x / n; });
+    const min = Math.min(...sm), max = Math.max(...sm), rom = max - min;
+    const raw = sm.map((v, i) => i === 0 ? 0 : (v - sm[i - 1]) / Math.max(0.005, (t[i] - t[i - 1]) / 1000));
+    // velocità smussata: il rumore del sensore non deve sembrare uno scatto
+    const vel = raw.map((_, i) => { let x = 0, n = 0; for (let k = Math.max(0, i - 4); k <= Math.min(raw.length - 1, i + 4); k++) { x += raw[k]; n++; } return x / n; });
+    const hi = min + rom * 0.6, lo = min + rom * 0.3; const reps = []; let up = false, start = 0, peak = -1e9;
+    if (rom >= 10) {
+      sm.forEach((v, i) => {
+        if (!up && v > hi) { up = true; peak = v; } else if (up) { peak = Math.max(peak, v); if (v < lo) { reps.push({ s: start, e: i, peak }); up = false; start = i; } }
+        if (!up && v <= lo) start = i;
+      });
+    }
+    const pv = reps.map((r) => Math.max(...vel.slice(r.s, r.e + 1).map(Math.abs)));
+    // fluidità: quanti picchi di velocità in ogni ripetizione (2 = un'andata e un ritorno puliti)
+    const jerks = reps.map((r) => {
+      const v = vel.slice(r.s, r.e + 1).map(Math.abs); const top = Math.max(...v) * 0.2; let n = 0;
+      for (let i = 1; i < v.length - 1; i++) if (v[i] > top && v[i] >= v[i - 1] && v[i] > v[i + 1]) n++;
+      return n;
+    });
+    const mean = (l) => l.length ? l.reduce((x, y) => x + y, 0) / l.length : 0;
+    const jk = mean(jerks);
+    return { min, max, rom, reps: reps.length, peaks: reps.map((r) => r.peak), vel: mean(pv), jerk: jk,
+      smooth: !reps.length ? '' : jk <= 2.5 ? T('fluido') : jk <= 4 ? T('abbastanza fluido') : T('a scatti'), dur: (t[t.length - 1] - t[0]) / 1000 };
+  }
+  // grafico angolo-tempo (SVG)
+  function chartSvg(samples) {
+    if (samples.length < 2) return '';
+    const W = 320, Hh = 120, t0 = samples[0].t, t1 = samples[samples.length - 1].t; const a = samples.map((s) => s.a);
+    const lo = Math.min(0, ...a), hi = Math.max(10, ...a);
+    const X = (t) => 8 + (t - t0) / Math.max(1, t1 - t0) * (W - 16), Y = (v) => Hh - 14 - (v - lo) / (hi - lo) * (Hh - 28);
+    const step = Math.max(1, Math.floor(samples.length / 300));
+    const d = samples.filter((_, i) => i % step === 0).map((s, i) => (i ? 'L' : 'M') + X(s.t).toFixed(1) + ' ' + Y(s.a).toFixed(1)).join(' ');
+    return '<svg class="mv-chart" viewBox="0 0 ' + W + ' ' + Hh + '" role="img" aria-label="' + esc(T('Angolo nel tempo')) + '">' +
+      '<line x1="8" y1="' + Y(0).toFixed(1) + '" x2="' + (W - 8) + '" y2="' + Y(0).toFixed(1) + '" stroke="#E2E0EF"/>' +
+      '<path d="' + d + '" fill="none" stroke="#5A54A8" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<text x="10" y="12" font-size="10" fill="#6E6A8C">' + Math.round(hi) + '°</text><text x="10" y="' + (Hh - 3) + '" font-size="10" fill="#6E6A8C">' + Math.round(lo) + '° · ' + fmt((t1 - t0) / 1000, 0) + ' s</text></svg>';
+  }
+
   function renderGonio(app) {
     const knee = prefs.joint === 'ginocchio';
     const mv = knee ? prefs.kmv : prefs.smv;
+    const mode = prefs.mmode || 'movimento';
+    const dyn = mode === 'movimento';
     const moves = knee ? { flessione: MOVES().flessione, estensione: MOVES().estensione } : { flessione: MOVES().flessione, abduzione: MOVES().abduzione };
     const how = knee
-      ? [T('Persona sdraiata o seduta. Appoggia il telefono <b>sul lato esterno della coscia</b>, lungo l’osso, <b>schermo verso l’esterno</b> e parte alta del telefono verso il ginocchio.'),
+      ? [T('Persona seduta. Appoggia il telefono <b>sul lato esterno della coscia</b>, lungo l’osso, <b>schermo verso l’esterno</b> e parte alta del telefono verso il ginocchio.'),
         T('Tocca <b>Segna coscia</b>: il telefono registra la direzione del femore, che fa da <b>riferimento</b>. Non si calibra nulla e il dispositivo Equistasi non serve: si usa solo il telefono.'),
-        T('Poi appoggia il telefono <b>sul lato esterno della tibia</b>, sempre schermo verso l’esterno e parte alta verso il piede.'),
-        (mv === 'flessione' ? T('Fai piegare il ginocchio al massimo e tocca <b>Segna tibia</b>.') : T('Fai distendere il ginocchio al massimo e tocca <b>Segna tibia</b>: 0° = gamba dritta.')) + ' ' +
-        T('L’app calcola la <b>differenza tra coscia e tibia</b>: è l’angolo del ginocchio, giusto anche se la coscia non è perfettamente dritta.')]
-      : [T('Persona in piedi, braccio lungo il fianco. Appoggia il telefono <b>sul braccio</b>, sopra il gomito, con la parte alta verso la mano.') + ' ' +
+        T('Poi fissa il telefono <b>sul lato esterno della tibia</b> (fascia o mano ben aderente), schermo verso l’esterno e parte alta verso il piede.'),
+        dyn ? T('Tocca <b>Registra</b> e fai ripetere il movimento lentamente, da 3 a 10 volte, poi tocca <b>Stop</b>.')
+          : (mv === 'flessione' ? T('Fai piegare il ginocchio al massimo e tocca <b>Segna tibia</b>.') : T('Fai distendere il ginocchio al massimo e tocca <b>Segna tibia</b>: 0° = gamba dritta.')) + ' ' +
+            T('L’app calcola la <b>differenza tra coscia e tibia</b>: è l’angolo del ginocchio.')]
+      : [T('Persona in piedi, braccio lungo il fianco. Fissa il telefono <b>sul braccio</b>, sopra il gomito, con la parte alta verso la mano.') + ' ' +
         (mv === 'flessione' ? T('Schermo <b>verso l’esterno</b> (di lato).') : T('Schermo <b>in avanti</b> (davanti al braccio).')),
         T('Tocca <b>Zero</b> con il braccio lungo il fianco.'),
-        (mv === 'flessione' ? T('Fai alzare il braccio <b>in avanti</b> al massimo, gomito disteso.') : T('Fai alzare il braccio <b>di lato</b> al massimo, gomito disteso.')) + ' ' + T('L’app tiene il valore massimo: tocca <b>Salva</b>.')];
-    app.innerHTML = head(T('Goniometro'), T('Gradi di movimento di ginocchio e spalla con il telefono.')) +
-      '<div class="card"><div class="toolbar">' + seg('joint', JOINTS(), prefs.joint, T('Articolazione')) + '</div>' +
+        dyn ? T('Tocca <b>Registra</b> e fai alzare e abbassare il braccio lentamente, gomito disteso, da 3 a 10 volte, poi tocca <b>Stop</b>.')
+          : (mv === 'flessione' ? T('Fai alzare il braccio <b>in avanti</b> al massimo, gomito disteso.') : T('Fai alzare il braccio <b>di lato</b> al massimo, gomito disteso.')) + ' ' + T('L’app tiene il valore massimo: tocca <b>Salva</b>.')];
+    const num = (id, val, label, unit, step) => '<label class="mv-num"><span>' + label + '</span><input id="' + id + '" type="number" inputmode="decimal" min="0" step="' + step + '" value="' + esc(val || '') + '" placeholder="–"><small>' + unit + '</small></label>';
+    app.innerHTML = head(T('Analisi del movimento'), T('Gradi lungo tutto il movimento, ripetizioni, velocità, fluidità e forza stimata, con il telefono.')) +
+      '<div class="mv-est">' + ESTIMATE() + '</div>' +
+      '<div class="card"><div class="toolbar">' + seg('mmode', MODES(), mode, T('Modo')) + '</div>' +
+      '<div class="toolbar">' + seg('joint', JOINTS(), prefs.joint, T('Articolazione')) + '</div>' +
       '<div class="toolbar">' + seg(knee ? 'kmv' : 'smv', moves, mv, T('Movimento')) + '</div>' +
       '<div class="toolbar">' + seg('side', SIDES(), prefs.side, T('Lato')) + '</div>' +
       '<div class="toolbar">' + seg('cond', CONDS(), prefs.cond, T('Condizione')) + '</div>' +
+      (dyn ? '<div class="mv-nums">' + num('mv-kg', prefs.kg, T('Peso'), 'kg', 1) + num('mv-cm', prefs.cm, T('Altezza'), 'cm', 1) +
+        num('mv-load', prefs.load, knee ? T('Cavigliera') : T('Peso in mano'), 'kg', 0.5) + '</div>' +
+        '<p class="small muted" style="margin:0 0 10px">' + T('Peso e altezza servono solo per stimare la forza; il carico è facoltativo.') + '</p>' : '') +
       gonioFigures(knee, mv) +
-      '<p class="small muted gn-key">' + T('Nel disegno il telefono è giallo: appoggia il <b>dorso</b> del telefono sul corpo, con lo <b>schermo verso di te</b> che guardi. La tacca indica la <b>parte alta</b> del telefono. Tienilo fermo con la mano, ben aderente.') + '</p>' +
+      '<p class="small muted gn-key">' + T('Nel disegno il telefono è giallo: appoggia il <b>dorso</b> del telefono sul corpo, con lo <b>schermo verso di te</b> che guardi. La tacca indica la <b>parte alta</b> del telefono. Tienilo fermo, ben aderente: per il movimento meglio una fascia.') + '</p>' +
       '<ol class="steps">' + how.map((x) => '<li>' + x + '</li>').join('') + '</ol>' +
       '<div class="pro-live" id="pro-live"><div class="pro-big" id="pro-big">–</div><div class="small" id="pro-sub">' + T('Tocca «Inizia» per accendere i sensori') + '</div></div>' +
+      '<div id="mv-out"></div>' +
       '<p class="gate-msg" id="pro-msg" role="status"></p>' +
       '<div class="btn-col"><button class="btn primary" type="button" id="pro-go">' + T('Inizia') + '</button>' +
       '<button class="btn" type="button" id="pro-save" hidden>' + T('Salva') + '</button></div></div>' +
-      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + gonioHistory() + '</div>' + NOTE;
+      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + gonioHistory() + '</div>' +
+      '<p class="small muted" style="margin-top:14px">' + ESTIMATE() + '. ' + T('Misure fatte con i sensori del telefono: la valutazione resta del professionista.') + '</p>';
     bindSegs(app, () => renderGonio(app));
+    ['kg', 'cm', 'load'].forEach((k) => { const el = document.getElementById('mv-' + k); if (el) el.addEventListener('change', () => { prefs[k] = el.value; savePrefs(); }); });
 
-    const big = document.getElementById('pro-big'); const sub = document.getElementById('pro-sub');
+    const big = document.getElementById('pro-big'); const sub = document.getElementById('pro-sub'); const out = document.getElementById('mv-out');
     const go = document.getElementById('pro-go'); const save = document.getElementById('pro-save'); const msg = document.getElementById('pro-msg');
     let step = 0; let ref = null; let value = null; let best = 0; let lastA = null; let unwrapped = 0; let cur = null;
+    let rec = false; let samples = []; let sinMax = 0; let result = null; let timer = null;
     const show = (v) => { big.textContent = v == null ? '–' : Math.round(v) + '°'; };
+    const angleNow = (v) => {
+      const a = planeAngle(v);
+      if (knee) return Math.abs(wrap(ref - a));
+      unwrapped += wrap(a - lastA); lastA = a; return Math.min(180, Math.abs(unwrapped));
+    };
+    const stopRec = () => {
+      rec = false; clearTimeout(timer); stopMotion();
+      result = analyse(samples);
+      if (!result) { msg.textContent = T('Registrazione troppo breve: riprova.'); go.textContent = T('Registra'); go.hidden = false; step = 2; return; }
+      const f = forceOf(prefs.joint, sinMax);
+      result.f = f;
+      show(result.max); sub.textContent = T('Registrazione finita: controlla e tocca Salva');
+      out.innerHTML = '<div class="mv-res">' + chartSvg(samples) +
+        '<div class="mv-grid">' +
+        '<div><span>' + T('Escursione') + '</span><b>' + Math.round(result.rom) + '°</b><small>' + T('da {a}° a {b}°', { a: Math.round(result.min), b: Math.round(result.max) }) + '</small></div>' +
+        '<div><span>' + T('Ripetizioni') + '</span><b>' + result.reps + '</b><small>' + fmt(result.dur, 0) + ' s</small></div>' +
+        '<div><span>' + T('Velocità di picco') + '</span><b>' + (result.reps ? Math.round(result.vel) + '°/s' : '–') + '</b><small>' + T('media delle ripetizioni') + '</small></div>' +
+        '<div><span>' + T('Fluidità') + '</span><b>' + (result.smooth || '–') + '</b><small>' + (result.reps ? T('{n} picchi di velocità a ripetizione', { n: fmt(result.jerk, 1) }) : '') + '</small></div>' +
+        '<div><span>' + T('Forza stimata') + '</span><b>' + (f ? Math.round(f.n) + ' N' : '–') + '</b><small>' + (f ? fmt(f.nm, 1) + ' N·m · ' + (knee ? T('alla caviglia') : T('alla mano')) : T('servono peso e altezza')) + '</small></div>' +
+        '</div><p class="small muted" style="margin:8px 0 0">' + ESTIMATE() + '. ' + T('Forza: carico di gravità del segmento e del peso aggiunto nel punto più faticoso del movimento, non la forza massima del muscolo.') + '</p></div>';
+      go.hidden = true; save.hidden = false;
+    };
     go.addEventListener('click', async () => {
       if (step === 0) {
         if (!(await permission())) { msg.textContent = T('Serve il permesso ai sensori di movimento: consenti l’accesso quando richiesto.'); return; }
+        ['kg', 'cm', 'load'].forEach((k) => { const el = document.getElementById('mv-' + k); if (el) { prefs[k] = el.value; } }); savePrefs();
         step = 1; go.textContent = knee ? T('Segna coscia') : T('Zero');
         sub.textContent = knee ? T('Telefono sulla coscia, di taglio') : T('Braccio lungo il fianco');
         startMotion((v) => {
           cur = v;
-          if (!planeOk(v)) { sub.textContent = T('Tieni il telefono di taglio: lo schermo deve guardare di lato, non verso l’alto'); return; }
-          const a = planeAngle(v);
-          if (knee) {
-            if (step === 2) { value = Math.abs(wrap(ref - a)); show(value); sub.textContent = T('Telefono sulla tibia'); }
-          } else if (step === 2) {
-            unwrapped += wrap(a - lastA); lastA = a; value = Math.min(180, Math.abs(unwrapped)); best = Math.max(best, value);
-            show(value); sub.textContent = T('Massimo: {v}°', { v: Math.round(best) });
+          if (!planeOk(v)) { if (!rec) sub.textContent = T('Tieni il telefono di taglio: lo schermo deve guardare di lato, non verso l’alto'); return; }
+          if (step !== 2) return;
+          if (dyn) {
+            if (!rec) { show(angleNow(v)); return; }
+            const ang = angleNow(v); samples.push({ t: performance.now(), a: ang }); show(ang);
+            sinMax = Math.max(sinMax, Math.abs(v.x) / Math.max(0.1, Math.hypot(v.x, v.y)));
+            const r = analyse(samples); sub.textContent = T('Ripetizioni: {n}', { n: r ? r.reps : 0 });
+            return;
           }
+          if (knee) { value = angleNow(v); show(value); sub.textContent = T('Telefono sulla tibia'); }
+          else { value = angleNow(v); best = Math.max(best, value); show(value); sub.textContent = T('Massimo: {v}°', { v: Math.round(best) }); }
         });
         return;
       }
@@ -149,41 +248,56 @@
         if (!cur || !planeOk(cur)) { msg.textContent = T('Tieni il telefono di taglio: lo schermo deve guardare di lato, non verso l’alto'); return; }
         msg.textContent = '';
         ref = planeAngle(cur); lastA = ref; unwrapped = 0; best = 0; step = 2;
+        if (dyn) { go.textContent = T('Registra'); sub.textContent = knee ? T('Ora fissa il telefono sulla tibia, poi tocca Registra') : T('Pronto: tocca Registra'); show(knee ? null : 0); return; }
         if (knee) { go.textContent = T('Segna tibia'); sub.textContent = T('Ora appoggia il telefono sulla tibia'); show(null); }
         else { go.hidden = true; save.hidden = false; show(0); }
         return;
       }
+      if (step === 2 && dyn) {
+        if (!rec) { rec = true; samples = []; sinMax = 0; out.innerHTML = ''; go.textContent = T('Stop'); sub.textContent = T('Ripetizioni: {n}', { n: 0 }); timer = setTimeout(stopRec, 60000); return; }
+        stopRec(); return;
+      }
       if (step === 2 && knee) { if (value == null) return; stopMotion(); go.hidden = true; save.hidden = false; sub.textContent = T('Misura pronta: tocca Salva'); }
     });
     save.addEventListener('click', () => {
-      const v = knee ? value : best;
-      if (v == null) return;
+      let r;
+      if (dyn) {
+        if (!result) return;
+        r = { t: Date.now(), j: prefs.joint, mv, side: prefs.side, cond: prefs.cond, mode: 'movimento', v: Math.round(result.max), min: Math.round(result.min), rom: Math.round(result.rom),
+          reps: result.reps, vel: Math.round(result.vel), jerk: Math.round(result.jerk * 10) / 10, smooth: result.smooth,
+          n: result.f ? Math.round(result.f.n) : null, nm: result.f ? Math.round(result.f.nm * 10) / 10 : null, load: Number(prefs.load) || 0 };
+      } else {
+        const v = knee ? value : best; if (v == null) return;
+        r = { t: Date.now(), j: prefs.joint, mv, side: prefs.side, cond: prefs.cond, mode: 'fermo', v: Math.round(v) };
+      }
       stopMotion();
-      const all = store.get(GONIO, []); all.push({ t: Date.now(), j: prefs.joint, mv, side: prefs.side, cond: prefs.cond, v: Math.round(v) });
-      store.set(GONIO, all.slice(-300));
+      const all = store.get(GONIO, []); all.push(r); store.set(GONIO, all.slice(-300));
       renderGonio(app);
-      const m = document.getElementById('pro-msg'); m.className = 'ts-done'; m.textContent = T('Salvato: {v}°', { v: Math.round(v) });
+      const m = document.getElementById('pro-msg'); m.className = 'ts-done'; m.textContent = T('Salvato: {v}°', { v: r.v });
     });
   }
 
   const sideWord = (r) => r.j === 'spalla' ? (r.side === 'dx' ? T('destra') : T('sinistra')) : (r.side === 'dx' ? T('destro') : T('sinistro'));
   const moveLabel = (r) => JOINTS()[r.j] + ' ' + sideWord(r) + ' · ' + MOVES()[r.mv];
+  // dettagli di una misura in movimento (ripetizioni, velocità, fluidità, forza)
+  const moveDetail = (r) => r.mode === 'movimento' ? [T('escursione {v}°', { v: r.rom }), T('{n} ripetizioni', { n: r.reps }),
+    r.reps ? Math.round(r.vel) + '°/s' : '', r.smooth || '', r.n != null ? T('forza stimata {n} N ({nm} N·m)', { n: r.n, nm: fmt(r.nm, 1) }) + (r.load ? ' · ' + T('carico {k} kg', { k: fmt(r.load, 1) }) : '') : ''].filter(Boolean).join(' · ') : T('da fermo');
   function gonioHistory() {
     const all = store.get(GONIO, []);
     if (!all.length) return '<p class="small muted" style="margin:0">' + T('Nessuna misura salvata.') + '</p>';
-    // per ogni articolazione/movimento/lato: prima e ultima misura, e confronto destro/sinistro
+    // per ogni articolazione/movimento/lato: prima e ultima misura (tra sedute), confronto destro/sinistro e senza/con
     const groups = {};
     all.forEach((r) => { const k = r.j + '|' + r.mv + '|' + r.side; (groups[k] = groups[k] || []).push(r); });
     const rows = Object.keys(groups).map((k) => {
       const l = groups[k]; const first = l[0]; const last = l[l.length - 1];
       const other = groups[last.j + '|' + last.mv + '|' + (last.side === 'dx' ? 'sx' : 'dx')];
       const sym = other ? Math.round(Math.min(last.v, other[other.length - 1].v) / Math.max(1, Math.max(last.v, other[other.length - 1].v)) * 100) : null;
-      return '<tr><th>' + moveLabel(last) + '</th><td><b>' + last.v + '°</b> <small class="muted">' + dateStr(last.t) + ' · ' + (last.cond === 'con' ? T('con') : T('senza')) + '</small></td>' +
+      return '<tr><th>' + moveLabel(last) + '<br><small class="muted">' + moveDetail(last) + '</small></th><td><b>' + last.v + '°</b> <small class="muted">' + dateStr(last.t) + ' · ' + (last.cond === 'con' ? T('con') : T('senza')) + '</small></td>' +
         '<td>' + (l.length > 1 ? (last.v - first.v >= 0 ? '+' : '') + (last.v - first.v) + '° <small class="muted">' + T('da {d}', { d: dateStr(first.t) }) + '</small>' : '<span class="muted">—</span>') + '</td>' +
         '<td>' + (sym != null && last.side === 'dx' ? sym + '%' : '<span class="muted">—</span>') + '</td></tr>';
     });
-    return '<div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Movimento') + '</th><th>' + T('Ultima') + '</th><th>' + T('Variazione') + '</th><th>' + T('Simmetria dx/sx') + '</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' +
-      '<p class="small muted" style="margin:8px 0 0">' + T('Simmetria: lato con meno movimento in percentuale dell’altro (ultime misure).') + '</p>';
+    return '<div class="pz-table-wrap"><table class="pz-table"><thead><tr><th>' + T('Movimento') + '</th><th>' + T('Ultima') + '</th><th>' + T('Tra sedute') + '</th><th>' + T('Simmetria dx/sx') + '</th></tr></thead><tbody>' + rows.join('') + '</tbody></table></div>' +
+      '<p class="small muted" style="margin:8px 0 0">' + T('Gradi massimi raggiunti. Simmetria: lato con meno movimento in percentuale dell’altro (ultime misure).') + ' ' + ESTIMATE() + '.</p>';
   }
 
   /* ───────── Scoliometro ───────── */
@@ -452,14 +566,14 @@
       (window.EqRemote ? window.EqRemote.cardHtml() : '') +
       '<div class="list">' +
       tile('#/pro/protocolli', T('Protocolli'), T('Tutti i protocolli Equistasi, in app e in PDF'), svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>')) +
-      tile('#/pro/gonio', T('Goniometro'), T('Gradi di movimento di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
+      tile('#/pro/movimento', T('Analisi del movimento'), T('Gradi, ripetizioni, velocità e forza stimata di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
       tile('#/pro/tug', T('Timed Up and Go'), T('Alzarsi, camminare 3 metri, tornare e sedersi'), svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')) +
       tile('#/pro/cammino', T('Cammino su 10 metri'), T('Velocità del cammino, passi e cadenza'), svg('<path d="M4 20 20 4"/><path d="M14 4h6v6"/>')) +
       tile('#/sedia/cinque', T('5 alzate dalla sedia'), T('Tempo per alzarsi e sedersi 5 volte'), svg('<path d="M7 3v9h10v9M7 12v9M17 12V8"/>')) +
       tile('#/pro/esercizi', T('Programma di esercizi posturali'), T('Proposto dalle misure della postura, da fare con Equistasi'), svg('<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M12 14l-3 6M12 14l3 6"/>')) +
       tile('#/pro/dolore', T('Dolore e uso del dispositivo'), T('Dolore 0–10 prima e dopo, giorni e ore di utilizzo'), svg('<path d="M3 12h4l2-6 4 12 2-6h6"/>')) +
-      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche goniometro, scoliometro, test a tempo, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
+      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche analisi del movimento, scoliometro, test a tempo, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
   }
   function renderLocked(app) {
     app.innerHTML = head(T('Strumenti per il professionista')) +
@@ -473,7 +587,7 @@
     stopMotion(); if (clinStop) clinStop();
     if (arg === 'dolore') { renderPain(app); return; } // dolore e uso: per tutti
     if (!isPro()) { renderLocked(app); return; }
-    if (arg === 'gonio') renderGonio(app);
+    if (arg === 'gonio' || arg === 'movimento') renderGonio(app);
     else if (arg === 'tug') renderClin(app, 'tug');
     else if (arg === 'cammino') renderClin(app, 'walk');
     else if (arg === 'scolio') renderScolio(app);
@@ -492,9 +606,9 @@
     const gon = store.get(GONIO, []);
     if (gon.length) {
       const last = {}; gon.forEach((r) => { last[r.j + '|' + r.mv + '|' + r.side] = r; });
-      out.push({ title: T('Goniometro'), rows: Object.values(last).map((r) => {
+      out.push({ title: T('Analisi del movimento') + ' · ' + ESTIMATE(), rows: Object.values(last).map((r) => {
         const first = gon.find((x) => x.j === r.j && x.mv === r.mv && x.side === r.side);
-        return { label: moveLabel(r) + ' · ' + dateStr(r.t) + (first !== r ? ' (' + T('da {v}° il {d}', { v: first.v, d: dateStr(first.t) }) + ')' : ''), val: r.v + '°' };
+        return { label: moveLabel(r) + ' · ' + (r.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + dateStr(r.t) + (first !== r ? ' (' + T('da {v}° il {d}', { v: first.v, d: dateStr(first.t) }) + ')' : '') + ' — ' + moveDetail(r), val: r.v + '°' };
       }).concat(Object.values(last).filter((r) => r.side === 'dx' && last[r.j + '|' + r.mv + '|sx']).map((r) => {
         const o = last[r.j + '|' + r.mv + '|sx'];
         return { label: T('Simmetria destra/sinistra') + ' · ' + JOINTS()[r.j] + ' · ' + MOVES()[r.mv], val: Math.round(Math.min(r.v, o.v) / Math.max(1, r.v, o.v) * 100) + '%' };
@@ -510,7 +624,7 @@
 
   // Scheda di accesso (Progressi, Info, pannello del dispositivo): solo per noleggio prof
   const cardHtml = () => isPro() ? '<a class="card vpromo pro-card" href="#/pro"><span class="vpromo-ico pz-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v4H9zM5 7h14v14H5z"/><path d="M12 11v6M9 14h6"/></svg></span>' +
-    '<span><b>' + T('Strumenti per il professionista') + '</b><br><span class="small muted">' + T('Goniometro, scoliometro, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' : '';
+    '<span><b>' + T('Strumenti per il professionista') + '</b><br><span class="small muted">' + T('Analisi del movimento, scoliometro, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' : '';
 
   // Scheda nel Promemoria (per tutti): dolore e uso del dispositivo
   function painCardHtml() {
