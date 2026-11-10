@@ -3,6 +3,8 @@
 - Seriali validi: quelli collegati a un kit (Abbinamento Kit → «Abbinamento seriali (testo)»), come la verifica Make.
 - Tipologia (SILICON, GEL, SLIM, EQUIX, noleggio prof…): tabella «dispositivi disponibili».
   Slim ed Equix entrano comunque nell'elenco, così l'app può dire che non usano Equistasi Point.
+- Data di acquisto (inizio dell'anno di calibrazione): «Data Vendita» del cliente per i kit venduti,
+  «Data noleggio» per quelli a noleggio (vale la più recente).
 - Prossima calibrazione: tabella calibrazioni, il seriale è scritto nelle NOTE (vale la calibrazione più recente).
 - Rubrica: nome, tipo di cliente e dati del noleggio di chi ha un kit, con i seriali collegati
   (kit venduti: campo «Rubrica» del kit; kit a noleggio: campo «Rubrica 2»). Niente email né telefoni.
@@ -84,6 +86,19 @@ for r in airtable(T_KIT, ["Abbinamento seriali (testo)", "Rubrica", "Rubrica 2",
             links += [(cid, s, rel, kit) for s in serials]
 print("Seriali collegati ai kit:", len(valid))
 
+# 1b) Rubrica (serve per la data di acquisto e per la copia dei clienti)
+ids = {c for c, _, _, _ in links}
+FIELDS = ["Nome e cognome", "Tipologia cliente", "Data Vendita", "Data noleggio", "data scadenza noleggio", "Noleggio reso", "RESO IN DATA", "STATO NOLEGGIO"]
+day = lambda v: v[:10] if isinstance(v, str) and re.match(r"^\d{4}-\d{2}-\d{2}", v) else None
+rub = {r["id"]: r.get("fields", {}) for r in airtable(T_RUB, FIELDS) if r["id"] in ids}
+buy = {}
+for c, s, rel, _ in links:
+    f = rub.get(c)
+    d = f and day(f.get("Data Vendita" if rel == "vendita" else "Data noleggio"))
+    if d and d > buy.get(s, ""):
+        buy[s] = d
+print("Seriali con data di acquisto:", len(buy))
+
 # 2) tipologia di ogni seriale
 names = {r["id"]: str(r.get("fields", {}).get("Name", "")).strip() for r in airtable(T_TIPO, ["Name"])}
 tipi = {}
@@ -125,7 +140,7 @@ rows = {}
 for s in valid | {s for s, l in tipi.items() if tipo_of(l).upper() in NO_ACCESS}:
     l = tipi.get(s, [])
     rows[s] = {"serial": s, "tipo": tipo_of(l), "pro": any("NOLEGGIO PROF" in t.upper() for t in l),
-               "cal_next": cal.get(s), "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+               "cal_next": cal.get(s), "buy_date": buy.get(s), "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 print("Dispositivi da copiare:", len(rows), "· senza accesso:", sum(1 for r in rows.values() if r["tipo"].upper() in NO_ACCESS),
       "· noleggio prof:", sum(1 for r in rows.values() if r["pro"]))
 if len(rows) < 50:
@@ -157,16 +172,10 @@ elif gone:
     print("::warning::%d seriali non più su Airtable: troppi per toglierli in automatico, controlla" % len(gone))
 
 # 6) Rubrica: solo i clienti con almeno un kit, con i loro seriali
-ids = {c for c, _, _, _ in links}
-FIELDS = ["Nome e cognome", "Tipologia cliente", "Data noleggio", "data scadenza noleggio", "Noleggio reso", "RESO IN DATA", "STATO NOLEGGIO"]
-day = lambda v: v[:10] if isinstance(v, str) and re.match(r"^\d{4}-\d{2}-\d{2}", v) else None
 cust = []
-for r in airtable(T_RUB, FIELDS):
-    if r["id"] not in ids:
-        continue
-    f = r.get("fields", {})
+for rid, f in rub.items():
     st = f.get("STATO NOLEGGIO")
-    cust.append({"airtable_id": r["id"], "nome": text(f.get("Nome e cognome")).strip()[:200],
+    cust.append({"airtable_id": rid, "nome": text(f.get("Nome e cognome")).strip()[:200],
                  "tipologia_cliente": text(f.get("Tipologia cliente")).strip()[:100],
                  "data_noleggio": day(f.get("Data noleggio")), "scadenza_noleggio": day(f.get("data scadenza noleggio")),
                  "noleggio_reso": bool(f.get("Noleggio reso")), "reso_in_data": day(f.get("RESO IN DATA")),
