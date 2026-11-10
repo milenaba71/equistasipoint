@@ -15,7 +15,7 @@ import json, os, re, sys, time, urllib.parse, urllib.request, urllib.error
 BASE = "appI8mMIC0khEkLqK"
 T_KIT, T_DEV, T_TIPO, T_CAL, T_RUB = "tbldfuiVOiGFIq9vv", "tblmeCftgU0TrG0ck", "tbl9Am32xXmH6gubq", "tblI6t11kS44O6UD7", "tbllNx7iSqpAtbQde"
 NO_ACCESS = {"EQUIX", "SLIM", "SLIM MEDINAT"}
-KEEP = {"DEMO2026"}  # seriale di prova dei revisori, non viene da Airtable
+KEEP = {"DEMO2026", "DEMOPRO2026"}  # seriali di prova (revisori, noleggio prof), non vengono da Airtable
 
 AT = os.environ["AIRTABLE_TOKEN"].strip()
 SB_URL = os.environ["SUPABASE_URL"].rstrip("/")
