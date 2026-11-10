@@ -1,0 +1,110 @@
+-- Codice di prova per il noleggio professionale: DEMOPRO2026 (tutti gli strumenti per il professionista).
+-- Come DEMO2026 non ha limiti di telefoni.
+insert into public.devices (serial, tipo, pro, updated_at) values ('DEMOPRO2026', 'noleggio prof', true, now())
+  on conflict (serial) do update set tipo = excluded.tipo, pro = true, updated_at = now();
+
+create or replace function public.pair_device(p_serial text, p_phone text, p_move boolean default false)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  s text := upper(regexp_replace(coalesce(p_serial, ''), '\s', '', 'g'));
+  ph text := left(coalesce(p_phone, ''), 80);
+  d public.devices;
+  l public.phone_links;
+  base jsonb;
+  rental boolean;
+  cust text;
+  reso boolean := false;
+begin
+  if s = '' or length(ph) < 8 then
+    return jsonb_build_object('valid', false);
+  end if;
+  select * into d from public.devices where serial = s;
+  if not found then
+    return jsonb_build_object('valid', false);
+  end if;
+  base := jsonb_build_object('valid', true, 'tipo', d.tipo, 'pro', d.pro, 'cal', coalesce(to_char(d.cal_next, 'YYYY-MM-DD'), ''),
+                            'buy', coalesce(to_char(d.buy_date, 'YYYY-MM-DD'), ''));
+  -- Slim ed Equix non usano l'app
+  if upper(trim(d.tipo)) in ('EQUIX', 'SLIM', 'SLIM MEDINAT') then
+    return base || jsonb_build_object('access', false, 'status', 'ok');
+  end if;
+  base := base || jsonb_build_object('access', true);
+  -- seriali di prova (revisori Apple e Google, noleggio prof): nessun limite di telefoni
+  if s in ('DEMO2026', 'DEMOPRO2026') then
+    return base || jsonb_build_object('status', 'ok');
+  end if;
+
+  rental := upper(trim(d.tipo)) = 'NOLEGGIO PRIVATO';
+  if rental then
+    select c.airtable_id, c.noleggio_reso into cust, reso
+      from public.customer_devices cd join public.customers c on c.airtable_id = cd.customer_id
+     where cd.serial = s and cd.relazione = 'noleggio'
+     order by c.data_noleggio desc nulls last, c.updated_at desc
+     limit 1;
+    if coalesce(reso, false) then
+      return base || jsonb_build_object('access', false, 'status', 'ended');
+    end if;
+    -- telefono di un cliente precedente: il noleggio per lui è finito
+    -- (ogni telefono usato da un altro cliente con questo seriale; se lo stesso cliente noleggia di nuovo, torna valido)
+    if cust is not null
+       and exists (select 1 from public.link_log g where g.serial = s and g.phone_id = ph and g.customer_id <> cust)
+       and not exists (select 1 from public.link_log g where g.serial = s and g.phone_id = ph and g.customer_id = cust) then
+      return base || jsonb_build_object('access', false, 'status', 'ended');
+    end if;
+  end if;
+
+  select * into l from public.phone_links where serial = s for update;
+  if not found then
+    insert into public.phone_links (serial, phone_id, customer_id) values (s, ph, cust);
+    insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'abbinato', cust);
+    return base || jsonb_build_object('status', 'ok');
+  end if;
+
+  if rental and cust is not null then
+    if l.customer_id is null then
+      -- abbinato prima che la Rubrica arrivasse su Supabase: il cliente è quello in corso
+      update public.phone_links set customer_id = cust where serial = s;
+      update public.link_log set customer_id = cust where serial = s and customer_id is null;
+      l.customer_id := cust;
+    elsif l.customer_id <> cust then
+      -- il dispositivo è passato a un nuovo cliente: il telefono precedente è chiuso
+      insert into public.link_log (serial, phone_id, action, customer_id) values (s, l.phone_id, 'fine_noleggio', l.customer_id);
+      if l.phone_id = ph then
+        return base || jsonb_build_object('access', false, 'status', 'ended');
+      end if;
+      update public.phone_links
+         set phone_id = ph, customer_id = cust, linked_at = now(), moves = 0, moves_since = now()
+       where serial = s;
+      insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'abbinato', cust);
+      return base || jsonb_build_object('status', 'ok');
+    end if;
+  end if;
+
+  if l.phone_id = ph then
+    return base || jsonb_build_object('status', 'ok');
+  end if;
+  if not p_move then
+    return base || jsonb_build_object('status', 'other_phone');
+  end if;
+  -- spostamento confermato: al massimo 3 in 30 giorni
+  if l.moves_since < now() - interval '30 days' then
+    l.moves := 0; l.moves_since := now();
+  end if;
+  if l.blocked or l.moves >= 3 then
+    insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'limite', cust);
+    return base || jsonb_build_object('status', 'limit');
+  end if;
+  update public.phone_links
+     set phone_id = ph, linked_at = now(), moves = l.moves + 1, moves_since = l.moves_since
+   where serial = s;
+  insert into public.link_log (serial, phone_id, action, customer_id) values (s, ph, 'spostato', cust);
+  return base || jsonb_build_object('status', 'moved');
+end;
+$$;
+
+revoke all on function public.pair_device(text, text, boolean) from public;
+grant execute on function public.pair_device(text, text, boolean) to anon, authenticated;
