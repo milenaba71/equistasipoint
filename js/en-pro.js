@@ -140,6 +140,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Dall’ultima calibrazione registrata da Equistasi": "From the last calibration recorded by Equistasi",
   "Dalla calibrazione del {d}": "From the calibration on {d}",
   "Dall’attivazione del dispositivo, il {d}": "From device activation on {d}",
+  "Dalla data di acquisto, il {d}": "From the purchase date, {d}",
   "Calibrazione del dispositivo": "Device calibration",
   "<b>È ora di mandarlo a calibrare</b>": "<b>It’s time to send it for calibration</b>",
   "Mancano <b>{n} giorni</b> · calibrazione entro il {d}": "<b>{n} days</b> left · calibration by {d}",

@@ -1100,7 +1100,7 @@
       store.set('tp-kind', kind);
       store.set('tp-pro', kind === 'prof' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
       if (kind === 'gel' || state.devType === 'gel') { state.devType = kind === 'gel' ? 'gel' : 'silicone'; store.set('tp-devtype', state.devType); }
-      if (window.EqCalib) window.EqCalib.update(serial, d.cal); // calibrazione annuale
+      if (window.EqCalib) window.EqCalib.update(serial, d.cal, d.buy); // calibrazione annuale
       return (lastCheck = { ok: true, moved: d.status === 'moved' });
     } finally { clearTimeout(t); }
   }
@@ -1124,7 +1124,7 @@
       // dispositivo a noleggio professionale: sblocca gli strumenti per il professionista
       if (ok) {
         store.set('tp-pro', data.pro === true || data.pro === 'true' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
-        if (window.EqCalib) window.EqCalib.update(serial, data.cal); // calibrazione annuale
+        if (window.EqCalib) window.EqCalib.update(serial, data.cal, data.buy); // calibrazione annuale
       }
       lastCheck = { ok, reason: ok ? '' : 'invalid' };
       return ok;

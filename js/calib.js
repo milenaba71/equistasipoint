@@ -1,5 +1,6 @@
 /* Calibrazione annuale del dispositivo: una barra che scorre per un anno.
-   - Parte dal giorno in cui il dispositivo viene attivato nell'app (abbinamento del numero di serie).
+   - Parte dalla data di acquisto del dispositivo (Airtable, Rubrica: «Data Vendita»; per il noleggio «Data noleggio»).
+     Solo se manca, dal giorno in cui il dispositivo viene attivato nell'app.
    - Se su Airtable (tabella calibrazioni) c'è una calibrazione registrata per quel seriale, usa la sua
      «data prossima calibrazione»: dopo ogni nuova calibrazione la barra riparte da sola.
    - A zero: «È ora di mandarlo a calibrare»; con «Calibrato: riparti» la barra ricomincia da oggi.
@@ -14,11 +15,13 @@
   const LN = () => window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() &&
     window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
 
-  // dopo la verifica del seriale: data di attivazione e data della prossima calibrazione da Airtable
-  function update(serial, cal) {
+  const isDay = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+  // dopo la verifica del seriale: data di attivazione, data di acquisto e prossima calibrazione da Airtable
+  function update(serial, cal, buy) {
     if (!serial) return;
     if (raw('tp-act-sn') !== serial) { put('tp-act', String(Date.now())); put('tp-act-sn', serial); put('tp-cal-reset', ''); }
-    put('tp-cal-next', /^\d{4}-\d{2}-\d{2}$/.test(cal || '') ? cal : '');
+    put('tp-cal-next', isDay(cal) ? cal : '');
+    put('tp-buy', isDay(buy) ? buy : '');
     schedule();
   }
 
@@ -27,11 +30,14 @@
     if (!act) return null;
     const reset = Number(raw('tp-cal-reset')) || 0;
     const next = raw('tp-cal-next');
+    const buyDay = raw('tp-buy');
+    const buy = isDay(buyDay) ? new Date(buyDay + 'T09:00:00').getTime() : 0;
+    const first = buy || act; // l'anno parte dall'acquisto; se non c'è, dall'attivazione
     let end; let from;
     const airEnd = next ? new Date(next + 'T09:00:00').getTime() : 0;
     if (airEnd && (!reset || airEnd > reset + 30 * DAY)) { end = airEnd; from = 'airtable'; }
-    else { end = plusYear(reset || act); from = reset ? 'reset' : 'act'; }
-    const start = from === 'airtable' ? new Date(end).setFullYear(new Date(end).getFullYear() - 1) : (reset || act);
+    else { end = plusYear(reset || first); from = reset ? 'reset' : buy ? 'buy' : 'act'; }
+    const start = from === 'airtable' ? new Date(end).setFullYear(new Date(end).getFullYear() - 1) : (reset || first);
     const days = Math.ceil((end - Date.now()) / DAY);
     return { start, end, days, frac: Math.min(1, Math.max(0, (Date.now() - start) / (end - start))), from };
   }
@@ -41,7 +47,7 @@
     if (!i) return '';
     const due = i.days <= 0; const soon = !due && i.days <= 30;
     const cls = due ? ' due' : soon ? ' soon' : '';
-    const src = i.from === 'airtable' ? T('Dall’ultima calibrazione registrata da Equistasi') : i.from === 'reset' ? T('Dalla calibrazione del {d}', { d: dstr(i.start) }) : T('Dall’attivazione del dispositivo, il {d}', { d: dstr(i.start) });
+    const src = i.from === 'airtable' ? T('Dall’ultima calibrazione registrata da Equistasi') : i.from === 'reset' ? T('Dalla calibrazione del {d}', { d: dstr(i.start) }) : i.from === 'buy' ? T('Dalla data di acquisto, il {d}', { d: dstr(i.start) }) : T('Dall’attivazione del dispositivo, il {d}', { d: dstr(i.start) });
     return '<div class="card cal-card' + cls + '"><div class="cal-top"><span class="cal-ico" aria-hidden="true">🛠️</span><div><b>' + T('Calibrazione del dispositivo') + '</b><br>' +
       '<span class="small">' + (due ? T('<b>È ora di mandarlo a calibrare</b>') : T('Mancano <b>{n} giorni</b> · calibrazione entro il {d}', { n: i.days, d: dstr(i.end) })) + '</span></div></div>' +
       '<div class="cal-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(i.frac * 100) + '" aria-label="' + T('Anno di utilizzo prima della calibrazione') + '"><i style="width:' + (100 - i.frac * 100).toFixed(1) + '%"></i></div>' +
