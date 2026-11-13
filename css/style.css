@@ -1213,3 +1213,13 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .mv-grid span { font-size: 12px; color: var(--muted, #6E6A8C); }
 .mv-grid b { font-size: 20px; color: var(--indigo, #29235C); }
 .mv-grid small { font-size: 11px; color: var(--muted, #6E6A8C); }
+
+/* ───────── Novità (js/news.js) ───────── */
+.news-banner { display: flex; gap: 12px; align-items: center; text-decoration: none; color: inherit; border-left: 4px solid var(--blue); }
+.news-banner img { width: 64px; height: 64px; object-fit: cover; border-radius: 12px; flex: none; }
+.news-banner b { display: block; margin: 2px 0; }
+.news-new { display: inline-block; background: var(--red); color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .02em; padding: 1px 8px; border-radius: 999px; vertical-align: middle; margin-right: 6px; }
+.news-list { display: grid; gap: 14px; max-width: 720px; }
+.news-item img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
+.news-item h3 { margin: 4px 0 6px; }
+.news-body { white-space: pre-line; margin: 0 0 12px; }
