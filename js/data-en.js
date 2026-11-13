@@ -565,6 +565,9 @@
       ['Your rights',
         'You can ask at any time for access, rectification, erasure, restriction and portability of your data, and object to processing, as well as withdraw your consent. ' +
         'You also have the right to lodge a complaint with the Italian Data Protection Authority (Garante per la protezione dei dati personali, www.garanteprivacy.it).'],
+      ['Anonymous usage statistics',
+        'Once a day, when you open the app, we send a random code created by the app (not linked to your name or serial number), the device type and the system (iPhone, Android or website). ' +
+        'We use it only to know how many people use the app each week and with which devices (legitimate interest, art. 6.1.f GDPR). The data are stored on Supabase and deleted after 13 months.'],
       ['Data on your phone',
         'The app saves the serial number, your chosen profile and your preferences on your phone, so it doesn’t have to ask you every time. You can delete them whenever you like from the app’s Privacy page.'],
     ];

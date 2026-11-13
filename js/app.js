@@ -1078,6 +1078,22 @@
     }
     return id;
   }
+  // Statistiche anonime di utilizzo: un solo segnale al giorno (codice casuale del telefono, tipo di dispositivo,
+  // piattaforma). Niente seriali né dati personali. Il riepilogo settimanale si legge in statistiche.html.
+  function dailyPing() {
+    if (!(cfg.supabaseUrl && cfg.pointKey)) return;
+    const d = new Date(); const day = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    const kind = store.get('tp-kind', '');
+    if (store.get('tp-ping', '') === day + '|' + kind) return;
+    const C = window.Capacitor;
+    const platform = C && C.getPlatform ? C.getPlatform() : 'web';
+    fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/app_ping', {
+      method: 'POST', headers: { apikey: cfg.pointKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_phone: phoneId(), p_kind: kind, p_platform: platform }), cache: 'no-store',
+    }).then((r) => { if (r.ok) store.set('tp-ping', day + '|' + kind); }).catch(() => { /* senza rete: si riprova alla prossima apertura */ });
+  }
+  setTimeout(dailyPing, 3000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') dailyPing(); });
   // esito dell'ultima verifica: { ok, reason: invalid | noaccess | ended | other | limit }
   let lastCheck = { ok: false };
   async function pairDevice(serial, move) {
@@ -1101,6 +1117,7 @@
       store.set('tp-pro', kind === 'prof' ? '1' : ''); store.set('tp-pro-at', String(Date.now()));
       if (kind === 'gel' || state.devType === 'gel') { state.devType = kind === 'gel' ? 'gel' : 'silicone'; store.set('tp-devtype', state.devType); }
       if (window.EqCalib) window.EqCalib.update(serial, d.cal, d.buy); // calibrazione annuale
+      dailyPing();
       return (lastCheck = { ok: true, moved: d.status === 'moved' });
     } finally { clearTimeout(t); }
   }
