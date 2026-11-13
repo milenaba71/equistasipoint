@@ -361,13 +361,4 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Si riparte dall’abbinamento del dispositivo.": "You start again from pairing the device.",
   "Vuoi cancellare tutti i risultati (test, postura e foto, promemoria)? Non si possono recuperare.": "Do you want to delete all results (tests, posture and photos, reminders)? They cannot be recovered.",
   "Vuoi cancellare tutto da questo telefono e ricominciare da capo? I dati non si possono recuperare.": "Do you want to delete everything from this phone and start from scratch? The data cannot be recovered.",
-  "Nuovo": "New",
-  "e altre {n} novità": "and {n} more",
-  "Leggi le novità di Equistasi ›": "Read the latest from Equistasi ›",
-  "Novità di Equistasi": "News from Equistasi",
-  "Notizie, eventi e consigli dal team Equistasi.": "News, events and tips from the Equistasi team.",
-  "Apri le novità": "Open the news",
-  "Scopri di più": "Learn more",
-  "Novità": "News",
-  "Per ora non ci sono novità. Torna a trovarci presto!": "No news for now. Check back soon!",
 });
