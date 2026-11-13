@@ -1648,7 +1648,7 @@ window.ETA = ['Meno di 30', '30-49', '50-64', '65-74', '75 e oltre'];
  * Le parti tra [parentesi quadre] vanno completate.
  * Il link all’informativa completa si imposta in js/config.js → privacyUrl. */
 window.PRIVACY = {
-  version: '2026-10',
+  version: '2026-11',
   titolare: '[Ragione sociale, sede legale e P. IVA del Titolare del trattamento]',
   contatto: '[email per la privacy / DPO]',
   sections: [
@@ -1672,6 +1672,9 @@ window.PRIVACY = {
     ['I tuoi diritti',
       'Puoi chiedere in ogni momento accesso, rettifica, cancellazione, limitazione, portabilità dei dati e opporti al trattamento, oltre a revocare il consenso. ' +
       'Hai anche il diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it).'],
+    ['Statistiche anonime di utilizzo',
+      'Una volta al giorno, quando apri l’app, inviamo un codice casuale creato dall’app (non legato al tuo nome né al numero di serie), il tipo di dispositivo e il sistema (iPhone, Android o sito). ' +
+      'Ci serve solo per sapere quante persone usano l’app ogni settimana e con quali dispositivi (legittimo interesse, art. 6.1.f GDPR). I dati sono registrati su Supabase e cancellati dopo 13 mesi.'],
     ['Dati sul tuo telefono',
       'L’app salva sul telefono il numero di serie, il profilo scelto e le tue preferenze, per non chiederteli ogni volta. Puoi cancellarli quando vuoi dalla pagina Privacy dell’app.'],
   ],
