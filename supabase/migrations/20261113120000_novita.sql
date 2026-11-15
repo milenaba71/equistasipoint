@@ -78,5 +78,10 @@ drop policy if exists news_img_delete on storage.objects;
 create policy news_img_delete on storage.objects for delete to authenticated
   using (bucket_id = 'news' and public.is_news_editor());
 
+-- account dell'ufficio che gestiscono le novità
+insert into public.news_editors (email) values
+  ('servizi@equistasi.com'), ('iris@equistasi.com'), ('milena.baroni@equistasi.com')
+on conflict do nothing;
+
 -- (pulizia della riga di prova delle statistiche)
 delete from public.app_usage_day where phone_id like 'test-claude%';
