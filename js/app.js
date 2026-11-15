@@ -191,7 +191,7 @@
       '<button type="button" class="hero-cover neuro" id="to-protos" aria-label="Vai ai tuoi protocolli">' +
       '<img src="' + NEURO_IMG.hero + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui: i tuoi protocolli</span></button></section>') +
-      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') + (window.EqNews ? window.EqNews.bannerHtml() : '') +
       T('<div class="home-grid"><div><div id="protos-anchor" class="protos-anchor"><h2 class="sec-title">I tuoi protocolli</h2>') + appProtocolCards() + protocolsCard(T('Protocolli in PDF')) + '</div>' + window.EqTimer.cardHtml() + window.EqPosture.cardHtml() + window.EqChair.cardHtml() + videoPromo + '</div><div>' +
       T('<div class="card"><h3>Il tuo percorso</h3><div class="howsteps">') +
       '<figure><img src="' + NEURO_IMG.s1 + T('" alt="" loading="lazy" /><figcaption><b>1</b> Segui il protocollo indicato dal tuo specialista</figcaption></figure>') +
@@ -247,7 +247,7 @@
       '<button type="button" class="hero-cover" id="to-map" aria-label="Entra nella mappa del corpo">' +
       '<img src="' + (sport ? window.EqTests.IMG.hero : PAIN_IMG.hero) + '" alt="" />' +
       T('<span class="hero-cover-cta">👆 Tocca qui ed entra nella mappa</span></button>') + '</section>' +
-      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') +
+      window.EqTimer.todayHtml() + (window.EqCalib ? window.EqCalib.bannerHtml() : '') + (window.EqNews ? window.EqNews.bannerHtml() : '') +
       (sport ? '' : T('<div class="card criteria"><h3>Puoi seguire due criteri</h3><div class="crit"><span class="crit-ico" aria-hidden="true">🎯</span><p><b>Il trigger point</b> è un punto particolarmente sensibile dentro un muscolo. Premendolo si può riprodurre il dolore che conosci, proprio lì oppure in un’altra zona.</p></div><div class="crit"><span class="crit-ico" aria-hidden="true">🦴</span><p><b>Dermatomeri e metameri</b> sono come una mappa di collegamenti: alcune aree del corpo comunicano con lo stesso tratto del midollo spinale attraverso i nervi. Il fisioterapista considera questi collegamenti per valutare anche zone diverse da quella dolorosa.</p></div><div class="crit-btns"><button type="button" class="btn primary" id="use-tp">🎯 Usa i trigger point</button><a class="btn" href="#/metameri">🦴 Usa dermatomeri e metameri</a></div></div>')) +
       (sport ? window.EqTests.cardHtml() + window.EqPosture.cardHtml() + protocolsCard(T('I tuoi protocolli per lo sport')) : '') +
       '<div class="home-grid">' +
@@ -767,6 +767,7 @@
       T('<li>Shah JP et al. Myofascial trigger points then and now: a historical and scientific perspective. <i>PM&R</i>, 2015;7(7):746–761.</li>') +
       '</ul></div>' +
       T('<div class="card"><h3>Tavole anatomiche</h3><p class="small" style="margin:0">Immagini 3D realizzate dal modello Z-Anatomy – The libre 3D atlas of anatomy (CC BY-SA 4.0), basato su BodyParts3D – The Database Center for Life Science (CC BY-SA 2.1 Japan). Le tavole sono distribuite con licenza CC BY-SA 4.0.</p></div>') +
+      (window.EqNews ? window.EqNews.linkHtml() : '') +
       T('<div class="card"><h3>Il tuo profilo</h3><p class="small">') + (store.get('tp-name', '') ? '<b>' + esc(store.get('tp-name', '')) + '</b> · ' : '') + esc(profileName() || '—') + T('</p><a class="btn" href="#/profilo">Cambia profilo</a> <a class="btn" href="#/privacy">Privacy</a></div>') +
       '<div class="card"><h3>Lingua · Language</h3><div class="lang-switch" role="group" aria-label="Lingua"><button type="button" data-lang="it" aria-pressed="' + (window.LANG === 'it') + '">Italiano</button><button type="button" data-lang="en" aria-pressed="' + (window.LANG === 'en') + '">English</button></div></div>' +
       T('<div class="card"><h3>Installa l’app</h3><p class="small" style="margin:0">Su iPhone: tocca <b>Condividi</b> → <b>Aggiungi alla schermata Home</b>. Su Android: menu ⋮ → <b>Installa app</b>. Funziona anche senza connessione.</p></div>') +
@@ -877,6 +878,7 @@
     else if (page === 'info') renderInfo();
     else if (page === 'video') { if (arg) renderVideo(arg); else renderVideos(); }
     else if (page === 'privacy') renderPrivacy();
+    else if (page === 'novita' && window.EqNews) { setBack(true); window.EqNews.render(app); }
     else if (page === 'protocollo') renderAppProtocol(arg);
     else if (page === 'metameri') { setBack(true); window.EqMeta.render(app, arg); }
     else if (page === 'promemoria') renderTimer();
