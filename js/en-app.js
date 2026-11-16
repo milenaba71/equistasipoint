@@ -154,6 +154,7 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "In Misura trovi tutti i test: equilibrio, salto e sprint, sempre con una persona vicino": "In Measure you find all the tests: balance, jump and sprint, always with someone close by",
   "Caricamento…": "Loading…",
   "Misura": "Measure",
+  "<!--barra-->Misura": "Measure",
   "Con <b>un solo dispositivo</b> le {n} X sono punti alternativi: scegli il più doloroso.": "With <b>one device</b> the {n} X marks are alternative points: choose the most painful one.",
   "<b>Se hai più dispositivi</b>, puoi provare ad applicarli tutti insieme, sui punti più dolorosi.": "<b>If you have more than one device</b>, you can try applying them all together, on the most painful points.",
   "Le X sono alternative": "The X marks are alternatives",
@@ -369,5 +370,6 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Apri le novità": "Open the news",
   "Scopri di più": "Learn more",
   "Novità": "News",
+  "Novità: {n} da leggere": "News: {n} unread",
   "Per ora non ci sono novità. Torna a trovarci presto!": "No news for now. Check back soon!",
 });
