@@ -2,7 +2,7 @@
    - Le scrive l'ufficio da app.equistasi.com/admin/ (tabella Supabase «news»); qui si leggono solo quelle pubblicate e non scadute.
    - Si scaricano al massimo una volta ogni ora e restano salvate sul telefono (funziona anche senza rete).
    - Ognuna può essere per tutti o solo per certi tipi di dispositivo (silicon, gel, prof, rent: vedi js/access.js).
-   - In Home: riquadro «Nuovo» con l'ultima novità non ancora letta; pagina #/novita con tutte. */
+   - Campanella nella barra in basso con il numero da leggere; in Home riquadro «Nuovo»; pagina #/novita con tutte. */
 (function () {
   const T = (s, o) => (window.T ? window.T(s, o) : s);
   const raw = (k) => { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -26,7 +26,16 @@
     });
   }
   const unseen = () => { const s = seen(); return list().filter((n) => !s.includes(n.id)); };
-  function markSeen() { put('tp-news-seen', JSON.stringify(list().map((n) => n.id).concat(seen()).slice(0, 200))); }
+  function markSeen() { put('tp-news-seen', JSON.stringify(list().map((n) => n.id).concat(seen()).slice(0, 200))); updateBadge(); }
+  // campanella nella barra in basso: numero di novità da leggere
+  function updateBadge() {
+    const b = document.getElementById('news-badge');
+    if (!b) return;
+    const n = unseen().length;
+    b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n);
+    const tab = document.getElementById('tab-news');
+    if (tab) tab.setAttribute('aria-label', n ? T('Novità: {n} da leggere', { n }) : T('Novità'));
+  }
 
   async function refresh(force) {
     const c = cfg();
@@ -40,6 +49,7 @@
       const data = await r.json();
       put('tp-news', JSON.stringify(Array.isArray(data) ? data : []));
       put('tp-news-at', String(Date.now()));
+      updateBadge();
       // c'è una novità nuova e si è in Home: ridisegna
       if (unseen().length !== before && /^#?\/?$/.test(location.hash)) window.dispatchEvent(new HashChangeEvent('hashchange'));
     } catch (e) { /* senza rete: restano quelle salvate */ }
@@ -79,8 +89,8 @@
     refresh(true).then(() => { if (location.hash.indexOf('novita') >= 0 && list().length !== items.length) render(app); });
   }
 
-  setTimeout(() => refresh(false), 2500);
+  setTimeout(() => { updateBadge(); refresh(false); }, 2500);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(false); });
 
-  window.EqNews = { bannerHtml, linkHtml, render, refresh };
+  window.EqNews = { bannerHtml, linkHtml, render, refresh, updateBadge };
 })();

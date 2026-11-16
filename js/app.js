@@ -849,13 +849,14 @@
   function setBack(on) { btnBack.hidden = !on; }
   btnBack.addEventListener('click', () => { if (history.length > 1) history.back(); else location.hash = '#/'; });
 
-  // Barra in basso: Mappa, Promemoria, Misura (tutti i test e la postura), Video, Info
+  // Barra in basso: Mappa, Promemoria, Misura (tutti i test e la postura), Video, Novità (campanella con il numero da leggere), Info
   function updateTabs(page) {
     const extra = document.getElementById('tab-extra');
     if (!extra) return;
     const homeTab = document.querySelector('#tabbar [data-tab="home"]');
     if (homeTab) homeTab.lastChild.textContent = (getProfile() || {}).type === 'neuro' ? T('Home') : T('Mappa');
-    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', postura: 'misura', sedia: 'misura', pro: 'misura', promemoria: 'promemoria', video: 'video', test: 'misura', info: 'extra' }[page || ''];
+    const cur = { '': 'home', area: 'home', m: 'home', protocollo: 'home', metameri: 'home', postura: 'misura', sedia: 'misura', pro: 'misura', promemoria: 'promemoria', video: 'video', test: 'misura', info: 'extra', novita: 'novita' }[page || ''];
+    if (window.EqNews) window.EqNews.updateBadge();
     document.querySelectorAll('#tabbar a').forEach((a) => a.classList.toggle('on', a.dataset.tab === cur));
   }
 
