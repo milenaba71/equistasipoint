@@ -1083,8 +1083,11 @@
   }
   // Statistiche anonime di utilizzo: un solo segnale al giorno (codice casuale del telefono, tipo di dispositivo,
   // piattaforma). Niente seriali né dati personali. Il riepilogo settimanale si legge in statistiche.html.
+  // Per ora solo sul sito: nelle app per iPhone/Android è spento (niente da dichiarare nella privacy degli store).
   function dailyPing() {
     if (!(cfg.supabaseUrl && cfg.pointKey)) return;
+    const C0 = window.Capacitor;
+    if (C0 && C0.isNativePlatform && C0.isNativePlatform()) return;
     const d = new Date(); const day = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     const kind = store.get('tp-kind', '');
     if (store.get('tp-ping', '') === day + '|' + kind) return;
