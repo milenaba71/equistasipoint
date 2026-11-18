@@ -43,8 +43,8 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Novità di Equistasi: notizie, eventi e consigli direttamente nell’app\n• La calibrazione annuale ora parte dalla data di acquisto del dispositivo\n• Piccoli miglioramenti e correzioni"
-          WHATS_NEW_EN: "• News from Equistasi: news, events and tips right in the app\n• The yearly calibration now starts from the device purchase date\n• Minor improvements and fixes"
+          WHATS_NEW_IT: "• Statistiche anonime di utilizzo per migliorare l’app\n• Piccoli miglioramenti e correzioni"
+          WHATS_NEW_EN: "• Anonymous usage statistics to improve the app\n• Minor improvements and fixes"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
