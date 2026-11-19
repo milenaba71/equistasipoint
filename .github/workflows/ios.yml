@@ -28,10 +28,13 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Usa Xcode 26 (richiesto da Apple per caricare le app)
+      - name: Usa Xcode 27 se c'è, altrimenti 26 (da aprile 2027 Apple chiede l'SDK iOS 27)
         run: |
-          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
-          if [ -z "$XC" ]; then echo "::error::Xcode 26 non disponibile su questo runner"; ls -d /Applications/Xcode*.app; exit 1; fi
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_27*.app 2>/dev/null | grep -vi -e beta -e rc | sort -V | tail -1)
+          [ -n "$XC" ] || XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -vi -e beta -e rc | sort -V | tail -1)
+          if [ -z "$XC" ]; then echo "::error::Né Xcode 27 né Xcode 26 disponibili su questo runner"; exit 1; fi
+          case "$XC" in *Xcode_26*) echo "::warning::Xcode 27 non ancora disponibile: uso $XC (da aprile 2027 servirà Xcode 27)";; esac
           sudo xcode-select -s "$XC/Contents/Developer"
           xcodebuild -version
 
