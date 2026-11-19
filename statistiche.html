@@ -63,7 +63,11 @@
       }).join('') + '</tbody></table></div>' +
       '<div class="card"><table><thead><tr><th>Settimana</th><th>Nuovi abbinamenti</th></tr></thead><tbody>' +
       (d.weeks || []).map(function (w) { return '<tr><td>' + fmt(w.week) + ' – ' + plus6(w.week) + '</td><td class="n">' + w.n + '<div class="bar" style="width:' + Math.round(w.n / wmax * 100) + '%"></div></td></tr>'; }).join('') +
-      '</tbody></table></div><h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app con un dispositivo abbinato</h2>';
+      '</tbody></table></div>' +
+      ((d.demo || []).length ? '<div class="card"><table><thead><tr><th>Codice demo' + (d.demo_since ? ' (dal ' + fmt(d.demo_since) + '/' + d.demo_since.slice(0, 4) + ')' : '') + '</th><th>Telefoni</th><th>Usato negli ultimi 7 giorni</th></tr></thead><tbody>' +
+        d.demo.map(function (x) { return '<tr><td>' + esc(x.serial) + '</td><td class="n">' + x.phones + '</td><td class="n">' + x.last7 + '</td></tr>'; }).join('') +
+        '</tbody></table><p class="muted" style="margin:8px 0 0">I codici demo non sono contati nei dispositivi abbinati.</p></div>' : '') +
+      '<h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app con un dispositivo abbinato</h2>';
   }
 
   function show(weeks) {
