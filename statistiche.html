@@ -63,7 +63,7 @@
       }).join('') + '</tbody></table></div>' +
       '<div class="card"><table><thead><tr><th>Settimana</th><th>Nuovi abbinamenti</th></tr></thead><tbody>' +
       (d.weeks || []).map(function (w) { return '<tr><td>' + fmt(w.week) + ' – ' + plus6(w.week) + '</td><td class="n">' + w.n + '<div class="bar" style="width:' + Math.round(w.n / wmax * 100) + '%"></div></td></tr>'; }).join('') +
-      '</tbody></table></div><h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app</h2>';
+      '</tbody></table></div><h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app con un dispositivo abbinato</h2>';
   }
 
   function show(weeks) {
@@ -71,11 +71,12 @@
     var cur = weeks[0], prev = weeks[1] || { people: 0 };
     document.getElementById('out').innerHTML =
       '<div class="card"><div class="muted">Questa settimana (' + fmt(cur.week) + ' – ' + plus6(cur.week) + ')</div><div class="big">' + cur.people + '</div>' +
-      '<div class="muted">La settimana scorsa: ' + prev.people + '</div><div class="tags" style="margin-top:10px">' + tags(cur.kind) + '</div><div class="tags">' + tags(cur.platform) + '</div></div>' +
-      '<div class="card"><table><thead><tr><th>Settimana</th><th>Persone</th><th>Dispositivi</th><th>Sistema</th></tr></thead><tbody>' +
+      '<div class="muted">La settimana scorsa: ' + prev.people + '</div><div class="tags" style="margin-top:10px">' + tags(cur.kind) + '</div><div class="tags">' + tags(cur.platform) + '</div>' +
+      '<p class="muted" style="margin:12px 0 0">In più <b>' + (cur.visitors || 0) + '</b> visitatori senza dispositivo (hanno aperto l\'app ma non l\'hanno attivata) · la settimana scorsa ' + (prev.visitors || 0) + '</p></div>' +
+      '<div class="card"><table><thead><tr><th>Settimana</th><th>Persone con dispositivo</th><th>Dispositivi</th><th>Sistema</th><th>Visitatori senza dispositivo</th></tr></thead><tbody>' +
       weeks.map(function (w) {
         return '<tr><td>' + fmt(w.week) + ' – ' + plus6(w.week) + '</td><td class="n">' + w.people + '<div class="bar" style="width:' + Math.round(w.people / max * 100) + '%"></div></td>' +
-          '<td class="tags">' + tags(w.kind) + '</td><td class="tags">' + tags(w.platform) + '</td></tr>';
+          '<td class="tags">' + tags(w.kind) + '</td><td class="tags">' + tags(w.platform) + '</td><td class="n">' + (w.visitors || 0) + '</td></tr>';
       }).join('') + '</tbody></table></div>';
   }
 
