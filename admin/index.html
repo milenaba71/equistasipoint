@@ -35,6 +35,8 @@
     .list-item:last-child { border-bottom: 0; }
     .list-item img, .list-item .ph { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex: none; background: #eef1fb; }
     .list-item b { display: block; }
+    .stat { display: block; font-size: .85rem; margin-top: 3px; color: var(--navy); }
+    .list-item .stat b { display: inline; }
     .list-item.sel { background: #eef1fb; border-radius: 10px; padding-left: 8px; }
     .badge { display: inline-block; font-size: .75rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin-right: 4px; }
     .b-pub { background: #dff3e7; color: var(--ok); } .b-draft { background: #eef1fb; color: var(--muted); } .b-exp { background: #fde7e5; color: var(--red); } .b-wait { background: #fff3e6; color: #8a4300; }
@@ -169,11 +171,21 @@
     return '<span class="badge b-pub">Pubblicata</span>';
   }
   var dt = function (t) { return t ? new Date(t).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; };
+  var stats = {};
+  // letture anonime: persone diverse che hanno aperto la novità e quante hanno toccato il pulsante
+  var statLine = function (n) {
+    var st = stats[n.id]; if (!n.published && !st) return '';
+    if (!st) return '<span class="stat">👁 Letta da 0 persone</span>';
+    return '<span class="stat">👁 Letta da <b>' + st.reads + '</b> ' + (st.reads == 1 ? 'persona' : 'persone') + (n.link_url ? ' · 👆 <b>' + st.clicks + '</b> clic sul pulsante' : '') +
+      ' <span class="muted">(iPhone ' + st.ios + ' · Android ' + st.android + ' · sito ' + st.web + ')</span></span>';
+  };
   async function loadList() {
     items = await api('/rest/v1/news?select=*&order=publish_at.desc&limit=200') || [];
+    stats = {};
+    try { (await api('/rest/v1/rpc/news_stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }) || []).forEach(function (r) { stats[r.news_id] = r; }); } catch (e) { /* statistiche non disponibili */ }
     $('list').innerHTML = items.length ? items.map(function (n) {
       return '<div class="list-item' + (cur && cur.id === n.id ? ' sel' : '') + '" data-id="' + n.id + '">' + (n.image_url ? '<img src="' + esc(n.image_url) + '" alt="" />' : '<div class="ph"></div>') +
-        '<div><b>' + esc(n.title) + '</b><span class="muted">' + status(n) + dt(n.publish_at) + ' · ' + (n.audience || []).map(function (a) { return AUD[a] || a; }).join(', ') + '</span></div></div>';
+        '<div><b>' + esc(n.title) + '</b><span class="muted">' + status(n) + dt(n.publish_at) + ' · ' + (n.audience || []).map(function (a) { return AUD[a] || a; }).join(', ') + '</span>' + statLine(n) + '</div></div>';
     }).join('') : '<p class="muted">Nessuna novità. Crea la prima con «+ Nuova».</p>';
   }
   $('list').addEventListener('click', function (e) {

@@ -11,6 +11,23 @@
   const safeUrl = (u) => (/^https:\/\//i.test(u || '') ? u : '');
   const HOUR = 36e5;
   const cfg = () => window.APP_CONFIG || {};
+  // letture anonime: codice casuale del telefono (lo crea app.js), mai seriali o dati personali
+  const platform = () => { const C = window.Capacitor; return C && C.getPlatform ? C.getPlatform() : 'web'; };
+  function rpc(name, body) {
+    const c = cfg(); const ph = raw('eq-phone-id');
+    if (!(c.supabaseUrl && c.pointKey) || !ph) return;
+    fetch(c.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/' + name, {
+      method: 'POST', headers: { apikey: c.pointKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({ p_phone: ph, p_platform: platform() }, body)), cache: 'no-store', keepalive: true,
+    }).then((r) => { if (r.ok && name === 'news_seen') put('tp-news-sent', JSON.stringify(body.p_ids.concat(sent()).slice(0, 200))); }).catch(() => { /* senza rete: si riprova la prossima volta */ });
+  }
+  function sent() { try { return JSON.parse(raw('tp-news-sent') || '[]'); } catch (e) { return []; } }
+  // segna come lette (una volta per telefono) le novità mostrate nella pagina
+  function reportSeen(ids) { const s = sent(); const fresh = ids.filter((id) => !s.includes(id)).slice(0, 20); if (fresh.length) rpc('news_seen', { p_ids: fresh }); }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-news-id]');
+    if (a) rpc('news_click', { p_id: a.dataset.newsId });
+  });
 
   function cached() { try { return JSON.parse(raw('tp-news') || '[]'); } catch (e) { return []; } }
   function seen() { try { return JSON.parse(raw('tp-news-seen') || '[]'); } catch (e) { return []; } }
@@ -77,7 +94,7 @@
     return '<article class="card news-item">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" />' : '') +
       '<div class="small muted">' + (isNew ? '<span class="news-new">' + T('Nuovo') + '</span> ' : '') + esc(day(n.publish_at)) + '</div>' +
       '<h3>' + esc(n.title) + '</h3>' + (n.body ? '<p class="news-body">' + esc(n.body) + '</p>' : '') +
-      (link ? '<a class="btn primary" href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(n.link_label || T('Scopri di più')) + ' ›</a>' : '') + '</article>';
+      (link ? '<a class="btn primary" href="' + esc(link) + '" target="_blank" rel="noopener" data-news-id="' + esc(n.id) + '">' + esc(n.link_label || T('Scopri di più')) + ' ›</a>' : '') + '</article>';
   }
 
   function render(app) {
@@ -86,6 +103,7 @@
       (items.length ? '<div class="news-list">' + items.map((n) => itemHtml(n, !s.includes(n.id))).join('') + '</div>'
         : '<div class="card"><p class="small" style="margin:0">' + T('Per ora non ci sono novità. Torna a trovarci presto!') + '</p></div>');
     markSeen();
+    reportSeen(items.map((n) => n.id));
     refresh(true).then(() => { if (location.hash.indexOf('novita') >= 0 && list().length !== items.length) render(app); });
   }
 
