@@ -28,18 +28,21 @@
 </head>
 <body>
 <main>
-  <h1>Utilizzo dell'app</h1>
-  <p class="muted">Persone diverse che hanno aperto Equistasi Point ogni settimana (da lunedì a domenica). Dati anonimi: un codice casuale per telefono.</p>
+  <h1>Equistasi Point · numeri</h1>
+  <p class="muted">Dispositivi abbinati all'app e persone che la usano ogni settimana. Dati anonimi: nessun nome, seriale o telefono.</p>
   <div class="card" id="login">
     <form id="f"><input id="code" autocomplete="off" placeholder="Codice di accesso" aria-label="Codice di accesso" /><button>Mostra</button></form>
     <p id="msg" class="muted" style="margin:8px 0 0"></p>
   </div>
+  <div id="dev"></div>
   <div id="out"></div>
 </main>
 <script>
 (function () {
   var URL_ = 'https://lxnntieqcumhjnvfbbgu.supabase.co/rest/v1/rpc/app_week_stats';
+  var URL_DEV = 'https://lxnntieqcumhjnvfbbgu.supabase.co/rest/v1/rpc/app_device_stats';
   var KEY = 'sb_publishable_TYFg4ICPgE_FSTCCYPf4Zg_AyvuPXrO';
+  var DEVNAMES = { 'noleggio prof': 'Noleggio prof', 'noleggio privato': 'Noleggio privato', SILICON: 'Silicon', 'SILICON FAMILY': 'Silicon Family', GEL: 'Gel', ELVY: 'Elvy', altro: 'Altro' };
   var NAMES = { prof: 'Noleggio prof', silicon: 'Silicon', gel: 'Gel', rent: 'Noleggio privato', nessuno: 'Senza dispositivo abbinato', ios: 'iPhone', android: 'Android', web: 'Sito' };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var get = function (k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } };
@@ -47,6 +50,21 @@
   var fmt = function (d) { var p = d.split('-'); return p[2] + '/' + p[1]; };
   var plus6 = function (d) { var t = new Date(d + 'T12:00:00'); t.setDate(t.getDate() + 6); return ('0' + t.getDate()).slice(-2) + '/' + ('0' + (t.getMonth() + 1)).slice(-2); };
   var tags = function (o) { return Object.keys(o).sort(function (a, b) { return o[b] - o[a]; }).map(function (k) { return '<span>' + esc(NAMES[k] || k) + ': <b>' + o[k] + '</b></span>'; }).join(''); };
+
+  function showDev(d) {
+    var k = d.kind || {}; var max = 1; Object.keys(k).forEach(function (x) { max = Math.max(max, k[x]); });
+    var wmax = Math.max.apply(null, (d.weeks || []).map(function (w) { return w.n; }).concat([1]));
+    document.getElementById('dev').innerHTML =
+      '<div class="card"><div class="muted">Dispositivi abbinati all\'app (dal ' + fmt(d.since) + '/' + d.since.slice(0, 4) + ')</div><div class="big">' + d.devices + '</div>' +
+      '<div class="muted">su ' + d.phones + ' telefoni · ' + d.last7 + ' negli ultimi 7 giorni · ' + d.last30 + ' negli ultimi 30</div></div>' +
+      '<div class="card"><table><thead><tr><th>Tipo di dispositivo</th><th>Abbinati</th></tr></thead><tbody>' +
+      Object.keys(k).sort(function (a, b) { return k[b] - k[a]; }).map(function (x) {
+        return '<tr><td>' + esc(DEVNAMES[x] || x) + '</td><td class="n">' + k[x] + '<div class="bar" style="width:' + Math.round(k[x] / max * 100) + '%"></div></td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<div class="card"><table><thead><tr><th>Settimana</th><th>Nuovi abbinamenti</th></tr></thead><tbody>' +
+      (d.weeks || []).map(function (w) { return '<tr><td>' + fmt(w.week) + ' – ' + plus6(w.week) + '</td><td class="n">' + w.n + '<div class="bar" style="width:' + Math.round(w.n / wmax * 100) + '%"></div></td></tr>'; }).join('') +
+      '</tbody></table></div><h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app</h2>';
+  }
 
   function show(weeks) {
     var max = Math.max.apply(null, weeks.map(function (w) { return w.people; }).concat([1]));
@@ -70,6 +88,10 @@
       if (!d || !d.ok) { msg.className = 'err'; msg.textContent = 'Codice non valido.'; put('eq-stats-code', ''); return; }
       put('eq-stats-code', code); msg.textContent = 'Aggiornato alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       show(d.weeks || []);
+      try {
+        var r2 = await fetch(URL_DEV, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }), cache: 'no-store' });
+        var d2 = await r2.json(); if (d2 && d2.ok) showDev(d2);
+      } catch (e) { /* dispositivi non disponibili */ }
     } catch (e) { msg.className = 'err'; msg.textContent = 'Connessione non riuscita. Riprova.'; }
   }
   document.getElementById('f').addEventListener('submit', function (e) { e.preventDefault(); var c = document.getElementById('code').value.trim(); if (c) load(c); });
