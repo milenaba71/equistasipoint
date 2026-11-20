@@ -48,7 +48,17 @@
     .note { background: #fff3e6; color: #8a4300; border-radius: 10px; padding: 10px 12px; font-size: .9rem; margin-top: 12px; }
     .imgbox { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .imgbox img { width: 90px; height: 90px; object-fit: cover; border-radius: 10px; }
+    [hidden] { display: none !important; }
     #login { max-width: 420px; margin: 40px auto; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tab { border-radius: 999px; }
+    .tab.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .door { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+    .door summary { padding: 10px 12px; cursor: pointer; font-weight: 600; }
+    .door summary small { font-weight: 400; color: var(--muted); }
+    .door > div { padding: 0 12px 12px; }
+    .door textarea { min-height: 70px; }
+    .checks.col, #p-aud, #p-freq { flex-direction: column; align-items: flex-start; }
     @media (max-width: 800px) { .layout, .row { grid-template-columns: 1fr; } }
   </style>
 </head>
@@ -67,7 +77,8 @@
   </div>
 
   <div id="panel" hidden>
-    <div class="layout">
+    <div class="tabs" role="tablist"><button type="button" class="tab on" data-tab="news">📰 Novità</button><button type="button" class="tab" data-tab="pop">🎁 Pop-up e calendario dell'Avvento</button></div>
+    <div class="layout" id="tab-news">
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <h2 style="margin:0">Novità</h2><button class="primary" id="new">+ Nuova</button>
@@ -110,6 +121,59 @@
           <div class="pcard" id="pv"></div>
         </div>
       </div>
+    </div>
+
+    <div class="layout" id="tab-pop" hidden>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <h2 style="margin:0">Pop-up</h2>
+          <div><button class="primary" id="p-new">+ Pop-up</button> <button id="p-new-adv">+ Calendario Avvento</button></div>
+        </div>
+        <p class="muted" style="margin:8px 0 0">Compare a tutto schermo quando si apre l'app. A ogni apertura al massimo uno: prima il calendario dell'Avvento, poi il pop-up più recente.</p>
+        <div id="p-list" style="margin-top:8px"></div>
+      </div>
+      <form class="card" id="p-ed">
+        <h2 style="margin:0" id="p-ed-title">Nuovo pop-up</h2>
+        <label for="p-title">Titolo *</label><input type="text" id="p-title" maxlength="140" required />
+        <label for="p-body">Testo</label><textarea id="p-body" maxlength="2000"></textarea>
+        <div id="p-single">
+          <label>Immagine</label>
+          <div class="imgbox"><img id="p-img" alt="" hidden /><input type="file" id="p-file" accept="image/*" /><button type="button" id="p-noimg" hidden>Togli immagine</button></div>
+          <div class="row">
+            <div><label for="p-link">Link (https://…)</label><input type="url" id="p-link" placeholder="https://shop.equistasi.com" /></div>
+            <div><label for="p-label">Testo del pulsante</label><input type="text" id="p-label" maxlength="40" placeholder="Vai allo shop" /></div>
+          </div>
+          <label for="p-coupon">Codice sconto (facoltativo)</label><input type="text" id="p-coupon" maxlength="40" placeholder="NATALE10" />
+        </div>
+        <div id="p-advent" hidden>
+          <label>Le 24 caselle</label>
+          <p class="muted" style="margin:0 0 6px">La casella 1 si apre il giorno di inizio (es. 1 dicembre), la 2 il giorno dopo, e così via. Le caselle senza titolo restano chiuse.</p>
+          <div id="p-doors"></div>
+        </div>
+        <label>Chi lo vede</label>
+        <div class="checks" id="p-aud">
+          <label><input type="radio" name="p-aud" value="none" /> Solo chi non ha ancora il dispositivo (anche nella schermata «Attiva l'app»)</label>
+          <label><input type="radio" name="p-aud" value="device" /> Solo chi ha un dispositivo (tutti i tipi)</label>
+          <label><input type="radio" name="p-aud" value="all" checked /> Tutti</label>
+        </div>
+        <label>Quanto spesso</label>
+        <div class="checks" id="p-freq">
+          <label><input type="radio" name="p-freq" value="always" checked /> A ogni apertura dell'app</label>
+          <label><input type="radio" name="p-freq" value="daily" /> Una volta al giorno</label>
+          <label><input type="radio" name="p-freq" value="once" /> Una volta sola</label>
+        </div>
+        <div class="row">
+          <div><label for="p-from">Dal</label><input type="datetime-local" id="p-from" /></div>
+          <div><label for="p-to">Al (facoltativo)</label><input type="datetime-local" id="p-to" /></div>
+        </div>
+        <label class="checks" style="margin-top:14px"><input type="checkbox" id="p-active" /> <b>Attivo</b> (se non spuntato nell'app non compare)</label>
+        <div class="note">Ricorda: niente promesse di guarigione o risultati medici. Per chi non ha il dispositivo, un pulsante verso lo shop funziona meglio.</div>
+        <div class="actions">
+          <button class="primary" id="p-save">Salva</button>
+          <button type="button" class="danger" id="p-del" hidden>Elimina</button>
+        </div>
+        <p id="p-msg"></p>
+      </form>
     </div>
   </div>
 </main>
@@ -273,7 +337,169 @@
     } catch (err) { $('ed-msg').className = 'err'; $('ed-msg').textContent = 'Non eliminata: ' + err.message; }
   };
 
+  window.EqAdmin = { api: api, esc: esc, SB: SB, statusOf: function () {} };
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.onclick = function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === b); });
+      $('tab-news').hidden = b.dataset.tab !== 'news'; $('tab-pop').hidden = b.dataset.tab !== 'pop';
+      if (b.dataset.tab === 'pop' && window.EqPopAdmin) window.EqPopAdmin.load();
+    };
+  });
   loadSess(); if (sess) start().catch(logout); else logout();
+})();
+</script>
+<script>
+/* Pop-up e calendario dell'Avvento (tabella Supabase «popups»). Usa api/esc della pagina (window.EqAdmin). */
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var A = function () { return window.EqAdmin; };
+  var AUDN = { none: 'Senza dispositivo', device: 'Con dispositivo', all: 'Tutti' };
+  var FREQN = { always: 'a ogni apertura', daily: 'una volta al giorno', once: 'una volta sola' };
+  var list = [], stats = {}, cur = null, kind = 'popup', img = { url: '', blob: null }, doorImgs = {};
+
+  var radio = function (name, v) { if (v === undefined) { var c = document.querySelector('input[name=' + name + ']:checked'); return c ? c.value : ''; } document.querySelectorAll('input[name=' + name + ']').forEach(function (r) { r.checked = r.value === v; }); };
+  var local = function (t) { if (!t) return ''; var d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+  var dt = function (t) { return t ? new Date(t).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; };
+
+  // foto rimpicciolita (max 1600 px, JPEG) e caricata nello spazio «news»
+  function shrink(file) {
+    return new Promise(function (ok, ko) {
+      var im = new Image(); var u = URL.createObjectURL(file);
+      im.onload = function () {
+        var s = Math.min(1, 1600 / Math.max(im.width, im.height)); var c = document.createElement('canvas');
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { URL.revokeObjectURL(u); ok(b); }, 'image/jpeg', 0.85);
+      };
+      im.onerror = function () { ko(new Error('Immagine non leggibile')); }; im.src = u;
+    });
+  }
+  async function upload(blob) {
+    var name = 'popup-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now()) + '.jpg';
+    await A().api('/storage/v1/object/news/' + name, { method: 'POST', headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'false' }, body: blob });
+    return A().SB + '/storage/v1/object/public/news/' + name;
+  }
+
+  function status(p) {
+    var now = Date.now();
+    if (!p.active) return '<span class="badge b-draft">Spento</span>';
+    if (p.ends_at && new Date(p.ends_at).getTime() <= now) return '<span class="badge b-exp">Scaduto</span>';
+    if (new Date(p.starts_at).getTime() > now) return '<span class="badge b-wait">Programmato</span>';
+    return '<span class="badge b-pub">Attivo</span>';
+  }
+  function statLine(p) {
+    var st = stats[p.id] || {}; var s0 = st[0] || { views: 0, clicks: 0 };
+    var t = '👁 Visto da <b>' + s0.views + '</b> ' + (s0.views == 1 ? 'persona' : 'persone');
+    if (p.kind === 'advent') {
+      var opens = 0, clicks = 0; Object.keys(st).forEach(function (d) { if (d != 0) { opens += st[d].views; clicks += st[d].clicks; } });
+      t += ' · 🎁 <b>' + opens + '</b> caselle aperte · 👆 <b>' + clicks + '</b> clic';
+    } else if (p.link_url) t += ' · 👆 <b>' + s0.clicks + '</b> clic sul pulsante';
+    return '<span class="stat">' + t + '</span>';
+  }
+
+  async function load() {
+    try {
+      list = await A().api('/rest/v1/popups?select=*&order=created_at.desc&limit=100') || [];
+      stats = {};
+      try { (await A().api('/rest/v1/rpc/popup_stats', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }) || []).forEach(function (r) { (stats[r.popup_id] = stats[r.popup_id] || {})[r.door] = r; }); } catch (e) {}
+    } catch (e) { $('p-list').innerHTML = '<p class="err">Non riesco a leggere i pop-up: ' + A().esc(e.message) + '</p>'; return; }
+    $('p-list').innerHTML = list.length ? list.map(function (p) {
+      return '<div class="list-item' + (cur && cur.id === p.id ? ' sel' : '') + '" data-pid="' + p.id + '">' + (p.image_url ? '<img src="' + A().esc(p.image_url) + '" alt="" />' : '<div class="ph" style="display:grid;place-items:center;font-size:24px">' + (p.kind === 'advent' ? '🎄' : '🎁') + '</div>') +
+        '<div><b>' + A().esc(p.title) + '</b><span class="muted">' + status(p) + (p.kind === 'advent' ? 'Calendario · ' : '') + AUDN[p.audience] + ' · ' + FREQN[p.frequency] + ' · dal ' + dt(p.starts_at) + (p.ends_at ? ' al ' + dt(p.ends_at) : '') + '</span>' + statLine(p) + '</div></div>';
+    }).join('') : '<p class="muted">Nessun pop-up. Creane uno con «+ Pop-up» o «+ Calendario Avvento».</p>';
+    if (!cur && $('p-title').value === '') edit(null, 'popup');
+  }
+  $('p-list').addEventListener('click', function (e) {
+    var el = e.target.closest('[data-pid]'); if (!el) return;
+    edit(list.find(function (p) { return p.id === el.dataset.pid; }) || null); load();
+  });
+  $('p-new').onclick = function () { edit(null, 'popup'); load(); };
+  $('p-new-adv').onclick = function () { edit(null, 'advent'); load(); };
+
+  function doorsHtml(doors) {
+    var h = '';
+    for (var n = 1; n <= 24; n++) {
+      var d = doors[n - 1] || {}; var st = (cur && stats[cur.id] && stats[cur.id][n]) || null;
+      h += '<details class="door" data-n="' + n + '"><summary>Casella ' + n + ' <small>' + (d.title ? '· ' + A().esc(d.title) : '· vuota') + (st ? ' · aperta da ' + st.views + ', ' + st.clicks + ' clic' : '') + '</small></summary><div>' +
+        '<label>Titolo</label><input type="text" class="d-title" maxlength="140" value="' + A().esc(d.title || '') + '" />' +
+        '<label>Testo</label><textarea class="d-body" maxlength="2000">' + A().esc(d.body || '') + '</textarea>' +
+        '<label>Immagine</label><div class="imgbox"><img class="d-img"' + (d.image_url ? ' src="' + A().esc(d.image_url) + '"' : ' hidden') + ' alt="" /><input type="file" class="d-file" accept="image/*" /><button type="button" class="d-noimg"' + (d.image_url ? '' : ' hidden') + '>Togli</button></div>' +
+        '<div class="row"><div><label>Link (https://…)</label><input type="url" class="d-link" value="' + A().esc(d.link_url || '') + '" /></div><div><label>Testo del pulsante</label><input type="text" class="d-label" maxlength="40" value="' + A().esc(d.link_label || '') + '" /></div></div>' +
+        '<label>Codice sconto</label><input type="text" class="d-coupon" maxlength="40" value="' + A().esc(d.coupon || '') + '" /></div></details>';
+    }
+    return h;
+  }
+
+  function edit(p, k) {
+    cur = p; kind = p ? p.kind : (k || 'popup'); img = { url: p ? p.image_url : '', blob: null }; doorImgs = {};
+    $('p-ed-title').textContent = (p ? 'Modifica ' : 'Nuovo ') + (kind === 'advent' ? 'calendario dell\'Avvento' : 'pop-up');
+    $('p-title').value = p ? p.title : (kind === 'advent' ? 'Calendario dell\'Avvento Equistasi' : '');
+    $('p-body').value = p ? p.body : '';
+    $('p-link').value = p ? p.link_url : ''; $('p-label').value = p ? p.link_label : ''; $('p-coupon').value = p ? p.coupon : '';
+    $('p-single').hidden = kind === 'advent'; $('p-advent').hidden = kind !== 'advent';
+    if (kind === 'advent') $('p-doors').innerHTML = doorsHtml(p ? (p.doors || []) : []);
+    radio('p-aud', p ? p.audience : 'all'); radio('p-freq', p ? p.frequency : 'always');
+    var y = new Date().getFullYear();
+    $('p-from').value = p ? local(p.starts_at) : (kind === 'advent' ? y + '-12-01T00:00' : local(new Date()));
+    $('p-to').value = p ? local(p.ends_at) : (kind === 'advent' ? y + '-12-25T00:00' : '');
+    $('p-active').checked = p ? p.active : false; $('p-file').value = '';
+    $('p-del').hidden = !p; $('p-msg').textContent = ''; showImg();
+  }
+  function showImg() { $('p-img').hidden = !img.url; if (img.url) $('p-img').src = img.url; $('p-noimg').hidden = !img.url; }
+  $('p-noimg').onclick = function () { img = { url: '', blob: null }; $('p-file').value = ''; showImg(); };
+  $('p-file').addEventListener('change', async function () {
+    var f = this.files && this.files[0]; if (!f) return;
+    try { var b = await shrink(f); img = { blob: b, url: URL.createObjectURL(b) }; showImg(); } catch (e) { $('p-msg').className = 'err'; $('p-msg').textContent = e.message; }
+  });
+  $('p-doors').addEventListener('change', async function (e) {
+    if (!e.target.classList.contains('d-file')) return;
+    var box = e.target.closest('.door'); var f = e.target.files && e.target.files[0]; if (!f) return;
+    var b = await shrink(f); doorImgs[box.dataset.n] = b;
+    var im = box.querySelector('.d-img'); im.src = URL.createObjectURL(b); im.hidden = false; box.querySelector('.d-noimg').hidden = false;
+  });
+  $('p-doors').addEventListener('click', function (e) {
+    if (!e.target.classList.contains('d-noimg')) return;
+    var box = e.target.closest('.door'); delete doorImgs[box.dataset.n];
+    var im = box.querySelector('.d-img'); im.removeAttribute('src'); im.hidden = true; e.target.hidden = true; box.querySelector('.d-file').value = '';
+  });
+
+  $('p-ed').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var msg = $('p-msg'); msg.className = 'muted'; msg.textContent = 'Salvataggio…'; $('p-save').disabled = true;
+    try {
+      var https = function (u) { if (u && !/^https:\/\//i.test(u)) throw new Error('I link devono iniziare con https://'); return u; };
+      var row = { kind: kind, title: $('p-title').value.trim(), body: $('p-body').value.trim(), audience: radio('p-aud'), frequency: radio('p-freq'),
+        active: $('p-active').checked, starts_at: $('p-from').value ? new Date($('p-from').value).toISOString() : new Date().toISOString(),
+        ends_at: $('p-to').value ? new Date($('p-to').value).toISOString() : null };
+      if (kind === 'advent') {
+        var doors = [];
+        var boxes = $('p-doors').querySelectorAll('.door');
+        for (var i = 0; i < boxes.length; i++) {
+          var b = boxes[i]; var n = b.dataset.n; var im = b.querySelector('.d-img');
+          var url = doorImgs[n] ? await upload(doorImgs[n]) : (im.hidden ? '' : (im.getAttribute('src') || ''));
+          doors.push({ title: b.querySelector('.d-title').value.trim(), body: b.querySelector('.d-body').value.trim(), image_url: url,
+            link_url: https(b.querySelector('.d-link').value.trim()), link_label: b.querySelector('.d-label').value.trim(), coupon: b.querySelector('.d-coupon').value.trim() });
+        }
+        row.doors = doors; row.image_url = ''; row.link_url = ''; row.link_label = ''; row.coupon = '';
+      } else {
+        row.image_url = img.blob ? await upload(img.blob) : (img.url || '');
+        row.link_url = https($('p-link').value.trim()); row.link_label = $('p-label').value.trim(); row.coupon = $('p-coupon').value.trim(); row.doors = [];
+      }
+      var saved = cur
+        ? await A().api('/rest/v1/popups?id=eq.' + cur.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) })
+        : await A().api('/rest/v1/popups', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) });
+      cur = saved && saved[0]; await load(); edit(cur);
+      msg.className = 'okmsg'; msg.textContent = row.active ? 'Salvato e attivo: nell\'app compare alla prossima apertura (nel periodo scelto).' : 'Salvato, ma spento: nell\'app non compare.';
+    } catch (err) { msg.className = 'err'; msg.textContent = 'Non salvato: ' + err.message; }
+    $('p-save').disabled = false;
+  });
+  $('p-del').onclick = async function () {
+    if (!cur || !confirm('Eliminare questo pop-up? Sparisce anche dall\'app.')) return;
+    try { await A().api('/rest/v1/popups?id=eq.' + cur.id, { method: 'DELETE' }); cur = null; await load(); edit(null, 'popup'); }
+    catch (err) { $('p-msg').className = 'err'; $('p-msg').textContent = 'Non eliminato: ' + err.message; }
+  };
+
+  window.EqPopAdmin = { load: load };
 })();
 </script>
 </body>

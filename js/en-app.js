@@ -372,4 +372,11 @@ window.I18N_EN = Object.assign(window.I18N_EN || {}, {
   "Novità": "News",
   "Novità: {n} da leggere": "News: {n} unread",
   "Per ora non ci sono novità. Torna a trovarci presto!": "No news for now. Check back soon!",
+  "Codice sconto": "Discount code",
+  "Copia": "Copy",
+  "Copiato ✓": "Copied ✓",
+  "Casella {n}": "Door {n}",
+  "Tocca la casella di oggi per scoprire la sorpresa.": "Tap today's door to discover your surprise.",
+  "Giorno {n}": "Day {n}",
+  "Torna al calendario": "Back to the calendar",
 });

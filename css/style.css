@@ -1226,3 +1226,33 @@ button.vpromo { width: 100%; text-align: left; font: inherit; color: inherit; bo
 .news-item img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 12px; margin-bottom: 10px; }
 .news-item h3 { margin: 4px 0 6px; }
 .news-body { white-space: pre-line; margin: 0 0 12px; }
+
+/* ───────── Pop-up all'apertura e calendario dell'Avvento (js/popup.js) ───────── */
+.pop-ov { position: fixed; inset: 0; z-index: 150; background: rgba(10, 12, 30, .62); display: grid; place-items: center; padding: 16px; overflow: auto; animation: popIn .25s ease; }
+@keyframes popIn { from { opacity: 0; } to { opacity: 1; } }
+.pop-card { position: relative; width: min(440px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: #fff; color: var(--txt); border-radius: 22px; box-shadow: 0 20px 60px rgba(0, 0, 0, .35); }
+.pop-inner { padding: 20px 18px 20px; }
+.pop-x { position: absolute; top: 10px; right: 10px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .92); box-shadow: 0 2px 8px rgba(0, 0, 0, .15); font-size: 16px; cursor: pointer; }
+.pop-img { display: block; width: calc(100% + 36px); margin: -20px -18px 14px; max-height: 280px; object-fit: cover; }
+.pop-title { margin: 4px 0 8px; font-size: 1.3rem; color: var(--indigo, #23266f); padding-right: 30px; }
+.pop-body { white-space: pre-line; margin: 0 0 14px; }
+.pop-btn { display: block; text-align: center; margin-top: 6px; }
+.pop-coupon { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 2px dashed var(--red); border-radius: 14px; padding: 10px 12px; margin: 0 0 12px; }
+.pop-coupon span { font-size: .8rem; color: var(--muted); width: 100%; }
+.pop-coupon b { font-size: 1.25rem; letter-spacing: .06em; flex: 1; }
+.pop-back { margin-top: 12px; width: 100%; }
+.pop-ov.advent .pop-card { background: linear-gradient(170deg, #1d2a6b, #23266f 55%, #3a1c3f); color: #fff; }
+.pop-ov.advent .pop-title { color: #fff; }
+.pop-ov.advent .pop-body, .pop-ov.advent .muted { color: rgba(255, 255, 255, .85) !important; }
+.adv-head { text-align: center; }
+.adv-head > span { font-size: 34px; }
+.adv-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.adv-door { position: relative; aspect-ratio: 1; border-radius: 12px; border: 1px solid rgba(255, 255, 255, .25); background: rgba(255, 255, 255, .1); color: #fff; font-weight: 800; font-size: 1.15rem; cursor: pointer; }
+.adv-door.today { background: var(--yellow, #FADC00); color: #23266f; border-color: transparent; box-shadow: 0 0 0 3px rgba(250, 220, 0, .35); animation: advPulse 1.6s ease-in-out infinite; }
+.adv-door.seen:not(.today) { background: rgba(200, 55, 45, .55); }
+.adv-door.locked { opacity: .45; cursor: default; }
+.adv-door i { position: absolute; right: 5px; bottom: 3px; font-size: 11px; font-style: normal; }
+@keyframes advPulse { 50% { transform: scale(1.06); } }
+.adv-day { display: inline-block; background: var(--yellow, #FADC00); color: #23266f; font-weight: 800; border-radius: 999px; padding: 3px 12px; margin-bottom: 8px; }
+.pop-ov.advent .pop-img { margin-top: 8px; width: 100%; margin-left: 0; border-radius: 14px; }
+body.popup-open { overflow: hidden; }
