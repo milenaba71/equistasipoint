@@ -73,6 +73,20 @@
       <label for="pw">Password</label><input type="password" id="pw" autocomplete="current-password" required />
       <div class="actions"><button class="primary">Entra</button></div>
       <p id="login-msg" class="err"></p>
+      <p style="margin:6px 0 0"><a href="#" id="forgot">Password dimenticata?</a></p>
+    </form>
+    <form id="forgot-f" hidden>
+      <p class="muted">Scrivi la tua email: ti mandiamo un link per scegliere una nuova password.</p>
+      <label for="fem">Email</label><input type="email" id="fem" autocomplete="username" required />
+      <div class="actions"><button class="primary">Mandami il link</button> <button type="button" id="forgot-back">Annulla</button></div>
+      <p id="forgot-msg"></p>
+    </form>
+    <form id="reset-f" hidden>
+      <p class="muted">Scegli la nuova password (almeno 8 caratteri).</p>
+      <label for="np1">Nuova password</label><input type="password" id="np1" autocomplete="new-password" minlength="8" required />
+      <label for="np2">Ripeti la nuova password</label><input type="password" id="np2" autocomplete="new-password" minlength="8" required />
+      <div class="actions"><button class="primary">Salva la nuova password</button></div>
+      <p id="reset-msg"></p>
     </form>
   </div>
 
@@ -345,7 +359,43 @@
       if (b.dataset.tab === 'pop' && window.EqPopAdmin) window.EqPopAdmin.load();
     };
   });
-  loadSess(); if (sess) start().catch(logout); else logout();
+  // ── password dimenticata: email con link (Supabase), poi nuova password su questa pagina ──
+  var show = function (id) { ['login-f', 'forgot-f', 'reset-f'].forEach(function (f) { $(f).hidden = f !== id; }); };
+  $('forgot').onclick = function (e) { e.preventDefault(); $('fem').value = $('em').value; $('forgot-msg').textContent = ''; show('forgot-f'); };
+  $('forgot-back').onclick = function () { show('login-f'); };
+  $('forgot-f').addEventListener('submit', async function (e) {
+    e.preventDefault(); var m = $('forgot-msg'); m.className = 'muted'; m.textContent = 'Invio…';
+    try {
+      var r = await fetch(SB + '/auth/v1/recover?redirect_to=' + encodeURIComponent(location.origin + location.pathname), {
+        method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: $('fem').value.trim() }) });
+      if (r.status === 429) throw new Error('Troppe richieste: riprova tra un\'ora.');
+      if (!r.ok) throw new Error('Invio non riuscito.');
+      m.className = 'okmsg'; m.textContent = 'Fatto. Se l\'email è abilitata, tra poco ricevi il link (guarda anche nello spam). Aprilo da questo computer o telefono.';
+    } catch (err) { m.className = 'err'; m.textContent = err.message; }
+  });
+  // arrivo dal link dell'email: #access_token=...&refresh_token=...&type=recovery
+  var hp = new URLSearchParams(location.hash.slice(1));
+  if (hp.get('type') === 'recovery' && hp.get('access_token')) {
+    saveSess({ at: hp.get('access_token'), rt: hp.get('refresh_token') || '', exp: Date.now() + (Number(hp.get('expires_in')) || 3600) * 1000, email: '' });
+    history.replaceState(null, '', location.pathname);
+    $('login').hidden = false; $('panel').hidden = true; show('reset-f');
+    $('reset-f').addEventListener('submit', async function (e) {
+      e.preventDefault(); var m = $('reset-msg');
+      if ($('np1').value !== $('np2').value) { m.className = 'err'; m.textContent = 'Le due password non coincidono.'; return; }
+      m.className = 'muted'; m.textContent = 'Salvataggio…';
+      try {
+        var d = await api('/auth/v1/user', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $('np1').value }) });
+        sess.email = (d && d.email) || ''; saveSess(sess); $('np1').value = $('np2').value = '';
+        m.className = 'okmsg'; m.textContent = 'Password cambiata. Entro nel pannello…';
+        setTimeout(function () { show('login-f'); start(); }, 900);
+      } catch (err) { m.className = 'err'; m.textContent = 'Non riuscito: ' + err.message + '. Chiedi un nuovo link.'; }
+    });
+  } else if (hp.get('error_description')) {
+    history.replaceState(null, '', location.pathname);
+    logout(); $('login-msg').textContent = 'Il link non è più valido: chiedine uno nuovo con «Password dimenticata?».';
+  } else {
+    loadSess(); if (sess) start().catch(logout); else logout();
+  }
 })();
 </script>
 <script>
