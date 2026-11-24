@@ -569,11 +569,12 @@
       tile('#/pro/movimento', T('Analisi del movimento'), T('Gradi, ripetizioni, velocità e forza stimata di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
       tile('#/pro/tug', T('Timed Up and Go'), T('Alzarsi, camminare 3 metri, tornare e sedersi'), svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')) +
+      tile('#/pro/andatura', T('Analisi del cammino'), T('Video: fasi del passo, bacino, tronco e ginocchia'), svg('<circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M11 15l1-5 4 3h3M8 11l4-1"/>')) +
       tile('#/pro/cammino', T('Cammino su 10 metri'), T('Velocità del cammino, passi e cadenza'), svg('<path d="M4 20 20 4"/><path d="M14 4h6v6"/>')) +
       tile('#/sedia/cinque', T('5 alzate dalla sedia'), T('Tempo per alzarsi e sedersi 5 volte'), svg('<path d="M7 3v9h10v9M7 12v9M17 12V8"/>')) +
       tile('#/pro/esercizi', T('Programma di esercizi posturali'), T('Proposto dalle misure della postura, da fare con Equistasi'), svg('<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M12 14l-3 6M12 14l3 6"/>')) +
       tile('#/pro/dolore', T('Dolore e uso del dispositivo'), T('Dolore 0–10 prima e dopo, giorni e ore di utilizzo'), svg('<path d="M3 12h4l2-6 4 12 2-6h6"/>')) +
-      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche analisi del movimento, scoliometro, test a tempo, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
+      '</div><a class="card vpromo ts-report" href="#/postura/report"><span class="vpromo-ico pz-ico" aria-hidden="true">' + svg('<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M10 12h5M10 16h5"/>') + '</span><span><b>' + T('Report in PDF') + '</b><br><span class="small muted">' + T('Il report include anche analisi del movimento, del cammino, scoliometro, test a tempo, dolore e uso del dispositivo') + '</span></span><span class="chev" aria-hidden="true">›</span></a>' + NOTE;
   }
   function renderLocked(app) {
     app.innerHTML = head(T('Strumenti per il professionista')) +
@@ -590,6 +591,7 @@
     if (arg === 'gonio' || arg === 'movimento') renderGonio(app);
     else if (arg === 'tug') renderClin(app, 'tug');
     else if (arg === 'cammino') renderClin(app, 'walk');
+    else if (arg === 'andatura' && window.EqGait) window.EqGait.render(app);
     else if (arg === 'scolio') renderScolio(app);
     else if (arg === 'esercizi' && window.EqExercises) window.EqExercises.render(app);
     else if (arg === 'dolore') renderPain(app);
@@ -616,6 +618,7 @@
     }
     const sc = store.get(SCOLIO, []);
     out.push(...clinGroups());
+    if (window.EqGait) out.push(...window.EqGait.reportGroups());
     if (sc.length) out.push({ title: T('Scoliometro'), rows: sc.slice(-5).reverse().map((r) => ({ label: REGIONS()[r.reg] + ' · ' + (r.side === 'dx' ? T('gibbo a destra') : T('gibbo a sinistra')) + ' · ' + dateStr(r.t), val: fmt(r.v, 1) + '°' })) });
     const prog = window.EqExercises && window.EqExercises.reportGroup();
     if (prog) out.push(prog);
