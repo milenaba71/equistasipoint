@@ -83,6 +83,58 @@
   const ok = (f, ...names) => names.every((n) => f[n] && f[n][2] > 0.4);
   const fill = (a) => { const out = a.slice(); let last = null; for (let i = 0; i < out.length; i++) { if (out[i] == null) out[i] = last; else last = out[i]; } last = null; for (let i = out.length - 1; i >= 0; i--) { if (out[i] == null) out[i] = last; else last = out[i]; } return out; };
 
+
+  // cicli del passo e fasi (Perry) dagli eventi dei due piedi: { L:{IC,TO}, R:{IC,TO} }
+  function buildCycles(ev) {
+    const cycles = { L: [], R: [] };
+    ['L', 'R'].forEach((s) => {
+      const { IC, TO } = ev[s];
+      for (let k = 0; k + 1 < IC.length; k++) {
+        const a = IC[k]; const b = IC[k + 1]; const to = TO.find((x) => x > a && x < b);
+        const dur = (b - a) / FPS;
+        if (to != null && dur > 0.6 && dur < 2.5) cycles[s].push({ a, b, to, dur, stance: (to - a) / (b - a) });
+      }
+    });
+    if (!cycles.L.length || !cycles.R.length) return null;
+    const other = (s) => (s === 'L' ? 'R' : 'L');
+    cycles.L.concat(cycles.R).forEach((c) => {
+      c.side = cycles.L.includes(c) ? 'L' : 'R';
+      const o = ev[other(c.side)];
+      const oTO = o.TO.find((x) => x > c.a && x < c.to); const oIC = o.IC.find((x) => x > c.a && x < c.to);
+      const lrEnd = oTO != null ? oTO : c.a + Math.round((c.to - c.a) * 0.17);
+      const psStart = oIC != null && oIC > lrEnd ? oIC : c.a + Math.round((c.to - c.a) * 0.8);
+      const mid = Math.round((lrEnd + psStart) / 2);
+      const sw = c.b - c.to;
+      c.bounds = [c.a, Math.min(c.a + 1, lrEnd), lrEnd, mid, psStart, c.to, c.to + Math.round(sw / 3), c.to + Math.round(sw * 2 / 3), c.b];
+      c.ds = ((lrEnd - c.a) + (c.to - psStart)) / (c.b - c.a);
+    });
+    const contacts = ev.L.IC.concat(ev.R.IC).sort((a, b) => a - b);
+    const stepT = []; for (let i = 1; i < contacts.length; i++) { const d = (contacts[i] - contacts[i - 1]) / FPS; if (d > 0.3 && d < 1.3) stepT.push(d); }
+    // passo destro = dal contatto sinistro al destro (e viceversa)
+    const stepSide = { L: [], R: [] }; const sideOf = (i) => (ev.L.IC.includes(i) ? 'L' : 'R');
+    for (let i = 1; i < contacts.length; i++) {
+      const cur = sideOf(contacts[i]); const prev = sideOf(contacts[i - 1]);
+      const d = (contacts[i] - contacts[i - 1]) / FPS; if (cur !== prev && d > 0.3 && d < 1.3) stepSide[cur].push(d);
+    }
+    return { cycles, allC: cycles.L.concat(cycles.R), contacts, stepT, stepSide, sideOf };
+  }
+  const sym = (a, b) => Math.max(0, 100 - Math.abs(a - b) / ((a + b) / 2) * 100);
+  // curva media sul ciclo (0-100%, 51 punti)
+  const cycleCurve = (cycles, sig, sign) => { const out = Array(51).fill(0); const cnt = Array(51).fill(0); cycles.forEach((c) => { for (let k = 0; k <= 50; k++) { const i = Math.round(c.a + (c.b - c.a) * k / 50); const v = sig[i]; if (v != null) { out[k] += v * sign; cnt[k]++; } } }); return out.map((v, k) => (cnt[k] ? v / cnt[k] : null)); };
+  // picchi di un segnale (massimi) distanti almeno minGap, con una certa ampiezza
+  function peaks(h, minGap, minAmp) {
+    const n = h.length; const out = [];
+    for (let i = 2; i < n - 2; i++) {
+      if (h[i] == null) continue;
+      if (h[i] > h[i - 1] && h[i] >= h[i + 1] && h[i] > h[i - 2] && h[i] >= h[i + 2]) {
+        const win = h.slice(Math.max(0, i - minGap), Math.min(n, i + minGap + 1)).filter((x) => x != null);
+        if (h[i] - Math.min(...win) < minAmp) continue;
+        if (out.length && i - out[out.length - 1] < minGap) { if (h[i] > h[out[out.length - 1]]) out[out.length - 1] = i; } else out.push(i);
+      }
+    }
+    return out;
+  }
+
   function analyse(rec) {
     const F = rec.frames; const n = F.length;
     const good = F.filter((f) => ok(f, 'hipL', 'hipR', 'ankL', 'ankR', 'kneeL', 'kneeR')).length;
@@ -115,39 +167,9 @@
       return { IC: [...new Set(IC)].sort((a, b) => a - b), TO: [...new Set(TO)].sort((a, b) => a - b), mins };
     }
     const ev = { L: events(lv.L), R: events(lv.R) };
-    // cicli: da un contatto al successivo dello stesso piede, con lo stacco in mezzo
-    const cycles = { L: [], R: [] };
-    ['L', 'R'].forEach((s) => {
-      const { IC, TO } = ev[s];
-      for (let k = 0; k + 1 < IC.length; k++) {
-        const a = IC[k]; const b = IC[k + 1]; const to = TO.find((x) => x > a && x < b);
-        const dur = (b - a) / FPS;
-        if (to != null && dur > 0.6 && dur < 2.5) cycles[s].push({ a, b, to, dur, stance: (to - a) / (b - a) });
-      }
-    });
-    if (cycles.L.length + cycles.R.length < 2 || !cycles.L.length || !cycles.R.length) return { error: 'steps' };
-    const other = (s) => (s === 'L' ? 'R' : 'L');
-    // fasi di ogni ciclo dagli eventi dei due piedi (Perry)
-    cycles.L.concat(cycles.R).forEach((c) => {
-      c.side = cycles.L.includes(c) ? 'L' : 'R';
-      const o = ev[other(c.side)];
-      const oTO = o.TO.find((x) => x > c.a && x < c.to); const oIC = o.IC.find((x) => x > c.a && x < c.to);
-      const lrEnd = oTO != null ? oTO : c.a + Math.round((c.to - c.a) * 0.17);
-      const psStart = oIC != null && oIC > lrEnd ? oIC : c.a + Math.round((c.to - c.a) * 0.8);
-      const mid = Math.round((lrEnd + psStart) / 2);
-      const sw = c.b - c.to;
-      c.bounds = [c.a, Math.min(c.a + 1, lrEnd), lrEnd, mid, psStart, c.to, c.to + Math.round(sw / 3), c.to + Math.round(sw * 2 / 3), c.b];
-      c.ds = ((lrEnd - c.a) + (c.to - psStart)) / (c.b - c.a);
-    });
-    const allC = cycles.L.concat(cycles.R);
-    const contacts = ev.L.IC.concat(ev.R.IC).sort((a, b) => a - b);
-    const stepT = []; for (let i = 1; i < contacts.length; i++) { const d = (contacts[i] - contacts[i - 1]) / FPS; if (d > 0.3 && d < 1.3) stepT.push(d); }
-    // passo destro = dal contatto sinistro al destro (e viceversa)
-    const stepSide = { L: [], R: [] };
-    for (let i = 1; i < contacts.length; i++) {
-      const cur = ev.L.IC.includes(contacts[i]) ? 'L' : 'R'; const prev = ev.L.IC.includes(contacts[i - 1]) ? 'L' : 'R';
-      const d = (contacts[i] - contacts[i - 1]) / FPS; if (cur !== prev && d > 0.3 && d < 1.3) stepSide[cur].push(d);
-    }
+    const B = buildCycles(ev);
+    if (!B) return { error: 'steps' };
+    const { cycles, allC, contacts, stepT, stepSide } = B;
     // piano frontale, fotogramma per fotogramma
     const pelvis = F.map((f) => (ok(f, 'hipL', 'hipR') ? deg(Math.atan2(f.hipR[1] - f.hipL[1], Math.abs(f.hipL[0] - f.hipR[0]))) : null)); // + = anca destra più bassa
     const trunk = F.map((f) => {
@@ -180,20 +202,88 @@
     // larghezza del passo: distanza orizzontale tra le caviglie ai contatti, rispetto alla distanza tra le anche
     const widths = contacts.map((i) => { const f = F[i]; return ok(f, 'ankL', 'ankR', 'hipL', 'hipR') ? Math.abs(f.ankL[0] - f.ankR[0]) / Math.abs(f.hipL[0] - f.hipR[0]) : null; }).filter((x) => x != null && x < 3);
     const res = { L: per('L'), R: per('R'), cadence: 60 / mean(stepT), width: mean(widths) * 100, nSteps: contacts.length };
-    const sym = (a, b) => Math.max(0, 100 - Math.abs(a - b) / ((a + b) / 2) * 100);
     res.symStance = sym(res.L.stance, res.R.stance); res.symStep = sym(res.L.step, res.R.step);
     res.ds = (res.L.ds + res.R.ds) / 2;
     if (prefs.h && +prefs.h > 100) res.widthCm = res.width / 100 * (+prefs.h * 0.105);
     // curve medie sul ciclo (0-100%) per i grafici
-    const curve = (sig, s, sign) => { const out = Array(51).fill(0); const cnt = Array(51).fill(0); cycles[s].forEach((c) => { for (let k = 0; k <= 50; k++) { const i = Math.round(c.a + (c.b - c.a) * k / 50); const v = sig[i]; if (v != null) { out[k] += v * sign; cnt[k]++; } } }); return out.map((v, k) => (cnt[k] ? v / cnt[k] : null)); };
+    const curve = (sig, s, sign) => cycleCurve(cycles[s], sig, sign);
     res.curves = { pelL: curve(pel, 'L', 1), pelR: curve(pel, 'R', -1), knL: curve(kn.L, 'L', 1), knR: curve(kn.R, 'R', 1), stL: res.L.stance, stR: res.R.stance };
     return { res, cycles: allC, ev, kn, pel, tr };
+  }
+
+  /* ───────── video DI LATO: piano sagittale e parametri spazio-temporali ─────────
+     Contatto iniziale = tallone alla massima distanza davanti al bacino; stacco = punta alla massima distanza dietro
+     (metodo di Zeni). Angoli: anca (coscia rispetto al tronco), ginocchio (coscia-gamba), caviglia (gamba-piede).
+     Scala in metri dall'altezza del paziente: anca-caviglia ≈ 0,491 × altezza (Winter). */
+  function analyseSide(rec) {
+    const F = rec.frames; const n = F.length;
+    const good = F.filter((f) => ok(f, 'hipL', 'hipR', 'ankL', 'ankR', 'kneeL', 'kneeR')).length;
+    if (n < FPS * 2 || good < n * 0.6) return { error: 'body' };
+    const pelX = fill(F.map((f) => (ok(f, 'hipL', 'hipR') ? (f.hipL[0] + f.hipR[0]) / 2 : null)));
+    const first = pelX.find((x) => x != null); const last = [...pelX].reverse().find((x) => x != null);
+    if (first == null || Math.abs(last - first) < rec.W * 0.15) return { error: 'across' };
+    const d = Math.sign(last - first); // verso di marcia nell'immagine
+    const legPx = fill(F.map((f) => (ok(f, 'hipL', 'hipR', 'ankL', 'ankR') ? Math.max(Math.hypot(f.hipL[0] - f.ankL[0], f.hipL[1] - f.ankL[1]), Math.hypot(f.hipR[0] - f.ankR[0], f.hipR[1] - f.ankR[1])) : null)));
+    const legRef = legPx.map((_, i) => Math.max(...legPx.slice(Math.max(0, i - FPS), i + FPS + 1).filter((x) => x != null))); // gamba distesa vicino a quel momento
+    const rel = (name) => smooth(fill(F.map((f, i) => (ok(f, name) && pelX[i] != null ? (f[name][0] - pelX[i]) * d / legRef[i] : null))), 1);
+    const minGap = Math.round(FPS * 0.55);
+    const ev = {};
+    ['L', 'R'].forEach((sd) => {
+      const heel = rel('heel' + sd); const toe = rel('toe' + sd);
+      ev[sd] = { IC: peaks(heel, minGap, 0.25), TO: peaks(toe.map((x) => (x == null ? null : -x)), minGap, 0.25) };
+    });
+    const B = buildCycles(ev);
+    if (!B) return { error: 'steps' };
+    const { cycles, allC, contacts, stepT, stepSide, sideOf } = B;
+    // angoli sagittali (gradi): avanti = verso di marcia, y dell'immagine verso il basso
+    const ang = (v) => deg(Math.atan2(v[0] * d, v[1])); // da verticale verso il basso, + in avanti
+    const vec = (f, a, b) => [f[b][0] - f[a][0], f[b][1] - f[a][1]];
+    const joints = (sd) => {
+      const hip = []; const knee = []; const ankle = [];
+      F.forEach((f) => {
+        if (!ok(f, 'hip' + sd, 'knee' + sd, 'ank' + sd)) { hip.push(null); knee.push(null); ankle.push(null); return; }
+        const th = ang(vec(f, 'hip' + sd, 'knee' + sd)); const sh = ang(vec(f, 'knee' + sd, 'ank' + sd));
+        const tr = ok(f, 'sh' + sd) ? ang(vec(f, 'sh' + sd, 'hip' + sd)) : 0; // tronco come riferimento dell'anca
+        hip.push(th - tr); knee.push(th - sh);
+        if (ok(f, 'heel' + sd, 'toe' + sd)) { const fv = vec(f, 'heel' + sd, 'toe' + sd); ankle.push(sh + deg(Math.atan2(-fv[1], fv[0] * d))); } else ankle.push(null);
+      });
+      return { hip: smooth(hip, 1), knee: smooth(knee, 1), ankle: smooth(ankle, 1) };
+    };
+    const J = { L: joints('L'), R: joints('R') };
+    // scala: metri per pixel dall'altezza (se inserita)
+    const hCm = prefs.h && +prefs.h > 100 && +prefs.h < 230 ? +prefs.h : 0;
+    const mpp = (i) => (hCm ? (0.491 * hCm / 100) / legRef[i] : null);
+    const heelX = (sd, i) => (ok(F[i], 'heel' + sd) ? F[i]['heel' + sd][0] : null);
+    const stepLen = { L: [], R: [] };
+    for (let k = 1; k < contacts.length; k++) {
+      const i = contacts[k]; const sd = sideOf(i); const o = sd === 'L' ? 'R' : 'L';
+      if (sideOf(contacts[k - 1]) === sd) continue;
+      const a = heelX(sd, i); const b = heelX(o, i); if (a == null || b == null) continue;
+      const px = Math.abs(a - b); stepLen[sd].push(hCm ? px * mpp(i) : px / legRef[i]);
+    }
+    const strideLen = { L: [], R: [] };
+    allC.forEach((c) => { const a = heelX(c.side, c.a); const b = heelX(c.side, c.b); if (a != null && b != null) { const px = Math.abs(b - a); strideLen[c.side].push(hCm ? px * mpp(c.a) : px / legRef[c.a]); } });
+    const i0 = contacts[0]; const i1 = contacts[contacts.length - 1];
+    const speed = (Math.abs(pelX[i1] - pelX[i0]) / ((i1 - i0) / FPS)) * (hCm ? mpp(Math.round((i0 + i1) / 2)) : 1 / legRef[Math.round((i0 + i1) / 2)]);
+    const range = (sig, cs) => { const mx = []; const mn = []; cs.forEach((c) => { const v = sig.slice(c.a, c.b + 1).filter((x) => x != null); if (v.length) { mx.push(Math.max(...v)); mn.push(Math.min(...v)); } }); return { max: mean(mx), min: mean(mn) }; };
+    const per = (sd) => {
+      const cs = cycles[sd];
+      const st = mean(cs.map((c) => c.stance)) * 100;
+      return { cycles: cs.length, cycle: mean(cs.map((c) => c.dur)), stance: st, swing: 100 - st, ds: mean(cs.map((c) => c.ds)) * 100, step: mean(stepSide[sd]),
+        stepLen: mean(stepLen[sd]), strideLen: mean(strideLen[sd]), hip: range(J[sd].hip, cs), knee: range(J[sd].knee, cs), ankle: range(J[sd].ankle, cs) };
+    };
+    const res = { view: 'lato', L: per('L'), R: per('R'), cadence: 60 / mean(stepT), nSteps: contacts.length, speed, metric: !!hCm };
+    res.symStance = sym(res.L.stance, res.R.stance); res.symStep = sym(res.L.step, res.R.step); res.symLen = sym(res.L.stepLen, res.R.stepLen);
+    res.ds = (res.L.ds + res.R.ds) / 2;
+    res.curves = { hipL: cycleCurve(cycles.L, J.L.hip, 1), hipR: cycleCurve(cycles.R, J.R.hip, 1), knL: cycleCurve(cycles.L, J.L.knee, 1), knR: cycleCurve(cycles.R, J.R.knee, 1),
+      anL: cycleCurve(cycles.L, J.L.ankle, 1), anR: cycleCurve(cycles.R, J.R.ankle, 1), stL: res.L.stance, stR: res.R.stance };
+    return { res, cycles: allC, ev, J };
   }
 
   /* ───────── disegni ───────── */
   const LINES = [['shL', 'shR'], ['hipL', 'hipR'], ['shL', 'hipL'], ['shR', 'hipR'], ['hipL', 'kneeL'], ['kneeL', 'ankL'], ['hipR', 'kneeR'], ['kneeR', 'ankR'], ['ankL', 'heelL'], ['heelL', 'toeL'], ['ankL', 'toeL'], ['ankR', 'heelR'], ['heelR', 'toeR'], ['ankR', 'toeR']];
   function phaseAt(cycles, side, i) { const c = cycles.find((x) => x.side === side && i >= x.a && i < x.b); if (!c) return -1; for (let p = 0; p < 8; p++) if (i < c.bounds[p + 1]) return p; return 7; }
-  function drawFrame(g, f, k, cycles, i) {
+  function drawFrame(g, f, k, cycles, i, J) {
     g.lineCap = 'round'; g.lineWidth = Math.max(2, 4 * k);
     const col = (a, b) => (/L$/.test(a) && /L$/.test(b) ? '#2fbf71' : /R$/.test(a) && /R$/.test(b) ? '#3a8ee6' : '#fadc00');
     LINES.forEach(([a, b]) => { if (!ok(f, a, b)) return; g.strokeStyle = col(a, b); g.beginPath(); g.moveTo(f[a][0] * k, f[a][1] * k); g.lineTo(f[b][0] * k, f[b][1] * k); g.stroke(); });
@@ -207,6 +297,14 @@
       const w = g.measureText(txt).width + 14; const y = 10 + j * 28;
       g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(8, y, w, 24); g.fillStyle = c; g.fillRect(8, y, 5, 24); g.fillStyle = '#fff'; g.fillText(txt, 18, y + 17);
     });
+    if (J) {
+      const r = (v) => (v == null ? '–' : Math.round(v) + '°');
+      [['L', '#2fbf71'], ['R', '#3a8ee6']].forEach(([s, c], j) => {
+        const txt = (s === 'L' ? T('Sx') : T('Dx')) + ' · ' + T('anca') + ' ' + r(J[s].hip[i]) + ' · ' + T('ginocchio') + ' ' + r(J[s].knee[i]) + ' · ' + T('caviglia') + ' ' + r(J[s].ankle[i]);
+        g.font = 'bold ' + Math.round(13 * Math.max(1, k * 1.2)) + 'px system-ui'; const w = g.measureText(txt).width + 14; const y = g.canvas.height - 62 + j * 28;
+        g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(8, y, w, 24); g.fillStyle = c; g.fillRect(8, y, 5, 24); g.fillStyle = '#fff'; g.fillText(txt, 18, y + 17);
+      });
+    }
   }
   function phaseBar(cycles, side) {
     const c = cycles.find((x) => x.side === side); if (!c) return '';
@@ -236,16 +334,29 @@
   let stop = false; let rafId = 0;
   function cleanup() { stop = true; cancelAnimationFrame(rafId); }
 
+  const VIEWS = () => ({ fronte: T('Video di fronte'), lato: T('Video di lato') });
+  function howTo(view) {
+    const li = (x) => '<li>' + x + '</li>';
+    if (view === 'lato') {
+      return [T('Appoggia il telefono <b>fermo, in orizzontale</b>, all’altezza del bacino (circa 1 metro), a <b>3–4 metri</b> dal percorso.'),
+        T('Il paziente cammina <b>di lato al telefono</b>, da una parte all’altra, a passo normale: inizia a camminare prima di entrare nell’inquadratura.'),
+        T('Deve vedersi <b>tutto il corpo, piedi compresi</b>, per almeno 3–4 passi. Meglio abiti aderenti e buona luce.'),
+        T('Per velocità e lunghezza del passo in metri inserisci l’<b>altezza del paziente</b>.')].map(li).join('');
+    }
+    return [T('Appoggia il telefono <b>fermo, in verticale</b>, all’altezza del bacino (circa 1 metro), su un treppiede o una sedia.'),
+      T('Il paziente parte a <b>6–7 metri</b> e cammina <b>verso il telefono</b> a passo normale, per almeno 4–5 passi.'),
+      T('Deve vedersi <b>tutto il corpo, piedi compresi</b>, per tutto il video. Meglio abiti aderenti e buona luce.'),
+      T('Registra 6–10 secondi, poi fermati prima che il paziente arrivi troppo vicino.')].map(li).join('');
+  }
+
   function render(app) {
     cleanup(); stop = false;
+    if (!prefs.view) prefs.view = 'fronte';
     const seg = (k, opts) => '<div class="seg" role="group">' + opts.map(([v, l]) => '<button type="button" data-gp="' + k + '" data-val="' + v + '" aria-pressed="' + (prefs[k] === v) + '">' + l + '</button>').join('') + '</div>';
-    app.innerHTML = head(T('Analisi del cammino'), T('Video di fronte: fasi del passo, bacino, tronco e ginocchia sul piano frontale.')) +
+    app.innerHTML = head(T('Analisi del cammino'), T('Fasi del passo, piano frontale (video di fronte) e piano sagittale con velocità e lunghezza del passo (video di lato).')) +
       '<div class="home-grid"><div>' +
-      '<div class="card"><h3>' + T('Come fare il video') + '</h3><ol class="steps">' +
-      '<li>' + T('Appoggia il telefono <b>fermo, in verticale</b>, all’altezza del bacino (circa 1 metro), su un treppiede o una sedia.') + '</li>' +
-      '<li>' + T('Il paziente parte a <b>6–7 metri</b> e cammina <b>verso il telefono</b> a passo normale, per almeno 4–5 passi.') + '</li>' +
-      '<li>' + T('Deve vedersi <b>tutto il corpo, piedi compresi</b>, per tutto il video. Meglio abiti aderenti e buona luce.') + '</li>' +
-      '<li>' + T('Registra 6–10 secondi, poi fermati prima che il paziente arrivi troppo vicino.') + '</li></ol>' +
+      '<div class="card">' + seg('view', [['fronte', '🧍 ' + VIEWS().fronte], ['lato', '🚶 ' + VIEWS().lato]]) +
+      '<h3 style="margin-top:14px">' + T('Come fare il video') + '</h3><ol class="steps" id="gt-how">' + howTo(prefs.view) + '</ol>' +
       '<p class="small muted" style="margin:0">' + T('Il video resta sul telefono: non viene inviato a nessuno.') + '</p></div>' +
       '<div class="card"><label class="small" style="display:block;margin-bottom:6px"><b>' + T('Condizione') + '</b></label>' + seg('cond', [['senza', T('Senza Equistasi')], ['con', T('Con Equistasi')]]) +
       '<label class="small" style="display:block;margin:12px 0 6px" for="gt-h"><b>' + T('Altezza del paziente (cm, facoltativa)') + '</b></label><input id="gt-h" type="number" inputmode="numeric" min="100" max="220" value="' + esc(prefs.h) + '" style="max-width:140px" />' +
@@ -253,13 +364,18 @@
       '<div id="gt-prog" hidden><p class="small" id="gt-prog-t"></p><div class="gt-progress"><i id="gt-prog-b"></i></div><button type="button" class="btn" id="gt-cancel">' + T('Annulla') + '</button></div>' +
       '<p class="small err" id="gt-err"></p></div>' +
       '</div><div>' + historyHtml() + '</div></div><div id="gt-out"></div>' + NOTE();
-    app.querySelectorAll('[data-gp]').forEach((b) => b.addEventListener('click', () => { prefs[b.dataset.gp] = b.dataset.val; savePrefs(); app.querySelectorAll('[data-gp="' + b.dataset.gp + '"]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }));
+    app.querySelectorAll('[data-gp]').forEach((b) => b.addEventListener('click', () => {
+      prefs[b.dataset.gp] = b.dataset.val; savePrefs();
+      app.querySelectorAll('[data-gp="' + b.dataset.gp + '"]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      if (b.dataset.gp === 'view') { app.querySelector('#gt-how').innerHTML = howTo(prefs.view); app.querySelector('#gt-out').innerHTML = ''; }
+    }));
     app.querySelector('#gt-h').addEventListener('change', (e) => { prefs.h = e.target.value; savePrefs(); });
     app.querySelector('#gt-file').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) run(app, f); e.target.value = ''; });
   }
 
   async function run(app, file) {
     let cancel = false; stop = false;
+    const view = prefs.view === 'lato' ? 'lato' : 'fronte';
     const prog = app.querySelector('#gt-prog'); const bar = app.querySelector('#gt-prog-b'); const txt = app.querySelector('#gt-prog-t'); const err = app.querySelector('#gt-err');
     err.textContent = ''; prog.hidden = false; txt.textContent = T('Preparo il riconoscimento del corpo…'); bar.style.width = '2%';
     app.querySelector('#gt-cancel').onclick = () => { cancel = true; };
@@ -267,45 +383,69 @@
       const rec = await track(file, (p) => { txt.textContent = T('Analizzo il video… {p}%', { p: Math.round(p * 100) }); bar.style.width = Math.round(p * 100) + '%'; }, () => cancel || stop);
       if (cancel || stop) { prog.hidden = true; return; }
       txt.textContent = T('Calcolo le fasi del passo…');
-      const out = analyse(rec);
+      const out = view === 'lato' ? analyseSide(rec) : analyse(rec);
       prog.hidden = true;
-      if (out.error) { err.textContent = out.error === 'body' ? T('Non vedo bene tutto il corpo nel video: rifallo con la persona intera, piedi compresi, e più luce.') : T('Non ho trovato abbastanza passi: servono almeno 4–5 passi interi. Rifai il video partendo più lontano.'); return; }
-      const saved = { t: Date.now(), view: 'fronte', cond: prefs.cond, r: Object.assign({}, out.res, { curves: undefined }) };
+      if (out.error) {
+        err.textContent = out.error === 'body' ? T('Non vedo bene tutto il corpo nel video: rifallo con la persona intera, piedi compresi, e più luce.')
+          : out.error === 'across' ? T('Nel video di lato il paziente deve attraversare l’inquadratura da una parte all’altra. Se cammina verso il telefono, scegli «Video di fronte».')
+            : T('Non ho trovato abbastanza passi: servono almeno 4–5 passi interi. Rifai il video partendo più lontano.');
+        return;
+      }
+      const saved = { t: Date.now(), view, cond: prefs.cond, r: Object.assign({}, out.res, { curves: undefined }) };
       const all = store.get(KEY, []); all.push(saved); store.set(KEY, all.slice(-60));
-      showResult(app, file, rec, out);
+      showResult(app, file, rec, out, view);
     } catch (e) {
       prog.hidden = true;
       err.textContent = e && e.message === 'video' ? T('Non riesco a leggere questo video. Prova a registrarlo di nuovo.') : T('Il riconoscimento del corpo non è disponibile su questo telefono o senza connessione. Riprova più tardi.');
     }
   }
 
+  const pct = (v) => (isFinite(v) ? fmt(v, 0) + '%' : '–'); const dgr = (v) => (isFinite(v) ? fmt(v, 1) + '°' : '–'); const sec = (v) => (isFinite(v) ? fmt(v, 2) + ' s' : '–');
+  const trow = (label, l, rr, note) => '<tr><th>' + label + (note ? '<br><small class="muted">' + note + '</small>' : '') + '</th><td>' + l + '</td><td>' + rr + '</td></tr>';
+  const thead = () => '<div class="pz-table-wrap"><table class="pz-table gt-table"><thead><tr><th></th><th>' + T('Sinistro') + '</th><th>' + T('Destro') + '</th></tr></thead><tbody>';
+  const timeRows = (r) => trow(T('Durata del ciclo del passo'), sec(r.L.cycle), sec(r.R.cycle), T('da un contatto al successivo dello stesso piede')) +
+    trow(T('Fase di appoggio'), pct(r.L.stance), pct(r.R.stance), T('riferimento circa 60%')) +
+    trow(T('Fase di oscillazione'), pct(r.L.swing), pct(r.R.swing), T('riferimento circa 40%')) +
+    trow(T('Tempo del passo'), sec(r.L.step), sec(r.R.step));
+  const kpi = (v, label) => '<div><b>' + v + '</b><span>' + label + '</span></div>';
+
   function metricsHtml(r) {
-    const row = (label, l, rr, note) => '<tr><th>' + label + (note ? '<br><small class="muted">' + note + '</small>' : '') + '</th><td>' + l + '</td><td>' + rr + '</td></tr>';
-    const pct = (v) => (isFinite(v) ? fmt(v, 0) + '%' : '–'); const dg = (v) => (isFinite(v) ? fmt(v, 1) + '°' : '–'); const s = (v) => (isFinite(v) ? fmt(v, 2) + ' s' : '–');
     const kv = (v) => (isFinite(v) ? fmt(Math.abs(v), 1) + '° ' + (Math.abs(v) < 2 ? T('allineato') : v > 0 ? T('valgo') : T('varo')) : '–');
-    return '<div class="pz-table-wrap"><table class="pz-table gt-table"><thead><tr><th></th><th>' + T('Sinistro') + '</th><th>' + T('Destro') + '</th></tr></thead><tbody>' +
-      row(T('Durata del ciclo del passo'), s(r.L.cycle), s(r.R.cycle), T('da un contatto al successivo dello stesso piede')) +
-      row(T('Fase di appoggio'), pct(r.L.stance), pct(r.R.stance), T('riferimento circa 60%')) +
-      row(T('Fase di oscillazione'), pct(r.L.swing), pct(r.R.swing), T('riferimento circa 40%')) +
-      row(T('Tempo del passo'), s(r.L.step), s(r.R.step)) +
-      row(T('Caduta del bacino dal lato opposto'), dg(r.L.drop), dg(r.R.drop), T('nel singolo appoggio di questo arto')) +
-      row(T('Inclinazione del tronco verso l’arto in appoggio'), dg(r.L.lean), dg(r.R.lean)) +
-      row(T('Ginocchio nella prima parte dell’appoggio'), kv(r.L.knee), kv(r.R.knee), T('valgo: verso l’interno · varo: verso l’esterno')) +
-      '</tbody></table></div>' +
-      '<div class="gt-kpis">' +
-      '<div><b>' + (isFinite(r.cadence) ? Math.round(r.cadence) : '–') + '</b><span>' + T('passi/min (cadenza)') + '</span></div>' +
-      '<div><b>' + pct(r.ds) + '</b><span>' + T('doppio appoggio (rif. circa 20%)') + '</span></div>' +
-      '<div><b>' + pct(r.symStance) + '</b><span>' + T('simmetria dell’appoggio dx/sx') + '</span></div>' +
-      '<div><b>' + pct(r.symStep) + '</b><span>' + T('simmetria del tempo del passo') + '</span></div>' +
-      '<div><b>' + (r.widthCm ? '≈ ' + fmt(r.widthCm, 0) + ' cm' : pct(r.width)) + '</b><span>' + (r.widthCm ? T('larghezza del passo') : T('larghezza del passo rispetto alla distanza tra le anche')) + '</span></div>' +
-      '</div>';
+    return thead() + timeRows(r) +
+      trow(T('Caduta del bacino dal lato opposto'), dgr(r.L.drop), dgr(r.R.drop), T('nel singolo appoggio di questo arto')) +
+      trow(T('Inclinazione del tronco verso l’arto in appoggio'), dgr(r.L.lean), dgr(r.R.lean)) +
+      trow(T('Ginocchio nella prima parte dell’appoggio'), kv(r.L.knee), kv(r.R.knee), T('valgo: verso l’interno · varo: verso l’esterno')) +
+      '</tbody></table></div><div class="gt-kpis">' +
+      kpi(isFinite(r.cadence) ? Math.round(r.cadence) : '–', T('passi/min (cadenza)')) + kpi(pct(r.ds), T('doppio appoggio (rif. circa 20%)')) +
+      kpi(pct(r.symStance), T('simmetria dell’appoggio dx/sx')) + kpi(pct(r.symStep), T('simmetria del tempo del passo')) +
+      kpi(r.widthCm ? '≈ ' + fmt(r.widthCm, 0) + ' cm' : pct(r.width), r.widthCm ? T('larghezza del passo') : T('larghezza del passo rispetto alla distanza tra le anche')) + '</div>';
+  }
+  function metricsSideHtml(r) {
+    const len = (v) => (isFinite(v) ? (r.metric ? fmt(v, 2) + ' m' : fmt(v, 2) + ' ' + T('gambe')) : '–');
+    const rng = (o) => (isFinite(o.max) ? dgr(o.max) + ' / ' + dgr(o.min) : '–');
+    return thead() + timeRows(r) +
+      trow(T('Lunghezza del passo'), len(r.L.stepLen), len(r.R.stepLen), T('tallone davanti – tallone dietro, al contatto')) +
+      trow(T('Lunghezza del ciclo (falcata)'), len(r.L.strideLen), len(r.R.strideLen)) +
+      trow(T('Anca: flessione max / estensione'), rng(r.L.hip), rng(r.R.hip), T('riferimento circa +30° / −10°')) +
+      trow(T('Ginocchio: flessione max / min'), rng(r.L.knee), rng(r.R.knee), T('riferimento circa 60° in oscillazione, 0–5° in appoggio')) +
+      trow(T('Caviglia: flessione dorsale max / plantare'), rng(r.L.ankle), rng(r.R.ankle), T('riferimento circa +10° / −20°')) +
+      '</tbody></table></div><div class="gt-kpis">' +
+      kpi(isFinite(r.speed) ? (r.metric ? fmt(r.speed, 2) + ' m/s' : fmt(r.speed, 2)) : '–', r.metric ? T('velocità del cammino') : T('velocità (lunghezze di gamba al secondo): inserisci l’altezza per i metri')) +
+      kpi(isFinite(r.cadence) ? Math.round(r.cadence) : '–', T('passi/min (cadenza)')) + kpi(pct(r.ds), T('doppio appoggio (rif. circa 20%)')) +
+      kpi(pct(r.symStance), T('simmetria dell’appoggio dx/sx')) + kpi(pct(r.symLen), T('simmetria della lunghezza del passo')) + '</div>';
   }
 
-  function showResult(app, file, rec, out) {
-    const r = out.res; const ph = PHASES();
+  function showResult(app, file, rec, out, view) {
+    const r = out.res; const ph = PHASES(); const side = view === 'lato';
     const box = app.querySelector('#gt-out');
-    box.innerHTML = '<div class="card gt-result"><h3>' + T('Risultato · video di fronte') + ' <span class="small muted">· ' + (prefs.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + T('{n} contatti del piede', { n: r.nSteps }) + '</span></h3>' +
-      '<div class="gt-video"><video id="gt-v" playsinline muted></video><canvas id="gt-c"></canvas></div>' +
+    const charts = side
+      ? chart(r.curves.hipL, r.curves.hipR, T('Anca (piano sagittale)'), T('+ flessione · − estensione'), r.curves.stL, r.curves.stR) +
+        chart(r.curves.knL, r.curves.knR, T('Ginocchio (piano sagittale)'), T('+ flessione'), r.curves.stL, r.curves.stR) +
+        chart(r.curves.anL, r.curves.anR, T('Caviglia (piano sagittale)'), T('+ flessione dorsale · − plantare'), r.curves.stL, r.curves.stR)
+      : chart(r.curves.pelL, r.curves.pelR, T('Caduta del bacino dal lato opposto'), T('gradi, sul ciclo dell’arto'), r.curves.stL, r.curves.stR) +
+        chart(r.curves.knL, r.curves.knR, T('Ginocchio sul piano frontale'), T('+ valgo · − varo'), r.curves.stL, r.curves.stR);
+    box.innerHTML = '<div class="card gt-result"><h3>' + (side ? T('Risultato · video di lato') : T('Risultato · video di fronte')) + ' <span class="small muted">· ' + (prefs.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + T('{n} contatti del piede', { n: r.nSteps }) + '</span></h3>' +
+      '<div class="gt-video' + (side ? ' wide' : '') + '"><video id="gt-v" playsinline muted></video><canvas id="gt-c"></canvas></div>' +
       '<div class="gt-ctrl"><button type="button" class="btn" id="gt-play">▶︎ ' + T('Riproduci') + '</button>' +
       '<div class="seg" role="group" aria-label="' + T('Velocità') + '">' + [[0.25, '¼×'], [0.5, '½×'], [1, '1×']].map(([v, l]) => '<button type="button" data-rate="' + v + '" aria-pressed="' + (v === 0.25) + '">' + l + '</button>').join('') + '</div>' +
       '<input type="range" id="gt-seek" min="0" max="' + (rec.frames.length - 1) + '" value="0" aria-label="' + T('Fotogramma') + '" /></div>' +
@@ -313,11 +453,10 @@
       ['L', 'R'].map((s) => '<div class="gt-barrow"><span>' + (s === 'L' ? T('Sinistro') : T('Destro')) + '</span>' + phaseBar(out.cycles, s) + '</div>').join('') +
       '<div class="gt-legend">' + ph.map((n, p) => '<button type="button" data-ph="' + p + '"><i style="background:' + PH_COL[p] + '"></i>' + (p + 1) + '. ' + n + '</button>').join('') + '</div>' +
       '<p class="small muted">' + T('Tocca una fase per fermare il video in quel momento (piede sinistro, primo ciclo).') + '</p>' +
-      metricsHtml(r) +
-      '<div class="gt-charts">' + chart(r.curves.pelL, r.curves.pelR, T('Caduta del bacino dal lato opposto'), T('gradi, sul ciclo dell’arto'), r.curves.stL, r.curves.stR) +
-      chart(r.curves.knL, r.curves.knR, T('Ginocchio sul piano frontale'), T('+ valgo · − varo'), r.curves.stL, r.curves.stR) + '</div>' +
+      (side ? metricsSideHtml(r) : metricsHtml(r)) +
+      '<div class="gt-charts">' + charts + '</div>' +
       '<p class="small muted">' + T('Linee verdi: lato sinistro · blu: lato destro · gialle: bacino e spalle. La riga tratteggiata è l’orizzontale del bacino.') + '</p>' +
-      '<p class="small muted">' + ESTIMATE() + '. ' + T('Velocità, lunghezza del passo e angoli visti di lato si misurano con il video laterale (in arrivo).') + '</p></div>';
+      '<p class="small muted">' + ESTIMATE() + '. ' + (side ? T('Visto di lato, la gamba più lontana dal telefono è in parte nascosta: i suoi valori sono meno precisi.') : T('Velocità, lunghezza del passo e angoli di anca, ginocchio e caviglia si misurano con il video di lato.')) + '</p></div>';
     const v = box.querySelector('#gt-v'); const c = box.querySelector('#gt-c'); const g = c.getContext('2d');
     v.src = URL.createObjectURL(file); v.playbackRate = 0.25;
     v.addEventListener('loadedmetadata', () => { const k = Math.min(1, 720 / Math.max(rec.W, rec.H)); c.width = Math.round(rec.W * k); c.height = Math.round(rec.H * k); c.dataset.k = k; paint(); });
@@ -325,7 +464,7 @@
     function paint() {
       const k = +c.dataset.k || 1; g.clearRect(0, 0, c.width, c.height);
       g.drawImage(v, 0, 0, c.width, c.height);
-      const i = frameIdx(); drawFrame(g, rec.frames[i], k, out.cycles, i);
+      const i = frameIdx(); drawFrame(g, rec.frames[i], k, out.cycles, i, out.J);
       box.querySelector('#gt-seek').value = i;
     }
     const loop = () => { paint(); if (!v.paused && !stop) rafId = requestAnimationFrame(loop); };
@@ -347,30 +486,44 @@
     const l = store.get(KEY, []);
     if (!l.length) return '<div class="card"><h3>' + T('Analisi salvate') + '</h3><p class="small muted" style="margin:0">' + T('Nessuna analisi salvata.') + '</p></div>';
     return '<div class="card"><h3>' + T('Analisi salvate') + '</h3><div class="pz-table-wrap"><table class="pz-table"><tbody>' + l.slice(-8).reverse().map((x) => {
-      const r = x.r;
-      return '<tr><th>' + dateStr(x.t) + ' · ' + (x.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</th><td><small>' + T('Appoggio sx/dx {a}% / {b}%', { a: Math.round(r.L.stance), b: Math.round(r.R.stance) }) +
-        '<br>' + T('Cadenza {c} passi/min · simmetria {s}%', { c: Math.round(r.cadence), s: Math.round(r.symStance) }) + '</small></td></tr>';
+      const r = x.r; const side = x.view === 'lato';
+      return '<tr><th>' + dateStr(x.t) + ' · ' + (side ? '🚶 ' + T('di lato') : '🧍 ' + T('di fronte')) + '<br><small class="muted">' + (x.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</small></th><td><small>' + T('Appoggio sx/dx {a}% / {b}%', { a: Math.round(r.L.stance), b: Math.round(r.R.stance) }) +
+        '<br>' + T('Cadenza {c} passi/min · simmetria {s}%', { c: Math.round(r.cadence), s: Math.round(r.symStance) }) +
+        (side && r.metric && isFinite(r.speed) ? '<br>' + T('Velocità {v} m/s', { v: fmt(r.speed, 2) }) : '') + '</small></td></tr>';
     }).join('') + '</tbody></table></div></div>';
   }
 
   // righe per il report (web e PDF)
   function reportGroups() {
     const l = store.get(KEY, []); if (!l.length) return [];
-    const rows = [];
-    ['senza', 'con'].forEach((cond) => {
-      const x = l.filter((a) => a.cond === cond); if (!x.length) return;
-      const a = x[x.length - 1]; const r = a.r; const when = (cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + dateStr(a.t);
-      const d = (v) => (isFinite(v) ? fmt(v, 1) + '°' : '–');
-      rows.push({ label: T('Fase di appoggio sx / dx') + ' · ' + when, val: Math.round(r.L.stance) + '% / ' + Math.round(r.R.stance) + '%' });
-      rows.push({ label: T('Doppio appoggio · cadenza') + ' · ' + when, val: Math.round(r.ds) + '% · ' + Math.round(r.cadence) + ' ' + T('passi/min') });
-      rows.push({ label: T('Simmetria appoggio · tempo del passo') + ' · ' + when, val: Math.round(r.symStance) + '% · ' + Math.round(r.symStep) + '%' });
-      rows.push({ label: T('Caduta del bacino (appoggio sx / dx)') + ' · ' + when, val: d(r.L.drop) + ' / ' + d(r.R.drop) });
-      rows.push({ label: T('Inclinazione del tronco (appoggio sx / dx)') + ' · ' + when, val: d(r.L.lean) + ' / ' + d(r.R.lean) });
-      rows.push({ label: T('Ginocchio sul piano frontale sx / dx (+ valgo)') + ' · ' + when, val: d(r.L.knee) + ' / ' + d(r.R.knee) });
+    const groups = [];
+    const d = (v) => (isFinite(v) ? fmt(v, 1) + '°' : '–');
+    ['fronte', 'lato'].forEach((view) => {
+      const rows = [];
+      ['senza', 'con'].forEach((cond) => {
+        const x = l.filter((a) => (a.view || 'fronte') === view && a.cond === cond); if (!x.length) return;
+        const a = x[x.length - 1]; const r = a.r; const when = (cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + dateStr(a.t);
+        rows.push({ label: T('Fase di appoggio sx / dx') + ' · ' + when, val: Math.round(r.L.stance) + '% / ' + Math.round(r.R.stance) + '%' });
+        rows.push({ label: T('Doppio appoggio · cadenza') + ' · ' + when, val: Math.round(r.ds) + '% · ' + Math.round(r.cadence) + ' ' + T('passi/min') });
+        rows.push({ label: T('Simmetria appoggio · tempo del passo') + ' · ' + when, val: Math.round(r.symStance) + '% · ' + Math.round(r.symStep) + '%' });
+        if (view === 'fronte') {
+          rows.push({ label: T('Caduta del bacino (appoggio sx / dx)') + ' · ' + when, val: d(r.L.drop) + ' / ' + d(r.R.drop) });
+          rows.push({ label: T('Inclinazione del tronco (appoggio sx / dx)') + ' · ' + when, val: d(r.L.lean) + ' / ' + d(r.R.lean) });
+          rows.push({ label: T('Ginocchio sul piano frontale sx / dx (+ valgo)') + ' · ' + when, val: d(r.L.knee) + ' / ' + d(r.R.knee) });
+        } else {
+          const len = (v) => (isFinite(v) ? fmt(v, 2) + (r.metric ? ' m' : '') : '–');
+          if (r.metric) rows.push({ label: T('Velocità del cammino') + ' · ' + when, val: fmt(r.speed, 2) + ' m/s' });
+          rows.push({ label: T('Lunghezza del passo sx / dx') + (r.metric ? '' : ' (' + T('in lunghezze di gamba') + ')') + ' · ' + when, val: len(r.L.stepLen) + ' / ' + len(r.R.stepLen) });
+          rows.push({ label: T('Anca flessione max sx / dx') + ' · ' + when, val: d(r.L.hip.max) + ' / ' + d(r.R.hip.max) });
+          rows.push({ label: T('Ginocchio flessione max sx / dx') + ' · ' + when, val: d(r.L.knee.max) + ' / ' + d(r.R.knee.max) });
+          rows.push({ label: T('Caviglia flessione dorsale max sx / dx') + ' · ' + when, val: d(r.L.ankle.max) + ' / ' + d(r.R.ankle.max) });
+        }
+      });
+      if (rows.length) groups.push({ title: (view === 'lato' ? T('Analisi del cammino · video di lato') : T('Analisi del cammino · video di fronte')) + ' · ' + ESTIMATE(), rows });
     });
-    return [{ title: T('Analisi del cammino · video di fronte') + ' · ' + ESTIMATE(), rows }];
+    return groups;
   }
 
   window.addEventListener('hashchange', cleanup);
-  window.EqGait = { render, reportGroups, _analyse: analyse, _show: showResult };
+  window.EqGait = { render, reportGroups, _analyse: analyse, _analyseSide: analyseSide, _show: showResult };
 })();
