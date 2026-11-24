@@ -569,7 +569,7 @@
       tile('#/pro/movimento', T('Analisi del movimento'), T('Gradi, ripetizioni, velocità e forza stimata di ginocchio e spalla'), svg('<path d="M4 20h16M4 20 16 6"/><path d="M10 20a6 6 0 0 0-2-4.5"/>')) +
       tile('#/pro/scolio', T('Scoliometro'), T('Rotazione del tronco (test di Adams)'), svg('<path d="M12 3c-3 4 3 6 0 9s3 5 0 9"/><path d="M6 12h12"/>')) +
       tile('#/pro/tug', T('Timed Up and Go'), T('Alzarsi, camminare 3 metri, tornare e sedersi'), svg('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')) +
-      tile('#/pro/andatura', T('Analisi del cammino'), T('Video: fasi del passo, bacino, tronco e ginocchia'), svg('<circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M11 15l1-5 4 3h3M8 11l4-1"/>')) +
+      tile('#/pro/andatura', T('Analisi del cammino'), T('Video di fronte e di lato: fasi del passo, angoli, velocità'), svg('<circle cx="13" cy="4" r="2"/><path d="m9 21 2-6 3 3v3M11 15l1-5 4 3h3M8 11l4-1"/>')) +
       tile('#/pro/cammino', T('Cammino su 10 metri'), T('Velocità del cammino, passi e cadenza'), svg('<path d="M4 20 20 4"/><path d="M14 4h6v6"/>')) +
       tile('#/sedia/cinque', T('5 alzate dalla sedia'), T('Tempo per alzarsi e sedersi 5 volte'), svg('<path d="M7 3v9h10v9M7 12v9M17 12V8"/>')) +
       tile('#/pro/esercizi', T('Programma di esercizi posturali'), T('Proposto dalle misure della postura, da fare con Equistasi'), svg('<circle cx="12" cy="5" r="2"/><path d="M12 7v7M8 10h8M12 14l-3 6M12 14l3 6"/>')) +
