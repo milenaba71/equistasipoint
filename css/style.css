@@ -1287,3 +1287,8 @@ body.popup-open { overflow: hidden; }
 .gt-sum li:last-child { border-bottom: 0; }
 .gt-pdf { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
 .gt-hpdf { margin-top: 6px; padding: 4px 10px; font-size: .8rem; }
+.gt-interp { border-top: 2px solid var(--border); padding-top: 6px; }
+.gt-synth { font-weight: 700; margin: 0 0 8px; }
+.gt-pat { background: var(--chip); border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+.gt-pat h4 { margin: 0 0 6px; font-size: .98rem; }
+.gt-pat p { margin: 4px 0; font-size: .9rem; line-height: 1.4; }
