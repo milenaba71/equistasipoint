@@ -107,7 +107,7 @@
           <label>Immagine</label>
           <div class="imgbox"><img id="f-img" alt="" hidden /><input type="file" id="f-file" accept="image/*" /><button type="button" id="f-noimg" hidden>Togli immagine</button></div>
           <div class="row">
-            <div><label for="f-link">Link (https://…)</label><input type="url" id="f-link" placeholder="https://www.instagram.com/p/…" /></div>
+            <div><label for="f-link">Link (https://…)</label><input type="text" inputmode="url" id="f-link" placeholder="https://www.instagram.com/p/…" /></div>
             <div><label for="f-label">Testo del pulsante</label><input type="text" id="f-label" maxlength="40" placeholder="Guarda il post" /></div>
           </div>
           <label>Chi la vede</label>
@@ -146,7 +146,7 @@
         <p class="muted" style="margin:8px 0 0">Compare a tutto schermo quando si apre l'app. A ogni apertura al massimo uno: prima il calendario dell'Avvento, poi il pop-up più recente.</p>
         <div id="p-list" style="margin-top:8px"></div>
       </div>
-      <form class="card" id="p-ed">
+      <form class="card" id="p-ed" novalidate>
         <h2 style="margin:0" id="p-ed-title">Nuovo pop-up</h2>
         <label for="p-title">Titolo *</label><input type="text" id="p-title" maxlength="140" required />
         <label for="p-body">Testo</label><textarea id="p-body" maxlength="2000"></textarea>
@@ -154,7 +154,7 @@
           <label>Immagine</label>
           <div class="imgbox"><img id="p-img" alt="" hidden /><input type="file" id="p-file" accept="image/*" /><button type="button" id="p-noimg" hidden>Togli immagine</button></div>
           <div class="row">
-            <div><label for="p-link">Link (https://…)</label><input type="url" id="p-link" placeholder="https://shop.equistasi.com" /></div>
+            <div><label for="p-link">Link (https://…)</label><input type="text" inputmode="url" id="p-link" placeholder="https://shop.equistasi.com" /></div>
             <div><label for="p-label">Testo del pulsante</label><input type="text" id="p-label" maxlength="40" placeholder="Vai allo shop" /></div>
           </div>
           <label for="p-coupon">Codice sconto (facoltativo)</label><input type="text" id="p-coupon" maxlength="40" placeholder="NATALE10" />
@@ -218,7 +218,11 @@
     opt = opt || {};
     var h = Object.assign({ apikey: KEY, Authorization: 'Bearer ' + await token() }, opt.headers || {});
     var r = await fetch(SB + path, Object.assign({}, opt, { headers: h, cache: 'no-store' }));
-    if (r.status === 401) { logout(); throw new Error('auth'); }
+    if (r.status === 401 && sess && sess.rt && !opt._retry) {
+      // sessione scaduta: rinnova e riprova una volta, senza perdere quello che si sta scrivendo
+      try { await auth('refresh_token', { refresh_token: sess.rt }); return api(path, Object.assign({}, opt, { _retry: true })); } catch (e) { /* rinnovo non riuscito */ }
+    }
+    if (r.status === 401) throw new Error('la sessione è scaduta. Il lavoro resta salvato come bozza su questo computer: esci, rientra e riapri il calendario per recuperarlo');
     var txt = await r.text(); var d = null; try { d = txt ? JSON.parse(txt) : null; } catch (e) {}
     if (!r.ok) throw new Error((d && (d.message || d.error)) || ('HTTP ' + r.status));
     return d;
@@ -321,7 +325,9 @@
     var msg = $('ed-msg'); msg.className = 'muted'; msg.textContent = 'Salvataggio…'; $('save').disabled = true;
     try {
       var link = $('f-link').value.trim();
-      if (link && !/^https:\/\//i.test(link)) throw new Error('Il link deve iniziare con https://');
+      if (link && /^http:\/\//i.test(link)) link = 'https://' + link.slice(7);
+      if (link && !/^https:\/\//i.test(link)) link = 'https://' + link.replace(/^\/+/, '');
+      $('f-link').value = link;
       var url = imgUrl;
       if (newImg) {
         var name = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())) + '.jpg';
@@ -474,13 +480,39 @@
         '<label>Titolo</label><input type="text" class="d-title" maxlength="140" value="' + A().esc(d.title || '') + '" />' +
         '<label>Testo</label><textarea class="d-body" maxlength="2000">' + A().esc(d.body || '') + '</textarea>' +
         '<label>Immagine</label><div class="imgbox"><img class="d-img"' + (d.image_url ? ' src="' + A().esc(d.image_url) + '"' : ' hidden') + ' alt="" /><input type="file" class="d-file" accept="image/*" /><button type="button" class="d-noimg"' + (d.image_url ? '' : ' hidden') + '>Togli</button></div>' +
-        '<div class="row"><div><label>Link (https://…)</label><input type="url" class="d-link" value="' + A().esc(d.link_url || '') + '" /></div><div><label>Testo del pulsante</label><input type="text" class="d-label" maxlength="40" value="' + A().esc(d.link_label || '') + '" /></div></div>' +
+        '<div class="row"><div><label>Link (https://…)</label><input type="text" inputmode="url" class="d-link" value="' + A().esc(d.link_url || '') + '" /></div><div><label>Testo del pulsante</label><input type="text" class="d-label" maxlength="40" value="' + A().esc(d.link_label || '') + '" /></div></div>' +
         '<label>Codice sconto</label><input type="text" class="d-coupon" maxlength="40" value="' + A().esc(d.coupon || '') + '" /></div></details>';
     }
     return h;
   }
 
-  function edit(p, k) {
+  // bozza automatica su questo computer: niente si perde se il salvataggio non riesce o la pagina si chiude
+  var DKEY = 'eq-popup-draft';
+  function formState() {
+    var st = { id: cur ? cur.id : null, kind: kind, t: Date.now(), f: {}, doors: [] };
+    ['p-title', 'p-body', 'p-link', 'p-label', 'p-coupon', 'p-from', 'p-to'].forEach(function (id) { st.f[id] = $(id).value; });
+    st.f.active = $('p-active').checked; st.f.aud = radio('p-aud'); st.f.freq = radio('p-freq');
+    $('p-doors').querySelectorAll('.door').forEach(function (b) {
+      var im = b.querySelector('.d-img');
+      st.doors.push({ title: b.querySelector('.d-title').value, body: b.querySelector('.d-body').value, image_url: im.hidden ? '' : (im.getAttribute('src') || '').replace(/^blob:.*/, ''),
+        link_url: b.querySelector('.d-link').value, link_label: b.querySelector('.d-label').value, coupon: b.querySelector('.d-coupon').value });
+    });
+    return st;
+  }
+  function saveDraft() { try { localStorage.setItem(DKEY, JSON.stringify(formState())); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(DKEY); } catch (e) {} }
+  function readDraft() { try { return JSON.parse(localStorage.getItem(DKEY) || 'null'); } catch (e) { return null; } }
+  var draftTimer = 0;
+  $('p-ed').addEventListener('input', function () { clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 600); });
+  $('p-ed').addEventListener('change', function () { clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 600); });
+  function applyDraft(d) {
+    Object.keys(d.f).forEach(function (id) { if ($(id) && typeof d.f[id] === 'string') $(id).value = d.f[id]; });
+    $('p-active').checked = !!d.f.active; radio('p-aud', d.f.aud); radio('p-freq', d.f.freq);
+    if (d.kind === 'advent') $('p-doors').innerHTML = doorsHtml(d.doors);
+    $('p-msg').className = 'okmsg'; $('p-msg').textContent = 'Bozza recuperata: controlla e premi «Salva».';
+  }
+
+  function edit(p, k, noDraft) {
     cur = p; kind = p ? p.kind : (k || 'popup'); img = { url: p ? p.image_url : '', blob: null }; doorImgs = {};
     $('p-ed-title').textContent = (p ? 'Modifica ' : 'Nuovo ') + (kind === 'advent' ? 'calendario dell\'Avvento' : 'pop-up');
     $('p-title').value = p ? p.title : (kind === 'advent' ? 'Calendario dell\'Avvento Equistasi' : '');
@@ -494,6 +526,9 @@
     $('p-to').value = p ? local(p.ends_at) : (kind === 'advent' ? y + '-12-25T00:00' : '');
     $('p-active').checked = p ? p.active : false; $('p-file').value = '';
     $('p-del').hidden = !p; $('p-msg').textContent = ''; showImg();
+    var d = noDraft ? null : readDraft();
+    if (d && d.kind === kind && (d.id || null) === (p ? p.id : null) && (!p || d.t > new Date(p.updated_at).getTime()) &&
+        confirm('C\'è una bozza non salvata del ' + new Date(d.t).toLocaleString('it-IT') + ' per questo ' + (kind === 'advent' ? 'calendario' : 'pop-up') + '. Vuoi recuperarla?')) applyDraft(d);
   }
   function showImg() { $('p-img').hidden = !img.url; if (img.url) $('p-img').src = img.url; $('p-noimg').hidden = !img.url; }
   $('p-noimg').onclick = function () { img = { url: '', blob: null }; $('p-file').value = ''; showImg(); };
@@ -517,7 +552,9 @@
     e.preventDefault();
     var msg = $('p-msg'); msg.className = 'muted'; msg.textContent = 'Salvataggio…'; $('p-save').disabled = true;
     try {
-      var https = function (u) { if (u && !/^https:\/\//i.test(u)) throw new Error('I link devono iniziare con https://'); return u; };
+      // link: «www.sito.it» o «http://…» diventano «https://…»
+      var https = function (u) { u = (u || '').trim(); if (!u) return ''; if (/^http:\/\//i.test(u)) u = 'https://' + u.slice(7); if (!/^https:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); if (/\s/.test(u) || !/^https:\/\/[^\/.]+\.[^\/]+/i.test(u)) throw new Error('il link «' + u + '» non sembra un indirizzo web valido'); return u; };
+      if (!$('p-title').value.trim()) throw new Error('manca il titolo in alto');
       var row = { kind: kind, title: $('p-title').value.trim(), body: $('p-body').value.trim(), audience: radio('p-aud'), frequency: radio('p-freq'),
         active: $('p-active').checked, starts_at: $('p-from').value ? new Date($('p-from').value).toISOString() : new Date().toISOString(),
         ends_at: $('p-to').value ? new Date($('p-to').value).toISOString() : null };
@@ -538,9 +575,9 @@
       var saved = cur
         ? await A().api('/rest/v1/popups?id=eq.' + cur.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) })
         : await A().api('/rest/v1/popups', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(row) });
-      cur = saved && saved[0]; await load(); edit(cur);
+      clearDraft(); cur = saved && saved[0]; await load(); edit(cur, null, true);
       msg.className = 'okmsg'; msg.textContent = row.active ? 'Salvato e attivo: nell\'app compare alla prossima apertura (nel periodo scelto).' : 'Salvato, ma spento: nell\'app non compare.';
-    } catch (err) { msg.className = 'err'; msg.textContent = 'Non salvato: ' + err.message; }
+    } catch (err) { msg.className = 'err'; msg.textContent = 'Non salvato: ' + err.message; saveDraft(); alert('Attenzione: non salvato.\n' + err.message); }
     $('p-save').disabled = false;
   });
   $('p-del').onclick = async function () {
