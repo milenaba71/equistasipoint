@@ -43,8 +43,8 @@ jobs:
           CONTACT_LAST: Baroni
           CONTACT_PHONE: "+39 3355849343"
           CONTACT_EMAIL: info@equistasi.com
-          WHATS_NEW_IT: "• Analisi del cammino da video per i professionisti: fasi del passo, angoli di anca, ginocchio e caviglia, velocità e simmetria\n• Piccoli miglioramenti e correzioni"
-          WHATS_NEW_EN: "• Video gait analysis for professionals: gait phases, hip, knee and ankle angles, speed and symmetry\n• Minor improvements and fixes"
+          WHATS_NEW_IT: "• Per i professionisti: report PDF dell'analisi del cammino e lettura guidata delle misure (postura, scoliometro, movimento, test a tempo)\n• Piccoli miglioramenti e correzioni"
+          WHATS_NEW_EN: "• For professionals: PDF gait analysis report and guided reading of measurements (posture, scoliometer, movement, timed tests)\n• Minor improvements and fixes"
         run: |
           P=mobile/ios/App/App.xcodeproj/project.pbxproj
           BUNDLE=$(grep 'PRODUCT_BUNDLE_IDENTIFIER' $P | grep -v watchkitapp | head -1 | sed 's/.*= *//; s/;//')
