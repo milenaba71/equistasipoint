@@ -361,7 +361,7 @@
     return rows;
   }
   function summary(r, view, rows) {
-    const out = []; const sd = (s) => (s === 'L' ? T('sinistro') : T('destro'));
+    const out = []; let fem = false; const sd = (s) => (s === 'L' ? (fem ? T('sinistra') : T('sinistro')) : (fem ? T('destra') : T('destro')));
     const worse = (fl) => (fl.includes('r') ? 'r' : fl.includes('y') ? 'y' : 'g');
     // asimmetria dell'appoggio
     if (isFinite(r.L.stance) && isFinite(r.R.stance) && Math.abs(r.L.stance - r.R.stance) >= 4) {
@@ -382,6 +382,7 @@
         if (msg) out.push({ fl: f, t: msg });
         return;
       }
+      fem = /^(hip|ank)/.test(x.key);
       ['L', 'R'].forEach((s, i) => {
         const fl = x.fl[i]; if (fl !== 'y' && fl !== 'r') return; const v = x.fmtv(s === 'L' ? x.L : x.R); const val = s === 'L' ? x.L : x.R;
         const msg = {
@@ -421,6 +422,114 @@
     if (first) { const ch = line(first, entry); out.push(T('Rispetto alla prima prova del {d} ({c}): ', { d: dateStr(first.t), c: entry.cond === 'con' ? T('con Equistasi') : T('senza Equistasi') }) + (ch.length ? ch.join(' · ') : T('valori simili'))); }
     return out;
   }
+  /* ───────── interpretazione biomeccanica: schemi riconosciuti dai numeri (regole fisse) ─────────
+     Per ogni schema: i dati che lo sostengono, il significato meccanico e cosa verificare. Sono ipotesi per il professionista, non diagnosi. */
+  function patterns(r, view) {
+    const P = []; const add = (fl, title, ev, mean, check) => P.push({ fl, title, ev, mean, check });
+    const M = { L: T('sinistro'), R: T('destro') }; const F = { L: T('sinistra'), R: T('destra') }; const O = { L: 'R', R: 'L' };
+    const ok = isFinite; const d1 = (v) => fmt(v, 1) + '°'; const p0 = (v) => Math.round(v) + '%';
+    let stAsym = false;
+    if (ok(r.L.stance) && ok(r.R.stance) && Math.abs(r.L.stance - r.R.stance) >= 4) {
+      stAsym = true; const s = r.L.stance < r.R.stance ? 'L' : 'R'; const o = O[s];
+      add(Math.abs(r.L.stance - r.R.stance) >= 8 ? 'r' : 'y', T('Asimmetria del carico: appoggio più breve a {sf}', { sf: F[s] }),
+        T('Appoggio {a} a {sf} contro {b} a {of}; simmetria dell’appoggio {y}.', { a: p0(r[s].stance), b: p0(r[o].stance), sf: F[s], of: F[o], y: p0(r.symStance) }),
+        T('L’arto {s} resta in carico meno tempo e l’arto {o} compensa con un appoggio più lungo: schema di evitamento del carico (tipo antalgico). È il quadro tipico di dolore, instabilità o debolezza dell’arto {s}.', { s: M[s], o: M[o] }),
+        T('Dolore in carico, forza e stabilità dell’arto {s}; eventuale differenza di lunghezza degli arti.', { s: M[s] }));
+    }
+    const slow = (ok(r.cadence) && r.cadence < 95) || (r.metric && ok(r.speed) && r.speed < 1);
+    if (ok(r.ds) && r.ds > 26) {
+      add(slow || r.ds > 32 ? 'r' : 'y', T('Cammino prudente (strategia di stabilizzazione)'),
+        T('Doppio appoggio {d} (rif. ≈ 20%), cadenza {c} passi/min', { d: p0(r.ds), c: ok(r.cadence) ? Math.round(r.cadence) : '–' }) + (r.metric && ok(r.speed) ? ', ' + T('velocità') + ' ' + fmt(r.speed, 2) + ' m/s.' : '.'),
+        T('Aumenta il tempo con entrambi i piedi a terra: il cammino privilegia la stabilità rispetto alla progressione. Quadro tipico di ridotto controllo dell’equilibrio, paura di cadere o deficit sensoriale e propriocettivo.'),
+        T('Equilibrio statico e dinamico, storia di cadute, sensibilità plantare e vista.'));
+    }
+    if (!stAsym && ok(r.symStep) && r.symStep < 90) {
+      add('y', T('Ritmo del passo asimmetrico'), T('Tempo del passo {a} s a sinistra e {b} s a destra (simmetria {y}).', { a: fmt(r.L.step, 2), b: fmt(r.R.step, 2), y: p0(r.symStep) }),
+        T('I due passi non hanno la stessa durata anche se le percentuali di appoggio sono simili: un passo è più esitante dell’altro, oppure il cammino è variabile da un ciclo all’altro.'),
+        T('Ripetere la prova: con pochi passi il dato è sensibile al singolo passo.'));
+    }
+    if (view !== 'lato') {
+      ['L', 'R'].forEach((s) => {
+        const dr = r[s].drop; const ln = r[s].lean; const hasD = ok(dr) && dr > 5; const hasL = ok(ln) && ln > 5;
+        if (hasD || hasL) {
+          const ev = [hasD || ok(dr) ? T('caduta del bacino {v} (rif. < 5°)', { v: d1(dr) }) : '', ok(ln) ? T('inclinazione del tronco {v} (rif. < 5°)', { v: d1(ln) }) : ''].filter(Boolean).join(', ');
+          add((hasD && dr > 8) || (hasL && ln > 8) ? 'r' : 'y',
+            hasD && hasL ? T('Bacino che cade e tronco che compensa nell’appoggio {s}', { s: M[s] }) : hasD ? T('Caduta del bacino nell’appoggio {s} (tipo Trendelenburg)', { s: M[s] }) : T('Tronco inclinato verso l’arto {s} in appoggio (tipo Duchenne)', { s: M[s] }),
+            T('Nel singolo appoggio {s}: ', { s: M[s] }) + ev + '.',
+            hasD && hasL ? T('Il bacino scende dal lato in oscillazione e il tronco si sposta sopra l’arto in carico: schema tipo Trendelenburg con compenso del tronco (Duchenne). Gli abduttori dell’anca {sf} (medio gluteo) non stabilizzano a sufficienza il bacino sul piano frontale.', { sf: F[s] })
+              : hasD ? T('Il bacino scende dal lato in oscillazione: gli abduttori dell’anca {sf} (medio gluteo) non tengono il bacino orizzontale. Schema tipo Trendelenburg non compensato dal tronco.', { sf: F[s] })
+                : T('Il tronco si sposta sopra l’anca in carico: così si accorcia il braccio di leva del peso e cala il lavoro richiesto agli abduttori. Compenso tipico di debolezza degli abduttori o di dolore all’anca {sf}.', { sf: F[s] }),
+            T('Forza degli abduttori dell’anca {sf} (test di Trendelenburg), dolore e mobilità dell’anca.', { sf: F[s] }));
+        }
+        const kn = r[s].knee;
+        if (ok(kn) && Math.abs(kn) > 8) {
+          if (kn > 0) add(kn > 12 ? 'r' : 'y', T('Valgo dinamico del ginocchio {s}', { s: M[s] }), T('Deviazione di {v} verso l’interno nella risposta al carico (rif. < 8°).', { v: d1(kn) }),
+            T('All’inizio dell’appoggio il ginocchio si sposta all’interno della linea anca-caviglia: controllo insufficiente dell’anca (abduttori e rotatori esterni) e/o cedimento del piede in pronazione. Aumenta il carico sul compartimento laterale e sulla femoro-rotulea. Misura in 2D: una rotazione dell’arto può accentuarla.'),
+            T('Controllo dell’anca in appoggio su una gamba (squat monopodalico), appoggio del piede.'));
+          else add(kn < -12 ? 'r' : 'y', T('Varo del ginocchio {s} in appoggio', { s: M[s] }), T('Deviazione di {v} verso l’esterno nella risposta al carico (rif. < 8°).', { v: d1(-kn) }),
+            T('Il ginocchio resta all’esterno della linea anca-caviglia: il carico si concentra sul compartimento mediale. Se compare bruscamente all’inizio dell’appoggio si parla di spinta in varo (varus thrust). Misura in 2D: una rotazione dell’arto può accentuarla.'),
+            T('Allineamento statico dell’arto, lassità laterale, dolore mediale del ginocchio.'));
+        }
+      });
+      if (r.widthCm && r.widthCm > 18) add('y', T('Base di appoggio allargata'), T('Larghezza del passo ≈ {v} cm (rif. 5–13 cm).', { v: Math.round(r.widthCm) }),
+        T('Allargare la base aumenta la stabilità sul piano frontale: è una strategia di compenso per un equilibrio laterale incerto.'), T('Equilibrio e coordinazione.'));
+    } else {
+      const lenU = r.metric ? ' m' : ' ' + T('gambe');
+      if (r.metric && ok(r.speed) && r.speed < 1) {
+        const avg = (r.L.stepLen + r.R.stepLen) / 2; const short = ok(avg) && avg < 0.55; const lowC = ok(r.cadence) && r.cadence < 95;
+        add(r.speed < 0.8 ? 'r' : 'y', T('Velocità del cammino ridotta'),
+          T('Velocità {v} m/s (rif. ≥ 1,0), passo medio {l} m, cadenza {c} passi/min.', { v: fmt(r.speed, 2), l: ok(avg) ? fmt(avg, 2) : '–', c: ok(r.cadence) ? Math.round(r.cadence) : '–' }),
+          T('La velocità è l’indice globale della funzione del cammino.') + ' ' + (short && lowC ? T('Qui è ridotta sia per i passi corti sia per la cadenza bassa.') : short ? T('Qui la riduzione dipende soprattutto dai passi corti: la cadenza è conservata.') : lowC ? T('Qui la riduzione dipende soprattutto dalla cadenza bassa: la lunghezza del passo è conservata.') : '') + (r.speed < 0.8 ? ' ' + T('Sotto 0,8 m/s il cammino fuori casa è in genere limitato.') : ''),
+          T('Forza di spinta, resistenza allo sforzo, equilibrio.'));
+      }
+      if (ok(r.symLen) && r.symLen < 90 && ok(r.L.stepLen) && ok(r.R.stepLen)) {
+        const s = r.L.stepLen < r.R.stepLen ? 'L' : 'R'; const o = O[s];
+        add(r.symLen < 80 ? 'r' : 'y', T('Passo {s} più corto', { s: M[s] }), T('Passo {a} a {sf} e {b} a {of} (simmetria {y}).', { a: fmt(r[s].stepLen, 2) + lenU, b: fmt(r[o].stepLen, 2) + lenU, sf: F[s], of: F[o], y: p0(r.symLen) }),
+          T('La lunghezza del passo {s} dipende da quanto l’arto {o}, che è in appoggio, lascia avanzare il corpo. Un passo {s} corto indica in genere poca estensione dell’anca o poca spinta dell’arto {o}, oppure un appoggio breve su quell’arto.', { s: M[s], o: M[o] }),
+          T('Estensione dell’anca e spinta della caviglia dell’arto {o}.', { o: M[o] }));
+      }
+      ['L', 'R'].forEach((s) => {
+        const j = (o, k) => (o && ok(o[k]) ? o[k] : NaN); const A = { s: M[s], sf: F[s] };
+        const kMax = j(r[s].knee, 'max'); const kMin = j(r[s].knee, 'min'); const hMax = j(r[s].hip, 'max'); const hMin = j(r[s].hip, 'min'); const aMax = j(r[s].ankle, 'max'); const aMin = j(r[s].ankle, 'min');
+        if (kMax < 50) add(kMax < 45 ? 'r' : 'y', T('Ginocchio {s} rigido in oscillazione (stiff-knee)', A), T('Flessione massima {v} (rif. ≈ 60°).', { v: d1(kMax) }),
+          T('Il ginocchio si piega poco in oscillazione e il piede passa più vicino al suolo. Compensi frequenti: circonduzione dell’anca, sollevamento del bacino, spinta sulla punta dell’altro piede. Cause tipiche: attività eccessiva del retto femorale, spinta ridotta della caviglia in pre-oscillazione, velocità bassa.'),
+          T('Tensione o spasticità del retto femorale, spinta della caviglia, compensi visibili nel video di fronte.'));
+        if (kMin > 12) add(kMin > 18 ? 'r' : 'y', T('Ginocchio {s} flesso in appoggio', A), T('Estensione massima in appoggio {v} (rif. 0–5°).', { v: d1(kMin) }),
+          T('Il ginocchio non raggiunge l’estensione in carico: il quadricipite lavora per tutto l’appoggio e il passo opposto si accorcia. Compatibile con retrazione dei flessori, deficit di estensione o, se bilaterale, atteggiamento in flessione (crouch).'),
+          T('Estensione passiva del ginocchio, lunghezza degli ischiocrurali, estensione dell’anca.'));
+        if (kMin < -6) add(kMin < -10 ? 'r' : 'y', T('Iperestensione del ginocchio {s} in appoggio (recurvato)', A), T('Angolo minimo {v} (rif. 0–5°).', { v: d1(kMin) }),
+          T('Il ginocchio va oltre l’estensione in carico e si blocca passivamente. Compatibile con deficit del quadricipite, poca flessione dorsale della caviglia o ipertono dei flessori plantari che frena l’avanzamento della tibia.'),
+          T('Forza del quadricipite, flessione dorsale passiva, tono del tricipite surale.'));
+        if (hMin > -3) add(hMin > 2 ? 'r' : 'y', T('Estensione dell’anca {sf} ridotta a fine appoggio', A), T('Estensione massima {v} (rif. ≈ −10°).', { v: d1(hMin) }),
+          T('L’anca non va in estensione nell’appoggio terminale: il corpo avanza meno sull’arto in carico e il passo opposto si accorcia. Compatibile con retrazione dei flessori dell’anca, tronco flesso in avanti o spinta ridotta.'),
+          T('Test di Thomas, postura del tronco e del bacino.'));
+        if (hMax < 20) add(hMax < 15 ? 'r' : 'y', T('Flessione dell’anca {sf} ridotta in oscillazione', A), T('Flessione massima {v} (rif. ≈ 30°).', { v: d1(hMax) }),
+          T('L’arto avanza poco in oscillazione e il passo si accorcia. Compatibile con debolezza dei flessori dell’anca, rigidità o cammino molto lento.'), T('Forza dei flessori dell’anca, mobilità dell’anca.'));
+        if (aMin > -8) add(aMin > -4 ? 'r' : 'y', T('Spinta della caviglia {sf} ridotta (push-off)', A), T('Flessione plantare massima {v} (rif. ≈ −20°).', { v: d1(aMin) }),
+          T('In pre-oscillazione la caviglia genera la spinta che fa avanzare l’arto. Con poca flessione plantare la propulsione cala: diminuiscono la velocità e la lunghezza del passo opposto, e il ginocchio si piega meno in oscillazione.'),
+          T('Forza del tricipite surale (sollevamento sulla punta di un piede), dolore all’avampiede o al tendine d’Achille.'));
+        if (aMax < 4) add(aMax < 0 ? 'r' : 'y', T('Flessione dorsale della caviglia {sf} ridotta', A), T('Flessione dorsale massima {v} (rif. ≈ 10°).', { v: d1(aMax) }),
+          T('In appoggio la tibia avanza poco sopra il piede e il tallone tende a staccarsi presto; in oscillazione la punta resta bassa e aumenta il rischio di inciampo.'),
+          T('Flessione dorsale passiva (retrazione del tricipite), forza dei flessori dorsali (tibiale anteriore).'));
+      });
+    }
+    const notes = [];
+    if (r.nSteps < 8) notes.push(T('Pochi contatti del piede ({n}): le medie sono sensibili al singolo passo.', { n: r.nSteps }));
+    notes.push(view === 'lato' ? T('La gamba più lontana dal telefono è in parte nascosta: i suoi angoli sono meno precisi.') : T('Gli angoli sul piano frontale sono misurati in 2D: una rotazione dell’arto li può alterare.'));
+    notes.push(T('Angoli da video senza marcatori: precisione indicativa di circa ±5°.'));
+    P.sort((a, b) => (a.fl === b.fl ? 0 : a.fl === 'r' ? -1 : 1));
+    const main = P.filter((x) => x.fl === 'r'); const lead = (main.length ? main : P).slice(0, 3).map((x) => x.title);
+    const synth = P.length ? T('Quadro principale: ') + lead.join('; ') + '.' : T('Nessuno schema di alterazione riconosciuto: tempi, simmetria e angoli misurati rientrano nei riferimenti.');
+    return { list: P, notes, synth };
+  }
+  function patternsHtml(entry) {
+    const p = patterns(entry.r, entry.view);
+    return '<div class="gt-read gt-interp"><h3>' + T('Interpretazione biomeccanica') + '</h3><p class="small muted" style="margin:0 0 8px">' + T('Per il professionista: schemi riconosciuti dai numeri, con il significato meccanico e cosa verificare. Sono ipotesi, non una diagnosi.') + '</p>' +
+      '<p class="gt-synth">' + esc(p.synth) + '</p>' +
+      p.list.map((x) => '<div class="gt-pat"><h4><span aria-hidden="true">' + DOT[x.fl] + '</span> ' + esc(x.title) + '</h4><p><b>' + T('Dati') + ':</b> ' + esc(x.ev) + '</p><p><b>' + T('Significato') + ':</b> ' + esc(x.mean) + '</p><p><b>' + T('Da verificare') + ':</b> ' + esc(x.check) + '</p></div>').join('') +
+      '<p class="small muted" style="margin:8px 0 0"><b>' + T('Affidabilità della misura') + ':</b> ' + p.notes.map(esc).join(' ') + '</p></div>';
+  }
+
   function readingHtml(entry) {
     const rows = evaluate(entry.r, entry.view); const sum = summary(entry.r, entry.view, rows); const cmp = comparisons(entry);
     return '<div class="card gt-read"><h3>' + T('Lettura dei risultati') + '</h3><ul class="gt-sum">' + sum.map((x) => '<li><span aria-hidden="true">' + DOT[x.fl] + '</span> ' + esc(x.t) + '</li>').join('') + '</ul>' +
@@ -456,6 +565,21 @@
     font(12, true); ink('#29235C'); doc.text(plain(T('Lettura dei risultati')), M, y + 4); y += 8;
     sum.forEach((x) => { font(10, false); const t = doc.splitTextToSize(plain(x.t), CW - 8); need(t.length * 4.6 + 2); doc.setFillColor(...rgb(FL[x.fl])); doc.circle(M + 2, y + 1.6, 1.6, 'F'); ink('#161A33'); doc.text(t, M + 6, y + 3); y += t.length * 4.6 + 1.5; });
     if (cmp.length) { y += 2; font(11, true); ink('#29235C'); need(10); doc.text(plain(T('Confronti')), M, y + 4); y += 8; cmp.forEach((c) => { font(10, false); ink('#161A33'); const t = doc.splitTextToSize(plain(c), CW - 4); need(t.length * 4.6); doc.text(t, M + 2, y + 3); y += t.length * 4.6 + 1; }); }
+    // interpretazione biomeccanica
+    const pat = patterns(r, entry.view);
+    y += 3; need(22); font(12, true); ink('#29235C'); doc.text(plain(T('Interpretazione biomeccanica')), M, y + 4); y += 7;
+    font(8.5, false); ink('#5D6480'); { const t = doc.splitTextToSize(plain(T('Per il professionista: schemi riconosciuti dai numeri, con il significato meccanico e cosa verificare. Sono ipotesi, non una diagnosi.')), CW); doc.text(t, M, y + 3); y += t.length * 4 + 2; }
+    font(10, true); ink('#161A33'); { const t = doc.splitTextToSize(plain(pat.synth), CW); need(t.length * 4.6 + 2); doc.text(t, M, y + 3); y += t.length * 4.6 + 2; }
+    pat.list.forEach((x) => {
+      font(10, true); const tt = doc.splitTextToSize(plain(x.title), CW - 8); need(tt.length * 4.6 + 14);
+      doc.setFillColor(...rgb(FL[x.fl])); doc.circle(M + 2, y + 2.6, 1.6, 'F'); ink('#29235C'); doc.text(tt, M + 6, y + 4); y += tt.length * 4.6 + 1.5;
+      [[T('Dati'), x.ev], [T('Significato'), x.mean], [T('Da verificare'), x.check]].forEach(([k, v]) => {
+        font(9.5, false); const t = doc.splitTextToSize(plain(k + ': ' + v), CW - 8); need(t.length * 4.3 + 1); ink('#161A33'); doc.text(t, M + 6, y + 3);
+        ink('#29235C'); doc.text(plain(k) + ':', M + 6, y + 3); y += t.length * 4.3 + 0.8;
+      });
+      y += 2.5;
+    });
+    font(8.5, false); ink('#5D6480'); { const t = doc.splitTextToSize(plain(T('Affidabilità della misura') + ': ' + pat.notes.join(' ')), CW); need(t.length * 4 + 2); doc.text(t, M, y + 3); y += t.length * 4 + 1; }
     // tabella
     y += 4; need(14); font(12, true); ink('#29235C'); doc.text(plain(T('Valori misurati')), M, y + 4); y += 7;
     const cx = [M, M + 76, M + 112, M + 148];
@@ -657,7 +781,7 @@
       '<div class="gt-legend">' + ph.map((n, p) => '<button type="button" data-ph="' + p + '"><i style="background:' + PH_COL[p] + '"></i>' + (p + 1) + '. ' + n + '</button>').join('') + '</div>' +
       '<p class="small muted">' + T('Tocca una fase per fermare il video in quel momento (piede sinistro, primo ciclo).') + '</p>' +
       (side ? metricsSideHtml(r) : metricsHtml(r)) +
-      '<div class="gt-charts">' + charts + '</div>' + (entry ? readingHtml(entry).replace('<div class="card gt-read">', '<div class="gt-read">') : '') +
+      '<div class="gt-charts">' + charts + '</div>' + (entry ? readingHtml(entry).replace('<div class="card gt-read">', '<div class="gt-read">') + patternsHtml(entry) : '') +
       '<p class="small muted">' + T('Linee verdi: lato sinistro · blu: lato destro · gialle: bacino e spalle. La riga tratteggiata è l’orizzontale del bacino.') + '</p>' +
       '<div class="gt-pdf"><button type="button" class="btn primary" id="gt-pdf">📄 ' + T('Report PDF') + '</button><span id="gt-pdf-msg" class="small muted"></span></div>' +
       '<p class="small muted">' + ESTIMATE() + '. ' + (side ? T('Visto di lato, la gamba più lontana dal telefono è in parte nascosta: i suoi valori sono meno precisi.') : T('Velocità, lunghezza del passo e angoli di anca, ginocchio e caviglia si misurano con il video di lato.')) + '</p></div>';
@@ -745,5 +869,5 @@
   }
 
   window.addEventListener('hashchange', cleanup);
-  window.EqGait = { render, reportGroups, _makePdf: makePdf, _evaluate: evaluate, _analyse: analyse, _analyseSide: analyseSide, _show: showResult };
+  window.EqGait = { render, reportGroups, _makePdf: makePdf, _evaluate: evaluate, _patterns: patterns, _analyse: analyse, _analyseSide: analyseSide, _show: showResult };
 })();
