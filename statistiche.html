@@ -70,6 +70,22 @@
       '<h2 style="color:var(--navy);font-size:1.15rem;margin:28px 0 0">Persone che usano l\'app con un dispositivo abbinato</h2>';
   }
 
+  var SECN = { home: 'Home', mappa: 'Mappa del dolore e trigger point', metameri: 'Dermatomeri e metameri', protocolli: 'Protocolli', video: 'Video', promemoria: 'Promemoria',
+    novita: 'Novità', sedia: 'Test della sedia', test: 'Misura (elenco dei test)', 'test/equilibrio': 'Test di equilibrio', 'test/ortostasi': 'Test di ortostasi', 'test/salto': 'Test del salto', 'test/sprint': 'Test dello sprint',
+    postura: 'Postura', 'postura/stabilita': 'Postura · stabilità', 'postura/tronco': 'Postura · tronco', 'postura/testa': 'Postura · testa', 'postura/schiena': 'Postura · schiena',
+    'postura/foto': 'Postura · foto', 'postura/fotoconfronto': 'Postura · confronto foto', 'postura/risultato': 'Postura · risultato', 'postura/confronto': 'Postura · confronto', 'postura/progressi': 'Postura · progressi', 'postura/report': 'Report PDF',
+    pro: 'Strumenti professionista (elenco)', 'pro/movimento': 'Pro · analisi del movimento', 'pro/gonio': 'Pro · analisi del movimento', 'pro/andatura': 'Pro · analisi del cammino', 'pro/scolio': 'Pro · scoliometro',
+    'pro/tug': 'Pro · Timed Up and Go', 'pro/cammino': 'Pro · cammino su 10 metri', 'pro/esercizi': 'Pro · programma di esercizi', 'pro/dolore': 'Dolore e uso del dispositivo', 'pro/protocolli': 'Pro · protocolli' };
+  function sectionsCard(cur, prev) {
+    var c = cur.sections || {}; var p = (prev && prev.sections) || {};
+    var keys = Object.keys(c).concat(Object.keys(p).filter(function (k) { return !(k in c); }));
+    if (!keys.length) return '<div class="card"><h3 style="margin:0 0 6px">Strumenti usati</h3><p class="muted" style="margin:0">Ancora nessun dato: il conteggio parte da oggi.</p></div>';
+    keys.sort(function (a, b) { return (c[b] || 0) - (c[a] || 0); });
+    var max = Math.max.apply(null, keys.map(function (k) { return c[k] || 0; }).concat([1]));
+    return '<div class="card"><h3 style="margin:0 0 6px">Strumenti usati questa settimana</h3><p class="muted" style="margin:0 0 8px">Persone diverse (con dispositivo) che hanno aperto ogni sezione.</p><table><thead><tr><th>Sezione</th><th>Persone</th><th>Sett. scorsa</th></tr></thead><tbody>' +
+      keys.map(function (k) { return '<tr><td>' + esc(SECN[k] || k) + '</td><td class="n">' + (c[k] || 0) + '<div class="bar" style="width:' + Math.round((c[k] || 0) / max * 100) + '%"></div></td><td class="n">' + (p[k] || 0) + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+
   function show(weeks) {
     var max = Math.max.apply(null, weeks.map(function (w) { return w.people; }).concat([1]));
     var cur = weeks[0], prev = weeks[1] || { people: 0 };
@@ -93,6 +109,7 @@
       if (!d || !d.ok) { msg.className = 'err'; msg.textContent = 'Codice non valido.'; put('eq-stats-code', ''); return; }
       put('eq-stats-code', code); msg.textContent = 'Aggiornato alle ' + new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       show(d.weeks || []);
+      document.getElementById('out').insertAdjacentHTML('beforeend', sectionsCard((d.weeks || [])[0] || {}, (d.weeks || [])[1]));
       try {
         var r2 = await fetch(URL_DEV, { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }), cache: 'no-store' });
         var d2 = await r2.json(); if (d2 && d2.ok) showDev(d2);

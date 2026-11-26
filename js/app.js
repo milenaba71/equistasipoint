@@ -898,6 +898,7 @@
     app.classList.add(depth >= lastDepth ? 'pg-fwd' : 'pg-back');
     lastDepth = depth;
     updateTabs(page);
+    if (window.EqMarkSection) window.EqMarkSection(h);
     window.translateStatic(app); // aria-label e testi alternativi in inglese
     window.scrollTo(0, 0);
   }
@@ -1097,6 +1098,28 @@
     }).then((r) => { if (r.ok) store.set('tp-ping', day + '|' + kind); }).catch(() => { /* senza rete: si riprova alla prossima apertura */ });
   }
   setTimeout(dailyPing, 3000);
+  // Sezioni usate (anonime): una volta al giorno per sezione, solo il nome della sezione — mai risultati o misure
+  const SECTION_OF = { area: 'mappa', m: 'mappa', metameri: 'metameri', protocollo: 'protocolli', pdf: 'protocolli', video: 'video',
+    promemoria: 'promemoria', novita: 'novita', sedia: 'sedia', beta: 'sedia' };
+  function markSection(h) {
+    if (!(cfg.supabaseUrl && cfg.pointKey) || !store.get('tp-serial', '')) return; // solo chi ha un dispositivo abbinato
+    const [page, arg] = h.split('/');
+    let sec = '';
+    if (!page) sec = 'home';
+    else if (page === 'test' || page === 'pro' || page === 'postura') sec = page + (arg ? '/' + arg : '');
+    else sec = SECTION_OF[page] || '';
+    if (!sec) return;
+    const d = new Date(); const day = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    let log = {}; try { log = JSON.parse(store.get('tp-sec', '{}')) || {}; } catch (e) { log = {}; }
+    if (log.day !== day) log = { day, list: [] };
+    if (log.list.includes(sec)) return;
+    const C = window.Capacitor;
+    fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/app_section', {
+      method: 'POST', headers: { apikey: cfg.pointKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_phone: phoneId(), p_section: sec, p_kind: store.get('tp-kind', ''), p_platform: C && C.getPlatform ? C.getPlatform() : 'web' }), cache: 'no-store',
+    }).then((r) => { if (r.ok) { log.list.push(sec); store.set('tp-sec', JSON.stringify(log)); } }).catch(() => { /* senza rete: pazienza */ });
+  }
+  window.EqMarkSection = markSection;
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') dailyPing(); });
   // esito dell'ultima verifica: { ok, reason: invalid | noaccess | ended | other | limit }
   let lastCheck = { ok: false };
