@@ -328,6 +328,199 @@
       '<div class="small muted">' + T('0–100% del ciclo · verde sinistro, blu destro · tratteggio: fine dell’appoggio') + '</div></figure>';
   }
 
+  /* ───────── lettura dei risultati: riferimenti, colori e riassunto (regole fisse, niente IA) ─────────
+     Riferimenti indicativi per un cammino adulto tipico. g = nella norma, y = da osservare, r = lontano dal riferimento. */
+  const band = (v, g, y) => (!isFinite(v) ? '' : (v >= g[0] && v <= g[1]) ? 'g' : (v >= y[0] && v <= y[1]) ? 'y' : 'r');
+  const DOT = { g: '🟢', y: '🟡', r: '🔴', '': '⚪' };
+  function evaluate(r, view) {
+    const rows = []; const add = (key, label, L, R, ref, fl, fmtv, both) => rows.push({ key, label, L, R, ref, fl, fmtv, both: !!both });
+    const p0 = (v) => (isFinite(v) ? fmt(v, 0) + '%' : '–'); const d1 = (v) => (isFinite(v) ? fmt(v, 1) + '°' : '–');
+    const st = (v) => band(v, [57, 65], [53, 69]);
+    add('stance', T('Fase di appoggio'), r.L.stance, r.R.stance, '≈ 60%', [st(r.L.stance), st(r.R.stance)], p0);
+    add('ds', T('Doppio appoggio'), r.ds, null, '≈ 20%', [band(r.ds, [16, 26], [12, 32])], p0, true);
+    add('cad', T('Cadenza'), r.cadence, null, '95–125 ' + T('passi/min'), [band(r.cadence, [95, 125], [80, 135])], (v) => (isFinite(v) ? Math.round(v) + ' ' + T('passi/min') : '–'), true);
+    add('symSt', T('Simmetria dell’appoggio'), r.symStance, null, '≥ 95%', [band(r.symStance, [95, 100], [90, 100])], p0, true);
+    add('symStep', T('Simmetria del tempo del passo'), r.symStep, null, '≥ 95%', [band(r.symStep, [95, 100], [90, 100])], p0, true);
+    if (view === 'lato') {
+      if (r.metric) add('speed', T('Velocità del cammino'), r.speed, null, '≥ 1,0 m/s', [band(r.speed, [1.0, 2.2], [0.8, 2.5])], (v) => (isFinite(v) ? fmt(v, 2) + ' m/s' : '–'), true);
+      if (r.metric) add('len', T('Lunghezza del passo'), r.L.stepLen, r.R.stepLen, '0,55–0,80 m', [band(r.L.stepLen, [0.55, 0.85], [0.45, 0.95]), band(r.R.stepLen, [0.55, 0.85], [0.45, 0.95])], (v) => (isFinite(v) ? fmt(v, 2) + ' m' : '–'));
+      add('symLen', T('Simmetria della lunghezza del passo'), r.symLen, null, '≥ 95%', [band(r.symLen, [95, 100], [90, 100])], p0, true);
+      const j = (o, k) => (o && isFinite(o[k]) ? o[k] : NaN);
+      add('hipMax', T('Anca: flessione massima'), j(r.L.hip, 'max'), j(r.R.hip, 'max'), '25–40°', [band(j(r.L.hip, 'max'), [25, 40], [18, 48]), band(j(r.R.hip, 'max'), [25, 40], [18, 48])], d1);
+      add('hipMin', T('Anca: estensione'), j(r.L.hip, 'min'), j(r.R.hip, 'min'), '≤ −5°', [band(j(r.L.hip, 'min'), [-40, -5], [-40, 0]), band(j(r.R.hip, 'min'), [-40, -5], [-40, 0])], d1);
+      add('kneeMax', T('Ginocchio: flessione in oscillazione'), j(r.L.knee, 'max'), j(r.R.knee, 'max'), '55–70°', [band(j(r.L.knee, 'max'), [55, 72], [45, 78]), band(j(r.R.knee, 'max'), [55, 72], [45, 78])], d1);
+      add('kneeMin', T('Ginocchio: estensione in appoggio'), j(r.L.knee, 'min'), j(r.R.knee, 'min'), '0–8°', [band(j(r.L.knee, 'min'), [-5, 8], [-10, 15]), band(j(r.R.knee, 'min'), [-5, 8], [-10, 15])], d1);
+      add('ankMax', T('Caviglia: flessione dorsale'), j(r.L.ankle, 'max'), j(r.R.ankle, 'max'), '5–20°', [band(j(r.L.ankle, 'max'), [5, 25], [0, 30]), band(j(r.R.ankle, 'max'), [5, 25], [0, 30])], d1);
+      add('ankMin', T('Caviglia: flessione plantare'), j(r.L.ankle, 'min'), j(r.R.ankle, 'min'), '≤ −10°', [band(j(r.L.ankle, 'min'), [-40, -10], [-40, -5]), band(j(r.R.ankle, 'min'), [-40, -10], [-40, -5])], d1);
+    } else {
+      add('drop', T('Caduta del bacino dal lato opposto'), r.L.drop, r.R.drop, '< 5°', [band(r.L.drop, [-20, 5], [-20, 8]), band(r.R.drop, [-20, 5], [-20, 8])], d1);
+      add('lean', T('Inclinazione del tronco'), r.L.lean, r.R.lean, '< 5°', [band(r.L.lean, [-20, 5], [-20, 8]), band(r.R.lean, [-20, 5], [-20, 8])], d1);
+      const kv = (v) => (isFinite(v) ? Math.abs(v) : NaN);
+      add('knee', T('Ginocchio sul piano frontale'), r.L.knee, r.R.knee, '< 8°', [band(kv(r.L.knee), [0, 8], [0, 12]), band(kv(r.R.knee), [0, 8], [0, 12])], (v) => (isFinite(v) ? fmt(Math.abs(v), 1) + '° ' + (Math.abs(v) < 2 ? '' : v > 0 ? T('valgo') : T('varo')) : '–'));
+    }
+    return rows;
+  }
+  function summary(r, view, rows) {
+    const out = []; const sd = (s) => (s === 'L' ? T('sinistro') : T('destro'));
+    const worse = (fl) => (fl.includes('r') ? 'r' : fl.includes('y') ? 'y' : 'g');
+    // asimmetria dell'appoggio
+    if (isFinite(r.L.stance) && isFinite(r.R.stance) && Math.abs(r.L.stance - r.R.stance) >= 4) {
+      const longer = r.L.stance > r.R.stance ? 'L' : 'R';
+      out.push({ fl: Math.abs(r.L.stance - r.R.stance) >= 8 ? 'r' : 'y', t: T('L’appoggio sul piede {s} dura più dell’altro ({a}% contro {b}%): il carico tende a restare più a lungo su quel lato.', { s: sd(longer), a: Math.round(longer === 'L' ? r.L.stance : r.R.stance), b: Math.round(longer === 'L' ? r.R.stance : r.L.stance) }) });
+    }
+    rows.forEach((x) => {
+      const f = worse(x.fl.filter(Boolean)); if (f === 'g' || x.key === 'stance' || x.key === 'symSt') return;
+      if (x.both) {
+        const v = x.fmtv(x.L);
+        const msg = {
+          ds: x.L > 26 ? T('Il doppio appoggio è lungo ({v}): il passo è più prudente del solito.', { v }) : T('Il doppio appoggio è breve ({v}).', { v }),
+          cad: x.L < 95 ? T('La cadenza è bassa ({v}): passi lenti.', { v }) : T('La cadenza è alta ({v}): passi brevi e veloci.', { v }),
+          symStep: T('I tempi dei passi destro e sinistro sono diversi (simmetria {v}).', { v }),
+          speed: T('La velocità del cammino è ridotta ({v}).', { v }),
+          symLen: T('I passi destro e sinistro hanno lunghezze diverse (simmetria {v}).', { v }),
+        }[x.key];
+        if (msg) out.push({ fl: f, t: msg });
+        return;
+      }
+      ['L', 'R'].forEach((s, i) => {
+        const fl = x.fl[i]; if (fl !== 'y' && fl !== 'r') return; const v = x.fmtv(s === 'L' ? x.L : x.R); const val = s === 'L' ? x.L : x.R;
+        const msg = {
+          len: T('Il passo {s} è corto ({v}).', { s: sd(s), v }),
+          hipMax: val < 25 ? T('Anca {s}: flessione ridotta ({v}).', { s: sd(s), v }) : T('Anca {s}: flessione ampia ({v}).', { s: sd(s), v }),
+          hipMin: T('Anca {s}: poca estensione a fine appoggio ({v}).', { s: sd(s), v }),
+          kneeMax: val < 55 ? T('Ginocchio {s}: si piega poco in oscillazione ({v}): il piede può strisciare o il passo accorciarsi.', { s: sd(s), v }) : T('Ginocchio {s}: si piega molto in oscillazione ({v}).', { s: sd(s), v }),
+          kneeMin: T('Ginocchio {s}: non si distende del tutto in appoggio ({v}).', { s: sd(s), v }),
+          ankMax: T('Caviglia {s}: poca flessione dorsale ({v}).', { s: sd(s), v }),
+          ankMin: T('Caviglia {s}: poca spinta in flessione plantare a fine appoggio ({v}).', { s: sd(s), v }),
+          drop: T('Nel singolo appoggio {s} il bacino scende dal lato opposto di {v}.', { s: sd(s), v }),
+          lean: T('Nel singolo appoggio {s} il tronco si inclina di {v} verso quel lato.', { s: sd(s), v }),
+          knee: T('Ginocchio {s}: deviazione sul piano frontale all’inizio dell’appoggio ({v}).', { s: sd(s), v }),
+        }[x.key];
+        if (msg) out.push({ fl, t: msg });
+      });
+    });
+    if (!out.length) out.push({ fl: 'g', t: T('I parametri misurati sono vicini ai valori di riferimento di un cammino tipico.') });
+    return out.map((x) => ({ fl: x.fl, t: x.t.charAt(0).toUpperCase() + x.t.slice(1) }));
+  }
+  // confronto con la prova nell'altra condizione (senza/con Equistasi) e con la prima prova della stessa condizione
+  function comparisons(entry) {
+    const l = store.get(KEY, []).filter((x) => (x.view || 'fronte') === entry.view && x.t !== entry.t);
+    const out = [];
+    const keys = entry.view === 'lato'
+      ? [['symStance', T('simmetria dell’appoggio'), '%', 0], ['ds', T('doppio appoggio'), '%', 0], ['cadence', T('cadenza'), ' ' + T('passi/min'), 0], ['speed', T('velocità'), ' m/s', 2], ['symLen', T('simmetria della lunghezza del passo'), '%', 0]]
+      : [['symStance', T('simmetria dell’appoggio'), '%', 0], ['ds', T('doppio appoggio'), '%', 0], ['cadence', T('cadenza'), ' ' + T('passi/min'), 0], ['dropMax', T('caduta massima del bacino'), '°', 1]];
+    const val = (r, k) => (k === 'dropMax' ? Math.max(r.L.drop, r.R.drop) : k === 'speed' && !r.metric ? NaN : r[k]);
+    const line = (a, b, label) => keys.map(([k, name, u, d]) => { const x = val(a.r, k); const y = val(b.r, k); return isFinite(x) && isFinite(y) && Math.abs(x - y) >= (d ? 0.05 : 1) ? name + ' ' + fmt(x, d) + u + ' → ' + fmt(y, d) + u : ''; }).filter(Boolean);
+    const other = [...l].reverse().find((x) => x.cond !== entry.cond && Math.abs(x.t - entry.t) < 30 * 864e5);
+    if (other) {
+      const [a, b] = entry.cond === 'con' ? [other, entry] : [entry, other];
+      const ch = line(a, b);
+      out.push(T('Senza → con Equistasi ({d1} → {d2}): ', { d1: dateStr(a.t), d2: dateStr(b.t) }) + (ch.length ? ch.join(' · ') : T('valori simili')));
+    }
+    const first = l.find((x) => x.cond === entry.cond && x.t < entry.t);
+    if (first) { const ch = line(first, entry); out.push(T('Rispetto alla prima prova del {d} ({c}): ', { d: dateStr(first.t), c: entry.cond === 'con' ? T('con Equistasi') : T('senza Equistasi') }) + (ch.length ? ch.join(' · ') : T('valori simili'))); }
+    return out;
+  }
+  function readingHtml(entry) {
+    const rows = evaluate(entry.r, entry.view); const sum = summary(entry.r, entry.view, rows); const cmp = comparisons(entry);
+    return '<div class="card gt-read"><h3>' + T('Lettura dei risultati') + '</h3><ul class="gt-sum">' + sum.map((x) => '<li><span aria-hidden="true">' + DOT[x.fl] + '</span> ' + esc(x.t) + '</li>').join('') + '</ul>' +
+      (cmp.length ? '<h4>' + T('Confronti') + '</h4><ul class="gt-sum">' + cmp.map((x) => '<li>📈 ' + esc(x) + '</li>').join('') + '</ul>' : '') +
+      '<div class="pz-table-wrap"><table class="pz-table gt-table"><thead><tr><th></th><th>' + T('Sinistro') + '</th><th>' + T('Destro') + '</th></tr></thead><tbody>' +
+      rows.map((x) => '<tr><th>' + esc(x.label) + '<br><small class="muted">' + T('rif.') + ' ' + esc(x.ref) + '</small></th>' + (x.both ? '<td colspan="2">' + DOT[x.fl[0]] + ' ' + x.fmtv(x.L) + '</td>' : '<td>' + DOT[x.fl[0]] + ' ' + x.fmtv(x.L) + '</td><td>' + DOT[x.fl[1]] + ' ' + x.fmtv(x.R) + '</td>') + '</tr>').join('') +
+      '</tbody></table></div><p class="small muted" style="margin:6px 0 0">' + T('🟢 vicino al riferimento · 🟡 da osservare · 🔴 lontano dal riferimento. Riferimenti indicativi per un adulto: l’interpretazione spetta al professionista.') + '</p></div>';
+  }
+
+  /* ───────── report PDF dell'analisi del cammino ───────── */
+  async function makePdf(entry, snaps) {
+    const { jsPDF } = await window.EqReportPdf.load();
+    const logo = await fetch('img/logo.png').then((x) => x.blob()).then((b) => new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.onerror = () => ok(null); fr.readAsDataURL(b); })).catch(() => null);
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const W = 210, H = 297, M = 14, CW = W - 2 * M;
+    const rgb = (c) => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+    const font = (size, bold) => { doc.setFont('helvetica', bold ? 'bold' : 'normal'); doc.setFontSize(size); };
+    const ink = (c) => doc.setTextColor(...rgb(c));
+    const plain = (x) => String(x).replace(/<[^>]+>/g, '').replace(/[–—−]/g, '-').replace(/[«»]/g, '"').replace(/’/g, "'").replace(/≈/g, '~').replace(/≥/g, '>=').replace(/≤/g, '<=').replace(/→/g, '->').replace(/[🟢🟡🔴⚪📈]/gu, '');
+    const FL = { g: '#2FA36B', y: '#E0A419', r: '#C8372D', '': '#B8BCC8' };
+    const r = entry.r; const side = entry.view === 'lato';
+    let y = 0;
+    const head = () => { if (logo) doc.addImage(logo, 'PNG', M, 9, 34, 34 * 107 / 471); font(9, false); ink('#5D6480'); doc.text(plain(T('Analisi del cammino')) + ' · ' + dateStr(entry.t), W - M, 14, { align: 'right' }); y = 22; };
+    const need = (h) => { if (y + h > H - 22) { doc.addPage(); head(); } };
+    head();
+    doc.setFillColor(...rgb('#29235C')); doc.roundedRect(M, y, CW, 24, 4, 4, 'F');
+    font(16, true); ink('#FFFFFF'); doc.text(plain(T('Report dell’analisi del cammino')), M + 6, y + 10);
+    font(10, false); ink('#D9D7EE');
+    doc.text(plain((side ? T('Video di lato') : T('Video di fronte')) + ' · ' + (entry.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + ' · ' + dateStr(entry.t) + ' · ' + T('{n} contatti del piede', { n: r.nSteps })), M + 6, y + 17.5);
+    y += 30;
+    // riassunto
+    const rows = evaluate(r, entry.view); const sum = summary(r, entry.view, rows); const cmp = comparisons(entry);
+    font(12, true); ink('#29235C'); doc.text(plain(T('Lettura dei risultati')), M, y + 4); y += 8;
+    sum.forEach((x) => { font(10, false); const t = doc.splitTextToSize(plain(x.t), CW - 8); need(t.length * 4.6 + 2); doc.setFillColor(...rgb(FL[x.fl])); doc.circle(M + 2, y + 1.6, 1.6, 'F'); ink('#161A33'); doc.text(t, M + 6, y + 3); y += t.length * 4.6 + 1.5; });
+    if (cmp.length) { y += 2; font(11, true); ink('#29235C'); need(10); doc.text(plain(T('Confronti')), M, y + 4); y += 8; cmp.forEach((c) => { font(10, false); ink('#161A33'); const t = doc.splitTextToSize(plain(c), CW - 4); need(t.length * 4.6); doc.text(t, M + 2, y + 3); y += t.length * 4.6 + 1; }); }
+    // tabella
+    y += 4; need(14); font(12, true); ink('#29235C'); doc.text(plain(T('Valori misurati')), M, y + 4); y += 7;
+    const cx = [M, M + 76, M + 112, M + 148];
+    doc.setFillColor(...rgb('#EEF1FB')); doc.rect(M, y, CW, 7, 'F'); font(9, true); ink('#5D6480');
+    [T('Parametro'), T('Sinistro'), T('Destro'), T('Riferimento')].forEach((h, i) => doc.text(plain(h), cx[i] + 2, y + 4.8)); y += 7;
+    rows.forEach((x, k) => {
+      need(7); if (k % 2) { doc.setFillColor(...rgb('#F7F8FC')); doc.rect(M, y, CW, 7, 'F'); }
+      font(9.5, false); ink('#161A33'); doc.text(plain(x.label), cx[0] + 2, y + 4.8);
+      const cell = (v, fl, col) => { doc.setFillColor(...rgb(FL[fl || ''])); doc.circle(cx[col] + 3.5, y + 3.4, 1.5, 'F'); ink('#161A33'); doc.text(plain(x.fmtv(v)), cx[col] + 7, y + 4.8); };
+      if (x.both) cell(x.L, x.fl[0], 1); else { cell(x.L, x.fl[0], 1); cell(x.R, x.fl[1], 2); }
+      font(8.5, false); ink('#5D6480'); doc.text(plain(x.ref), cx[3] + 2, y + 4.8); y += 7;
+    });
+    // tempi
+    need(16); y += 4; font(9, false); ink('#5D6480');
+    doc.text(plain(T('Ciclo del passo sx/dx: {a} / {b} s · Oscillazione sx/dx: {c}% / {d}% · Tempo del passo sx/dx: {e} / {f} s', { a: fmt(r.L.cycle, 2), b: fmt(r.R.cycle, 2), c: Math.round(r.L.swing), d: Math.round(r.R.swing), e: fmt(r.L.step, 2), f: fmt(r.R.step, 2) })), M, y + 3); y += 6;
+    // fasi
+    if (entry.phases) {
+      need(30); y += 2; font(11, true); ink('#29235C'); doc.text(plain(T('Fasi del ciclo del passo')), M, y + 4); y += 7;
+      ['L', 'R'].forEach((s) => { const fr = entry.phases[s]; if (!fr) return; font(9, false); ink('#161A33'); doc.text(plain(s === 'L' ? T('Sinistro') : T('Destro')), M, y + 4); let x = M + 20; fr.forEach((f, p) => { const w = (CW - 20) * f; doc.setFillColor(...rgb(PH_COL[p])); doc.rect(x, y, Math.max(0.3, w), 5.5, 'F'); x += w; }); y += 8; });
+      font(7.5, false); ink('#5D6480'); const leg = PHASES().map((n, p) => (p + 1) + ' ' + n).join(' · '); doc.text(doc.splitTextToSize(plain(leg), CW), M, y + 2); y += 8;
+    }
+    // grafici
+    const charts = side ? [['hipL', 'hipR', T('Anca (piano sagittale)')], ['knL', 'knR', T('Ginocchio (piano sagittale)')], ['anL', 'anR', T('Caviglia (piano sagittale)')]]
+      : [['pelL', 'pelR', T('Caduta del bacino dal lato opposto')], ['knL', 'knR', T('Ginocchio sul piano frontale')]];
+    const C = entry.r.curves || entry.curves;
+    if (C) {
+      const cw = (CW - 6 * (charts.length - 1)) / charts.length; const ch = 34; need(ch + 14); y += 2;
+      charts.forEach(([a, b, label], i) => {
+        const x0 = M + i * (cw + 6); const A = C[a] || []; const B = C[b] || []; const vals = A.concat(B).filter((v) => v != null);
+        font(9, true); ink('#29235C'); doc.text(plain(label), x0, y + 3);
+        doc.setDrawColor(...rgb('#E1E5EF')); doc.setLineWidth(0.3); doc.rect(x0, y + 5, cw, ch);
+        if (!vals.length) return;
+        const lo = Math.min(0, ...vals) - 2; const hi = Math.max(0, ...vals) + 2; const yy = (v) => y + 5 + ch - (v - lo) / (hi - lo) * ch; const xx = (k) => x0 + k / 50 * cw;
+        doc.setDrawColor(...rgb('#B8BCC8')); doc.line(x0, yy(0), x0 + cw, yy(0));
+        [[A, '#2FBF71'], [B, '#3A8EE6']].forEach(([arr, col]) => { doc.setDrawColor(...rgb(col)); doc.setLineWidth(0.6); let prev = null; arr.forEach((v, k) => { if (v == null) { prev = null; return; } if (prev) doc.line(xx(prev[0]), yy(prev[1]), xx(k), yy(v)); prev = [k, v]; }); });
+        font(7, false); ink('#5D6480'); doc.text(fmt(hi, 0) + '°', x0 + 1, y + 8); doc.text(fmt(lo, 0) + '°', x0 + 1, y + 4 + ch);
+      });
+      y += ch + 8; font(7.5, false); ink('#5D6480'); doc.text(plain(T('0-100% del ciclo · verde sinistro, blu destro')), M, y); y += 4;
+    }
+    // immagini dal video
+    if (snaps && snaps.length) {
+      const iw = Math.min(56, (CW - 8) / snaps.length); need(10);
+      font(11, true); ink('#29235C'); doc.text(plain(T('Immagini dal video')), M, y + 5); y += 8;
+      let maxh = 0; snaps.forEach((sn, i) => { const ip = doc.getImageProperties(sn.img); const ih = iw * ip.height / ip.width; maxh = Math.max(maxh, ih); });
+      need(maxh + 8);
+      snaps.forEach((sn, i) => { const ip = doc.getImageProperties(sn.img); const ih = iw * ip.height / ip.width; doc.addImage(sn.img, 'JPEG', M + i * (iw + 4), y, iw, ih); font(8, false); ink('#5D6480'); doc.text(plain(sn.label), M + i * (iw + 4), y + ih + 4); });
+      y += maxh + 8;
+    }
+    const tot = doc.getNumberOfPages();
+    for (let n = 1; n <= tot; n++) {
+      doc.setPage(n); font(7.5, false); ink('#5D6480');
+      doc.text(doc.splitTextToSize(plain(ESTIMATE() + '. ' + T('Misure da un solo video, approssimate: non sostituiscono un laboratorio di analisi del movimento né la valutazione clinica. Riferimenti indicativi per un adulto.')), CW - 20), M, H - 12);
+      doc.text(n + ' / ' + tot, W - M, H - 12, { align: 'right' });
+    }
+    return doc.output('blob');
+  }
+  async function deliverPdf(entry, snaps, dl, msgEl) {
+    msgEl.className = 'small muted'; msgEl.textContent = T('Preparo il PDF…');
+    try {
+      const blob = await makePdf(entry, snaps);
+      const how = await window.EqReportPdf.deliver(blob, 'Equistasi-cammino-' + new Date(entry.t).toISOString().slice(0, 10) + '.pdf', dl, T('Analisi del cammino'));
+      msgEl.className = 'small ts-done'; msgEl.textContent = how === 'download' ? T('PDF scaricato: lo trovi nella cartella dei download.') : how === 'share' ? T('PDF pronto.') : '';
+    } catch (e) { msgEl.className = 'small err'; msgEl.textContent = T('Non è stato possibile creare il PDF. Riprova.'); }
+  }
+
   /* ───────── pagine ───────── */
   const head = (title, sub) => '<div class="detail-head"><div class="eyebrow">' + T('Professionista') + ' · <span class="beta-tag">' + T('in prova') + '</span></div><h1>' + title + '</h1>' + (sub ? '<p class="small muted" style="margin:6px 0 0">' + sub + '</p>' : '') + '</div>';
   const NOTE = () => '<p class="small muted" style="margin-top:14px">' + ESTIMATE() + '. ' + T('Le misure da un solo video sono approssimate: non sostituiscono un laboratorio di analisi del movimento.') + '</p>';
@@ -371,6 +564,10 @@
     }));
     app.querySelector('#gt-h').addEventListener('change', (e) => { prefs.h = e.target.value; savePrefs(); });
     app.querySelector('#gt-file').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) run(app, f); e.target.value = ''; });
+    app.querySelectorAll('[data-gt-pdf]').forEach((b) => b.addEventListener('click', () => {
+      const t = +b.dataset.gtPdf; const e = store.get(KEY, []).find((x) => x.t === t); const m = app.querySelector('[data-gt-msg="' + t + '"]');
+      if (e && m) deliverPdf(Object.assign({ view: 'fronte' }, e), [], false, m);
+    }));
   }
 
   async function run(app, file) {
@@ -391,9 +588,15 @@
             : T('Non ho trovato abbastanza passi: servono almeno 4–5 passi interi. Rifai il video partendo più lontano.');
         return;
       }
-      const saved = { t: Date.now(), view, cond: prefs.cond, r: Object.assign({}, out.res, { curves: undefined }) };
-      const all = store.get(KEY, []); all.push(saved); store.set(KEY, all.slice(-60));
-      showResult(app, file, rec, out, view);
+      const rd = (v) => (v == null || !isFinite(v) ? null : Math.round(v * 10) / 10);
+      const curves = {}; Object.keys(out.res.curves || {}).forEach((k) => { const c = out.res.curves[k]; curves[k] = Array.isArray(c) ? c.map(rd) : c; });
+      const phases = {}; ['L', 'R'].forEach((sd) => {
+        const cs = out.cycles.filter((c) => c.side === sd && c.bounds); if (!cs.length) return;
+        phases[sd] = PH_COL.map((_, ph) => Math.round(cs.reduce((a, c) => a + (c.bounds[ph + 1] - c.bounds[ph]) / (c.b - c.a), 0) / cs.length * 1000) / 1000);
+      });
+      const saved = { t: Date.now(), view, cond: prefs.cond, r: Object.assign({}, out.res, { curves: undefined }), curves, phases };
+      const all = store.get(KEY, []); all.push(saved); store.set(KEY, all.slice(-40));
+      showResult(app, file, rec, out, view, saved);
     } catch (e) {
       prog.hidden = true;
       err.textContent = e && e.message === 'video' ? T('Non riesco a leggere questo video. Prova a registrarlo di nuovo.') : T('Il riconoscimento del corpo non è disponibile su questo telefono o senza connessione. Riprova più tardi.');
@@ -435,7 +638,7 @@
       kpi(pct(r.symStance), T('simmetria dell’appoggio dx/sx')) + kpi(pct(r.symLen), T('simmetria della lunghezza del passo')) + '</div>';
   }
 
-  function showResult(app, file, rec, out, view) {
+  function showResult(app, file, rec, out, view, entry) {
     const r = out.res; const ph = PHASES(); const side = view === 'lato';
     const box = app.querySelector('#gt-out');
     const charts = side
@@ -454,8 +657,9 @@
       '<div class="gt-legend">' + ph.map((n, p) => '<button type="button" data-ph="' + p + '"><i style="background:' + PH_COL[p] + '"></i>' + (p + 1) + '. ' + n + '</button>').join('') + '</div>' +
       '<p class="small muted">' + T('Tocca una fase per fermare il video in quel momento (piede sinistro, primo ciclo).') + '</p>' +
       (side ? metricsSideHtml(r) : metricsHtml(r)) +
-      '<div class="gt-charts">' + charts + '</div>' +
+      '<div class="gt-charts">' + charts + '</div>' + (entry ? readingHtml(entry).replace('<div class="card gt-read">', '<div class="gt-read">') : '') +
       '<p class="small muted">' + T('Linee verdi: lato sinistro · blu: lato destro · gialle: bacino e spalle. La riga tratteggiata è l’orizzontale del bacino.') + '</p>' +
+      '<div class="gt-pdf"><button type="button" class="btn primary" id="gt-pdf">📄 ' + T('Report PDF') + '</button><span id="gt-pdf-msg" class="small muted"></span></div>' +
       '<p class="small muted">' + ESTIMATE() + '. ' + (side ? T('Visto di lato, la gamba più lontana dal telefono è in parte nascosta: i suoi valori sono meno precisi.') : T('Velocità, lunghezza del passo e angoli di anca, ginocchio e caviglia si misurano con il video di lato.')) + '</p></div>';
     const v = box.querySelector('#gt-v'); const c = box.querySelector('#gt-c'); const g = c.getContext('2d');
     v.src = URL.createObjectURL(file); v.playbackRate = 0.25;
@@ -479,6 +683,22 @@
       const cyc = out.cycles.find((x) => x.side === 'L') || out.cycles[0]; const p = +b.dataset.ph;
       v.pause(); v.currentTime = Math.round((cyc.bounds[p] + cyc.bounds[p + 1]) / 2) / FPS;
     }));
+    // immagini dal video per il PDF: contatto iniziale, appoggio medio e oscillazione media del piede sinistro
+    async function snaps() {
+      const cyc = out.cycles.find((x) => x.side === 'L') || out.cycles[0]; if (!cyc || !cyc.bounds) return [];
+      const k = Math.min(1, 480 / Math.max(rec.W, rec.H)); const cv = document.createElement('canvas'); cv.width = Math.round(rec.W * k); cv.height = Math.round(rec.H * k); const gg = cv.getContext('2d');
+      const sideName = cyc.side === 'L' ? T('sinistro') : T('destro');
+      const picks = [[cyc.bounds[0], T('Contatto iniziale')], [Math.round((cyc.bounds[2] + cyc.bounds[3]) / 2), T('Appoggio medio')], [Math.round((cyc.bounds[6] + cyc.bounds[7]) / 2), T('Oscillazione media')]];
+      const res = []; v.pause();
+      for (const [i0, label] of picks) {
+        const i = Math.max(0, Math.min(rec.frames.length - 1, Math.round(i0)));
+        await new Promise((ok) => { const done = () => { v.removeEventListener('seeked', done); ok(); }; v.addEventListener('seeked', done); setTimeout(done, 2000); v.currentTime = i / FPS; });
+        try { gg.drawImage(v, 0, 0, cv.width, cv.height); drawFrame(gg, rec.frames[i], k, out.cycles, i, out.J); res.push({ img: cv.toDataURL('image/jpeg', 0.82), label: label + ' (' + sideName + ')' }); } catch (e) { /* video non disegnabile */ }
+      }
+      return res;
+    }
+    if (entry) box.querySelector('#gt-pdf').onclick = async () => { const m = box.querySelector('#gt-pdf-msg'); m.textContent = T('Preparo il PDF…'); deliverPdf(entry, await snaps(), false, m); };
+    else box.querySelector('#gt-pdf').hidden = true;
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -489,7 +709,7 @@
       const r = x.r; const side = x.view === 'lato';
       return '<tr><th>' + dateStr(x.t) + ' · ' + (side ? '🚶 ' + T('di lato') : '🧍 ' + T('di fronte')) + '<br><small class="muted">' + (x.cond === 'con' ? T('con Equistasi') : T('senza Equistasi')) + '</small></th><td><small>' + T('Appoggio sx/dx {a}% / {b}%', { a: Math.round(r.L.stance), b: Math.round(r.R.stance) }) +
         '<br>' + T('Cadenza {c} passi/min · simmetria {s}%', { c: Math.round(r.cadence), s: Math.round(r.symStance) }) +
-        (side && r.metric && isFinite(r.speed) ? '<br>' + T('Velocità {v} m/s', { v: fmt(r.speed, 2) }) : '') + '</small></td></tr>';
+        (side && r.metric && isFinite(r.speed) ? '<br>' + T('Velocità {v} m/s', { v: fmt(r.speed, 2) }) : '') + '</small><br><button type="button" class="btn gt-hpdf" data-gt-pdf="' + x.t + '">📄 ' + T('Report PDF') + '</button> <span class="small muted" data-gt-msg="' + x.t + '"></span></td></tr>';
     }).join('') + '</tbody></table></div></div>';
   }
 
@@ -525,5 +745,5 @@
   }
 
   window.addEventListener('hashchange', cleanup);
-  window.EqGait = { render, reportGroups, _analyse: analyse, _analyseSide: analyseSide, _show: showResult };
+  window.EqGait = { render, reportGroups, _makePdf: makePdf, _evaluate: evaluate, _analyse: analyse, _analyseSide: analyseSide, _show: showResult };
 })();

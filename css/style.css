@@ -1280,3 +1280,10 @@ body.popup-open { overflow: hidden; }
 .gt-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
 .gt-chart { margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
 .gt-video.wide { max-width: 720px; }
+.gt-read { margin-top: 14px; }
+.gt-read h3, .gt-read h4 { margin: 10px 0 6px; }
+.gt-sum { list-style: none; padding: 0; margin: 0 0 10px; }
+.gt-sum li { padding: 6px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+.gt-sum li:last-child { border-bottom: 0; }
+.gt-pdf { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 4px; }
+.gt-hpdf { margin-top: 6px; padding: 4px 10px; font-size: .8rem; }
