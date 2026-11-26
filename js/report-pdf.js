@@ -224,6 +224,31 @@
       y += 4;
     });
 
+    // interpretazione biomeccanica (solo noleggio prof): per ogni strumento schemi, dati, significato, cosa verificare
+    if (data.interp && data.interp.length) {
+      const plain = (x) => String(x).replace(/[–—−]/g, '-').replace(/[«»]/g, '"').replace(/’/g, "'").replace(/≈/g, '~').replace(/≥/g, '>=').replace(/≤/g, '<=').replace(/→/g, '->');
+      const FL = { g: [47, 163, 107], y: [224, 164, 25], r: [200, 55, 45] };
+      section(T('Interpretazione biomeccanica'));
+      font(8.5, false); ink(MUTED); { const t = doc.splitTextToSize(plain(window.EqInterp.intro()), CW); need(t.length * 4 + 2); doc.text(t, M, y + 1); y += t.length * 4 + 3; }
+      data.interp.forEach((sc) => {
+        font(10, true); const tt = doc.splitTextToSize(plain(sc.title), CW); need(tt.length * 4.6 + 12);
+        fill(SOFT); doc.rect(M, y - 1.5, CW, tt.length * 4.6 + 2.5, 'F'); ink(INDIGO); doc.text(tt, M + 2, y + 2.5); y += tt.length * 4.6 + 3.5;
+        font(9.5, true); ink(INK); { const t = doc.splitTextToSize(plain(sc.p.synth), CW - 2); need(t.length * 4.4 + 2); doc.text(t, M + 2, y + 2.5); y += t.length * 4.4 + 2; }
+        sc.p.list.forEach((x) => {
+          font(9.5, true); const t1 = doc.splitTextToSize(plain(x.title), CW - 9); need(t1.length * 4.4 + 12);
+          fill(FL[x.fl] || MUTED); doc.circle(M + 3.5, y + 2.2, 1.5, 'F'); ink(INDIGO); doc.text(t1, M + 7, y + 3.5); y += t1.length * 4.4 + 1.2;
+          [[T('Dati'), x.ev], [T('Significato'), x.mean], [T('Da verificare'), x.check]].forEach(([k, v]) => {
+            if (!v) return; font(9, false); const t = doc.splitTextToSize(plain(k + ': ' + v), CW - 9); need(t.length * 4.1 + 1);
+            ink(INK); doc.text(t, M + 7, y + 3); ink(INDIGO); doc.text(plain(k) + ':', M + 7, y + 3); y += t.length * 4.1 + 0.8;
+          });
+          y += 2;
+        });
+        if (sc.p.notes.length) { font(8, false); ink(MUTED); const t = doc.splitTextToSize(plain(T('Affidabilità della misura') + ': ' + sc.p.notes.join(' ')), CW - 2); need(t.length * 3.7 + 2); doc.text(t, M + 2, y + 2.5); y += t.length * 3.7 + 2; }
+        y += 3;
+      });
+      y += 2;
+    }
+
     // foto con i punti
     if (data.photos.length) {
       section(T('Foto della postura'));

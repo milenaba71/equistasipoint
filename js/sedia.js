@@ -224,7 +224,7 @@
       '<p class="gate-msg" id="ch-msg" role="alert"></p>' +
       '<button class="btn primary" id="ch-go" type="button" disabled>' + T('Inizia') + '</button></div></div><div>' +
       '<div class="card"><h3>' + T('I tuoi risultati') + '</h3><p class="small muted" style="margin:0 0 8px">' + MODE[prefs.mode] + ' · ' + ARMS[prefs.arms] + '</p>' + summary() + history() + '</div>' +
-      '</div></div>' + NOTE;
+      '</div></div>' + (window.EqInterp ? window.EqInterp.cards(['sedia']) : '') + NOTE;
     app.querySelectorAll('[data-pref]').forEach((b) => b.addEventListener('click', () => { prefs[b.dataset.pref] = b.dataset.val; savePrefs(); renderTest(app); }));
     const ok = document.getElementById('ch-ok'); const go = document.getElementById('ch-go');
     ok.addEventListener('change', () => { go.disabled = !ok.checked; });

@@ -269,7 +269,7 @@
       '<button class="btn" id="pz-moved" type="button">' + T('Ha spostato un piede') + '</button></div></div>' +
       '<p class="gate-msg" id="pz-msg" role="alert"></p>' +
       '<button class="btn primary" id="pz-go" type="button">' + T('Inizia') + '</button></div></div><div>' +
-      historyCard('stabilita') + '</div></div>' + NOTE;
+      historyCard('stabilita') + '</div></div>' + (window.EqInterp ? window.EqInterp.cards(['stabilita']) : '') + NOTE;
     bindPrefs(app, () => renderStability(app));
     document.getElementById('pz-go').addEventListener('click', () => runStability(app));
   }
@@ -340,7 +340,7 @@
       '</div><div><div class="card"><div class="btn-col">' +
       (r.eyes === 'aperti' ? '<a class="btn primary" href="#/postura/stabilita" data-eyes="chiusi">' + T('Ora a occhi chiusi') + '</a>' : '<a class="btn primary" href="#/postura/stabilita">' + T('Ripeti la prova') + '</a>') +
       '<a class="btn" href="#/postura/confronto">' + T('Confronta con e senza Equistasi') + '</a>' +
-      '<a class="btn" href="#/postura/progressi">' + T('Vedi i progressi') + '</a></div></div></div></div>' + NOTE;
+      '<a class="btn" href="#/postura/progressi">' + T('Vedi i progressi') + '</a></div></div></div></div>' + (window.EqInterp ? window.EqInterp.cards(['stabilita'], { id: r.id }) : '') + NOTE;
     const e = app.querySelector('[data-eyes]');
     if (e) e.addEventListener('click', () => { prefs.eyes = 'chiusi'; savePrefs(); });
   }
@@ -365,7 +365,7 @@
       '<div class="toolbar">' + seg('cond', COND, prefs.cond, T('Condizione')) + '</div>' +
       '<div class="ts-live" id="pz-live" hidden><div class="ts-big" id="pz-big"></div><div class="small muted" id="pz-sub"></div></div>' +
       '<p class="gate-msg" id="pz-msg" role="alert"></p>' +
-      '<button class="btn primary" id="pz-go" type="button">' + T('Inizia') + '</button></div></div><div>' + historyCard(test) + '</div></div>' + NOTE;
+      '<button class="btn primary" id="pz-go" type="button">' + T('Inizia') + '</button></div></div><div>' + historyCard(test) + '</div></div>' + (window.EqInterp ? window.EqInterp.cards([test]) : '') + NOTE;
     bindPrefs(app, () => renderStatic(app, test));
     document.getElementById('pz-go').addEventListener('click', () => runStatic(app, test));
   }
@@ -534,6 +534,7 @@
       recent: recs.slice(-10).reverse().map((r) => ({ label: label(r), date: dateStr(r.t) + ' ' + timeStr(r.t), cond: condTxt(r.cond), val: val(r) })),
       photos, chair,
       pro: window.EqPro ? window.EqPro.reportGroups() : [],
+      interp: !gel && window.EqInterp ? window.EqInterp.sections() : [],
     };
   }
 
@@ -605,6 +606,7 @@
         data.sport.map((r) => '<tr><th>' + r.label + '</th><td>' + cell(r.s, r.unit) + '</td><td>' + cell(r.c, r.unit) + '</td><td>' + change(r) + '</td></tr>').join('') + '</tbody></table></div></div>' : '') +
       data.pro.map((gr) => '<div class="card"><h3>' + gr.title + '</h3><div class="pz-table-wrap"><table class="pz-table"><tbody>' +
         gr.rows.map((r) => r.fig && window.EqExercises && window.EqExercises.figSvg ? '<tr><td colspan="2"><div class="ex-rep">' + window.EqExercises.figSvg(r.fig) + '<span><b>' + r.label + '</b><br><span class="small muted">' + (r.how || '') + '</span><br><span class="ex-dose">' + (r.val || '') + '</span></span></div></td></tr>' : '<tr><th>' + r.label + '</th>' + (r.val ? '<td><b>' + r.val + '</b></td>' : '') + '</tr>').join('') + '</tbody></table></div></div>').join('') +
+      (!data.gel && window.EqInterp ? window.EqInterp.cards() : '') +
       (data.photos.length ? '<div class="card"><h3>' + T('Foto della postura') + '</h3><div class="pz-photo-grid">' + store.get(PHOTO_KEY, []).slice(-6).map((p) => photoFigure(p, true)).join('') + '</div></div>' : '') +
       '<p class="small muted">' + T('Valori stimati con i sensori e la fotocamera del telefono, indicativi e non diagnostici. Area: ellisse al 95% dell’oscillazione stimata del corpo; velocità: percorso medio al secondo.') + '</p></div>';
     const msg = document.getElementById('pz-pdf-msg');
@@ -751,7 +753,7 @@
       '<label class="btn">' + T('Carica dalla galleria') + '<input type="file" accept="image/*" id="pz-gal" hidden></label></div>' +
       '<p class="gate-msg" id="pz-msg" role="alert"></p><div id="pz-work"></div></div></div><div>' +
       '<div class="card"><h3>' + T('Foto salvate') + '</h3>' + (saved.length ? '<div class="pz-photo-grid">' + saved.slice(0, 8).map((p) => photoFigure(p, true)).join('') + '</div><a class="btn" href="#/postura/fotoconfronto" style="margin-top:10px">' + T('Confronta prima e dopo') + '</a>' : '<p class="small muted" style="margin:0">' + T('Nessuna foto salvata.') + '</p>') + '</div>' +
-      '</div></div>' + NOTE;
+      '</div></div>' + (window.EqInterp ? window.EqInterp.cards(['foto']) : '') + NOTE;
     bindPrefs(app, () => renderPhoto(app));
     ['pz-cam', 'pz-gal'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; if (f) analyse(app, f); }); });
     const live = document.getElementById('pz-live'); if (live) live.addEventListener('click', () => openCamera(app));

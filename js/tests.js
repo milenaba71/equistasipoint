@@ -234,7 +234,7 @@
       '<button class="btn primary" id="ts-go" type="button">' + T('Inizia') + '</button></div>' +
       '</div><div>' +
       '<div class="card"><h3>' + T('I tuoi risultati') + '</h3>' + summary(type) + history(type) + '</div>' +
-      '</div></div>';
+      '</div></div>' + (window.EqInterp ? window.EqInterp.cards([type]) : '');
 
     app.querySelectorAll('[data-pref]').forEach((b) => b.addEventListener('click', () => {
       prefs[b.dataset.pref] = b.dataset.pref === 'dist' ? Number(b.dataset.val) : b.dataset.val;
