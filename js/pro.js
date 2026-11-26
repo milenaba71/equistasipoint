@@ -190,7 +190,7 @@
       '<p class="gate-msg" id="pro-msg" role="status"></p>' +
       '<div class="btn-col"><button class="btn primary" type="button" id="pro-go">' + T('Inizia') + '</button>' +
       '<button class="btn" type="button" id="pro-save" hidden>' + T('Salva') + '</button></div></div>' +
-      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + gonioHistory() + '</div>' +
+      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + gonioHistory() + '</div>' + (window.EqInterp ? window.EqInterp.cards(['gonio']) : '') +
       '<p class="small muted" style="margin-top:14px">' + ESTIMATE() + '. ' + T('Misure fatte con i sensori del telefono: la valutazione resta del professionista.') + '</p>';
     bindSegs(app, () => renderGonio(app));
     ['kg', 'cm', 'load'].forEach((k) => { const el = document.getElementById('mv-' + k); if (el) el.addEventListener('change', () => { prefs[k] = el.value; savePrefs(); }); });
@@ -314,7 +314,7 @@
       '<div class="btn-col"><button class="btn primary" type="button" id="pro-go">' + T('Inizia') + '</button>' +
       '<button class="btn" type="button" id="pro-save" hidden>' + T('Salva') + '</button>' +
       '<button class="btn" type="button" id="pro-zero">' + T('Azzera su un tavolo') + (off ? ' (' + fmt(off, 1) + '°)' : '') + '</button></div></div>' +
-      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + scolioHistory() + '</div>' + NOTE;
+      '<div class="card"><h3>' + T('Misure salvate') + '</h3>' + scolioHistory() + '</div>' + (window.EqInterp ? window.EqInterp.cards(['scolio']) : '') + NOTE;
     bindSegs(app, () => renderScolio(app));
     const big = document.getElementById('pro-big'); const sub = document.getElementById('pro-sub'); const msg = document.getElementById('pro-msg');
     const go = document.getElementById('pro-go'); const save = document.getElementById('pro-save');
@@ -473,7 +473,7 @@
       '<div class="pro-live"><div class="pro-big" id="pro-big">0,0 s</div><div class="small" id="pro-sub">' + T('Pronto') + '</div></div>' +
       '<p class="gate-msg" id="pro-msg" role="status"></p>' +
       '<div class="btn-col"><button class="btn primary" type="button" id="pro-go">' + T('Inizia') + '</button></div></div>' +
-      '<div class="card"><h3>' + T('Risultati') + '</h3>' + clinHistory(test) + '</div>' + NOTE;
+      '<div class="card"><h3>' + T('Risultati') + '</h3>' + clinHistory(test) + '</div>' + (window.EqInterp ? window.EqInterp.cards([tug ? 'tug' : 'walk']) : '') + NOTE;
     bindSegs(app, () => renderClin(app, test));
     const big = document.getElementById('pro-big'); const sub = document.getElementById('pro-sub'); const msg = document.getElementById('pro-msg');
     const go = document.getElementById('pro-go');
