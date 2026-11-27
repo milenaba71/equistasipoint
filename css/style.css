@@ -1295,3 +1295,4 @@ body.popup-open { overflow: hidden; }
 .gt-interp-card .gt-isec { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 12px; }
 .gt-interp-card .gt-isec:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
 .gt-ititle { font-weight: 700; text-transform: uppercase; letter-spacing: .03em; font-size: .72rem; margin-bottom: 4px; }
+.adv-door.xmas { grid-column: 1 / -1; aspect-ratio: auto; min-height: 56px; }

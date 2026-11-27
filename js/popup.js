@@ -1,6 +1,6 @@
 /* Pop-up all'apertura dell'app, gestiti dall'ufficio su app.equistasi.com/admin/ (tabella Supabase «popups»).
    - kind 'popup': messaggio con foto, pulsante (shop, video…) e codice sconto da copiare.
-   - kind 'advent': calendario dell'Avvento a 24 caselle; la casella N si apre dal giorno «starts_at» + N-1 (ora italiana).
+   - kind 'advent': calendario dell'Avvento a 25 caselle (dal 1° al 25 dicembre); la casella N si apre dal giorno «starts_at» + N-1 (ora italiana).
    - audience: 'none' = solo chi non ha ancora abbinato un dispositivo (anche sulla schermata «Attiva l'app»),
      'device' = chi ha un dispositivo (tutti i tipi), 'all' = tutti.
    - frequency: 'always' = a ogni apertura, 'daily' = una volta al giorno, 'once' = una volta sola.
@@ -86,11 +86,11 @@
     const today = romeDay(Date.now()); const opened = (() => { try { return JSON.parse(raw('tp-advent-' + p.id) || '[]'); } catch (e) { return []; } })();
     const doors = Array.isArray(p.doors) ? p.doors : [];
     let cells = '';
-    for (let n = 1; n <= 24; n++) {
+    for (let n = 1; n <= 25; n++) {
       const day = doorDay(p, n); const open = day <= today; const isToday = day === today;
       const has = doors[n - 1] && doors[n - 1].title;
-      cells += '<button type="button" class="adv-door' + (isToday ? ' today' : '') + (open && has ? '' : ' locked') + (opened.includes(n) ? ' seen' : '') + '"' +
-        (open && has ? ' data-adv-door="' + n + '"' : ' disabled') + ' aria-label="' + T('Casella {n}', { n }) + '"><span>' + n + '</span>' + (open ? '' : '<i aria-hidden="true">🔒</i>') + '</button>';
+      cells += '<button type="button" class="adv-door' + (n === 25 ? ' xmas' : '') + (isToday ? ' today' : '') + (open && has ? '' : ' locked') + (opened.includes(n) ? ' seen' : '') + '"' +
+        (open && has ? ' data-adv-door="' + n + '"' : ' disabled') + ' aria-label="' + T('Casella {n}', { n }) + '"><span>' + (n === 25 ? '🎁 25' : n) + '</span>' + (open ? '' : '<i aria-hidden="true">🔒</i>') + '</button>';
     }
     return '<div class="adv-head"><span aria-hidden="true">🎄</span><h2 class="pop-title">' + esc(p.title) + '</h2>' + (p.body ? '<p class="pop-body">' + esc(p.body) + '</p>' : '') +
       '<p class="small muted">' + T('Tocca la casella di oggi per scoprire la sorpresa.') + '</p></div><div class="adv-grid">' + cells + '</div>';
