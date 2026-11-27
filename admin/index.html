@@ -160,7 +160,7 @@
           <label for="p-coupon">Codice sconto (facoltativo)</label><input type="text" id="p-coupon" maxlength="40" placeholder="NATALE10" />
         </div>
         <div id="p-advent" hidden>
-          <label>Le 24 caselle</label>
+          <label>Le 25 caselle</label>
           <p class="muted" style="margin:0 0 6px">La casella 1 si apre il giorno di inizio (es. 1 dicembre), la 2 il giorno dopo, e così via. Le caselle senza titolo restano chiuse.</p>
           <div id="p-doors"></div>
         </div>
@@ -474,7 +474,7 @@
 
   function doorsHtml(doors) {
     var h = '';
-    for (var n = 1; n <= 24; n++) {
+    for (var n = 1; n <= 25; n++) {
       var d = doors[n - 1] || {}; var st = (cur && stats[cur.id] && stats[cur.id][n]) || null;
       h += '<details class="door" data-n="' + n + '"><summary>Casella ' + n + ' <small>' + (d.title ? '· ' + A().esc(d.title) : '· vuota') + (st ? ' · aperta da ' + st.views + ', ' + st.clicks + ' clic' : '') + '</small></summary><div>' +
         '<label>Titolo</label><input type="text" class="d-title" maxlength="140" value="' + A().esc(d.title || '') + '" />' +
@@ -523,7 +523,7 @@
     radio('p-aud', p ? p.audience : 'all'); radio('p-freq', p ? p.frequency : 'always');
     var y = new Date().getFullYear();
     $('p-from').value = p ? local(p.starts_at) : (kind === 'advent' ? y + '-12-01T00:00' : local(new Date()));
-    $('p-to').value = p ? local(p.ends_at) : (kind === 'advent' ? y + '-12-25T00:00' : '');
+    $('p-to').value = p ? local(p.ends_at) : (kind === 'advent' ? y + '-12-26T00:00' : '');
     $('p-active').checked = p ? p.active : false; $('p-file').value = '';
     $('p-del').hidden = !p; $('p-msg').textContent = ''; showImg();
     var d = noDraft ? null : readDraft();
