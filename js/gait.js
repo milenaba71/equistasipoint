@@ -45,35 +45,99 @@
     return poseP;
   }
 
-  const seek = (v, t) => new Promise((res) => { const on = () => { v.removeEventListener('seeked', on); res(); }; v.addEventListener('seeked', on); v.currentTime = t; });
+  // sposta il video a un istante; non resta mai in attesa all'infinito (su iPhone «seeked» a volte non arriva)
+  const seek = (v, t, ms) => new Promise((res) => {
+    if (Math.abs(v.currentTime - t) < 0.001 && v.readyState >= 2) { res(true); return; }
+    let done = false; const end = (ok) => { if (done) return; done = true; v.removeEventListener('seeked', on); clearTimeout(to); res(ok); };
+    const on = () => end(true); const to = setTimeout(() => end(v.readyState >= 2), ms || 2500);
+    v.addEventListener('seeked', on); try { v.currentTime = t; } catch (e) { end(false); }
+  });
 
-  // estrae i punti del corpo da ogni fotogramma (30 al secondo)
+  /* Estrae i punti del corpo dal video e li riporta a 30 fotogrammi al secondo.
+     Modo principale: il video viene riprodotto (muto, a velocità ridotta) e ogni fotogramma mostrato viene analizzato:
+     è il modo che funziona su iPhone, dove spostarsi fotogramma per fotogramma è lento o si blocca.
+     Riserva: spostamento fotogramma per fotogramma, con tempo massimo per ogni passo. */
   async function track(file, onProgress, cancelled) {
     const pose = await loadPose();
     const v = document.createElement('video');
-    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
-    await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('video')); });
-    if (!isFinite(v.duration) || v.duration <= 0) { v.currentTime = 1e9; await new Promise((r) => { v.ondurationchange = r; setTimeout(r, 1500); }); }
-    const W = v.videoWidth; const H = v.videoHeight; const dur = Math.min(v.duration || 0, MAX_S);
-    if (!W || !H || !dur) throw new Error('video');
-    const k = Math.min(1, 480 / Math.max(W, H));
-    const c = document.createElement('canvas'); c.width = Math.round(W * k); c.height = Math.round(H * k);
-    const g = c.getContext('2d', { willReadFrequently: true });
-    const frames = []; const n = Math.floor(dur * FPS);
-    for (let i = 0; i < n; i++) {
-      if (cancelled()) break;
-      const t = i / FPS;
-      await seek(v, t);
-      g.drawImage(v, 0, 0, c.width, c.height);
-      const r = pose.detectForVideo(c, Math.round(t * 1000) + 1);
-      const lm = r && r.landmarks && r.landmarks[0];
-      const f = { t };
-      if (lm) Object.keys(IDX).forEach((name) => { const p = lm[IDX[name]]; f[name] = [p.x * W, p.y * H, p.visibility == null ? 1 : p.visibility]; });
-      frames.push(f);
-      if (i % 5 === 0) onProgress(i / n);
+    v.muted = true; v.defaultMuted = true; v.playsInline = true; v.preload = 'auto';
+    v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none;z-index:-1';
+    document.body.appendChild(v); // su iPhone un video fuori dalla pagina non decodifica i fotogrammi
+    const url = URL.createObjectURL(file);
+    try {
+      v.src = url;
+      await new Promise((res, rej) => { const to = setTimeout(() => rej(new Error('video')), 20000); v.onloadedmetadata = () => { clearTimeout(to); res(); }; v.onerror = () => { clearTimeout(to); rej(new Error('video')); }; v.load(); });
+      if (!isFinite(v.duration) || v.duration <= 0) { v.currentTime = 1e9; await new Promise((r) => { v.ondurationchange = r; setTimeout(r, 1500); }); v.currentTime = 0; }
+      const W = v.videoWidth; const H = v.videoHeight; const dur = Math.min(isFinite(v.duration) ? v.duration : 0, MAX_S);
+      if (!W || !H || !dur) throw new Error('video');
+      const k = Math.min(1, 480 / Math.max(W, H));
+      const c = document.createElement('canvas'); c.width = Math.round(W * k); c.height = Math.round(H * k);
+      const g = c.getContext('2d', { willReadFrequently: true });
+      let samples = []; let clock = 0;
+      const grab = (t) => {
+        g.drawImage(v, 0, 0, c.width, c.height);
+        clock += 34; // il riconoscimento vuole tempi sempre crescenti
+        const r = pose.detectForVideo(c, clock); const lm = r && r.landmarks && r.landmarks[0];
+        let pts = null;
+        if (lm) { pts = {}; Object.keys(IDX).forEach((name) => { const p = lm[IDX[name]]; pts[name] = [p.x * W, p.y * H, p.visibility == null ? 1 : p.visibility]; }); }
+        samples.push({ t, pts });
+      };
+      // 1) riproduzione
+      if (typeof v.requestVideoFrameCallback === 'function') {
+        v.playbackRate = 0.5;
+        const started = await v.play().then(() => true, () => false);
+        if (started) {
+          await new Promise((res) => {
+            let last = -1; let fin = false; let dog = null;
+            const end = () => { if (fin) return; fin = true; clearTimeout(dog); v.removeEventListener('ended', end); try { v.pause(); } catch (e) { /* già fermo */ } res(); };
+            const feed = () => { clearTimeout(dog); dog = setTimeout(end, 5000); }; // fermo da 5 secondi: si chiude
+            const cb = (now, meta) => {
+              if (fin) return;
+              const t = meta && isFinite(meta.mediaTime) ? meta.mediaTime : v.currentTime;
+              if (cancelled() || t >= dur) { end(); return; }
+              feed();
+              if (t - last >= 1 / FPS - 0.004) { last = t; try { grab(t); } catch (e) { /* fotogramma non disegnabile */ } onProgress(Math.min(1, t / dur)); }
+              v.requestVideoFrameCallback(cb);
+            };
+            v.addEventListener('ended', end); feed(); v.requestVideoFrameCallback(cb);
+          });
+        }
+      }
+      if (cancelled()) return { frames: [], W, H, dur };
+      // 2) riserva: fotogramma per fotogramma
+      if (samples.length < dur * FPS * 0.3) {
+        samples = []; const n = Math.floor(dur * FPS); let miss = 0;
+        try { v.pause(); v.playbackRate = 1; } catch (e) { /* niente */ }
+        for (let i = 0; i < n; i++) {
+          if (cancelled()) break;
+          const t = i / FPS; const okSeek = await seek(v, t);
+          if (!okSeek) { if (++miss >= 4 && samples.length < 3) throw new Error('video'); continue; }
+          try { grab(t); } catch (e) { /* fotogramma non disegnabile */ }
+          if (i % 5 === 0) onProgress(i / n);
+        }
+      }
+      if (samples.length < 10) throw new Error('video');
+      // riporta i campioni a 30 fotogrammi al secondo esatti
+      samples.sort((x, y) => x.t - y.t);
+      const frames = []; const n = Math.floor(dur * FPS); let j = 0;
+      for (let i = 0; i < n; i++) {
+        const t = i / FPS; while (j + 1 < samples.length && samples[j + 1].t <= t) j++;
+        const a = samples[j]; const b = samples[j + 1]; const f = { t };
+        if (a && b && a.pts && b.pts && a.t <= t && b.t - a.t < 0.2) {
+          const u = (t - a.t) / Math.max(1e-6, b.t - a.t);
+          Object.keys(IDX).forEach((name) => { const p = a.pts[name]; const q = b.pts[name]; f[name] = [p[0] + (q[0] - p[0]) * u, p[1] + (q[1] - p[1]) * u, Math.min(p[2], q[2])]; });
+        } else {
+          const near = [a, b].filter((x) => x && x.pts && Math.abs(x.t - t) < 0.1).sort((x, y) => Math.abs(x.t - t) - Math.abs(y.t - t))[0];
+          if (near) Object.keys(IDX).forEach((name) => { f[name] = near.pts[name].slice(); });
+        }
+        frames.push(f);
+      }
+      return { frames, W, H, dur };
+    } finally {
+      try { v.pause(); } catch (e) { /* niente */ }
+      v.removeAttribute('src'); try { v.load(); } catch (e) { /* niente */ } v.remove(); URL.revokeObjectURL(url);
     }
-    URL.revokeObjectURL(v.src);
-    return { frames, W, H, dur };
   }
 
   /* ───────── calcoli ───────── */
